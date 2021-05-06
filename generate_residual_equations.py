@@ -8065,34 +8065,49 @@ def excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex
 # ----------------------------------------------------------------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
-def generate_latex_files(order, only_ground_state=True, remove_f_terms=False, thermal=False):
+def generate_latex_files(truncations, only_ground_state=True, remove_f_terms=False, thermal=False, file=None):
     """ only generates .tex files to be compiled into pdf files """
 
-    # if only_ground_state:
-    #     generate_full_cc_latex(truncations, only_ground_state=True, path="./ground_state_full_cc_equations.tex")
-    # else:
-    #     generate_full_cc_latex(truncations, only_ground_state=False, path="./full_cc_equations.tex")
+    if file == 'full cc':
+        if only_ground_state:
+            generate_full_cc_latex(truncations, only_ground_state=True, path="./ground_state_full_cc_equations.tex")
+        else:
+            generate_full_cc_latex(truncations, only_ground_state=False, path="./full_cc_equations.tex")
 
-    # if only_ground_state:
-    #     generate_w_residual_equations_latex(truncations, only_ground_state=True, path="./ground_state_w_residual_equationstex")
-    # else:
-    #     generate_w_residual_equations_latex(truncations, only_ground_state=False, path="./w_residual_equationstex")
+    # this doesn't care about the truncation numbers
+    elif file == 'w equations':
 
-    if only_ground_state:
-        path = f"./ground_state_w_equations.tex"
-        ground_state_w_equations_latex(order, path)
+        """
+        eventually we want to merge both the
+        `ground_state_w_equations_latex`
+        and the
+        `excited_state_w_equations_latex`
+        functions
+        """
+
+        max_w_order = 5  # this is the
+
+        if only_ground_state:
+            path = f"./ground_state_w_equations.tex"
+            ground_state_w_equations_latex(max_w_order, path)
+        else:
+            path = f"./excited_state_w_equations.tex"
+            assert False, 'the excited_state_w_equations_latex has not been verified'
+            excited_state_w_equations_latex(max_w_order, path)
+
+    # the `s_taylor_max_order` isn't relevant for this execution pathway
+    elif file == 'z_t ansatz':
+        f_term_string = "_no_f_terms" if remove_f_terms else ''
+
+        if only_ground_state:
+            path = f"./ground_state_z_t_symmetric_equations{f_term_string}.tex"
+        else:
+            path = f"./z_t_symmetric_equations{f_term_string}.tex"
+
+        generate_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
+
     else:
-        path = f"./excited_state_w_equations.tex"
-        # excited_state_w_equations_latex(order, path)
-
-    # f_term_string = "_no_f_terms" if remove_f_terms else ''
-    #
-    # if only_ground_state:
-    #     path = f"./ground_state_z_t_symmetric_equations{f_term_string}.tex"
-    # else:
-    #     path = f"./z_t_symmetric_equations{f_term_string}.tex"
-
-    # generate_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
+        raise Exception(f"Wrong file type specified in {file=}")
 
     return
 
@@ -8120,9 +8135,15 @@ if (__name__ == '__main__'):
 
     maximum_h_rank = 2
     maximum_cc_rank = 4
-    s_taylor_max_order = 0  # this doesn't matter for the Z ansatz
-    omega_max_order = 4
+    s_taylor_max_order = 4  # this doesn't matter for the Z ansatz
+    omega_max_order = 3
 
     truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
-    generate_latex_files(5, only_ground_state=True, remove_f_terms=False, thermal=False)
+    generate_latex_files(
+        truncations,
+        only_ground_state=False,
+        remove_f_terms=False,
+        thermal=False,
+        file="full cc"
+    )
     # generate_python_files(truncations, only_ground_state=True, thermal=False)
