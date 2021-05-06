@@ -1,9 +1,0 @@
-language: python
-
-install:
-- pip install vulture
-
-script:
-- python factorial/factorial_test.py
-- vulture factorial/
-
