@@ -2554,62 +2554,6 @@ def _validate_s_terms(s_list):
     return
 
 
-def _old_generate_linked_common_terms(omega):
-
-    # length = max(omega.m, omega.n)
-    # print(length)
-
-    # generate lower permutations
-    maximum = 2
-    base_list = list(range(0, maximum+1))
-    all_permutations = [sorted(x) for x in it.product(base_list, repeat=maximum)]
-    unique_permutations = set([tuple(x) for x in all_permutations])
-    valid_lower_perms = [list(it.dropwhile(lambda y: y == 0, x)) for x in unique_permutations if (maximum >= sum(x))]
-    valid_lower_perms[valid_lower_perms.index([])] = [0]
-
-    print(f"{base_list=}")
-    print(f"{all_permutations=}")
-    print(f"{unique_permutations=}")
-    print(f"{valid_lower_perms=}\n")
-
-    # generate upper permutations
-    maximum = omega.n
-    base_list = list(range(0, maximum+1))
-    all_permutations = [sorted(x) for x in it.product(base_list, repeat=maximum)]
-    unique_permutations = set([tuple(x) for x in all_permutations])
-    valid_upper_perms = [list(it.dropwhile(lambda y: y == 0, x)) for x in unique_permutations if (maximum >= sum(x))]
-    valid_upper_perms[valid_upper_perms.index([])] = [0]
-
-    print(f"{base_list=}")
-    print(f"{all_permutations=}")
-    print(f"{unique_permutations=}")
-    print(f"{valid_upper_perms=}\n")
-
-    d = list(it.product(valid_upper_perms, valid_lower_perms))
-    print(f"{d=}")
-    del d[d.index(([omega.n], [2]))]
-    del d[d.index(([0], [0]))]
-    print(f"{d=}")
-
-    return_list = []
-    for term in d:
-        temp_set = set()
-        print('y', term)
-        for m in term[0]:
-            for n in term[1]:
-                temp_set.add(disconnected_namedtuple(0, 0, m_o=m, n_o=n))
-
-        print('A', temp_set)
-        return_list.append(temp_set)
-    for x in return_list:
-        print('B', x)
-
-    # e = [x for x in d]
-
-    sys.exit(0)
-    return
-
-
 def _generate_linked_common_terms(term_list):
     """ x """
     aset = set()
@@ -4360,83 +4304,6 @@ def _write_permutations(perm_t, perm_char_list, W_array, prefactor):
     return result
 
 
-def old_write_w_function_strings_show_all(order):
-    """ x """
-
-    string = ""  # we store the output in this string
-
-    num_tag = ["zero", "1st", "2nd", "3rd", "4th", "5th"]
-    word_tag = ["", "Singles", "Doubles", "Triples", "Quadruples", "Quintuples"]
-    einsum_surface_tags = "acdef"
-    tag_str = "ijklmn"
-    W_array = f"W_{order}"
-
-    string += (
-        f"\ndef calculate_order_{order}_w_operator(A, N, t_args):\n"
-        f'{tab}"""Calculate the {order} order W operator for use in the calculation of the residuals."""\n'
-        f"{tab}t_i, t_ij, t_ijk, t_ijkl = t_args\n"
-        f"{tab}# Creating the {num_tag[order]} order W operator\n"
-        f"{tab}{W_array} = np.zeros(({', '.join(['A','A',] + ['N',]*order)}), dtype=complex)\n"
-    )
-
-    # simple cases, zero and 1st order
-    if order == 0:
-        return f"{tab}return {W_array}\n"
-    if order == 1:
-        string += (
-            f"{tab}# Singles contribution\n"
-            f"{tab}{W_array} += t_i\n"
-            f"{tab}return {W_array}\n"
-        )
-        return string
-
-    t_term_dict = _generate_t_terms_dictionary(order)
-
-    previous_max = order
-    for num_group in t_term_dict.keys():
-
-        current_max = max(num_group)
-        w_prefactor = None  # generate_w_prefactors(list(num_group))
-
-        # Add comment
-        string += f"{tab}# {word_tag[current_max]} contribution\n"
-
-        if len(num_group) == 1:  # no permutation is needed for this term
-            string += f"{tab}{W_array} += {w_prefactor} * {t_term_dict[num_group][0]}\n"
-            continue
-
-        einsum_fixed = []  # contains [ac, cd, de.....]
-        # einsum_perm = []
-
-        t_perm = it.permutations(t_term_dict[num_group])  # permutations of t_i, t_ij, t_ijk....
-
-        # generate the list of tensor indices that we don't iterate over
-        i = 0
-        # previous_sum = 0
-        for n in num_group:
-            if i == len(num_group)-1:
-                einsum_fixed.append(einsum_surface_tags[i]+"b")
-                print(f"{einsum_fixed=}")
-            else:
-                einsum_fixed.append(einsum_surface_tags[i:i+2])
-                print(f"{einsum_fixed=}")
-            i += 1
-
-        if current_max < previous_max:  # check for the new type of contribution
-            previous_max = current_max
-        elif current_max == previous_max:  # if is the same type of contribution
-            string += "\n"
-
-        tag_perm = it.permutations(tag_str[:order])  # permutation of (i,j,k), (i,k,j).....
-        t_list = list(t_perm)
-        e_combination = _permutation_function(t_list, einsum_fixed, list(tag_perm), order)  # a list
-        string += _write_permutations(t_list, e_combination, W_array, w_prefactor)
-
-    string += f"{tab}return {W_array}\n"
-
-    return string
-
-
 # ------------------------------------------------------- #
 t_terms = [
     None,
@@ -5078,92 +4945,7 @@ def _contracted_expressions(partition_list, order):
         exp_list.append([max(partition), ] + temp_list)
 
     return exp_list
-
-
-def _old_write_optimized_vemx_paths_function(max_order):
-    """Return strings to write all the `oe.contract_expression` calls.
-    Unfortunately the code got a lot messier when I had to add in the truncation if statements.
-    It should get a rework/factorization at some point
-    """
-
-    raise Exception("shouldn't use this code")
-
-    assert max_order <= 6, "Only implemented up to 6th order"
-
-    string = (
-        f"\ndef compute_optimized_vemx_paths(A, N, truncation):\n"
-        f'{tab}"""Calculate optimized paths for the einsum calls up to `highest_order`."""\n'
-        "\n"
-        f"{tab}order_1_list, order_2_list, order_3_list = [], [], []\n"
-        f"{tab}order_4_list, order_5_list, order_6_list = [], [], []\n"
-        "\n"
-    )
-
-    optimized_orders = list(range(2, max_order+1))
-
-    for order in optimized_orders:
-        print("A")
-
-        # generate all the elements in the `order_{order}_list`
-        partitions = generate_un_linked_disconnected_partitions_of_n(order)
-        optimized_paths = _contracted_expressions(partitions, order)
-
-        # we always calculate Singles which requires (W^1, W^2, W^3)
-        if order == 2:
-            string += (
-                f"{tab}order_2_list.extend([\n"
-                f"{tab}{tab}{optimized_paths[0]}"
-                f"{tab}])\n\n"
-            )
-        elif order == 3:
-            string += (
-                f"{tab}if truncation.doubles:\n"
-                f"{tab}{tab}order_3_list.extend([\n"
-                f"{tab}{tab}{tab}{optimized_paths[0]}"
-                f"{tab}{tab}{tab}{optimized_paths[1]}"
-                f"{tab}{tab}])\n"
-                "\n"
-                f"{tab}order_3_list.extend([\n"
-                f"{tab}{tab}{optimized_paths[2]}"
-                f"{tab}])\n\n"
-            )
-
-        # for Doubles and higher truncations we want to add multiple`if` statement
-        # since we don't need to calculate these optimal paths
-        elif order >= 4:
-            # the string representation (doubles, triples, quadruples... etc)
-            contribution_name = lambda n: taylor_series_order_tag[n].lower()
-
-            string += f"{tab}if truncation.{contribution_name(order-2)}:\n"
-
-            string += (
-                f"{tab}{tab}if truncation.{contribution_name(order-1)}:\n"
-                f"{tab}{tab}{tab}order_{order}_list.extend([\n"
-                f"{tab}{tab}{tab}{tab}{optimized_paths[0]}"
-                f"{tab}{tab}{tab}{tab}{optimized_paths[1]}"
-                f"{tab}{tab}{tab}])\n\n"
-            )
-
-            # we need to a big long string, and also remove the first two opt paths
-            optimized_paths = "".join([
-                s.replace("oe", f"{tab}{tab}{tab}oe") for s in optimized_paths[2:]
-            ])
-
-            string += (
-                # f"{tab}if truncation.{contribution_name(order-2)}:\n"
-                f"{tab}{tab}order_{order}_list.extend([\n"
-                f"{optimized_paths}"
-                f"{tab}{tab}])\n"
-                f"{tab}else:\n"
-                f"""{tab}{tab}log.warning("Didn't calculate optimized paths of the W^{order} operator ")\n\n"""
-            )
-
-    return_list = ', '.join(['order_1_list', ] + [f'order_{order}_list' for order in optimized_orders])
-
-    string += f"{tab}return [{return_list}]\n"
-
-    return string
-
+    
 
 def _write_optimized_vemx_paths_function(max_order):
     """Return strings to write all the `oe.contract_expression` calls.
@@ -8146,4 +7928,4 @@ if (__name__ == '__main__'):
         thermal=False,
         file="full cc"
     )
-    # generate_python_files(truncations, only_ground_state=True, thermal=False)
+    generate_python_files(truncations, only_ground_state=True, thermal=False)
