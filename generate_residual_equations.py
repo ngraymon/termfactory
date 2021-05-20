@@ -5113,24 +5113,6 @@ def _generate_all_o_h_z_connection_permutations(LHS, h, valid_z_permutations, fo
     return annotated_permutations
 
 
-def _remove_duplicate_z_permutations(z_list):
-    """ x """
-    duplicate_set = set()
-
-    for i, a in enumerate(z_list):
-        a.sort()
-        a = tuple(a)
-        # print(h_string, i, a)
-        if a not in duplicate_set:
-            print("Added")
-            duplicate_set.add(a)
-        else:
-            pass
-            log.debug("Duplicate")
-
-    return duplicate_set
-
-
 def _generate_explicit_z_connections(LHS, h, unique_s_permutations):
     """ Generate new namedtuples for LHS and h explicitly labeling how they connect with each other and t.
     We make `connected_lhs_operator_namedtuple` and `connected_h_z_operator_namedtuple`.
@@ -5501,20 +5483,6 @@ def _build_z_latex_prefactor(h, t_list, simplify_flag=True):
         return ''
     else:
         return f"\\frac{{{numerator}}}{{{denominator}}}"
-
-
-def _creates_f_prefactor_for_z(LHS, h):
-    """ Define this check as a function to allow for modification later.
-    For example if we change the definition of d and b operators or do the thermal theory later.
-    """
-    return bool(LHS.m_h >= 1 and h.n_lhs >= 1)
-
-
-def _creates_fbar_prefactor_for_z(LHS, h):
-    """ Define this check as a function to allow for modification later.
-    For example if we change the definition of d and b operators or do the thermal theory later.
-    """
-    return bool(LHS.n_h >= 1 and h.m_lhs >= 1)
 
 
 def _f_zL_h_contributions(z_left, h):
