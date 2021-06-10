@@ -2583,10 +2583,9 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # ------------------------------------------------------------------------------------------- #
     # header for optimized paths function
     string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", s4)
-    # write the code for generating optimized paths for
-    # string += _write_optimized_vemx_paths_function(max_order) + '\n'
-    # write the code for generating optimized paths for
-    # string += _write_optimized_vecc_paths_function(max_order) + '\n'
+    # write the code for generating optimized paths for full CC, this is probably different than the W code?!?
+    # maybe... im not sure?
+    # both VEMX and VECC
     # ------------------------------------------------------------------------------------------- #
     return string
 
@@ -3670,7 +3669,7 @@ def _write_optimized_vecc_paths_function(max_order):
     string += (
         f"{tab}if not truncation.doubles:\n"
         f"{tab}{tab}log.warning('Did not calculate optimized VECC paths of the dt amplitudes')\n"
-        f"{tab}{tab}return {[[], ]*len(6)}\n"
+        f"{tab}{tab}return {[[], ]*6}\n"
         "\n"
     )
 
@@ -3766,9 +3765,9 @@ def generate_w_operators_string(max_order, s1=75, s2=28):
     # header for optimized paths function
     string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", s2)
     # write the code for generating optimized paths for VECI/CC (mixed) contributions
-    # string += _write_optimized_vemx_paths_function(max_order) + '\n'
+    string += _write_optimized_vemx_paths_function(max_order) + '\n'
     # write the code for generating optimized paths for VECC contributions
-    # string += _write_optimized_vecc_paths_function(max_order) + '\n'
+    string += _write_optimized_vecc_paths_function(max_order) + '\n'
     # ------------------------------------------------------------------------------------------- #
     return string
 
@@ -6432,11 +6431,13 @@ if (__name__ == '__main__'):
     omega_max_order = 3
 
     truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
-    generate_latex_files(
-        truncations,
-        only_ground_state=False,
-        remove_f_terms=False,
-        thermal=False,
-        file="full cc"
-    )
-    generate_python_files(truncations, only_ground_state=True, thermal=False)
+    # generate_latex_files(
+    #     truncations,
+    #     only_ground_state=False,
+    #     remove_f_terms=False,
+    #     thermal=False,
+    #     file="full cc"
+    # )
+    # generate_python_files(truncations, only_ground_state=True, thermal=False)
+
+    generate_w_operator_equations_file(max_w_order=6, path="./w_operator_equations.py")
