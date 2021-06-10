@@ -662,6 +662,41 @@ def _debug_print_different_types_of_terms(fully, linked, unlinked):
         log.debug(term)
 
 
+def _build_latex_h_string(h, unsummed=False):
+    """ x """
+    string = "h"
+
+    # we need to use different indices
+    index_list = summation_indices if not unsummed else unlinked_indices
+
+    if h.m > 0:
+        string += f"^{{{index_list[0:h.m]}}}"
+
+    if h.n > 0:
+        string += f"_{{{index_list[h.m:h.m+h.n]}}}"
+
+    if string == "h":
+        string = "h_0"
+
+    return string.replace("h", bold_h_latex)
+
+
+def _build_latex_t_string(s):
+    """ x """
+    string = "t"
+
+    if (s.h_n > 0) or (s.o_n > 0):
+        string += f"^{{{summation_indices[s.h_m:s.h_m+s.h_n]}{unlinked_indices[s.o_m:s.o_m+s.o_n]}}}"
+
+    if (s.h_m > 0) or (s.o_m > 0):
+        string += f"_{{{summation_indices[0:s.h_m]}{unlinked_indices[0:s.o_m]}}}"
+
+    if string == "t":
+        string = ""
+
+    return string.replace('t', bold_t_latex)
+
+
 # --------------------- Validating operator pairings ------------------------ #
 def _t_joining_with_t_terms(omega, h, s_list, nof_creation_ops):
     """Remove terms like `b h^1 t^2 t_2` which require the t^2 to join with t_2.
@@ -728,6 +763,22 @@ def _h_joining_with_itself(omega, h, s_list):
             return False
 
     return True
+
+
+def _build_h_string(h):
+    """ x """
+    string = "h"
+
+    if h.m > 0:
+        string += f"^{{{h.m}}}"
+
+    if h.n > 0:
+        string += f"_{{{h.n}}}"
+
+    if string == "h":
+        string = "h_0"
+
+    return string
 
 
 # ----------------------- generating operators -------------------------- #
@@ -1970,6 +2021,30 @@ def _full_cc_einsum_vibrational_components(h, t_list):
     return vibrational_components, ''.join(remaining_list)
 
 
+def _full_cc_einsum_subscript_generator(h, t_list):
+    """ x """
+    return_string = ""
+
+    electronic_components = _full_cc_einsum_electronic_components(t_list)
+
+    vibrational_components, remaining_indices = _full_cc_einsum_vibrational_components(h, t_list)
+
+    summation_subscripts = ", ".join([
+        f"{electronic_components[i]}{vibrational_components[i]}" for i in range(len(electronic_components))
+    ])
+
+    return_string = f"{summation_subscripts} -> ab{remaining_indices}"
+
+    return return_string
+
+
+def _full_cc_einsum_prefactor(term):
+    """ x """
+    string = ""
+
+    return string
+
+
 def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
     """ x """
 
@@ -2508,10 +2583,9 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # ------------------------------------------------------------------------------------------- #
     # header for optimized paths function
     string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", s4)
-    # write the code for generating optimized paths for
-    # string += _write_optimized_vemx_paths_function(max_order) + '\n'
-    # write the code for generating optimized paths for
-    # string += _write_optimized_vecc_paths_function(max_order) + '\n'
+    # write the code for generating optimized paths for full CC, this is probably different than the W code?!?
+    # maybe... im not sure?
+    # both VEMX and VECC
     # ------------------------------------------------------------------------------------------- #
     return string
 
@@ -2767,8 +2841,118 @@ def generate_residual_equations_file(max_residual_order, maximum_h_rank, path=".
 # ----------------------------------------------------------------------------------------------- #
 # ---------------------------  GENERATING W OPERATOR EQUATIONS  --------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
+def _next_list(lst, n):
+    ''' if items in `lst` are all one, or there is only one 1 in `lst`, add 1 to the last item and delete the first 1 in the list like:
+            [1, 1, 1] -> [1, 2] and [1, 2] -> [3];
+        if there is no 1 in `lst`, return the list itself;
+        if there more than one 1 in `lst`, delete one of 1 and add 1 to the last and the one before the last item separately, like:
+            [1, 1, 2] -> [(1,3), (2, 2)]'''
+    if lst.count(1) == 0:
+        return [lst, ]
+    elif lst.count(1) == n or lst.count(1) == 1:
+        result = lst[1:-1] + [(lst[-1]+1), ]
+        return [result, ]
+    else:
+        result = [(lst[1:-2] + [lst[-2]+1, ] + [lst[-1], ]), (lst[1:-1] + [(lst[-1]+1), ])]
+        return result
 
 
+def _generate_t_lists(n):
+    ''' generates a list of lists in which each item is from 1 to n and the sum of items are n, for example:
+        4 -> [[4], [1, 3], [2, 2], [1, 1, 2], [1, 1, 1, 1]]'''
+    first = [1]*n
+    result = []
+    lst = [first]
+    current = _next_list(lst[-1], n)
+
+    # if there is no 1 in current(a list), lst gets all items, bit not in correct order
+    while current != [lst[-1]]:
+        lst += current
+        current = _next_list(lst[-1], n)
+
+    # sort lst to get the final result
+    previous_max = max(lst[0])  # initialize previous_max to record the maximum value in the previous list
+
+    for sub_lst in lst:
+        current_max = max(sub_lst)  # record the maximum in the first list in lst
+
+        # if the maximum item in sub-lst is larger than the max in previous sub-list
+        # add sub_lst to the end of result list
+        if current_max >= previous_max:
+            result.append(sub_lst)
+            previous_max = current_max
+        # if the max in sub-lst is smaller than the max in previous sub-list
+        # add sub_lst to the beginning of result list
+        else:
+            result = [sub_lst] + result
+    result.reverse()
+    return result
+
+
+def _generate_t_terms_dictionary(n):
+    ''' generates a dictionary in which keys are tuple that show the tag for t terms as number, and values are the actual t terms,
+        for example: {(1, 4): ('t_i', 't_ijkl')}'''
+    result = {}
+    t_tag_list = ["i", "j", "k", "l", "m", "n"]
+    t_num_list = _generate_t_lists(n)  # a list of lists like [1,1], [2,1,1]....
+    for num_term in t_num_list:
+        t_term = []  # stores t_i, t_ij, t_ijk....
+        for n in num_term:
+            t_str = "t_" + "".join(t_tag_list[:n])  # add i,j,k.....to "t_"
+            # print(n, t_str, t_terms[n-1].string)
+            t_term.append(t_str)
+        result[tuple(num_term)] = tuple(t_term)
+    return result
+
+
+def _permutation_function(l_t, l_fix, l_perm, n):
+    ''' generates a list of character combinations which will be used in the einsum calculation,
+        l_t contains combination of t terms group like [["t_i", "t_ij"], ["t_ij", "t_i"]];
+        l_fix contains the fixed part of character combinations which will be used in the einsum calculation like
+            ["ac", "cd", "db"] for (t_i, t_i, t_ij) group;
+        l_perm contains groups of characters which will be added to the fixed part later, for example:
+            [[i, j], [j, i]] for [t_i, t_i] and ["ac","cb"]
+        '''
+
+    result = []
+    for char_group in l_perm:
+        s_result = []
+        for t_group in l_t:
+            ss_result = [list(l_fix)]
+            i = 0
+            p_sum = 0
+            for t_item in t_group:
+                length = len(t_item) - 2  # delete the length of "t_" part
+                ss_result[0][i] += "".join(char_group[p_sum:length+p_sum])
+                p_sum += length
+                i += 1
+            if len(l_fix) != n:
+                s_result += ss_result
+        if len(l_fix) == n:
+            s_result += ss_result
+        result += [s_result]
+    return result
+
+
+def _write_permutations(perm_t, perm_char_list, W_array, prefactor):
+    ''' generates lines for w function if permutations inside the einsum calculation is needed'''
+    result = ""
+    for p_group in perm_char_list:
+        # list of command strings for einsum
+        # cmd = ",".join(einsum_perm) + " -> " + einsum_result
+        cmd_list = [", ".join(p_c) for p_c in p_group]
+        # list of arguments to einsum call
+        arg_list = [", ".join(perm) for perm in perm_t]
+        # compile a list of the einsum calls (as strings)
+        einsum_list = [f"np.einsum('{cmd_list[i]}', {arg_list[i]})" for i in range(len(p_group))]
+        # join them together
+        sum_of_einsums = " + ".join(einsum_list)
+        # add the whole line to the main string
+        result += f"{tab}{W_array} += {prefactor} * ({sum_of_einsums})\n"
+    return result
+
+
+# ------------------------------------------------------- #
 t_terms = [
     None,
     t_term_namedtuple("t_i", 1, "(A, A, N)"),
@@ -3363,6 +3547,167 @@ def _write_master_w_compute_function(max_order, opt_einsum=False):
 
 
 # ------------------------------------------------------- #
+def _t_term_shape_string(order):
+    """Return the string `(A, A, N, ...)` with `order` number of `N`'s."""
+    return f"({', '.join(['A','A',] + ['N',]*order)})"
+
+
+def _contracted_expressions(partition_list, order):
+    """Return a list of each of the `oe.contract_expression` calls
+    for a W operator of order `order`.
+    """
+    exp_list = []
+
+    # for each partition (the mathematical term) of the integer `order`
+    for partition in partition_list:
+
+        # there is nothing to optimize for the N^th case
+        # we simply add the largest t_term to the W operator
+        # no multiplication required
+        if len(partition) == 1:
+            continue
+
+        # the unique permutations of the `partition` of the integer `order`
+        combinations = unique_permutations(partition)
+        # the einsum indices for the surface dimensions
+        surf_index = _generate_surface_index(partition)
+        # the einsum indices for the normal mode dimensions
+        mode_index = _generate_mode_index(partition, order)
+
+        temp_list = []
+
+        # `combinations` is a list of tuples such as (2, 2, 1, ) or (5,)
+        for i, tupl in enumerate(combinations):
+            # the input dimensions are two character strings representing the surface dimensions
+            # plus 1 or more characters representing the normal mode dimensions
+            in_dims = ", ".join([surf_index[a]+mode_index[i][a] for a in range(len(surf_index))])
+            # the output dimension is the same for all einsum calls for a given `partition` argument
+            out_dims = f"ab{tag_str[0:order]}"
+            # the shape of the t_terms are (A, A, N, ...) where the number of N dimensions is
+            # determined by the integer elements of each tuple `tupl`
+            # so (2, 1) -> ("(A, A, N, N)", "(A, A, N")
+            pterms = ", ".join([_t_term_shape_string(n) for n in tupl])
+            # print(f"np.einsum('{in_dims}->{out_dims}', {pterms})")
+            temp_list.append(f"oe.contract_expression('{in_dims}->{out_dims}', {pterms}),\n")
+
+        exp_list.append([max(partition), ] + temp_list)
+
+    return exp_list
+
+
+def _write_optimized_vemx_paths_function(max_order):
+    """Return strings to write all the `oe.contract_expression` calls.
+    Unfortunately the code got a lot messier when I had to add in the truncation if statements.
+    It should get a rework/factorization at some point
+    """
+    assert max_order <= 6, "Only implemented up to 6th order"
+
+    string = (
+        f"\ndef compute_optimized_vemx_paths(A, N, truncation):\n"
+        f'{tab}"""Calculate optimized paths for the VECI/CC (mixed) einsum calls up to `highest_order`."""\n'
+        "\n"
+        f"{tab}order_2_list, order_3_list = [], []\n"
+        f"{tab}order_4_list, order_5_list, order_6_list = [], [], []\n"
+        "\n"
+    )
+
+    # there are no VECI/CC (mixed) contributions for order < 2
+    optimized_vemx_orders = list(range(2, max_order+1))
+
+    for order in optimized_vemx_orders:
+
+        # generate all the elements in the `order_{order}_list`
+        partitions = generate_linked_disconnected_partitions_of_n(order)
+        optimized_path_list = _contracted_expressions(partitions, order)
+
+        for optimized_paths in optimized_path_list:
+            current_max_order = optimized_paths[0]
+            del optimized_paths[0]
+            # print('ZZ', optimized_paths)
+
+            # the string representation (doubles, triples, quadruples... etc)
+            contribution_name = lambda n: taylor_series_order_tag[n].lower()
+
+            # we need to a big long string, and also remove the first two opt paths
+            optimized_paths = "".join([
+                s.replace("oe.contract", f"{tab}{tab}{tab}oe.contract") for s in optimized_paths
+            ])
+
+            string += (
+                f"{tab}if truncation.{contribution_name(current_max_order)}:\n"
+                f"{tab}{tab}order_{order}_list.extend([\n"
+                f"{optimized_paths}"
+                f"{tab}{tab}])\n"
+                "\n"
+            )
+
+    return_list = ', '.join(['[]', ] + [f'order_{order}_list' for order in optimized_vemx_orders])
+    string += f"\n{tab}return [{return_list}]\n"
+
+    return string
+
+
+def _write_optimized_vecc_paths_function(max_order):
+    """Return strings to write all the `oe.contract_expression` calls.
+    Unfortunately the code got a lot messier when I had to add in the truncation if statements.
+    It should get a rework/factorization at some point
+    """
+    assert max_order <= 6, "Only implemented up to 6th order"
+
+    string = (
+        f"\ndef compute_optimized_vecc_paths(A, N, truncation):\n"
+        f'{tab}"""Calculate optimized paths for the VECC einsum calls up to `highest_order`."""\n'
+        "\n"
+        f"{tab}order_4_list, order_5_list, order_6_list = [], [], []\n"
+        "\n"
+    )
+
+    # there are no VECC contributions for order < 4
+    optimized_vecc_orders = list(range(4, max_order+1))
+
+    # since we need at least doubles for things to matter:
+    string += (
+        f"{tab}if not truncation.doubles:\n"
+        f"{tab}{tab}log.warning('Did not calculate optimized VECC paths of the dt amplitudes')\n"
+        f"{tab}{tab}return {[[], ]*6}\n"
+        "\n"
+    )
+
+    for order in optimized_vecc_orders:
+
+        # generate all the elements in the `order_{order}_list`
+        partitions = generate_un_linked_disconnected_partitions_of_n(order)
+        optimized_path_list = _contracted_expressions(partitions, order)
+
+        for optimized_paths in optimized_path_list:
+            current_max_order = optimized_paths[0]
+            del optimized_paths[0]
+            # print('ZZ', optimized_paths)
+
+            # the string representation (doubles, triples, quadruples... etc)
+            contribution_name = lambda n: taylor_series_order_tag[n].lower()
+
+            # we need to a big long string, and also remove the first two opt paths
+            optimized_paths = "".join([
+                s.replace("oe.contract", f"{tab}{tab}{tab}oe.contract") for s in optimized_paths
+            ])
+
+            string += (
+                f"{tab}if truncation.{contribution_name(current_max_order)}:\n"
+                f"{tab}{tab}order_{order}_list.extend([\n"
+                f"{optimized_paths}"
+                f"{tab}{tab}])\n"
+                "\n"
+            )
+
+    return_list = ', '.join(['[]', '[]', '[]'] + [f'order_{order}_list' for order in optimized_vecc_orders])
+    # return_list = ', '.join( + [f'order_{order}_list' for order in optimized_vemx_orders])
+    string += f"\n{tab}return [{return_list}]\n"
+
+    return string
+
+
+# ------------------------------------------------------- #
 def generate_w_operators_string(max_order, s1=75, s2=28):
     """Return a string containing the python code to generate w operators up to (and including) `max_order`.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
@@ -3420,9 +3765,9 @@ def generate_w_operators_string(max_order, s1=75, s2=28):
     # header for optimized paths function
     string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", s2)
     # write the code for generating optimized paths for VECI/CC (mixed) contributions
-    # string += _write_optimized_vemx_paths_function(max_order) + '\n'
+    string += _write_optimized_vemx_paths_function(max_order) + '\n'
     # write the code for generating optimized paths for VECC contributions
-    # string += _write_optimized_vecc_paths_function(max_order) + '\n'
+    string += _write_optimized_vecc_paths_function(max_order) + '\n'
     # ------------------------------------------------------------------------------------------- #
     return string
 
@@ -4147,9 +4492,325 @@ def generate_z_operator(maximum_cc_rank, only_ground_state):
             return_list.append(general_operator_namedtuple(name, m+n, m, n))
 
     return z_operator_namedtuple(maximum_cc_rank, return_list)
-
-
 # ------------------------------------------------------------------------ #
+
+
+def _write_t_symmetric_latex_from_lists(rank, fully):
+    """Return the latex commands to write the provided terms.
+    We use `join` to insert two backward's slashes \\ BETWEEN each line
+    rather then adding them to end and having extra trailing slashes on the last line.
+    The user is expected to manually copy the relevant lines from the text file into a latex file
+    and generate the pdf themselves.
+    """
+    return_string = ""
+
+    # special case for zero order equation
+    if rank == 0:
+        return_string = _make_latex(rank, fully)
+        return return_string.replace("^{}", "").replace("_{}", "")
+
+    # no ____ terms
+    no_fully = ' '*4 + r'\textit{no fully connected terms}'
+
+    return_string += _make_latex(rank, fully) if fully != [] else no_fully
+
+    # remove all empty ^{}/_{} terms that are no longer needed
+    return return_string.replace("^{}", "").replace("_{}", "")
+
+
+def _generate_t_symmetric_latex_equations(omega, H, s_taylor_expansion, remove_f_terms=True):
+    """Return a string containing latex code to be placed into a .tex file.
+    For a given set of input arguments: (`omega`, `H`, `s_taylor_expansion`) we generate
+    all possible and valid CC terms. Note that:
+        - `omega` is an `omega_namedtuple` object
+        - `H` is a `hamiltonian_namedtuple` object
+        - `s_taylor_expansion` is one of :
+            - a single `general_operator_namedtuple`
+            - a list of `general_operator_namedtuple`s
+            - a list of lists of `general_operator_namedtuple`s
+
+    One possible input could be:
+        - `omega` is the creation operator d
+        - `H` is a Hamiltonian of rank two
+        - `s_taylor_expansion` is the S^1 Taylor expansion term
+    """
+
+    simple_repr_list = []  # old list, not so important anymore, might remove in future
+    valid_term_list = []   # store all valid Omega * h * (s*s*...s) terms here
+
+    """ First we want to generate a list of valid terms.
+    We start with the list of lists `s_taylor_expansion` which is processed by `_filter_out_valid_s_terms`.
+    This function identifies valid pairings AND places those pairings in the `valid_term_list`.
+    Specifically we replace the `general_operator_namedtuple`s with `connected_namedtuple`s and/or
+    `disconnected_namedtuple`s.
+    """
+    for count, s_series_term in enumerate(s_taylor_expansion):
+
+        if False:  # debugging
+            print(s_series_term, "-"*100, "\n\n")
+
+        _filter_out_valid_s_terms(omega, H, s_series_term, simple_repr_list, valid_term_list, remove_f_terms=remove_f_terms)
+
+    """ Next we take all terms and separate them into their respective groups """
+    fully, linked, unlinked = _seperate_s_terms_by_connection(valid_term_list)
+
+    if False:  # extra heavy debugging
+        _debug_print_valid_term_list(valid_term_list)
+        _debug_print_different_types_of_terms(fully, linked, unlinked)
+
+    # write and return the latex code
+    return _write_t_symmetric_latex_from_lists(omega.rank, fully)
+
+
+def _generate_t_symmetric_left_hand_side(omega):
+    """ Generate the latex code for the LHS (left hand side) of the CC equation.
+    The order of the `omega` operator determines all terms on the LHS.
+    """
+
+    omega_order = omega.m + omega.n
+
+    if omega_order == 0:
+        return r'''i\left(\dv{\bs_{0,\gamma}}{\tau}\right)'''
+
+    # generate all possible tuples (m, n) representing t terms t^m_n
+    single_t_list = [[m, n] for m in range(0, omega_order+1) for n in range(0, omega_order+1) if ((n == m != 0) or (n != m))]
+
+    all_combinations_list = []
+
+    # generate all possible combinations of t^m_n
+    # such as t_1, t^2, t^1 * t^1, t^1 * t^2_3, ... etc
+    for length in range(1, omega_order+1):
+        all_combinations_list.append(list(it.product(single_t_list, repeat=length)))
+
+    """ Next we filter out the combinations that don't match omega.
+    Suppose omega is o^2_1:
+        - it can match with  (t^1 * t^1 * t_1) or (t^2_1) and so forth
+        - it cant match with (t^1 * t^1 * t^1) or (t^1_1) and so forth
+    """
+    matched_set = set()
+    for list_of_t_terms in all_combinations_list:
+        for t_terms in list_of_t_terms:
+            upper_sum = sum([t[0] for t in t_terms])  # the sum over all m superscripts (t^m)
+            lower_sum = sum([t[1] for t in t_terms])  # the sum over all n superscripts (t_n)
+
+            # remember that a t_1 contracts with o^1
+            # so the `lower_sum` needs to be compared to o^n
+            if omega.m == lower_sum and omega.n == upper_sum:
+                """ The "filtering" is accomplished by adding sorted tuples of tuples to a set.
+                We cannot use lists because sets require hashable elements (immutable) such as tuples.
+                However with tuples, we can end up with duplicates like ((2, 0), (0, 1)) and ((0, 1), (2, 0)).
+                So we have to:
+                    - generate lists of tuples:             [(0, 1), (0, 2)]
+                    - sort those lists in reverse order:    [(0, 2), (0, 1)]
+                    - make a tuple from the list:           ((0, 2), (0, 1))
+                    - add the tuple to `matched_set`
+                """
+                matched_set.add(tuple(sorted([tuple(x) for x in t_terms], reverse=True)))
+
+    """ Transform the set into a list of lists sort by increasing length
+    Two examples:
+        - omega is `operator(name='bb', m=0, n=2)`
+        then `sorted_list` is [[(2, 0)], [(1, 0), (1, 0)]]
+
+        - omega is `operator(name='ddd', m=3, n=0)`
+        then `sorted_list` is [[(0, 3)], [(0, 2), (0, 1)], [(0, 1), (0, 1), (0, 1)]]
+    """
+    sorted_list = sorted([[b for b in a] for a in matched_set], key=len)
+
+    """ Next we generate the latex code for each t term represented by the (m, n) tuples
+    One possible `t_group` could be:
+        - [[(0, 2)], [(0, 1), (0, 1)]]
+    and its corresponding `group_list` would be:
+        - [['\\bt^{}_{ij}'], ['\\bt^{}_{i}', '\\bt^{}_{j}']]
+    """
+    latex_t_terms_list = []  # store the latex code for each valid t term here
+    for t_group in sorted_list:
+        count = 0  # keep track of what index labels have been used
+        group_list = []
+
+        for t in t_group:
+            upper_label = summation_indices[count:count+t[0]]
+            count += t[0]
+
+            lower_label = summation_indices[count:count+t[1]]
+            count += t[1]
+
+            lower_label += r'\gamma' if lower_label == "" else r',\gamma'
+
+            group_list.append(f"{bold_t_latex}^{{{upper_label}}}_{{{lower_label}}}")
+
+        latex_t_terms_list.append(group_list)
+
+    # create derivative terms
+    derivative_list = []
+    for t_group in latex_t_terms_list:
+        # loop over each t in the group and take the derivative of that specific t
+        for i in range(len(t_group)):
+            string = ""
+
+            # if there are t terms to the left of the current index
+            if len(t_group[0:i]) > 0:
+                string += f"{''.join(t_group[0:i])}"
+
+            # the t term we are currently taking the derivative of
+            string += rf'\dv{{{t_group[i]}}}{{\tau}}'
+
+            # if there are t terms to the right of the current index
+            if len(t_group[i:]) > 0:
+                string += f"{''.join(t_group[i+1:])}"
+
+            derivative_list.append(string)
+
+    # order the derivative terms before the epsilon terms
+    return_string = ' + '.join(derivative_list)
+    return rf'''i\left({return_string}\right)'''
+# ------------------------------------------------------------------------ #
+
+
+def _make_z_symmetric_latex(rank, term_list, linked_condense=False, unlinked_condense=False, print_prefactors=True):
+    """Return the latex commands to write the provided terms."""
+
+    return_list = []  # store output here
+
+    # prepare the common factors for condensing
+    if unlinked_condense:
+        common_unlinked_factor = prepare_condensed_terms(term_list, unlinked_condense=True)
+
+    elif linked_condense:
+        common_linked_factor_list = prepare_condensed_terms(term_list, linked_condense=True)
+        # where we store the lists of latex code
+        linked_return_list = [[] for i in range(len(common_linked_factor_list))]
+
+    # prepare all the latex strings
+    for term in term_list:
+        # extract elements of list `term`
+        LHS, h, t_list = term[0], term[1], term[2]
+        print(type(t_list), t_list)
+
+        # make sure all s_terms are valid objects
+        _validate_s_terms(t_list)
+
+        term_string = ''
+
+        # if needed add f prefactors
+        # if h has unpaired lower terms this implies it would contract with LHS in a `db` fashion
+        if _creates_f_prefactor(LHS, h):
+            if LHS.m_h == 1:
+                term_string += "f"
+            else:
+                term_string += f"f^{{{LHS.m_h}}}"
+
+        # added by shanmei, which of f and fbar should go first?
+        # if needed add fbar prefactors
+        # if h has unpaired upper terms this implies it would contract with LHS in a `bd` fashion
+        if _creates_fbar_prefactor(LHS, h):
+            if LHS.n_h == 1:
+                term_string += "\\bar{f}"
+            else:
+                term_string += f"\\bar{{f}}^{{{LHS.n_h}}}"
+
+        # add any prefactors if they exist
+        if print_prefactors:
+            term_string += _build_latex_prefactor(h, t_list)
+
+        # special treatment for condensing the linked disconnected terms
+        if linked_condense:
+            linked_list_index, new_t_list, t_offset_dict = _linked_condensed_adjust_t_terms(common_linked_factor_list, h, t_list)
+
+            # prepare the t-amplitude terms
+            t_string_list = _build_t_term_latex_group(new_t_list, h, t_offset_dict)
+
+            # build the latex code representing this term in the sum
+            h_offset = sum([t.m_o + t.n_o for t in common_linked_factor_list[linked_list_index]])
+            term_string += _build_h_term_latex_labels(h, h_offset) + ''.join(t_string_list)
+
+            # store the result
+            linked_return_list[linked_list_index].append(term_string)
+
+        else:
+            # prepare the t-amplitude terms
+            t_string_list = _build_t_term_latex_group(t_list, h=h)
+
+            # build the latex code representing this term in the sum
+            term_string += _build_h_term_latex_labels(h) + ''.join(t_string_list)
+
+            # store the result
+            return_list.append(term_string)
+
+    # glue all the latex code together!!
+
+    # special treatment to condense the unlinked disconnected terms
+    if unlinked_condense:
+        log.warning("This has not been tested for Hamiltonians of rank >= 3")
+
+        # remove the common factor from each term
+        common_latex = _build_t_term_latex(common_unlinked_factor)
+        return_list = [term.replace(common_latex, '') for term in return_list]
+
+        # print(return_list)
+
+        return f"({' + '.join(return_list)}){common_latex}"
+
+    # special treatment to condense the linked disconnected terms
+    if linked_condense:
+        log.warning("This has not been tested for Hamiltonians of rank >= 3")
+
+        return_strings = []
+
+        for i, factor in enumerate(common_linked_factor_list):
+            common_latex = ''.join(_build_t_term_latex_group(factor))
+            # print('z', i, linked_return_list[i], '\n\n')
+            # print(factor)
+
+            # if common_latex == '\\bt^{z}_{}\\bt^{y}_{}':
+            #     print('z', common_latex)
+            #     for term in linked_return_list[i]:
+            #         if common_latex in term:
+            #             print('\n\n', term)
+            #             sys.exit(0)
+
+            #             if "\\bh^{z}_{}\\bt^{}_{y}\\bt^{x}_{}" in term:
+            #                 print('\n\n', term)
+            #                 sys.exit(0)
+
+            # linked_return_list[i] = [term.replace(common_latex, '') for term in linked_return_list[i]]
+            # print('z', i, linked_return_list[i])
+            return_strings.append(f"({' + '.join(linked_return_list[i])}){common_latex}")
+
+        # join the lists with the equation splitting string
+        splitting_string = r'\\  &+  % split long equation'
+        final_string = f"\n{tab}{splitting_string}\n".join(return_strings)
+
+        return final_string
+
+        # if rank == 1:
+        #     return _glue_linked_disconnected_latex_together(rank, term_list, common_linked_factor_list, linked_return_list)
+        # if rank == 2:
+        #     return _glue_linked_disconnected_latex_together(rank, term_list, common_linked_factor_list, linked_return_list)
+        # if rank == 3:
+        #     return _glue_linked_disconnected_latex_together(rank, term_list, common_linked_factor_list, linked_return_list)
+
+    # otherwise we simply glue everything together
+    else:
+        # the maximum number of terms on 1 horizontal line (in latex)
+        # change this as needed to fit equations on page
+        split_number = 7
+
+        # if the line is so short we don't need to split
+        if len(return_list) < split_number*2:
+            return f"({' + '.join(return_list)})"
+
+        # make a list of each line
+        split_equation_list = []
+        for i in range(0, len(return_list) // split_number):
+            split_equation_list.append(' + '.join(return_list[i*split_number:(i+1)*split_number]))
+
+        # join the lists with the equation splitting string
+        splitting_string = r'\\  &+  % split long equation'
+        final_string = f"\n{tab}{splitting_string}\n".join(split_equation_list)
+
+        # and we're done!
+        return f"(\n{final_string}\n)"
 
 
 def _z_joining_with_z_terms(LHS, h, left_z, right_z):
@@ -5770,11 +6431,13 @@ if (__name__ == '__main__'):
     omega_max_order = 3
 
     truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
-    generate_latex_files(
-        truncations,
-        only_ground_state=False,
-        remove_f_terms=False,
-        thermal=False,
-        file="full cc"
-    )
-    generate_python_files(truncations, only_ground_state=True, thermal=False)
+    # generate_latex_files(
+    #     truncations,
+    #     only_ground_state=False,
+    #     remove_f_terms=False,
+    #     thermal=False,
+    #     file="full cc"
+    # )
+    # generate_python_files(truncations, only_ground_state=True, thermal=False)
+
+    generate_w_operator_equations_file(max_w_order=6, path="./w_operator_equations.py")
