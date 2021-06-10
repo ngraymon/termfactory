@@ -662,41 +662,6 @@ def _debug_print_different_types_of_terms(fully, linked, unlinked):
         log.debug(term)
 
 
-def _build_latex_h_string(h, unsummed=False):
-    """ x """
-    string = "h"
-
-    # we need to use different indices
-    index_list = summation_indices if not unsummed else unlinked_indices
-
-    if h.m > 0:
-        string += f"^{{{index_list[0:h.m]}}}"
-
-    if h.n > 0:
-        string += f"_{{{index_list[h.m:h.m+h.n]}}}"
-
-    if string == "h":
-        string = "h_0"
-
-    return string.replace("h", bold_h_latex)
-
-
-def _build_latex_t_string(s):
-    """ x """
-    string = "t"
-
-    if (s.h_n > 0) or (s.o_n > 0):
-        string += f"^{{{summation_indices[s.h_m:s.h_m+s.h_n]}{unlinked_indices[s.o_m:s.o_m+s.o_n]}}}"
-
-    if (s.h_m > 0) or (s.o_m > 0):
-        string += f"_{{{summation_indices[0:s.h_m]}{unlinked_indices[0:s.o_m]}}}"
-
-    if string == "t":
-        string = ""
-
-    return string.replace('t', bold_t_latex)
-
-
 # --------------------- Validating operator pairings ------------------------ #
 def _t_joining_with_t_terms(omega, h, s_list, nof_creation_ops):
     """Remove terms like `b h^1 t^2 t_2` which require the t^2 to join with t_2.
@@ -763,22 +728,6 @@ def _h_joining_with_itself(omega, h, s_list):
             return False
 
     return True
-
-
-def _build_h_string(h):
-    """ x """
-    string = "h"
-
-    if h.m > 0:
-        string += f"^{{{h.m}}}"
-
-    if h.n > 0:
-        string += f"_{{{h.n}}}"
-
-    if string == "h":
-        string = "h_0"
-
-    return string
 
 
 # ----------------------- generating operators -------------------------- #
@@ -2021,30 +1970,6 @@ def _full_cc_einsum_vibrational_components(h, t_list):
     return vibrational_components, ''.join(remaining_list)
 
 
-def _full_cc_einsum_subscript_generator(h, t_list):
-    """ x """
-    return_string = ""
-
-    electronic_components = _full_cc_einsum_electronic_components(t_list)
-
-    vibrational_components, remaining_indices = _full_cc_einsum_vibrational_components(h, t_list)
-
-    summation_subscripts = ", ".join([
-        f"{electronic_components[i]}{vibrational_components[i]}" for i in range(len(electronic_components))
-    ])
-
-    return_string = f"{summation_subscripts} -> ab{remaining_indices}"
-
-    return return_string
-
-
-def _full_cc_einsum_prefactor(term):
-    """ x """
-    string = ""
-
-    return string
-
-
 def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
     """ x """
 
@@ -2842,118 +2767,8 @@ def generate_residual_equations_file(max_residual_order, maximum_h_rank, path=".
 # ----------------------------------------------------------------------------------------------- #
 # ---------------------------  GENERATING W OPERATOR EQUATIONS  --------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
-def _next_list(lst, n):
-    ''' if items in `lst` are all one, or there is only one 1 in `lst`, add 1 to the last item and delete the first 1 in the list like:
-            [1, 1, 1] -> [1, 2] and [1, 2] -> [3];
-        if there is no 1 in `lst`, return the list itself;
-        if there more than one 1 in `lst`, delete one of 1 and add 1 to the last and the one before the last item separately, like:
-            [1, 1, 2] -> [(1,3), (2, 2)]'''
-    if lst.count(1) == 0:
-        return [lst, ]
-    elif lst.count(1) == n or lst.count(1) == 1:
-        result = lst[1:-1] + [(lst[-1]+1), ]
-        return [result, ]
-    else:
-        result = [(lst[1:-2] + [lst[-2]+1, ] + [lst[-1], ]), (lst[1:-1] + [(lst[-1]+1), ])]
-        return result
 
 
-def _generate_t_lists(n):
-    ''' generates a list of lists in which each item is from 1 to n and the sum of items are n, for example:
-        4 -> [[4], [1, 3], [2, 2], [1, 1, 2], [1, 1, 1, 1]]'''
-    first = [1]*n
-    result = []
-    lst = [first]
-    current = _next_list(lst[-1], n)
-
-    # if there is no 1 in current(a list), lst gets all items, bit not in correct order
-    while current != [lst[-1]]:
-        lst += current
-        current = _next_list(lst[-1], n)
-
-    # sort lst to get the final result
-    previous_max = max(lst[0])  # initialize previous_max to record the maximum value in the previous list
-
-    for sub_lst in lst:
-        current_max = max(sub_lst)  # record the maximum in the first list in lst
-
-        # if the maximum item in sub-lst is larger than the max in previous sub-list
-        # add sub_lst to the end of result list
-        if current_max >= previous_max:
-            result.append(sub_lst)
-            previous_max = current_max
-        # if the max in sub-lst is smaller than the max in previous sub-list
-        # add sub_lst to the beginning of result list
-        else:
-            result = [sub_lst] + result
-    result.reverse()
-    return result
-
-
-def _generate_t_terms_dictionary(n):
-    ''' generates a dictionary in which keys are tuple that show the tag for t terms as number, and values are the actual t terms,
-        for example: {(1, 4): ('t_i', 't_ijkl')}'''
-    result = {}
-    t_tag_list = ["i", "j", "k", "l", "m", "n"]
-    t_num_list = _generate_t_lists(n)  # a list of lists like [1,1], [2,1,1]....
-    for num_term in t_num_list:
-        t_term = []  # stores t_i, t_ij, t_ijk....
-        for n in num_term:
-            t_str = "t_" + "".join(t_tag_list[:n])  # add i,j,k.....to "t_"
-            # print(n, t_str, t_terms[n-1].string)
-            t_term.append(t_str)
-        result[tuple(num_term)] = tuple(t_term)
-    return result
-
-
-def _permutation_function(l_t, l_fix, l_perm, n):
-    ''' generates a list of character combinations which will be used in the einsum calculation,
-        l_t contains combination of t terms group like [["t_i", "t_ij"], ["t_ij", "t_i"]];
-        l_fix contains the fixed part of character combinations which will be used in the einsum calculation like
-            ["ac", "cd", "db"] for (t_i, t_i, t_ij) group;
-        l_perm contains groups of characters which will be added to the fixed part later, for example:
-            [[i, j], [j, i]] for [t_i, t_i] and ["ac","cb"]
-        '''
-
-    result = []
-    for char_group in l_perm:
-        s_result = []
-        for t_group in l_t:
-            ss_result = [list(l_fix)]
-            i = 0
-            p_sum = 0
-            for t_item in t_group:
-                length = len(t_item) - 2  # delete the length of "t_" part
-                ss_result[0][i] += "".join(char_group[p_sum:length+p_sum])
-                p_sum += length
-                i += 1
-            if len(l_fix) != n:
-                s_result += ss_result
-        if len(l_fix) == n:
-            s_result += ss_result
-        result += [s_result]
-    return result
-
-
-def _write_permutations(perm_t, perm_char_list, W_array, prefactor):
-    ''' generates lines for w function if permutations inside the einsum calculation is needed'''
-    result = ""
-    for p_group in perm_char_list:
-        # list of command strings for einsum
-        # cmd = ",".join(einsum_perm) + " -> " + einsum_result
-        cmd_list = [", ".join(p_c) for p_c in p_group]
-        # list of arguments to einsum call
-        arg_list = [", ".join(perm) for perm in perm_t]
-        # compile a list of the einsum calls (as strings)
-        einsum_list = [f"np.einsum('{cmd_list[i]}', {arg_list[i]})" for i in range(len(p_group))]
-        # join them together
-        sum_of_einsums = " + ".join(einsum_list)
-        # add the whole line to the main string
-        result += f"{tab}{W_array} += {prefactor} * ({sum_of_einsums})\n"
-    return result
-
-
-# ------------------------------------------------------- #
 t_terms = [
     None,
     t_term_namedtuple("t_i", 1, "(A, A, N)"),
@@ -3548,164 +3363,7 @@ def _write_master_w_compute_function(max_order, opt_einsum=False):
 
 
 # ------------------------------------------------------- #
-def _t_term_shape_string(order):
-    """Return the string `(A, A, N, ...)` with `order` number of `N`'s."""
-    return f"({', '.join(['A','A',] + ['N',]*order)})"
 
-
-def _contracted_expressions(partition_list, order):
-    """Return a list of each of the `oe.contract_expression` calls
-    for a W operator of order `order`.
-    """
-    exp_list = []
-
-    # for each partition (the mathematical term) of the integer `order`
-    for partition in partition_list:
-
-        # there is nothing to optimize for the N^th case
-        # we simply add the largest t_term to the W operator
-        # no multiplication required
-        if len(partition) == 1:
-            continue
-
-        # the unique permutations of the `partition` of the integer `order`
-        combinations = unique_permutations(partition)
-        # the einsum indices for the surface dimensions
-        surf_index = _generate_surface_index(partition)
-        # the einsum indices for the normal mode dimensions
-        mode_index = _generate_mode_index(partition, order)
-
-        temp_list = []
-
-        # `combinations` is a list of tuples such as (2, 2, 1, ) or (5,)
-        for i, tupl in enumerate(combinations):
-            # the input dimensions are two character strings representing the surface dimensions
-            # plus 1 or more characters representing the normal mode dimensions
-            in_dims = ", ".join([surf_index[a]+mode_index[i][a] for a in range(len(surf_index))])
-            # the output dimension is the same for all einsum calls for a given `partition` argument
-            out_dims = f"ab{tag_str[0:order]}"
-            # the shape of the t_terms are (A, A, N, ...) where the number of N dimensions is
-            # determined by the integer elements of each tuple `tupl`
-            # so (2, 1) -> ("(A, A, N, N)", "(A, A, N")
-            pterms = ", ".join([_t_term_shape_string(n) for n in tupl])
-            # print(f"np.einsum('{in_dims}->{out_dims}', {pterms})")
-            temp_list.append(f"oe.contract_expression('{in_dims}->{out_dims}', {pterms}),\n")
-
-        exp_list.append([max(partition), ] + temp_list)
-
-    return exp_list
-
-
-def _write_optimized_vemx_paths_function(max_order):
-    """Return strings to write all the `oe.contract_expression` calls.
-    Unfortunately the code got a lot messier when I had to add in the truncation if statements.
-    It should get a rework/factorization at some point
-    """
-    assert max_order <= 6, "Only implemented up to 6th order"
-
-    string = (
-        f"\ndef compute_optimized_vemx_paths(A, N, truncation):\n"
-        f'{tab}"""Calculate optimized paths for the VECI/CC (mixed) einsum calls up to `highest_order`."""\n'
-        "\n"
-        f"{tab}order_2_list, order_3_list = [], []\n"
-        f"{tab}order_4_list, order_5_list, order_6_list = [], [], []\n"
-        "\n"
-    )
-
-    # there are no VECI/CC (mixed) contributions for order < 2
-    optimized_vemx_orders = list(range(2, max_order+1))
-
-    for order in optimized_vemx_orders:
-
-        # generate all the elements in the `order_{order}_list`
-        partitions = generate_linked_disconnected_partitions_of_n(order)
-        optimized_path_list = _contracted_expressions(partitions, order)
-
-        for optimized_paths in optimized_path_list:
-            current_max_order = optimized_paths[0]
-            del optimized_paths[0]
-            # print('ZZ', optimized_paths)
-
-            # the string representation (doubles, triples, quadruples... etc)
-            contribution_name = lambda n: taylor_series_order_tag[n].lower()
-
-            # we need to a big long string, and also remove the first two opt paths
-            optimized_paths = "".join([
-                s.replace("oe.contract", f"{tab}{tab}{tab}oe.contract") for s in optimized_paths
-            ])
-
-            string += (
-                f"{tab}if truncation.{contribution_name(current_max_order)}:\n"
-                f"{tab}{tab}order_{order}_list.extend([\n"
-                f"{optimized_paths}"
-                f"{tab}{tab}])\n"
-                "\n"
-            )
-
-    return_list = ', '.join(['[]', ] + [f'order_{order}_list' for order in optimized_vemx_orders])
-    string += f"\n{tab}return [{return_list}]\n"
-
-    return string
-
-
-def _write_optimized_vecc_paths_function(max_order):
-    """Return strings to write all the `oe.contract_expression` calls.
-    Unfortunately the code got a lot messier when I had to add in the truncation if statements.
-    It should get a rework/factorization at some point
-    """
-    assert max_order <= 6, "Only implemented up to 6th order"
-
-    string = (
-        f"\ndef compute_optimized_vecc_paths(A, N, truncation):\n"
-        f'{tab}"""Calculate optimized paths for the VECC einsum calls up to `highest_order`."""\n'
-        "\n"
-        f"{tab}order_4_list, order_5_list, order_6_list = [], [], []\n"
-        "\n"
-    )
-
-    # there are no VECC contributions for order < 4
-    optimized_vecc_orders = list(range(4, max_order+1))
-
-    # since we need at least doubles for things to matter:
-    string += (
-        f"{tab}if not truncation.doubles:\n"
-        f"{tab}{tab}log.warning('Did not calculate optimized VECC paths of the dt amplitudes')\n"
-        f"{tab}{tab}return {[[], ]*len(6)}\n"
-        "\n"
-    )
-
-    for order in optimized_vecc_orders:
-
-        # generate all the elements in the `order_{order}_list`
-        partitions = generate_un_linked_disconnected_partitions_of_n(order)
-        optimized_path_list = _contracted_expressions(partitions, order)
-
-        for optimized_paths in optimized_path_list:
-            current_max_order = optimized_paths[0]
-            del optimized_paths[0]
-            # print('ZZ', optimized_paths)
-
-            # the string representation (doubles, triples, quadruples... etc)
-            contribution_name = lambda n: taylor_series_order_tag[n].lower()
-
-            # we need to a big long string, and also remove the first two opt paths
-            optimized_paths = "".join([
-                s.replace("oe.contract", f"{tab}{tab}{tab}oe.contract") for s in optimized_paths
-            ])
-
-            string += (
-                f"{tab}if truncation.{contribution_name(current_max_order)}:\n"
-                f"{tab}{tab}order_{order}_list.extend([\n"
-                f"{optimized_paths}"
-                f"{tab}{tab}])\n"
-                "\n"
-            )
-
-    return_list = ', '.join(['[]', '[]', '[]'] + [f'order_{order}_list' for order in optimized_vecc_orders])
-    # return_list = ', '.join( + [f'order_{order}_list' for order in optimized_vemx_orders])
-    string += f"\n{tab}return [{return_list}]\n"
-
-    return string
 
 
 # ------------------------------------------------------- #
