@@ -13,8 +13,13 @@ cov_test:
     - py -m coverage run generate_residual_equations.py
     - py -m coverage html
   artifacts:
-    reports:
-      cobertura: 
+    paths:
         - .\htmlcov\*.css
         - .\htmlcov\*.js
-        - .\htmlcov\generate_residual_equations_py.html, .\htmlcov\*.css
+        - .\htmlcov\generate_residual_equations_py.html
+
+    # reports:
+    #   cobertura: 
+    #     - .\htmlcov\*.css
+    #     - .\htmlcov\*.js
+    #     - .\htmlcov\generate_residual_equations_py.html, .\htmlcov\*.css
