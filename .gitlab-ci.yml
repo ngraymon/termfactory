@@ -14,4 +14,7 @@ cov_test:
     - py -m coverage html
   artifacts:
     reports:
-      cobertura: .\htmlcov\generate_residual_equations_py.html
+      cobertura: 
+        - .\htmlcov\generate_residual_equations_py.html
+        - .\htmlcov\*.css
+        - .\htmlcov\*.js
