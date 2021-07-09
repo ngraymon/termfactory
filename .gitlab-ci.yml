@@ -1,0 +1,17 @@
+stages:
+    - code_analysis
+
+default:
+  image: python:3.8
+
+cov_test:
+  stage: code_analysis
+  tags: [ci]
+  script:
+    - py -m pip install coverage
+    - py -m pip install numpy
+    - py -m coverage run generate_residual_equations.py
+    - py -m coverage html
+  artifacts:
+    reports:
+      cobertura: .\htmlcov\generate_residual_equations_py.html
