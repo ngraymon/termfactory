@@ -8,8 +8,7 @@ cov_test:
   stage: code_analysis
   tags: [ci]
   script:
-    - py -m pip install coverage
-    - py -m pip install numpy
+    - py -m pip install -r requirements.txt
     - py -m coverage run generate_residual_equations.py
     - py -m coverage html
   artifacts:
