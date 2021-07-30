@@ -1,5 +1,4 @@
 # system imports
-# import os
 import math
 import sys
 import itertools as it
@@ -568,12 +567,16 @@ def _generate_veci_latex(hamiltonian, max_order):
     The user is expected to manually copy the relevant lines from the text file into a latex file
     and generate the pdf themselves.
     """
+
+    list_veci = [_generate_veci_latex_form(hamiltonian, order, max_order) for order in range(max_order+1)]
+    list_explicit_veci = [_generate_veci_latex_form(hamiltonian, order, max_order, explicit=True) for order in range(max_order+1)]
+
     return_string = ""  # store it all in here
     return_string += "VECI condensed latex\n"
-    return_string += ' \\\\\n%\n'.join([_generate_veci_latex_form(hamiltonian, order, max_order) for order in range(max_order+1)])
+    return_string += ' \\\\\n%\n'.join(list_veci)
     return_string += "\n"*4
     return_string += "VECI explicit latex\n"
-    return_string += ' \\\\\n%\n'.join([_generate_veci_latex_form(hamiltonian, order, max_order, explicit=True) for order in range(max_order+1)])
+    return_string += ' \\\\\n%\n'.join(list_explicit_veci)
     return return_string
 
 
@@ -744,7 +747,10 @@ def _generate_mixedcc_condensed_latex_term(term_list, h_list, w_list):
     return
 
 
-def _generate_mixedcc_latex_form(hamiltonian, order, max_order, expand_order_n_w=3, condense_disconnected_terms=True, explicit=False):
+def _generate_mixedcc_latex_form(
+    hamiltonian, order, max_order, expand_order_n_w=3,
+    condense_disconnected_terms=True, explicit=False
+):
     """Generate the VECI/CC latex for the residual equations.
     Default is to generate the condensed form, but if `explicit` flag is `True` then
     explicit form with all i and k terms and prefactors is returned.
@@ -885,21 +891,24 @@ def _generate_mixedcc_latex(hamiltonian, max_order):
     if True:
         return_string += _generate_mixedcc_wave_operator_1(hamiltonian, max_order)
     else:
-        return_string += ' \\\\\n'.join(
-            [_generate_mixedcc_wave_operator_2(hamiltonian, order, max_order) for order in range(max_order+1)]
-        )
+        return_string += ' \\\\\n'.join([
+            _generate_mixedcc_wave_operator_2(hamiltonian, order, max_order)
+            for order in range(max_order+1)
+        ])
 
     return_string += "\n"*4
     return_string += "VECI/CC mixed condensed latex\n"
-    return_string += ' \\\\\n%\n'.join(
-        [_generate_mixedcc_latex_form(hamiltonian, order, max_order, expand_order_n_w) for order in range(max_order+1)]
-    )
+    return_string += ' \\\\\n%\n'.join([
+        _generate_mixedcc_latex_form(hamiltonian, order, max_order, expand_order_n_w)
+        for order in range(max_order+1)
+    ])
 
     return_string += "\n"*4
     return_string += "VECI/CC mixed explicit latex\n"
-    return_string += ' \\\\\n%\n'.join(
-        [_generate_mixedcc_latex_form(hamiltonian, order, max_order, expand_order_n_w, explicit=True) for order in range(max_order+1)]
-    )
+    return_string += ' \\\\\n%\n'.join([
+        _generate_mixedcc_latex_form(hamiltonian, order, max_order, expand_order_n_w, explicit=True)
+        for order in range(max_order+1)
+    ])
     return return_string
 
 
@@ -1019,7 +1028,10 @@ def _generate_vecc_condensed_latex_term(term_list, h_list, w_list):
     return
 
 
-def _generate_vecc_latex_form(hamiltonian, order, max_order, expand_order_n_w=3, condense_disconnected_terms=True, explicit=False):
+def _generate_vecc_latex_form(
+    hamiltonian, order, max_order, expand_order_n_w=3,
+    condense_disconnected_terms=True, explicit=False
+):
     """Generate the VECC latex for the residual equations.
     Default is to generate the condensed form, but if `explicit` flag is `True` then
     explicit form with all i and k terms and prefactors is returned.
@@ -1154,15 +1166,18 @@ def _generate_vecc_latex(hamiltonian, max_order):
 
     return_string += "\n"*4
     return_string += "VECC condensed latex\n"
-    return_string += ' \\\\\n%\n'.join(
-        [_generate_vecc_latex_form(hamiltonian, order, max_order, expand_order_n_w) for order in range(max_order+1)]
-    )
+    return_string += ' \\\\\n%\n'.join([
+        _generate_vecc_latex_form(hamiltonian, order, max_order, expand_order_n_w)
+        for order in range(max_order+1)
+    ])
 
     return_string += "\n"*4
     return_string += "VECC explicit latex\n"
-    return_string += ' \\\\\n%\n'.join(
-        [_generate_vecc_latex_form(hamiltonian, order, max_order, expand_order_n_w, explicit=True) for order in range(max_order+1)]
-    )
+    return_string += ' \\\\\n%\n'.join([
+        _generate_vecc_latex_form(hamiltonian, order, max_order, expand_order_n_w, explicit=True)
+        for order in range(max_order+1)
+    ])
+
     return return_string
 
 
@@ -1498,14 +1513,21 @@ def _write_quadratic_cc_latex_from_lists(fully, linked, unlinked):
     The user is expected to manually copy the relevant lines from the text file into a latex file
     and generate the pdf themselves.
     """
+
+    str_fc = r'    \textit{no fully connected terms}'
+    str_ld = r'    \textit{no linked disconnected terms}'
+    str_ud = r'    \textit{no unlinked disconnected terms}'
+
     return_string = "FULLY CONNECTED TERMS\n"
-    return_string += _make_quadratic_latex(fully) if fully != [] else r'    \textit{no fully connected terms}'
+    return_string += _make_quadratic_latex(fully) if fully != [] else str_fc
     return_string += "\n"*2
+
     return_string += "LINKED DISCONNECTED TERMS\n"
-    return_string += _make_quadratic_latex(linked, linked_condense=True) if linked != [] else r'    \textit{no linked disconnected terms}'
+    return_string += _make_quadratic_latex(linked, linked_condense=True) if linked != [] else str_ld
     return_string += "\n"*2
+
     return_string += "CONDENSED UNLINKED DISCONNECTED TERMS\n"
-    return_string += _make_quadratic_latex(unlinked, unlinked_condense=True) if unlinked != [] else r'    \textit{no unlinked disconnected terms}'
+    return_string += _make_quadratic_latex(unlinked, unlinked_condense=True) if unlinked != [] else str_ud
 
     # remove all empty ^{}/_{} terms that are no longer needed
     return return_string.replace("^{}", "").replace("_{}", "")
@@ -1742,17 +1764,25 @@ def _write_cubic_cc_latex_from_lists(fully, linked, unlinked):
     The user is expected to manually copy the relevant lines from the text file into a latex file
     and generate the pdf themselves.
     """
+
+    str_fc = r'    \textit{no fully connected terms}'
+    str_ld = r'    \textit{no linked disconnected terms}'
+    str_ud = r'    \textit{no unlinked disconnected terms}'
+
     return_string = "FULLY CONNECTED TERMS\n"
-    return_string += _make_cubic_latex(fully) if fully != [] else r'    \textit{no fully connected terms}'
+    return_string += _make_cubic_latex(fully) if fully != [] else str_fc
     return_string += "\n"*2
+
     return_string += "UNCONDENSED LINKED DISCONNECTED TERMS\n"
-    return_string += _make_cubic_latex(linked, linked_condense=False) if linked != [] else r'    \textit{no linked disconnected terms}'
+    return_string += _make_cubic_latex(linked, linked_condense=False) if linked != [] else str_ld
     return_string += "\n"*2
+
     return_string += "CONDENSED LINKED DISCONNECTED TERMS\n"
-    return_string += _make_cubic_latex(linked, linked_condense=True) if linked != [] else r'    \textit{no linked disconnected terms}'
+    return_string += _make_cubic_latex(linked, linked_condense=True) if linked != [] else str_ld
     return_string += "\n"*2
+
     return_string += "CONDENSED UNLINKED DISCONNECTED TERMS\n"
-    return_string += _make_cubic_latex(unlinked, unlinked_condense=True) if unlinked != [] else r'    \textit{no unlinked disconnected terms}'
+    return_string += _make_cubic_latex(unlinked, unlinked_condense=True) if unlinked != [] else str_ud
 
     # remove all empty ^{}/_{} terms that are no longer needed
     return return_string.replace("^{}", "").replace("_{}", "")
@@ -2800,7 +2830,7 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
     """
 
     # special case, single h
-    if len(t_list) == 1 and t_list[0] == disconnected_namedtuple(0,0,0,0):
+    if len(t_list) == 1 and t_list[0] == disconnected_namedtuple(0, 0, 0, 0):
         return ''
 
     numerator_list = []
@@ -2810,7 +2840,17 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
     connected_ts = [t for t in t_list if t.m_h > 0 or t.n_h > 0]
     x = len(set(connected_ts))
 
-    if h.n == 2 and h.m == 0 and len(t_list) == 2 and t_list[0].m_h == 1 and t_list[0].m_o == 1 and t_list[1].m_h == 1 and t_list[1].m_o == 1:
+    debug_flag = bool(
+        h.n == 2
+        and h.m == 0
+        and len(t_list) == 2
+        and t_list[0].m_h == 1
+        and t_list[0].m_o == 1
+        and t_list[1].m_h == 1
+        and t_list[1].m_o == 1
+    )
+
+    if debug_flag:
         print('\n\n\nzzzzzzzzz')
         print(connected_ts)
         print(set(connected_ts))
@@ -2907,7 +2947,7 @@ def _creates_fbar_prefactor(omega, h):
 def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False, print_prefactors=True, color=False):
     """Return the latex commands to write the provided terms.
 
-    the `color` argument in this case wraps all disconnected terms in a `\colorbox{yellow}` if True
+    the `color` argument in this case wraps all disconnected terms in a `\\colorbox{yellow}` if True
     """
 
     return_list = []  # store output here
@@ -3550,7 +3590,7 @@ def _build_full_cc_python_prefactor(h, t_list, simplify_flag=True):
     """
 
     # special case, single h
-    if len(t_list) == 1 and t_list[0] == disconnected_namedtuple(0,0,0,0):
+    if len(t_list) == 1 and t_list[0] == disconnected_namedtuple(0, 0, 0, 0):
         return ''
 
     numerator_list = []
@@ -3563,7 +3603,17 @@ def _build_full_cc_python_prefactor(h, t_list, simplify_flag=True):
 
     x = len(set(connected_ts))
 
-    if h.n == 2 and h.m == 0 and len(t_list) == 2 and t_list[0].m_h == 1 and t_list[0].m_o == 1 and t_list[1].m_h == 1 and t_list[1].m_o == 1:
+    debug_flag = (
+        h.n == 2
+        and h.m == 0
+        and len(t_list) == 2
+        and t_list[0].m_h == 1
+        and t_list[0].m_o == 1
+        and t_list[1].m_h == 1
+        and t_list[1].m_o == 1
+    )
+
+    if debug_flag:
         print('\n\n\nzzzzzzzzz')
         print(connected_ts)
         print(set(connected_ts))
@@ -4226,7 +4276,8 @@ def write_residual_function_string(residual_terms_list, order):
 
 def generate_python_code_for_residual_functions(term_lists, max_order):
     """Return a string containing the python code to generate residual functions up to (and including) `max_order`.
-    `term_lists` is a list of lists, each of which contain tuples `(prefactor, h, w)` representing terms of that particular residual.
+    `term_lists` is a list of lists, each of which contain tuples `(prefactor, h, w)`,
+    representing terms of that particular residual.
     Requires the following header: `"import numpy as np"`.
     """
     lst = [write_residual_function_string(term_lists[order], order=order) for order in range(max_order+1)]
@@ -4274,11 +4325,14 @@ def generate_residual_equations_file(max_residual_order, maximum_h_rank, path=".
 # ---------------------------  GENERATING W OPERATOR EQUATIONS  --------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
 def _next_list(lst, n):
-    ''' if items in `lst` are all one, or there is only one 1 in `lst`, add 1 to the last item and delete the first 1 in the list like:
-            [1, 1, 1] -> [1, 2] and [1, 2] -> [3];
-        if there is no 1 in `lst`, return the list itself;
-        if there more than one 1 in `lst`, delete one of 1 and add 1 to the last and the one before the last item separately, like:
-            [1, 1, 2] -> [(1,3), (2, 2)]'''
+    ''' if items in `lst` are all one, or there is only one 1 in `lst`:
+            -add 1 to the last item and delete the first 1 in the list like:
+                [1, 1, 1] -> [1, 2] and [1, 2] -> [3];
+        if there is no 1 in `lst`:
+            -return the list itself;
+        if there more than one 1 in `lst`:
+            -delete one of 1 and add 1 to the last and the one before the last item separately, like:
+                [1, 1, 2] -> [(1,3), (2, 2)]'''
     if lst.count(1) == 0:
         return [lst, ]
     elif lst.count(1) == n or lst.count(1) == 1:
@@ -5916,7 +5970,10 @@ def generate_dt_amplitude_string(max_order, s1=75, s2=28):
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
     """
     spacing_line = "# " + "-"*s1 + " #\n"
-    named_line = lambda name, width: "# " + "-"*width + f" {name} " + "-"*width + " #\n"
+
+    def named_line(name, width):
+        """ x """
+        return "# " + "-"*width + f" {name} " + "-"*width + " #\n"
 
     # ------------------------------------------------------------------------------------------- #
     # header for default functions
@@ -6021,8 +6078,9 @@ z_operator_namedtuple = namedtuple('z_operator', ['maximum_rank', 'operator_list
 Note that the attributes for these `namedtuples` operate in a specific manner.
 The general rule that can be followed is the m/n refers to the object it is an attribute of:
 `lhs.m_h` refers to the `m` value of `lhs`, contracting with `h`, which implies that it contracts with the `n` of `h`.
-The `m_h` attribute counts how many of the LHS's or z's m indices contract _omega_joining_with_itself the n indices of the h operator.
-So a h_1 couples with z^1 but the values inside the z^1 `namedtuple` object would be `m_l`=1, `n_l`=0, `m_lhs`=1, `n_lhs`=0, `m_r`=0, `n_r`=0.
+`m_h` counts how many of the LHS's or z's m indices contract _omega_joining_with_itself the n indices of the h operator.
+So a h_1 couples with z^1 but the values inside the z^1 `namedtuple` object would be:
+    `m_l`=1, `n_l`=0, `m_lhs`=1, `n_lhs`=0, `m_r`=0, `n_r`=0.
 """
 
 # the `m_t` and `n_t` are lists of integers whose length is == number of t's
@@ -7064,7 +7122,17 @@ def _build_z_latex_prefactor(h, t_list, simplify_flag=True):
     connected_ts = [t for t in t_list if t.m_h > 0 or t.n_h > 0]
     x = len(set(connected_ts))
 
-    if False and h.n == 2 and h.m == 0 and len(t_list) == 2 and t_list[0].m_h == 1 and t_list[0].m_o == 1 and t_list[1].m_h == 1 and t_list[1].m_o == 1:
+    debug_flag = bool(
+        h.n == 2
+        and h.m == 0
+        and len(t_list) == 2
+        and t_list[0].m_h == 1
+        and t_list[0].m_o == 1
+        and t_list[1].m_h == 1
+        and t_list[1].m_o == 1
+    )
+
+    if False and debug_flag:
         print('\n\n\nzzzzzzzzz')
         print(connected_ts)
         print(set(connected_ts))
@@ -7178,8 +7246,7 @@ def _prepare_second_z_latex(term_list, split_width=7, remove_f_terms=False, prin
     for term in term_list:
         term_string = ''
 
-        # print("TERM", term)
-        # extract elements of list `term`
+        # extract elements of list `term`, for now we don't use `LHS` or `z_right`
         LHS, h, z_left, z_right = term[0], term[1], *term[2]
 
         # if needed add f prefactors
@@ -7836,9 +7903,9 @@ t_namedtuple_latex = namedtuple('t_namedtuple_latex', ['m', 'n'])
 w_namedtuple_latex = namedtuple('w_latex', ['m', 'n'])
 
 
-def remove_list_item(i, l):
+def remove_list_item(i, lst):
     """"""
-    return list(item for item in l if item != i)
+    return list(item for item in lst if item != i)
 
 
 def count_items(lis):
@@ -8065,6 +8132,7 @@ def excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex
     latex_code += "\\end{equation}\n"
 
     # if file already exists then update it
+    import os
     if os.path.isfile(path):
 
         # read the entire file contents
@@ -8112,10 +8180,10 @@ def generate_latex_files(truncations, only_ground_state=True, remove_f_terms=Fal
         max_w_order = 5  # this is the
 
         if only_ground_state:
-            path = f"./ground_state_w_equations.tex"
+            path = "./ground_state_w_equations.tex"
             ground_state_w_equations_latex(max_w_order, path)
         else:
-            path = f"./excited_state_w_equations.tex"
+            path = "./excited_state_w_equations.tex"
             assert False, 'the excited_state_w_equations_latex has not been verified'
             excited_state_w_equations_latex(max_w_order, path)
 
