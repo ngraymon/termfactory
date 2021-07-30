@@ -2437,7 +2437,7 @@ def _seperate_s_terms_by_connection(total_list):
 
 
 # --------------- assigning of upper/lower latex indices ------------------------- #
-def _build_h_term_latex_labels(h, condense_offset=0):
+def _build_h_term_latex_labels(h, condense_offset=0, color=True):
     """ Builds latex code for labeling a `connected_h_operator_namedtuple`.
 
     The `condense_offset` is an optional argument which is needed when creating latex code
@@ -2449,20 +2449,28 @@ def _build_h_term_latex_labels(h, condense_offset=0):
     string = bold_h_latex
 
     # do the upper indices first
-    upper_indices = summation_indices[0:h.m - h.m_o]
-    upper_indices += unlinked_indices[condense_offset:condense_offset+h.m_o]
+    if not color:
+        upper_indices = summation_indices[0:h.m - h.m_o]
+        upper_indices += unlinked_indices[condense_offset:condense_offset+h.m_o]
+    else:
+        upper_indices = r'\blue{' + summation_indices[0:h.m - h.m_o] + '}'
+        upper_indices += r'\red{' + unlinked_indices[condense_offset:condense_offset+h.m_o] + '}'
     string += f"^{{{upper_indices}}}"
 
     # now do the lower indices
     h_offset = h.m - h.m_o
-    lower_indices = summation_indices[h_offset:h_offset + (h.n - h.n_o)]
-    lower_indices += unlinked_indices[condense_offset+h.m_o:condense_offset+h.m_o+h.n_o]
+    if not color:
+        lower_indices = summation_indices[h_offset:h_offset + (h.n - h.n_o)]
+        lower_indices += unlinked_indices[condense_offset+h.m_o:condense_offset+h.m_o+h.n_o]
+    else:
+        lower_indices = r'\blue{' + summation_indices[h_offset:h_offset + (h.n - h.n_o)] + '}'
+        lower_indices += r'\red{' + unlinked_indices[condense_offset+h.m_o:condense_offset+h.m_o+h.n_o] + '}'
     string += f"_{{{lower_indices}}}"
 
     return string
 
 
-def _build_t_term_latex_labels(term, offset_dict):
+def _build_t_term_latex_labels(term, offset_dict, color=True):
     """Return a latex string representation of `s_term`.
     Should use `_build_t_term_latex` primarily to build single t-strings.
 
@@ -2480,7 +2488,11 @@ def _build_t_term_latex_labels(term, offset_dict):
     if (term.n_h > 0) or (term.n_o > 0):
         a, b = offset_dict['summation_lower'], offset_dict['unlinked']
 
-        down_label = summation_indices[a:a+term.n_h] + unlinked_indices[b:b+term.n_o]
+        if not color:
+            down_label = summation_indices[a:a+term.n_h] + unlinked_indices[b:b+term.n_o]
+        else:
+            down_label = r'\blue{' + summation_indices[a:a+term.n_h] + '}'
+            down_label += r'\red{' + unlinked_indices[b:b+term.n_o] + '}'
 
         # record the change in the offset
         offset_dict['summation_lower'] += term.n_h
@@ -2490,7 +2502,11 @@ def _build_t_term_latex_labels(term, offset_dict):
     if (term.m_h > 0) or (term.m_o > 0):
         a, b = offset_dict['summation_upper'], offset_dict['unlinked']
 
-        up_label = summation_indices[a:a+term.m_h] + unlinked_indices[b:b+term.m_o]
+        if not color:
+            up_label = summation_indices[a:a+term.m_h] + unlinked_indices[b:b+term.m_o]
+        else:
+            up_label = r'\blue{' + summation_indices[a:a+term.m_h] + '}'
+            up_label += r'\red{' + unlinked_indices[b:b+term.m_o] + '}'
 
         # record the change in the offset
         offset_dict['summation_upper'] += term.m_h
@@ -2888,8 +2904,11 @@ def _creates_fbar_prefactor(omega, h):
     return bool(omega.n_h >= 1 and h.m_o >= 1)
 
 
-def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False, print_prefactors=True):
-    """Return the latex commands to write the provided terms."""
+def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False, print_prefactors=True, color=False):
+    """Return the latex commands to write the provided terms.
+
+    the `color` argument in this case wraps all disconnected terms in a `\colorbox{yellow}` if True
+    """
 
     return_list = []  # store output here
 
@@ -2964,9 +2983,14 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
     if unlinked_condense:
         log.warning("This has not been tested for Hamiltonians of rank >= 3")
 
-        # remove the common factor from each term
-        common_latex = _build_t_term_latex(common_unlinked_factor)
-        return_list = [term.replace(common_latex, '') for term in return_list]
+        if not color:
+            # remove the common factor from each term
+            common_latex = _build_t_term_latex(common_unlinked_factor)
+            return_list = [term.replace(common_latex, '') for term in return_list]
+        # adding colour
+        else:
+            common_latex = _build_t_term_latex(common_unlinked_factor)
+            return_list = [r'\disconnected{' + term.replace(common_latex, '') + r'}' for term in return_list]
 
         # print(return_list)
 

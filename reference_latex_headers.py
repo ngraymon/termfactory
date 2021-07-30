@@ -21,6 +21,11 @@ w_equations_latex_header = r"""
 \usepackage{physics}
 \usepackage{simplewick}
 
+\usepackage{color}
+\NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
+\NewDocumentCommand{\red}{G{}}{{\color{red}#1}}
+\NewDocumentCommand{\blue}{G{}}{{\color{blue}#1}}
+
 \geometry{legalpaper, landscape, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
 
 \newcommand{\bh}{\textbf{h}}
@@ -57,6 +62,11 @@ full_vecc_latex_header = r"""
 \usepackage{amsmath}
 \usepackage{physics}
 \usepackage{simplewick}
+
+\usepackage{color}
+\NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
+\NewDocumentCommand{\red}{G{}}{{\color{red}#1}}
+\NewDocumentCommand{\blue}{G{}}{{\color{blue}#1}}
 
 \geometry{legalpaper, landscape, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
 
@@ -166,6 +176,11 @@ ground_state_vecc_latex_header = r"""
 \usepackage{amsmath}
 \usepackage{physics}
 \usepackage{simplewick}
+
+\usepackage{color}
+\NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
+\NewDocumentCommand{\red}{G{}}{{\color{red}#1}}
+\NewDocumentCommand{\blue}{G{}}{{\color{blue}#1}}
 
 \geometry{legalpaper, landscape, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
 
