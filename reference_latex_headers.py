@@ -25,6 +25,7 @@ w_equations_latex_header = r"""
 \NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
 \NewDocumentCommand{\red}{G{}}{{\color{red}#1}}
 \NewDocumentCommand{\blue}{G{}}{{\color{blue}#1}}
+\NewDocumentCommand{\magenta}{G{}}{{\color{magenta}#1}}
 
 \geometry{legalpaper, landscape, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
 
@@ -67,6 +68,7 @@ full_vecc_latex_header = r"""
 \NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
 \NewDocumentCommand{\red}{G{}}{{\color{red}#1}}
 \NewDocumentCommand{\blue}{G{}}{{\color{blue}#1}}
+\NewDocumentCommand{\magenta}{G{}}{{\color{magenta}#1}}
 
 \geometry{legalpaper, landscape, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
 
@@ -181,6 +183,7 @@ ground_state_vecc_latex_header = r"""
 \NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
 \NewDocumentCommand{\red}{G{}}{{\color{red}#1}}
 \NewDocumentCommand{\blue}{G{}}{{\color{blue}#1}}
+\NewDocumentCommand{\magenta}{G{}}{{\color{magenta}#1}}
 
 \geometry{legalpaper, landscape, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
 
@@ -295,6 +298,7 @@ full_z_t_symmetric_latex_header = r"""
 \NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
 \NewDocumentCommand{\red}{G{}}{{\color{red}#1}}
 \NewDocumentCommand{\blue}{G{}}{{\color{blue}#1}}
+\NewDocumentCommand{\magenta}{G{}}{{\color{magenta}#1}}
 
 % \geometry{portrait, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
 \geometry{legalpaper, landscape, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
@@ -486,6 +490,7 @@ ground_state_z_t_symmetric_latex_header = r"""
 \NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
 \NewDocumentCommand{\red}{G{}}{{\color{red}#1}}
 \NewDocumentCommand{\blue}{G{}}{{\color{blue}#1}}
+\NewDocumentCommand{\magenta}{G{}}{{\color{magenta}#1}}
 
 %\geometry{portrait, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
 \geometry{a4paper, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
