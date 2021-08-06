@@ -13,6 +13,7 @@ cov_test:
     - py vulture_wrapper.py
     - py -m coverage run generate_residual_equations.py
     - py -m coverage html
+    - py -m coverage report
   artifacts:
     paths:
         - .\vulture_output.txt
