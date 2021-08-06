@@ -1,3 +1,5 @@
 Research Project
 
-[![Build Status](https://git.uwaterloo.ca/ngraymon/exploratory-project/-/commits/master)](https://git.uwaterloo.ca/ngraymon/exploratory-project/-/commits/master/pipline.svg)
+[![Code Coverage](https://git.uwaterloo.ca//%{project_path}/badges/%{default_branch}/coverage.svg)](https://git.uwaterloo.ca//%{project_path})
+
+[![Code Coverage](https://git.uwaterloo.ca//%{project_path}/badges/%{default_branch}/pipeline.svg)](https://git.uwaterloo.ca//%{project_path})
