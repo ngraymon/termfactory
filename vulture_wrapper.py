@@ -6,6 +6,6 @@ if (__name__ == '__main__'):
     sys.stdout = open('vulture_output.txt', 'w')
 
     os.system(
-        "python -m vulture --min-confidence 100 generate_residual_equations.py"
+        "py -m vulture --min-confidence 100 generate_residual_equations.py"
     )
     sys.stdout.close()
