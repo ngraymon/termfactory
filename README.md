@@ -1,3 +1,3 @@
 Research Project
 
-[![Build Status](https://git.uwaterloo.ca/ngraymon/exploratory-project/-/pipelines/54602)](https://git.uwaterloo.ca/ngraymon/exploratory-project/-/pipelines/54602)
+[![Build Status](https://git.uwaterloo.ca/ngraymon/exploratory-project/-/commits/master)](https://git.uwaterloo.ca/ngraymon/exploratory-project/-/commits/master/pipline.svg)
