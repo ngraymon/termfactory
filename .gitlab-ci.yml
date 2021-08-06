@@ -11,15 +11,14 @@ cov_test:
     - py -m pip install -r requirements.txt
     - py -m pip install -r test_requirements.txt
     - py vulture_wrapper.py
-    # - py -m vulture --min-confidence 100 generate_residual_equations.py
-    # - vulture generate_residual_equations.py --min-confidence 100
-    #- py -m coverage run generate_residual_equations.py
-    #- py -m coverage html
-  # artifacts:
-  #   paths:
-  #       - .\htmlcov\*.css
-  #       - .\htmlcov\*.js
-  #       - .\htmlcov\generate_residual_equations_py.html
+    - py -m coverage run generate_residual_equations.py
+    - py -m coverage html
+  artifacts:
+    paths:
+        - .\vulture_output.txt
+        - .\htmlcov\*.css
+        - .\htmlcov\*.js
+        - .\htmlcov\generate_residual_equations_py.html
 
     # reports:
     #   cobertura:
