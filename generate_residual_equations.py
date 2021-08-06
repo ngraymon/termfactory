@@ -6966,7 +6966,7 @@ def _filter_out_valid_z_terms(LHS, H, Z_left, Z_right, term_list, total_list):
 
 
 # --------------- assigning of upper/lower latex indices ------------------------- #
-def _build_left_z_term(z_left, h):
+def _build_left_z_term(z_left, h, color=True):
     """ Builds latex code for labeling a `connected_z_left_operator_namedtuple`.
 
     The `condense_offset` is an optional argument which is needed when creating latex code
@@ -6982,12 +6982,20 @@ def _build_left_z_term(z_left, h):
         # contract with h
         upper_indices += z_summation_indices[0:z_left.m_h]
 
-        # contract with right z
-        offset = z_left.m_h
-        upper_indices += r'\blue{' + z_summation_indices[offset:offset + z_left.m_r] + '}'
+        if not color:
+            # contract with right z
+            offset = z_left.m_h
+            upper_indices += z_summation_indices[offset:offset + z_left.m_r]
 
-        # pair with left hand side (LHS)
-        upper_indices += r'\red{' + z_unlinked_indices[0:z_left.m_lhs] + '}'
+            # pair with left hand side (LHS)
+            upper_indices += z_unlinked_indices[0:z_left.m_lhs]
+        else:
+            # contract with right z
+            offset = z_left.m_h
+            upper_indices += r'\blue{' + z_summation_indices[offset:offset + z_left.m_r] + '}'
+
+            # pair with left hand side (LHS)
+            upper_indices += r'\red{' + z_unlinked_indices[0:z_left.m_lhs] + '}'
 
     # now do the lower indices
     if z_left.n > 0:
@@ -6995,18 +7003,27 @@ def _build_left_z_term(z_left, h):
         offset = z_left.m_h + z_left.m_r
         lower_indices += z_summation_indices[offset:offset + z_left.n_h]
 
-        # contract with right z
-        offset += z_left.n_h
-        lower_indices += r'\blue{' + z_summation_indices[offset:offset + z_left.n_r] + '}'
+        if not color:
+            # contract with right z
+            offset += z_left.n_h
+            lower_indices += z_summation_indices[offset:offset + z_left.n_r]
 
-        # pair with left hand side (LHS)
-        lhs_offset = z_left.m_lhs
-        lower_indices += r'\red{' + z_unlinked_indices[lhs_offset:lhs_offset + z_left.n_lhs] + '}'
+            # pair with left hand side (LHS)
+            lhs_offset = z_left.m_lhs
+            lower_indices += z_unlinked_indices[lhs_offset:lhs_offset + z_left.n_lhs]
+        else:
+            # contract with right z
+            offset += z_left.n_h
+            lower_indices += r'\blue{' + z_summation_indices[offset:offset + z_left.n_r] + '}'
+
+            # pair with left hand side (LHS)
+            lhs_offset = z_left.m_lhs
+            lower_indices += r'\red{' + z_unlinked_indices[lhs_offset:lhs_offset + z_left.n_lhs] + '}'
 
     return f"{bold_z_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
 
 
-def _build_hz_term_latex_labels(h, offset_dict):
+def _build_hz_term_latex_labels(h, offset_dict, color=True):
     """ Builds latex code for labeling a `connected_h_operator_namedtuple`."""
 
     if h.rank == 0:
@@ -7017,11 +7034,11 @@ def _build_hz_term_latex_labels(h, offset_dict):
     # subscript indices
     if h.n > 0:
         # contract with left z
-        lower_indices += z_summation_indices[0:h.n_l]
+        lower_indices += r'\blue{' + z_summation_indices[0:h.n_l] + '}'
 
         # contract with right z
         s = offset_dict['summation_index']
-        lower_indices += z_summation_indices[s:s + h.n_r]
+        lower_indices += r'\blue{' + z_summation_indices[s:s + h.n_r] + '}'
         offset_dict['summation_index'] += h.n_r
 
         # pair with left hand side (LHS)
@@ -7033,11 +7050,11 @@ def _build_hz_term_latex_labels(h, offset_dict):
     if h.m > 0:
         # contract with left z
         a = offset_dict['left_upper']
-        upper_indices += z_summation_indices[a:a + h.m_l]
+        upper_indices += r'\blue{' + z_summation_indices[a:a + h.m_l] + '}'
 
         # contract with right z
         s = offset_dict['summation_index']
-        upper_indices += z_summation_indices[s:s + h.m_r]
+        upper_indices += r'\blue{' + z_summation_indices[s:s + h.m_r] + '}'
         offset_dict['summation_index'] += h.m_r
 
         # pair with left hand side (LHS)
@@ -7048,7 +7065,7 @@ def _build_hz_term_latex_labels(h, offset_dict):
     return f"{bold_h_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
 
 
-def _build_right_z_term(h, z_right, offset_dict):
+def _build_right_z_term(h, z_right, offset_dict, color=True):
     """ Builds latex code for labeling a `connected_z_right_operator_namedtuple`.
 
     The `condense_offset` is an optional argument which is needed when creating latex code
@@ -7064,11 +7081,11 @@ def _build_right_z_term(h, z_right, offset_dict):
     if z_right.n > 0:
         # contract with left z
         a = offset_dict['left_lower']
-        lower_indices += r'\blue{' + z_summation_indices[a:a + z_right.n_l] + '}'
+        lower_indices += r'\magenta{' + z_summation_indices[a:a + z_right.n_l] + '}'
 
         # contract with h
         b = offset_dict['h_lower']
-        lower_indices += z_summation_indices[b:b + z_right.n_h]
+        lower_indices += r'\blue{' + z_summation_indices[b:b + z_right.n_h] + '}'
 
         # pair with left hand side (LHS)
         u = offset_dict['unlinked_index']
@@ -7079,11 +7096,11 @@ def _build_right_z_term(h, z_right, offset_dict):
     if z_right.m > 0:
         # contract with left z
         a = offset_dict['left_upper']
-        upper_indices += r'\blue{' + z_summation_indices[a:a + z_right.m_l] + '}'
+        upper_indices += r'\magenta{' + z_summation_indices[a:a + z_right.m_l] + '}'
 
         # contract with h
         b = offset_dict['h_upper']
-        upper_indices += z_summation_indices[b:b + z_right.m_h]
+        upper_indices += r'\blue{' + z_summation_indices[b:b + z_right.m_h] + '}'
 
         # pair with left hand side (LHS)
         u = offset_dict['unlinked_index']
@@ -7759,8 +7776,12 @@ def generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_t
     maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
-    H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
+    raw_H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
     Z = generate_z_operator(maximum_cc_rank, only_ground_state)
+
+    # aug 4th songhao says this is because of theory
+    pruned_list = [term for term in raw_H.operator_list if (term.rank < 3) or (term.m == 0)]
+    H = hamiltonian_namedtuple(raw_H.maximum_rank, pruned_list)
 
     latex_code = ""  # store result in here
 
@@ -8225,17 +8246,17 @@ if (__name__ == '__main__'):
     import log_conf
     from log_conf import log
 
-    maximum_h_rank = 2
+    maximum_h_rank = 4
     maximum_cc_rank = 4
     s_taylor_max_order = 4  # this doesn't matter for the Z ansatz
-    omega_max_order = 3
+    omega_max_order = 4
 
     truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
     generate_latex_files(
         truncations,
-        only_ground_state=False,
+        only_ground_state=True,
         remove_f_terms=False,
         thermal=False,
-        file="full cc"
+        file='z_t ansatz'
     )
     # generate_python_files(truncations, only_ground_state=True, thermal=False)
