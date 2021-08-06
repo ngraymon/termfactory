@@ -13,11 +13,11 @@ cov_test:
     - py -m vulture generate_residual_equations.py
     #- py -m coverage run generate_residual_equations.py
     #- py -m coverage html
-  artifacts:
-    paths:
-        - .\htmlcov\*.css
-        - .\htmlcov\*.js
-        - .\htmlcov\generate_residual_equations_py.html
+  # artifacts:
+  #   paths:
+  #       - .\htmlcov\*.css
+  #       - .\htmlcov\*.js
+  #       - .\htmlcov\generate_residual_equations_py.html
 
     # reports:
     #   cobertura:
