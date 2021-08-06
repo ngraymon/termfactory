@@ -9,8 +9,9 @@ if (__name__ == '__main__'):
     # print("testing stdout")
 
     ret = subprocess.run(
-        ['py', '-m', 'vulture', '--min-confidence 100', 'generate_residual_equations.py'],
+        ['py', '-m', 'vulture', '--min-confidence', '100', 'generate_residual_equations.py'],
         capture_output=True,
+        text=True,
     )
 
     with open('vulture_output.txt', 'w') as fp:
