@@ -10,8 +10,9 @@ cov_test:
   script:
     - py -m pip install -r requirements.txt
     - py -m pip install -r test_requirements.txt
-    - py -m coverage run generate_residual_equations.py
-    - py -m coverage html
+    - py -m vulture generate_residual_equations.py
+    #- py -m coverage run generate_residual_equations.py
+    #- py -m coverage html
   artifacts:
     paths:
         - .\htmlcov\*.css
