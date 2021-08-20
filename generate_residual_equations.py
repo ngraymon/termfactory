@@ -6670,7 +6670,7 @@ def _generate_all_o_h_z_connection_permutations(LHS, h, valid_z_permutations, fo
     """ Generate all possible permutations of matching with LHS and h for t_terms """
 
     annotated_permutations = []  # store output here
-    log_conf.setLevelDebug()
+    log_conf.setLevelDebug(log)
     print('-'*30 + 'here' + '-'*30)
     i = 0
     for perm in valid_z_permutations:
@@ -6759,7 +6759,7 @@ def _generate_all_o_h_z_connection_permutations(LHS, h, valid_z_permutations, fo
         # if i == 3:
         #     sys.exit(0)
         i += 1
-    log_conf.setLevelInfo()
+    log_conf.setLevelInfo(log)
 
     return annotated_permutations
 
@@ -8244,7 +8244,13 @@ def generate_python_files(truncations, only_ground_state=True, thermal=False):
 
 if (__name__ == '__main__'):
     import log_conf
-    from log_conf import log
+
+    # for now make a second argument the filepath for logging output
+    if len(sys.argv) > 1:
+        logging_output_filename = str(sys.argv[1])
+        log = log_conf.get_filebased_logger(logging_output_filename)
+    else:
+        log = log_conf.get_stdout_logger()
 
     maximum_h_rank = 4
     maximum_cc_rank = 4
