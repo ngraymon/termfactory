@@ -3,6 +3,7 @@ stages:
 
 default:
   image: python:3.9
+  tags: [lightsail]
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
@@ -20,18 +21,17 @@ cache:
     - venv/
 
 before_script:
+  - echo "$CI_PROJECT_DIR"
   - python -V               # Print out python version for debugging
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
-  - python -m pip install -r requirements.txt
-  - python -m pip install -r test_requirements.txt
-
 
 cov_test:
   stage: code_analysis
-  tags: [lightsail]
   script:
+    - python -m pip install -r requirements.txt
+    - python -m pip install -r test_requirements.txt
     - python vulture_wrapper.py
     - python -m coverage run generate_residual_equations.py
     - python -m coverage html
