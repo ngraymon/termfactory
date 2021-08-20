@@ -1,14 +1,14 @@
 stages:
     - code_analysis
 
+# Change pip's cache directory to be inside the project directory since we can
+# only cache local items.
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
 default:
   image: python:3.9
   tags: [lightsail]
-
-  # Change pip's cache directory to be inside the project directory since we can
-  # only cache local items.
-  variables:
-    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
   # Pip's cache doesn't store the python packages
   # https://pip.pypa.io/en/stable/reference/pip_install/#caching
