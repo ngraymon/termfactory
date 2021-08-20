@@ -6,7 +6,7 @@ default:
 
 cov_test:
   stage: code_analysis
-  tags: [ci]
+  tags: [lightsail]
   script:
     - py -m pip install -r requirements.txt
     - py -m pip install -r test_requirements.txt
