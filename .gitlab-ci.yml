@@ -10,7 +10,7 @@ cov_test:
   script:
     - python -m pip install -r requirements.txt
     - python -m pip install -r test_requirements.txt
-    - python -m vulture generate_residual_equations.py
+    - python vulture_wrapper.py
     - python -m coverage run generate_residual_equations.py
     - python -m coverage html
     - python -m coverage report
