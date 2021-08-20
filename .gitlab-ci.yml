@@ -17,13 +17,13 @@ cov_test:
     - ls
   artifacts:
     paths:
-        - .\vulture_output.txt
-        - .\htmlcov\*.css
-        - .\htmlcov\*.js
-        - .\htmlcov\generate_residual_equations_py.html
+        - ./vulture_output.txt
+        - ./htmlcov/*.css
+        - ./htmlcov/*.js
+        - ./htmlcov/generate_residual_equations_py.html
 
     # reports:
     #   cobertura:
-    #     - .\htmlcov\*.css
-    #     - .\htmlcov\*.js
-    #     - .\htmlcov\generate_residual_equations_py.html, .\htmlcov\*.css
+    #     - ./htmlcov/*.css
+    #     - ./htmlcov/*.js
+    #     - ./htmlcov/generate_residual_equations_py.html, ./htmlcov/*.css
