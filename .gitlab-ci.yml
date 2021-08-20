@@ -5,7 +5,7 @@ default:
   image: python:3.8
 
 cov_test:
-  stage: code_analysis
+  stage: code_analysis_other
   tags: [lightsail]
   script:
     - py -m pip install -r requirements.txt
