@@ -5,10 +5,10 @@ default:
   image: python:3.8
 
 cov_test:
-  stage: code_analysis_other
+  stage: code_analysis
   tags: [lightsail]
   script:
-    - py -m pip install -r requirements.txt
+    - python -m pip install -r requirements.txt
     - py -m pip install -r test_requirements.txt
     - py vulture_wrapper.py
     - py -m coverage run generate_residual_equations.py
