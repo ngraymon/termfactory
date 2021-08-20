@@ -4,16 +4,25 @@ stages:
 default:
   image: python:3.8
 
-cov_test:
-  stage: code_analysis
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+
+pip_install:
+  stage: .pre
   tags: [lightsail]
   script:
     - python -m pip install -r requirements.txt
     - python -m pip install -r test_requirements.txt
+
+cov_test:
+  stage: code_analysis
+  tags: [lightsail]
+  script:
     - python vulture_wrapper.py
     - python -m coverage run generate_residual_equations.py
     - python -m coverage html
     - python -m coverage report
+
   artifacts:
     paths:
         - ./vulture_output.txt
