@@ -11,7 +11,7 @@ cov_test:
     - py -m pip install -r requirements.txt
     - py -m pip install -r test_requirements.txt
     - py vulture_wrapper.py
-    - py -m coverage run --include generate_residual_equations.py --source generate_residual_equations.py
+    - py -m coverage run --include=generate_residual_equations.py,reference_latex_headers.py generate_residual_equations.py
     - py -m coverage html
     - py -m coverage report
   artifacts:
