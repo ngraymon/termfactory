@@ -5,14 +5,11 @@ default:
   image: python:3.9
   tags: [lightsail]
 
-# Change pip's cache directory to be inside the project directory since we can
-# only cache local items.
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  # Change pip's cache directory to be inside the project directory since we can
+  # only cache local items.
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
-
-
-cov_test:
   # Pip's cache doesn't store the python packages
   # https://pip.pypa.io/en/stable/reference/pip_install/#caching
   #
@@ -24,16 +21,16 @@ cov_test:
       - .cache/pip
       - venv/
 
-  before_script:
-    - python -V               # Print out python version for debugging
-    - pip install virtualenv
-    - virtualenv venv
-    - source venv/bin/activate
-    - python -m pip install -r requirements.txt
-    - python -m pip install -r test_requirements.txt
+before_script:
+  - python -V               # Print out python version for debugging
+  - pip install virtualenv
+  - virtualenv venv
+  - source venv/bin/activate
+  - python -m pip install -r requirements.txt
+  - python -m pip install -r test_requirements.txt
 
+cov_test:
   stage: code_analysis
-
   script:
     - python vulture_wrapper.py
     - python -m coverage run generate_residual_equations.py
