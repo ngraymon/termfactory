@@ -21,13 +21,13 @@ default:
       - .cache/pip
       - venv/
 
-before_script:
-  - python -V               # Print out python version for debugging
-  - pip install virtualenv
-  - virtualenv venv
-  - source venv/bin/activate
-  - python -m pip install -r requirements.txt
-  - python -m pip install -r test_requirements.txt
+  before_script:
+    - python -V               # Print out python version for debugging
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - python -m pip install -r requirements.txt
+    - python -m pip install -r test_requirements.txt
 
 cov_test:
   stage: code_analysis
