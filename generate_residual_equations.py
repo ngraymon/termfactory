@@ -6536,7 +6536,6 @@ if (__name__ == '__main__'):
     # dump_all_stdout_to_devnull()   # calling this removes all prints / logs from stdout
     # log.setLevel('CRITICAL')
 
-
     maximum_h_rank = 4
     maximum_cc_rank = 4
     s_taylor_max_order = 4  # this doesn't matter for the Z ansatz
@@ -6551,3 +6550,4 @@ if (__name__ == '__main__'):
         file='z_t ansatz'
     )
     # generate_python_files(truncations, only_ground_state=True, thermal=False)
+    print("We reached the end of main")

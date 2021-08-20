@@ -37,12 +37,13 @@ cov_test:
   stage: code_analysis
   script:
     - python vulture_wrapper.py
-    - python -m coverage run generate_residual_equations.py
+    - python -m coverage run generate_residual_equations.py logging_output.txt
     - python -m coverage html
     - python -m coverage report
 
   artifacts:
     paths:
+        - ./logging_output.txt
         - ./vulture_output.txt
         - ./htmlcov/*.css
         - ./htmlcov/*.js
