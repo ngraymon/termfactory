@@ -8,8 +8,8 @@ cov_test:
   stage: code_analysis
   tags: [ci]
   script:
-    - py -m pip install -r requirements.txt
-    - py -m pip install -r test_requirements.txt
+    - py -m pip install -r requirements.txt --no-cache-dir --compile
+    - py -m pip install -r test_requirements.txt --no-cache-dir --compile
     - py vulture_wrapper.py
     - py -m coverage run generate_residual_equations.py
     - py -m coverage html
