@@ -1,6 +1,7 @@
 # system imports
-import math
+import os
 import sys
+import math
 import itertools as it
 from collections import namedtuple
 
@@ -14,6 +15,42 @@ import reference_latex_headers as headers
 # define
 tab_length = 4
 tab = " "*tab_length
+
+# use these if we define \newcommand to map textbf to \bt and so forth
+if True:
+    bold_t_latex = "\\bt"
+    bold_h_latex = "\\bh"
+    bold_w_latex = "\\bw"
+    bold_c_latex = "\\bc"
+    bold_d_latex = "\\bd"
+    bold_z_latex = "\\bz"
+    bold_s_latex = "\\bs"
+    bold_G_latex = "\\bG"
+else:
+    bold_t_latex = "\\textbf{t}"
+    bold_h_latex = "\\textbf{h}"
+    bold_w_latex = "\\textbf{w}"
+    bold_c_latex = "\\textbf{c}"
+    bold_d_latex = "\\textbf{d}"
+    bold_z_latex = "\\textbf{z}"
+    bold_s_latex = "\\textbf{s}"
+    bold_G_latex = "\\textbf{G}"
+
+
+def dump_all_stdout_to_devnull():
+    sys.stdout = open(os.devnull, 'w')
+
+
+def old_print_wrapper(*args, **kwargs):
+    """ wrapper for turning all old prints on/off"""
+
+    # delayed default argument
+    if 'suppress_print' not in kwargs:
+        kwargs['suppress_print'] = True
+
+    if not kwargs['suppress_print']:
+        print(*args, **kwargs)
+
 
 # our Hamiltonian is
 # H = (h_0 + omega + h^1 + h_1) + h^1_1 + h^2 + h_2
@@ -99,17 +136,17 @@ def print_residual_data(R_lists, term_lists, print_equations=False, print_tuples
     """Print to stdout in a easily readable format the residual terms and term tuples."""
     if print_equations:
         for i, R in enumerate(R_lists):
-            print(f"{'':-<30} R_{i} {'':-<30}")
+            old_print_wrapper(f"{'':-<30} R_{i} {'':-<30}")
             for a in R:
-                print(f"{tab} - {a}")
-        print(f"{'':-<65}\n{'':-<65}\n")
+                old_print_wrapper(f"{tab} - {a}")
+        old_print_wrapper(f"{'':-<65}\n{'':-<65}\n")
 
     if print_tuples:
         for i, terms in enumerate(term_lists):
-            print(f"{'':-<30} R_{i} {'':-<30}")
+            old_print_wrapper(f"{'':-<30} R_{i} {'':-<30}")
             for term in terms:
-                print(f"{tab} - {term}")
-        print(f"{'':-<65}\n{'':-<65}\n")
+                old_print_wrapper(f"{tab} - {term}")
+        old_print_wrapper(f"{'':-<65}\n{'':-<65}\n")
 
     return
 
@@ -197,11 +234,11 @@ def extract_numerator_denominator_from_string(s):
     if "*" in s:  # we are only trying to get the first fraction
         s = s.split('*')[0]
 
-    # print(s)
+    # old_print_wrapper(s)
     numer, denom = s.replace('(', '').replace(')', '').split(sep="/")
     denom = denom.split(sep='!')[0]
 
-    # print(f"numer: {numer} denom: {denom}")
+    # old_print_wrapper(f"numer: {numer} denom: {denom}")
     return [int(numer), int(denom)]
 
 
@@ -441,768 +478,6 @@ def generate_residual_data(H, max_order):
     term_lists = [tup[1] for tup in lst]
     return R_lists, term_lists
 
-# ----------------------------------------------------------------------------------------------- #
-# -------------------------------  GENERATING RESIDUAL LATEX  ----------------------------------- #
-# ----------------------------------------------------------------------------------------------- #
-
-
-# use these if we define \newcommand to map textbf to \bt and so forth
-if True:
-    bold_t_latex = "\\bt"
-    bold_h_latex = "\\bh"
-    bold_w_latex = "\\bw"
-    bold_c_latex = "\\bc"
-    bold_d_latex = "\\bd"
-    bold_z_latex = "\\bz"
-    bold_s_latex = "\\bs"
-    bold_G_latex = "\\bG"
-else:
-    bold_t_latex = "\\textbf{t}"
-    bold_h_latex = "\\textbf{h}"
-    bold_w_latex = "\\textbf{w}"
-    bold_c_latex = "\\textbf{c}"
-    bold_d_latex = "\\textbf{d}"
-    bold_z_latex = "\\textbf{z}"
-    bold_s_latex = "\\textbf{s}"
-    bold_G_latex = "\\textbf{G}"
-
-
-# ----------------- generating VECI residual latex -------------------- #
-def _generate_veci_explicit_latex_term(term_list, h_list, w_string, order):
-    """Generate the latex for the residual equations including all the indices and factors."""
-
-    for h in h_list:
-        h_string = bold_h_latex
-        h_string += construct_upper_h_label(h, order)
-        h_string += construct_lower_h_label(h, order)
-
-        # no W operator
-        if (h.m == order and h.n == 0) or h.m > order:
-            w_string = ""
-
-        # 1 W operator
-        else:
-            w_string = bold_t_latex + construct_upper_w_label(h, order)
-
-        prefactor = construct_prefactor(h,  order, True)
-        if prefactor != "":
-            numerator, denominator = prefactor[1:-1].split('/')
-            prefactor = f"\\left(\\dfrac{{{numerator}}}{{{denominator}}}\\right)"
-
-        # save the string representation of the term
-        # print(prefactor + h_string + w_string)
-        term_list.append(prefactor + h_string + w_string)
-    return
-
-
-def _generate_veci_condensed_latex_term(term_list, h_list, w_string):
-    """Append a string representation of a summation term for a residual to `term_list`."""
-
-    if len(h_list) == 1:
-        h_string = h_list[0].name.replace('h', bold_h_latex)
-    else:
-        bold_h_list = [h.name.replace('h', bold_h_latex) for h in h_list]
-        h_string = f"({' + '.join(bold_h_list)})"
-
-    # save the string representation of the term
-    term_list.append(h_string + w_string)
-    return
-
-
-def _generate_veci_latex_form(hamiltonian, order, max_order, explicit=False):
-    """Generate the VECI latex for the residual equations.
-    Default is to generate the condensed form, but if `explicit` flag is `True` then
-    explicit form with all i and k terms and prefactors is returned.
-    """
-    w_range = list(range(0, order + hamiltonian.maximum_rank + 1))
-
-    # generate a list of H terms of equal or lower order than the residual
-    operators = []
-    for h in hamiltonian.operator_list:
-        if h.m <= order:
-            operators.append(h)
-
-    # generate each term we need to sum over
-    term_list = []
-    for n in w_range:
-
-        # create the w string
-        w_string = f"{bold_t_latex}^{{{n}}}" if n != 0 else ""
-        h_list = []
-
-        # collect h terms that map to w^n
-        for i, h in enumerate(operators):
-            if abs(h.m - h.n - order) == n:
-                h_list.append(h)
-                operators.pop(i)
-
-        # if no terms we skip this W operator
-        if len(h_list) == 0:
-            continue
-
-        # append all term strings to `term_list`
-        if explicit:
-            _generate_veci_explicit_latex_term(term_list, h_list, w_string, order)
-            # _generate_mixedcc_explicit_latex_term(term_list, h_list, w_list, order, expand_order_n_w)
-        else:
-            _generate_veci_condensed_latex_term(term_list, h_list, w_string)
-            # _generate_mixedcc_condensed_latex_term(term_list, h_list, w_list)
-
-        # loop
-
-    # return the full string (with prefix and all term's wrapped in plus symbols)
-    if explicit:
-        i_terms = ", ".join([f"i_{n}" for n in range(1, order+1)]) if order != 0 else "0"
-        return_string = f"\\begin{{split}} \\textbf{{R}}_{{{i_terms}}} &=\n" + " +\n".join(term_list) + " \\end{split}"
-        return return_string
-    else:
-        return_string = f"\\textbf{{R}}_{{{order}}} &= " + " + ".join(term_list)
-        return return_string
-
-
-def _generate_veci_latex(hamiltonian, max_order):
-    """Generate all of the VECI latex equations.
-    We use `join` to insert two backward's slashes \\ BETWEEN each line
-    rather then adding them to end and having extra trailing slashes on the last line.
-    The user is expected to manually copy the relevant lines from the text file into a latex file
-    and generate the pdf themselves.
-    """
-
-    list_veci = [_generate_veci_latex_form(hamiltonian, order, max_order) for order in range(max_order+1)]
-    list_explicit_veci = [_generate_veci_latex_form(hamiltonian, order, max_order, explicit=True) for order in range(max_order+1)]
-
-    return_string = ""  # store it all in here
-    return_string += "VECI condensed latex\n"
-    return_string += ' \\\\\n%\n'.join(list_veci)
-    return_string += "\n"*4
-    return_string += "VECI explicit latex\n"
-    return_string += ' \\\\\n%\n'.join(list_explicit_veci)
-    return return_string
-
-
-# ----------------- generating VECI/CC residual latex -------------------- #
-def _construct_c_term(h, power, order):
-    """Creates the string for the "upper" labels of the tensor c.
-    c_n is defined as S * (1/n!) * (t^1)^n.
-    Returns `c^{str}` if there are upper labels
-    Otherwise returns an empty string
-    """
-    i_start = h.m+1
-    nof_k = h.n
-
-    upper_labels = []
-
-    for n in range(i_start, order+1):
-        upper_labels.append(f"i_{n}")
-
-    for n in range(1, nof_k+1):
-        upper_labels.append(f"k_{n}")
-
-    return f"{bold_c_latex}^{{{', '.join(upper_labels)}}}"
-
-
-def _construct_c_and_t_term(h, c_power, t_power, order):
-    """Creates the string for the "upper" labels of the c and t tensors.
-    c_n is defined as S * (1/n!) * (t^1)^n.
-    Returns `c^{str1}t^{str2}` if there are upper labels
-    Otherwise returns an empty string
-    """
-    nof_k = h.n
-
-    string = ""
-
-    return ""
-
-    for n in range(1, c_power - nof_k + 1):
-        string += f"{bold_c_latex}^{{i_{n}}}"
-
-    string += f"{bold_t_latex}^{{k_{n}}}"
-
-    return string
-
-
-def _extract_power(string):
-    """Return integer representation of the power that `string` is being raised to."""
-    return int(string.split('{')[1].strip('}')[0])
-
-
-def _extract_ct_powers(string):
-    """Return integer representation of the powers that the two terms in `string` are being raised to."""
-    n1 = int(string.split('{')[1].strip('}')[0])
-    n2 = int(string.split('{')[2].strip('}')[0])
-    return n1, n2
-
-
-def _generate_mixedcc_explicit_latex_term(term_list, h_list, w_list, order, expand_order_n_w=None):
-    """Generate the latex for the residual equations including all the indices and factors."""
-
-    for h in h_list:
-        h_string = bold_h_latex
-        h_string += construct_upper_h_label(h, order)
-        h_string += construct_lower_h_label(h, order)
-
-        prefactor = construct_prefactor(h,  order, True)
-        if prefactor != "":
-            numerator, denominator = prefactor[1:-1].split('/')
-            prefactor = f"\\left(\\frac{{{numerator}}}{{{denominator}}}\\right)"
-            # prefactor = f"\\frac{{{numerator}}}{{{denominator}}}"
-
-        # no W operator
-        if (h.m == order and h.n == 0) or h.m > order:
-            w_string = ""
-            term_list.append(prefactor + h_string + w_string)
-            continue
-
-        # 1 W operator
-        elif len(w_list) == 1 and bold_w_latex in w_list[0]:
-
-            power = _extract_power(w_list[0])
-
-            if expand_order_n_w is None or power < expand_order_n_w:
-                w_string = bold_w_latex + construct_upper_w_label(h, order)
-                term_list.append(prefactor + h_string + w_string)
-            else:
-                t_string = bold_t_latex + construct_upper_w_label(h, order)
-                term_list.append(prefactor + h_string + t_string)
-
-            continue
-
-        # many W operators
-        else:
-            w_string = ""
-            for w_op in w_list:
-
-                # these terms only appear because we are mixing in the VECC through the e^(t^1) operator
-                if bold_c_latex in w_op:
-                    # the term is c^x
-                    if bold_t_latex not in w_op:
-                        # add 1/n! to prefactor
-                        power = _extract_power(w_op)
-                        # we don't need to update prefactor if we keep the c term
-                        # updated_prefactor = f"\\left(\\dfrac{{{numerator}}}{{{denominator}*{power}!}}\\right)"
-                        term_list.append(prefactor + h_string + _construct_c_term(h, power, order))
-                        continue
-
-                    # the term is c^x * t^y
-                    else:
-                        # c_power, t_power = _extract_ct_powers(w_op)
-                        # term_list.append(prefactor + h_string + "\\left[" + w_op + "\\right]")
-
-                        term_list.append(h_string + "\\left[" + w_op + "\\right]")  # no prefactor for the moment
-
-                        # we will develop the expansion code here at a later date
-
-                        # # we have to modify the prefactor
-                        # if c_power > 1:
-                        #     # add 1/n! to prefactor
-                        #     updated_prefactor = f"\\left(\\dfrac{{{numerator}}}{{{denominator}*{c_power}!}}\\right)"
-                        #     term_list.append(
-                        #       updated_prefactor \
-                        #       + h_string \
-                        #       + _construct_c_and_t_term(h, c_power, t_power, order)
-                        #     )
-                        # # normal prefactor
-                        # else:
-                        #     term_list.append(
-                        #     prefactor \
-                        #     + h_string \
-                        #     + _construct_c_and_t_term(h, c_power, t_power, order)
-                        #     )
-
-                        continue
-
-                # this is the condensed linked-disconnected term contribution
-                elif bold_d_latex in w_op:
-                    d_string = bold_d_latex + construct_upper_w_label(h, order)
-                    term_list.append(prefactor + h_string + d_string)
-                    continue
-
-                # this is the VECI contribution (simple t amplitude t^y)
-                elif bold_t_latex in w_op and w_op.count(bold_t_latex) == 1:
-                    t_string = bold_t_latex + construct_upper_w_label(h, order)
-                    term_list.append(prefactor + h_string + t_string)
-                    continue
-                else:
-                    raise Exception()
-
-    return
-
-
-def _generate_mixedcc_condensed_latex_term(term_list, h_list, w_list):
-    """Append a string representation of a summation term for a residual to `term_list`."""
-
-    if len(h_list) == 1:
-        h_string = h_list[0].name.replace('h', bold_h_latex)
-    else:
-        bold_h_list = [h.name.replace('h', bold_h_latex) for h in h_list]
-        h_string = f"({' + '.join(bold_h_list)})"
-
-    if len(w_list) == 1:
-        w_string = w_list[0]
-    else:
-        w_string = f"({' + '.join(w_list)})"
-
-    # save the string representation of the term
-    term_list.append(h_string + w_string)
-    return
-
-
-def _generate_mixedcc_latex_form(
-    hamiltonian, order, max_order, expand_order_n_w=3,
-    condense_disconnected_terms=True, explicit=False
-):
-    """Generate the VECI/CC latex for the residual equations.
-    Default is to generate the condensed form, but if `explicit` flag is `True` then
-    explicit form with all i and k terms and prefactors is returned.
-    """
-    w_range = list(range(0, order + hamiltonian.maximum_rank + 1))
-
-    # generate a list of H terms of equal or lower order than the residual
-    operators = []
-    for h in hamiltonian.operator_list:
-        if h.m <= order:
-            operators.append(h)
-
-    term_list = []  # store all terms in here
-
-    # generate each term we need to sum over
-    for n in w_range:
-
-        h_list, w_list = [], []
-
-        # fill up the `w_list`
-        if expand_order_n_w is None or n < expand_order_n_w:
-            # create the plain w string
-            w_list.append(f"{bold_w_latex}^{{{n}}}" if n != 0 else "")
-
-        elif n >= expand_order_n_w:
-            # connected term
-            w_list.append(f"{bold_t_latex}^{{{n}}}")
-
-            # linked disconnected terms
-            if condense_disconnected_terms:
-                w_list.append(f"{bold_d_latex}^{{{n}}}")
-            else:
-                for partition in sorted(generate_linked_disconnected_partitions_of_n(n)):
-                    if max(partition) == 1:
-                        w_list.append(f"{bold_c_latex}^{{{len(partition)}}}")
-                    else:
-                        w_list.append(f"{bold_c_latex}^{{{len(partition)-1}}}" + f"{bold_t_latex}^{{{max(partition)}}}")
-
-        # collect h terms that map to the w^n operators in `w_list`
-        for i, h in enumerate(operators):
-            if abs(h.m - h.n - order) == n:
-                h_list.append(h)
-                operators.pop(i)
-
-        # if no terms we skip this W operator
-        if len(h_list) == 0:
-            continue
-
-        # append all term strings to `term_list`
-        if explicit:
-            _generate_mixedcc_explicit_latex_term(term_list, h_list, w_list, order, expand_order_n_w)
-        else:
-            _generate_mixedcc_condensed_latex_term(term_list, h_list, w_list)
-
-        # loop
-
-    # return the full string (with prefix and all term's wrapped in plus symbols)
-    if explicit:
-        i_terms = ", ".join([f"i_{n}" for n in range(1, order+1)]) if order != 0 else "0"
-        return_string = f"\\begin{{split}} \\textbf{{R}}_{{{i_terms}}} &=\n" + " +\n".join(term_list) + " \\end{split}"
-        return return_string
-    else:
-        return_string = f"\\textbf{{R}}_{{{order}}} &= " + " + ".join(term_list)
-        return return_string
-
-
-def _generate_mixedcc_wave_operator_2(hamiltonian, order, max_order):
-    """Generate the latex for the VECI/CC mixed wave operator w^{`order`}."""
-    return_string = ""
-
-    if order == 0:
-        return f"{bold_w_latex}^{{0}} &= \\textbf{{1}}"
-    elif order == 1:
-        return f"{bold_w_latex}^{{1}} &= {bold_t_latex}^{{1}}"
-    else:
-        c_list, d_list = [], []
-
-        c_list.append(f"{bold_c_latex}^{{{order}}}")
-        for i in range(2, order):
-            c_list.append(f"{bold_c_latex}^{{{order-i}}}" + f"{bold_t_latex}^{{{i}}}")
-        c_list.append(f"{bold_t_latex}^{{{order}}}")
-
-        d_list.append(f"\\textbf{{d}}^{{{order}}}")
-        d_list.append(f"{bold_t_latex}^{{{order}}}")
-
-        return_string = f"{bold_w_latex}^{{{order}}} &= " + " + ".join(c_list) + " &&=" + " + ".join(d_list)
-    return return_string
-
-
-def _generate_mixedcc_wave_operator_1(hamiltonian, max_order):
-    """Generate the latex for all the VECI/CC mixed wave operators up to w^{`max_order`}."""
-    line1, line2 = "", ""
-    for order in range(max_order + 1):
-        if order == 0:
-            # line1 += f"{bold_w_latex}^{{0}} &= \\textbf{{1}} &"
-            # line2 += f"{bold_w_latex}^{{0}} &= \\textbf{{1}} &"
-            continue
-        elif order == 1:
-            # line1 += f"{bold_w_latex}^{{1}} &= {bold_t_latex}^{{1}} &"
-            # line2 += f"{bold_w_latex}^{{1}} &= {bold_t_latex}^{{1}} &"
-            continue
-        else:
-            # c_list is the uncompressed format
-            # d_list is the compressed format
-            c_list, d_list = [], []
-            c_list, d_list = [], []
-
-            # connected term
-            c_list.append(f"{bold_t_latex}^{{{order}}}")
-            d_list.append(f"{bold_t_latex}^{{{order}}}")
-
-            # linked disconnected terms
-            d_list.append(f"\\textbf{{d}}^{{{order}}}")
-            for partition in sorted(generate_linked_disconnected_partitions_of_n(order)):
-                if max(partition) == 1:
-                    c_list.append(f"{bold_c_latex}^{{{len(partition)}}}")
-                else:
-                    c_list.append(f"{bold_c_latex}^{{{len(partition)-1}}}" + f"{bold_t_latex}^{{{max(partition)}}}")
-
-            # record lines
-            line1 += f"{bold_w_latex}^{{{order}}} &= " + " + ".join(c_list) + " & "
-            line2 += f"{bold_w_latex}^{{{order}}} &= " + " + ".join(d_list) + " & "
-
-    return line1 + ' \\\\\n' + line2
-
-
-def _generate_mixedcc_latex(hamiltonian, max_order):
-    """Generate all of the VECI/CC mixed latex equations.
-    We use `join` to insert two backward's slashes \\ BETWEEN each line
-    rather then adding them to end and having extra trailing slashes on the last line.
-    The user is expected to manually copy the relevant lines from the text file into a latex file
-    and generate the pdf themselves.
-    """
-    expand_order_n_w = 3  # expand all terms of order n or higher
-    return_string = ""  # store it all in here
-
-    return_string += "VECI/CC wave operator latex\n"
-    if True:
-        return_string += _generate_mixedcc_wave_operator_1(hamiltonian, max_order)
-    else:
-        return_string += ' \\\\\n'.join([
-            _generate_mixedcc_wave_operator_2(hamiltonian, order, max_order)
-            for order in range(max_order+1)
-        ])
-
-    return_string += "\n"*4
-    return_string += "VECI/CC mixed condensed latex\n"
-    return_string += ' \\\\\n%\n'.join([
-        _generate_mixedcc_latex_form(hamiltonian, order, max_order, expand_order_n_w)
-        for order in range(max_order+1)
-    ])
-
-    return_string += "\n"*4
-    return_string += "VECI/CC mixed explicit latex\n"
-    return_string += ' \\\\\n%\n'.join([
-        _generate_mixedcc_latex_form(hamiltonian, order, max_order, expand_order_n_w, explicit=True)
-        for order in range(max_order+1)
-    ])
-    return return_string
-
-
-# ------------------- generating VECC residual latex --------------------- #
-
-def _generate_vecc_explicit_latex_term(term_list, h_list, w_list, order, expand_order_n_w=None):
-    """Generate the latex for the residual equations including all the indices and factors."""
-
-    for h in h_list:
-        h_string = bold_h_latex
-        h_string += construct_upper_h_label(h, order)
-        h_string += construct_lower_h_label(h, order)
-
-        prefactor = construct_prefactor(h,  order, True)
-        if prefactor != "":
-            numerator, denominator = prefactor[1:-1].split('/')
-            prefactor = f"\\left(\\frac{{{numerator}}}{{{denominator}}}\\right)"
-            # prefactor = f"\\frac{{{numerator}}}{{{denominator}}}"
-
-        # no W operator
-        if (h.m == order and h.n == 0) or h.m > order:
-            w_string = ""
-            term_list.append(prefactor + h_string + w_string)
-            continue
-
-        # 1 W operator
-        elif len(w_list) == 1 and bold_w_latex in w_list[0]:
-
-            power = _extract_power(w_list[0])
-
-            if expand_order_n_w is None or power < expand_order_n_w:
-                w_string = bold_w_latex + construct_upper_w_label(h, order)
-                term_list.append(prefactor + h_string + w_string)
-            else:
-                t_string = bold_t_latex + construct_upper_w_label(h, order)
-                term_list.append(prefactor + h_string + t_string)
-
-            continue
-
-        # many W operators
-        else:
-            w_string = ""
-            for w_op in w_list:
-
-                # these terms only appear because we are mixing in the VECC through the e^(t^1) operator
-                if bold_c_latex in w_op:
-                    # the term is c^x
-                    if bold_t_latex not in w_op:
-                        # add 1/n! to prefactor
-                        power = _extract_power(w_op)
-                        # we don't need to update prefactor if we keep the c term
-                        # updated_prefactor = f"\\left(\\dfrac{{{numerator}}}{{{denominator}*{power}!}}\\right)"
-                        term_list.append(prefactor + h_string + _construct_c_term(h, power, order))
-                        continue
-
-                    # the term is c^x * t^y
-                    else:
-                        # c_power, t_power = _extract_ct_powers(w_op)
-                        # term_list.append(prefactor + h_string + "\\left[" + w_op + "\\right]")
-
-                        term_list.append(h_string + "\\left[" + w_op + "\\right]")  # no prefactor for the moment
-
-                        # we will develop the expansion code here at a later date
-
-                        # # we have to modify the prefactor
-                        # if c_power > 1:
-                        #     # add 1/n! to prefactor
-                        #     updated_prefactor = f"\\left(\\dfrac{{{numerator}}}{{{denominator}*{c_power}!}}\\right)"
-                        #     term_list.append(updated_prefactor + h_string + _construct_c_and_t_term(h, c_power, t_power, order))
-                        # # normal prefactor
-                        # else:
-                        #     term_list.append(prefactor + h_string + _construct_c_and_t_term(h, c_power, t_power, order))
-
-                        continue
-
-                # this is the condensed linked-disconnected term contribution
-                elif bold_d_latex in w_op:
-                    d_string = bold_d_latex + construct_upper_w_label(h, order)
-                    term_list.append(prefactor + h_string + d_string)
-                    continue
-
-                # this is the VECI contribution (simple t amplitude t^y)
-                elif bold_t_latex in w_op and w_op.count(bold_t_latex) == 1:
-                    t_string = bold_t_latex + construct_upper_w_label(h, order)
-                    term_list.append(prefactor + h_string + t_string)
-                    continue
-
-                # this is the unlinked-disconnected term (the VECC contributions)
-                elif bold_t_latex in w_op and w_op.count(bold_t_latex) > 1:
-                    # string = bold_t_latex + construct_upper_w_label(h, order)
-                    # term_list.append(prefactor + h_string + string)
-                    term_list.append(h_string + "\\left[" + w_op + "\\right]")  # no prefactor for the moment
-                    continue
-
-                else:
-                    raise Exception()
-
-    return
-
-
-def _generate_vecc_condensed_latex_term(term_list, h_list, w_list):
-    """Append a string representation of a summation term for a residual to `term_list`."""
-
-    if len(h_list) == 1:
-        h_string = h_list[0].name.replace('h', bold_h_latex)
-    else:
-        bold_h_list = [h.name.replace('h', bold_h_latex) for h in h_list]
-        h_string = f"({' + '.join(bold_h_list)})"
-
-    if len(w_list) == 1:
-        w_string = w_list[0]
-    else:
-        w_string = f"({' + '.join(w_list)})"
-
-    # save the string representation of the term
-    term_list.append(h_string + w_string)
-    return
-
-
-def _generate_vecc_latex_form(
-    hamiltonian, order, max_order, expand_order_n_w=3,
-    condense_disconnected_terms=True, explicit=False
-):
-    """Generate the VECC latex for the residual equations.
-    Default is to generate the condensed form, but if `explicit` flag is `True` then
-    explicit form with all i and k terms and prefactors is returned.
-    """
-    w_range = list(range(0, order + hamiltonian.maximum_rank + 1))
-
-    # generate a list of H terms of equal or lower order than the residual
-    operators = []
-    for h in hamiltonian.operator_list:
-        if h.m <= order:
-            operators.append(h)
-
-    term_list = []  # store all terms in here
-
-    # generate each term we need to sum over
-    for n in w_range:
-
-        h_list, w_list = [], []
-
-        # fill up the `w_list`
-        if expand_order_n_w is None or n < expand_order_n_w:
-            # create the plain w string
-            w_list.append(f"{bold_w_latex}^{{{n}}}" if n != 0 else "")
-
-        elif n >= expand_order_n_w:
-
-            # connected term
-            w_list.append(f"{bold_t_latex}^{{{n}}}")
-
-            # linked disconnected terms
-            if condense_disconnected_terms:
-                w_list.append(f"{bold_d_latex}^{{{n}}}")
-            else:
-                for partition in sorted(generate_linked_disconnected_partitions_of_n(n)):
-                    if max(partition) == 1:
-                        w_list.append(f"{bold_c_latex}^{{{len(partition)}}}")
-                    else:
-                        w_list.append(f"{bold_c_latex}^{{{len(partition)-1}}}" + f"{bold_t_latex}^{{{max(partition)}}}")
-
-            # un-linked disconnected terms
-            for partition in sorted(generate_un_linked_disconnected_partitions_of_n(n)):
-                unlinked_disconnected_term = "".join([f"{bold_t_latex}^{{{term}}}" for term in partition])
-                w_list.append(unlinked_disconnected_term)
-
-        # collect h terms that map to the w^n operators in `w_list`
-        for i, h in enumerate(operators):
-            if abs(h.m - h.n - order) == n:
-                h_list.append(h)
-                operators.pop(i)
-
-        # if no terms we skip this W operator
-        if len(h_list) == 0:
-            continue
-
-        # append all term strings to `term_list`
-        if explicit:
-            _generate_vecc_explicit_latex_term(term_list, h_list, w_list, order, expand_order_n_w)
-        else:
-            _generate_vecc_condensed_latex_term(term_list, h_list, w_list)
-
-    # return the full string (with prefix and all term's wrapped in plus symbols)
-    if explicit:
-        i_terms = ", ".join([f"i_{n}" for n in range(1, order+1)]) if order != 0 else "0"
-        return_string = f"\\begin{{split}} \\textbf{{R}}_{{{i_terms}}} &=\n" + " +\n".join(term_list) + " \\end{split}"
-        return return_string
-    else:
-        # higher order terms are very long and will probably need to be split over many lines
-        if order >= 4:
-            return f"\\begin{{split}} \\textbf{{R}}_{{{order}}} &=\n" + " +\n".join(term_list) + " \\end{split}"
-        else:
-            return f"\\textbf{{R}}_{{{order}}} &= " + " + ".join(term_list)
-
-    return return_string
-
-
-def _generate_vecc_wave_operator(hamiltonian, max_order):
-    """Generate the latex for all the VECC wave operators up to w^{`max_order`}."""
-    line1, line2 = "", ""
-    for order in range(max_order + 1):
-        if order == 0:
-            # line1 += f"{bold_w_latex}^{{0}} &= \\textbf{{1}} &"
-            # line2 += f"{bold_w_latex}^{{0}} &= \\textbf{{1}} &"
-            continue
-        elif order == 1:
-            # line1 += f"{bold_w_latex}^{{1}} &= {bold_t_latex}^{{1}} &"
-            # line2 += f"{bold_w_latex}^{{1}} &= {bold_t_latex}^{{1}} &"
-            continue
-        else:
-            # c_list is the uncompressed format
-            # d_list is the compressed format
-            c_list, d_list = [], []
-
-            # connected term
-            c_list.append(f"{bold_t_latex}^{{{order}}}")
-            d_list.append(f"{bold_t_latex}^{{{order}}}")
-
-            # linked disconnected terms
-            d_list.append(f"\\textbf{{d}}^{{{order}}}")
-            for partition in sorted(generate_linked_disconnected_partitions_of_n(order)):
-                if max(partition) == 1:
-                    c_list.append(f"{bold_c_latex}^{{{len(partition)}}}")
-                else:
-                    c_list.append(f"{bold_c_latex}^{{{len(partition)-1}}}" + f"{bold_t_latex}^{{{max(partition)}}}")
-
-            # un-linked disconnected terms
-            for partition in sorted(generate_un_linked_disconnected_partitions_of_n(order)):
-                string = ""
-                for term in partition:
-                    string += f"{bold_t_latex}^{{{term}}}"
-                c_list.append(string)
-                d_list.append(string)
-
-            # record lines
-            line1 += f"{bold_w_latex}^{{{order}}} &= " + " + ".join(c_list) + " & "
-            line2 += f"{bold_w_latex}^{{{order}}} &= " + " + ".join(d_list) + " & "
-
-    return line1 + ' \\\\\n' + line2
-
-
-def _generate_vecc_latex(hamiltonian, max_order):
-    """Generate all of the VECI/CC mixed latex equations.
-    We use `join` to insert two backward's slashes \\ BETWEEN each line
-    rather then adding them to end and having extra trailing slashes on the last line.
-    The user is expected to manually copy the relevant lines from the text file into a latex file
-    and generate the pdf themselves.
-    """
-    expand_order_n_w = 3  # expand all terms of order n or higher
-    return_string = ""  # store it all in here
-
-    return_string += "VECC wave operator latex\n"
-    return_string += _generate_vecc_wave_operator(hamiltonian, max_order)
-
-    return_string += "\n"*4
-    return_string += "VECC condensed latex\n"
-    return_string += ' \\\\\n%\n'.join([
-        _generate_vecc_latex_form(hamiltonian, order, max_order, expand_order_n_w)
-        for order in range(max_order+1)
-    ])
-
-    return_string += "\n"*4
-    return_string += "VECC explicit latex\n"
-    return_string += ' \\\\\n%\n'.join([
-        _generate_vecc_latex_form(hamiltonian, order, max_order, expand_order_n_w, explicit=True)
-        for order in range(max_order+1)
-    ])
-
-    return return_string
-
-
-# ------------------------------------------------------------------------ #
-def generate_residual_equations_latex(max_residual_order, maximum_h_rank, path="./generated_latex.txt"):
-    """Generates and saves to a file the code to calculate the residual equations for the CC approach."""
-
-    # generate the Hamiltonian data
-    H = generate_hamiltonian_operator(maximum_h_rank)
-    for h in H.operator_list:
-        print(h)
-
-    # write latex code
-    string = _generate_veci_latex(H, max_residual_order)
-
-    # write latex code
-    string += "\n"*4 + _generate_mixedcc_latex(H, max_residual_order)
-
-    # write latex code
-    string += "\n"*4 + _generate_vecc_latex(H, max_residual_order)
-
-    # save data
-    with open(path, 'w') as fp:
-        fp.write(string)
-
 
 # ----------------------------------------------------------------------------------------------- #
 # --------------------------------  GENERATING FULL CC LATEX  ----------------------------------- #
@@ -1239,597 +514,6 @@ disconnected_namedtuple = namedtuple('disconnected', ['m_h', 'n_h', 'm_o', 'n_o'
 """ These are the indices used to label the h and t's in the generated latex"""
 summation_indices = 'ijklmno'
 unlinked_indices = 'zyxwuv'
-
-
-# ------------------- generating quadratic CC latex --------------------- #
-def _build_quadratic_term_latex_string(string, s_list):
-    """ x """
-    for s_term in s_list:
-
-        if len(s_term) == 0:
-            break
-
-        elif len(s_term) > 1:
-            string += _build_latex_t_string(s_term)
-
-    return string
-
-
-def _build_quadratic_t_term_latex_labels(term, offset_dict):
-    """Return a latex string representation of `s_term`.
-    Should use `_build_quadratic_t_term_latex` primarily to build single t-strings.
-
-    It is CRITICAL to remember that `h_m` represents pairing with h^m indices; therefore
-    the indices need to be represented as a subscript on the t_term since h^m pairs with t_n.
-    The `term.h_m` attribute is a count of how many t_n subscripts pair with h^m superscripts.
-
-    Also remember that in `_build_latex_h_string` the h term assigns indices to the superscripts
-    before the subscripts. So to match our indices we need to assign indices connected to h in the
-    opposite order.
-    """
-    up_label, down_label = "", ""
-
-    # subscript indices
-    if (term.h_m > 0) or (term.o_m > 0):
-        # here we have to add h.m to account for the fact that we need to start at the indices used in h_n
-        a, b = offset_dict['h_sub'], offset_dict['o_sub']
-        down_label = summation_indices[a:a+term.h_m] + unlinked_indices[b:b+term.o_m]
-
-        # print("up  ", up_label)
-
-        # record the change in the offset
-        offset_dict['h_sub'] += term.h_m
-        offset_dict['o_sub'] += term.o_m
-
-    # superscript indices
-    if (term.h_n > 0) or (term.o_n > 0):
-        a, b = offset_dict['h_super'], offset_dict['o_super']
-
-        up_label = summation_indices[a:a+term.h_n] + unlinked_indices[b:b+term.o_n]
-
-        # print("down", down_label)
-
-        # record the change in the offset
-        offset_dict['h_super'] += term.h_n
-        offset_dict['o_super'] += term.o_n
-
-    return f"^{{{up_label}}}_{{{down_label}}}"
-
-
-def _build_quadratic_t_term_latex(s, h=None):
-    """ Wrapper for `_build_quadratic_t_term_latex_labels`.
-
-    if the t term we are generating is paired with an h term
-    then we need to account for the sub/super script index ordering
-    by offsetting the upper labels of the t term by the number of upper
-    labels of the h term. However we don't offset the lower labels.
-    """
-    offset_dict = {'h_super': 0, 'h_sub': 0, 'o_super': 0, 'o_sub': 0}
-
-    if h is not None:
-        offset_dict['h_super'] = h.m
-
-    return bold_t_latex + _build_quadratic_t_term_latex_labels(s, offset_dict)
-
-
-def _build_quadratic_t_term_latex_group(s_list, h=None, debug=False):
-    """Return a list of strings for each term in `s_list`
-
-    We need to account for the `h.m` and `h.n` attributes.
-    We do that by passing the h term to `_build_quadratic_t_term_latex_labels`.
-    """
-
-    t_list = []
-
-    # count
-    offset_dict = {'h_super': 0, 'h_sub': 0, 'o_super': 0, 'o_sub': 0}
-
-    # print(offset_dict)
-
-    if h is not None:
-        offset_dict['h_super'] = h.m
-
-    if debug:
-        print(offset_dict)
-
-    for s in s_list:
-        t_labels = _build_quadratic_t_term_latex_labels(s, offset_dict)
-        if debug:
-            print(s, t_labels, offset_dict)
-        # print(offset_dict)
-        # print(t_labels, s_list)
-
-        if t_labels != "^{}_{}":
-            t_list.append(bold_t_latex + t_labels)
-
-    return t_list
-
-
-def _make_quadratic_latex(term_list, linked_condense=False, unlinked_condense=False):
-    """Return the latex commands to write the provided terms."""
-
-    return_list = []  # store output here
-
-    if unlinked_condense:
-
-        if term_list[0][0].name == "bb":
-            common_factor = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=2)
-
-        elif term_list[0][0].name == "dd":
-            common_factor = disconnected_namedtuple(h_m=0, h_n=0, o_m=2, o_n=0)
-
-        elif term_list[0][0].name == "db":
-            common_factor = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=1)
-
-        for term in term_list:
-            s_list = term[2]
-            assert common_factor in s_list
-            del s_list[s_list.index(common_factor)]
-
-    if linked_condense:
-        # print(f"A {term_list[0][0].name}")
-        ti_list, tj_list, ti_tj_list = [], [], []
-
-        if term_list[0][0].name == "bb":
-            ti = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=1)
-            tj = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=1)
-
-        elif term_list[0][0].name == "dd":
-            ti = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=0)
-            tj = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=0)
-
-        elif term_list[0][0].name == "db":
-            ti = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=1)
-            tj = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=0)
-
-        ti_latex_string, tj_latex_string = _build_quadratic_t_term_latex_group([ti, tj, ])
-
-        for term in term_list:
-            s_list = term[2]
-            # print(f"{s_list=}")
-            # print(f"{term_list=}")
-            assert (ti in s_list) or (tj in s_list)
-
-    for term in term_list:
-        # extract elements of list `term`
-        omega, h, s_list = term[0], term[1], term[2]
-
-        term_string = _build_latex_h_string(h)
-
-        # make sure all s_terms are valid objects
-        for s_term in s_list:
-            assert isinstance(s_term, (connected_namedtuple, disconnected_namedtuple)), (
-                    "The following term is not a connected_namedtuple"
-                    f" or a disconnected_namedtuple but a {type(s_term)}\n"
-                    f"{s_term}\n"
-                )
-
-        # print(omega, h, s_list)
-        # prepare the t-amplitude terms
-        t_list = _build_quadratic_t_term_latex_group(s_list, h)
-
-        # add the t-amplitude terms
-        term_string += ''.join(t_list)
-        # print(f"{term_string=}")
-
-        # add f prefactors
-        total_d_ops_from_t_terms = sum([s.h_n for s in s_list])
-        if (omega.m >= 1) and (h.n >= 1) and (h.n > total_d_ops_from_t_terms):
-            term_string = "f * " + term_string
-
-        # print(term_string)
-        # print('?', omega, h)
-        #
-        other_terms_list = []
-
-        if linked_condense:
-            # print("\nB\n")
-            if (tj_latex_string in term_string) and (ti_latex_string in term_string):
-                # print('both', tj_latex_string, ti_latex_string, term_string)
-                ti_tj_list.append(
-                    term_string.replace(ti_latex_string, '').replace(tj_latex_string, '')
-                )
-
-            elif tj_latex_string in term_string:
-                # print('tj', tj_latex_string, term_string)
-                tj_list.append(term_string.replace(tj_latex_string, ''))
-
-            elif ti_latex_string in term_string:
-                # print('ti', ti_latex_string, term_string)
-                ti_list.append(term_string.replace(ti_latex_string, ''))
-
-            else:
-                term = [omega, h, term_string]
-                print(f'Factors: {ti_latex_string}  {tj_latex_string}')
-                print('Mislabeled term', *term)
-                other_terms_list.append(term)
-                raise Exception("Shouldn't happen")
-
-        elif unlinked_condense:
-            return_list.append(term_string)
-        else:
-            return_list.append(term_string)
-
-    if unlinked_condense:
-        return f"({' + '.join(return_list)}){_build_quadratic_t_term_latex(common_factor)}"
-
-    elif linked_condense:
-
-        if (omega.m == 2) or (omega.n == 2):
-            # since the ti and tj lists will be identical except for swapping indices we use the same list
-            tj_list = [t.replace('y', 'z') for t in ti_list]
-
-        ti_common_string = f"({' + '.join(ti_list)}){ti_latex_string}" if len(ti_list) != 0 else r'%'
-        tj_common_string = f"({' + '.join(tj_list)}){tj_latex_string}" if len(tj_list) != 0 else r'%'
-        ti_tj_common_string = f"({' + '.join(ti_tj_list)}){ti_latex_string}{tj_latex_string}" if len(ti_tj_list) != 0 else r'%'
-
-        split_equation_spacing_string = r'    \\  &+  % split long equation'
-
-        return f"\n{split_equation_spacing_string}\n".join([ti_common_string, tj_common_string, ti_tj_common_string])
-
-    else:
-        return f"({' + '.join(return_list)})"
-
-
-def _seperate_quadratic_terms_by_connection(total_list):
-    """ x """
-    # sort the terms (semi is not used for linear)
-    fully, linked, unlinked = [], [], []
-
-    for term in total_list:
-
-        linked_flag = False
-
-        for s in term[2]:
-
-            if isinstance(s, connected_namedtuple):
-                continue
-
-            elif isinstance(s, disconnected_namedtuple):
-                if _is_unlinked(term[0], s):
-                    unlinked.append(term)
-                    break
-                else:
-                    linked_flag = True
-
-            else:
-                # we shouldn't end up here
-                print('??', s, term)
-                raise Exception("s_list contains something other than connected/disconnected namedtuple")
-
-        else:
-            if linked_flag:
-                linked.append(term)
-            else:
-                fully.append(term)
-
-    return fully, linked, unlinked
-
-
-def _write_quadratic_cc_latex_from_lists(fully, linked, unlinked):
-    """Return the latex commands to write the provided terms.
-    We use `join` to insert two backward's slashes \\ BETWEEN each line
-    rather then adding them to end and having extra trailing slashes on the last line.
-    The user is expected to manually copy the relevant lines from the text file into a latex file
-    and generate the pdf themselves.
-    """
-
-    str_fc = r'    \textit{no fully connected terms}'
-    str_ld = r'    \textit{no linked disconnected terms}'
-    str_ud = r'    \textit{no unlinked disconnected terms}'
-
-    return_string = "FULLY CONNECTED TERMS\n"
-    return_string += _make_quadratic_latex(fully) if fully != [] else str_fc
-    return_string += "\n"*2
-
-    return_string += "LINKED DISCONNECTED TERMS\n"
-    return_string += _make_quadratic_latex(linked, linked_condense=True) if linked != [] else str_ld
-    return_string += "\n"*2
-
-    return_string += "CONDENSED UNLINKED DISCONNECTED TERMS\n"
-    return_string += _make_quadratic_latex(unlinked, unlinked_condense=True) if unlinked != [] else str_ud
-
-    # remove all empty ^{}/_{} terms that are no longer needed
-    return return_string.replace("^{}", "").replace("_{}", "")
-
-
-# ------------------- generating cubic CC latex --------------------- #
-def _seperate_cubic_terms_by_connection(total_list):
-    """ x """
-    # sort the terms (semi is not used for linear)
-    fully, linked, unlinked = [], [], []
-
-    for term in total_list:
-        # print("AA", term)
-
-        linked_flag = False
-
-        for s in term[2]:
-
-            if isinstance(s, connected_namedtuple):
-                continue
-
-            elif isinstance(s, disconnected_namedtuple):
-                if _is_unlinked(term[0], s):
-                    unlinked.append(term)
-                    break
-                else:
-                    linked_flag = True
-
-            else:
-                # we shouldn't end up here
-                print('??', s, term)
-                raise Exception("s_list contains something other than connected/disconnected namedtuple")
-
-        else:
-            if linked_flag:
-                linked.append(term)
-            else:
-                fully.append(term)
-
-    return fully, linked, unlinked
-
-
-def _make_cubic_latex(term_list, linked_condense=False, unlinked_condense=False):
-    """Return the latex commands to write the provided terms."""
-
-    return_list = []  # store output here
-
-    # in case?
-    if term_list == []:
-        return ""
-
-    if unlinked_condense:
-        # raise Exception("This has not been tested yet, since we have only considered hamiltonians of rank 2 up till now")
-
-        if term_list[0][0].name == "bbb":
-            common_factor = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=3)
-
-        elif term_list[0][0].name == "ddd":
-            common_factor = disconnected_namedtuple(h_m=0, h_n=0, o_m=3, o_n=0)
-
-        elif term_list[0][0].name == "ddb":
-            common_factor = disconnected_namedtuple(h_m=0, h_n=0, o_m=2, o_n=1)
-
-        elif term_list[0][0].name == "dbb":
-            common_factor = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=2)
-
-        for term in term_list:
-            s_list = term[2]
-            assert common_factor in s_list
-            del s_list[s_list.index(common_factor)]
-
-    if linked_condense:
-        # print("\nA\n")
-        ti_list, tj_list, tk_list, ti_tj_list, ti_tk_list, tj_tk_list, ti_tj_tk_list = [], [], [], [], [], [], []
-
-        if term_list[0][0].name == "bbb":
-            ti = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=1)
-            tj = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=1)
-            tk = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=1)
-
-        elif term_list[0][0].name == "dbb":
-            ti = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=0)
-            tj = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=1)
-            tk = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=1)
-
-        elif term_list[0][0].name == "ddb":
-            ti = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=0)
-            tj = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=0)
-            tk = disconnected_namedtuple(h_m=0, h_n=0, o_m=0, o_n=1)
-
-        elif term_list[0][0].name == "ddd":
-            ti = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=0)
-            tj = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=0)
-            tk = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=0)
-
-        ti_latex, tj_latex, tk_latex = _build_quadratic_t_term_latex_group([ti, tj, tk])
-        # print('Z', ti_latex, tj_latex, tk_latex)
-
-        for term in term_list:
-            s_list = term[2]
-            # print(f"{s_list=}")
-            # print(f"{term_list=}")
-
-    for term in term_list:
-        # extract elements of list `term`
-        omega, h, s_list = term[0], term[1], term[2]
-
-        term_string = _build_latex_h_string(h)
-
-        # make sure all s_terms are valid objects
-        for s_term in s_list:
-            assert isinstance(s_term, (connected_namedtuple, disconnected_namedtuple)), (
-                    "The following term is not a connected_namedtuple"
-                    f" or a disconnected_namedtuple but a {type(s_term)}\n"
-                    f"{s_term}\n"
-                )
-
-        # print(omega, h, s_list)
-        # prepare the t-amplitude terms
-        t_list = _build_quadratic_t_term_latex_group(s_list, h)
-
-        # add the t-amplitude terms
-        term_string += ''.join(t_list)
-        # print(f"{term_string=}")
-
-        # add f prefactors
-        total_d_ops_from_t_terms = sum([s.h_n for s in s_list])
-        if omega.m >= 1 and h.n >= 1 and (h.n > total_d_ops_from_t_terms):
-            term_string = "f * " + term_string
-
-        # print(term_string)
-        # print('?', omega, h)
-        #
-        other_terms_list = []
-
-        if linked_condense:
-            # print("\nB\n")
-            if (tk_latex in term_string) and (tj_latex in term_string) and (ti_latex in term_string):
-                # print('all', tk_latex, tj_latex, ti_latex, term_string)
-                ti_tj_tk_list.append(
-                    term_string.replace(ti_latex, '').replace(tj_latex, '').replace(tk_latex, '')
-                )
-
-            elif (ti_latex in term_string) and (tj_latex in term_string):
-                ti_tj_list.append(term_string.replace(tj_latex, '').replace(ti_latex, ''))
-
-            elif (ti_latex in term_string) and (tk_latex in term_string):
-                ti_tk_list.append(term_string.replace(tk_latex, '').replace(ti_latex, ''))
-
-            elif (tj_latex in term_string) and (tk_latex in term_string):
-                tj_tk_list.append(term_string.replace(tk_latex, '').replace(tj_latex, ''))
-
-            elif ti_latex in term_string:
-                ti_list.append(term_string.replace(ti_latex, ''))
-
-            elif tj_latex in term_string:
-                tj_list.append(term_string.replace(tj_latex, ''))
-
-            elif tk_latex in term_string:
-                tk_list.append(term_string.replace(tk_latex, ''))
-
-            # for cubic these are all the hard to condense terms
-            else:
-                term = [omega, h, term_string]
-                # print(f'Factors: {ti_latex}  {tj_latex} {tk_latex}')
-                # print('Mislabeled term', *term)
-                other_terms_list.append(term_string)
-
-        elif unlinked_condense:
-            return_list.append(term_string)
-        else:
-            return_list.append(term_string)
-
-    if unlinked_condense:
-        # raise Exception(
-        # "This has not been tested yet, since we have only considered hamiltonians of rank 2 up till now"
-        # )
-        return f"({' + '.join(return_list)}){_build_quadratic_t_term_latex(common_factor)}"
-
-    elif linked_condense:
-        # print('X', ti_latex, tj_latex, tk_latex)
-
-        ti_common_string = f"({' + '.join(ti_list)}){ti_latex}" if len(ti_list) != 0 else r'%'
-        tj_common_string = f"({' + '.join(tj_list)}){tj_latex}" if len(tj_list) != 0 else r'%'
-        tk_common_string = f"({' + '.join(tk_list)}){tj_latex}" if len(tj_list) != 0 else r'%'
-
-        ti_tj_common_string = f"({' + '.join(ti_tj_list)}){ti_latex}{tj_latex}" if len(ti_tj_list) != 0 else r'%'
-        ti_tk_common_string = f"({' + '.join(ti_tk_list)}){ti_latex}{tk_latex}" if len(ti_tk_list) != 0 else r'%'
-        tj_tk_common_string = f"({' + '.join(tj_tk_list)}){tj_latex}{tk_latex}" if len(tj_tk_list) != 0 else r'%'
-
-        ti_tj_tk_common_string = f"({' + '.join(ti_tj_tk_list)}){ti_latex}{tj_latex}{tk_latex}" if len(ti_tj_tk_list) != 0 else r'%'
-
-        no_common_string = f"({' + '.join(other_terms_list)})" if len(other_terms_list) != 0 else r'%'
-
-        split_equation_spacing_string = r'    \\  &+  % split long equation'
-
-        terms = [
-            ti_common_string,
-            tj_common_string,
-            tk_common_string,
-            ti_tj_common_string,
-            ti_tk_common_string,
-            tj_tk_common_string,
-            ti_tj_tk_common_string,
-            no_common_string,
-        ]
-
-        terms = [a for a in terms if a != r'%']
-
-        return f"\n{split_equation_spacing_string}\n".join(terms)
-
-    else:
-        split_number = 7
-
-        if len(return_list) < split_number*2:
-            return f"({' + '.join(return_list)})"
-
-        else:
-            split_equation_spacing_string = r'    \\  &+  % split long equation'
-
-            return_string = ' + '.join(return_list[0:split_number])
-
-            for i in range(1, len(return_list) // split_number):
-                return_string += f"\n{split_equation_spacing_string}\n"
-                return_string += ' + '.join(return_list[i*split_number:(i+1)*split_number])
-
-            return f"(\n{return_string}\n)"
-
-
-def _write_cubic_cc_latex_from_lists(fully, linked, unlinked):
-    """Return the latex commands to write the provided terms.
-    We use `join` to insert two backward's slashes \\ BETWEEN each line
-    rather then adding them to end and having extra trailing slashes on the last line.
-    The user is expected to manually copy the relevant lines from the text file into a latex file
-    and generate the pdf themselves.
-    """
-
-    str_fc = r'    \textit{no fully connected terms}'
-    str_ld = r'    \textit{no linked disconnected terms}'
-    str_ud = r'    \textit{no unlinked disconnected terms}'
-
-    return_string = "FULLY CONNECTED TERMS\n"
-    return_string += _make_cubic_latex(fully) if fully != [] else str_fc
-    return_string += "\n"*2
-
-    return_string += "UNCONDENSED LINKED DISCONNECTED TERMS\n"
-    return_string += _make_cubic_latex(linked, linked_condense=False) if linked != [] else str_ld
-    return_string += "\n"*2
-
-    return_string += "CONDENSED LINKED DISCONNECTED TERMS\n"
-    return_string += _make_cubic_latex(linked, linked_condense=True) if linked != [] else str_ld
-    return_string += "\n"*2
-
-    return_string += "CONDENSED UNLINKED DISCONNECTED TERMS\n"
-    return_string += _make_cubic_latex(unlinked, unlinked_condense=True) if unlinked != [] else str_ud
-
-    # remove all empty ^{}/_{} terms that are no longer needed
-    return return_string.replace("^{}", "").replace("_{}", "")
-
-
-# ------------------------------------------------------------------------ #
-def _generate_valid_s_operators(omega, h, s_series_term):
-    """ Remove s operators whose b/d operators don't add up (theoretically can't exist)
-
-    For example O^1 h_1 is allowed but not O^1 h_1 t^1 because we have 2 d operators but only 1 b operator.
-    Additionally we need to make sure the t operator is not joining with itself.
-
-    This means that the b/d operators from Omega and h need to be sufficient to balance the b/d's from the t's.
-
-        - For the S^1 expansion term: O^2, h_2, t^2_2 is allowed but not O^1, h_1, t^2_2 because the t^2_2 term
-    has to pair with itself. This is not allowed.
-
-        - For the S^2 expansion term: O^1_1, h_2, t^1_1, t^2 is allowed but not O_1, h_1, t^1_1, t^2 because the
-    t^1_1 term has to pair with the t^2, or in other words the only sources of d operators are t terms so
-    the b operator from t^1_1 has to pair with a d from a t term. This is not allowed.
-    """
-
-    valid_permutations = []
-
-    # generate all possible valid s operators
-    for s_group in s_series_term:
-
-        nof_creation_ops = omega.m + h.m + sum([s.m for s in s_group])
-        nof_annhiliation_ops = omega.n + h.n + sum([s.n for s in s_group])
-
-        # only terms which can pair off all operators are non zero
-        cannot_pair_off_b_d_operators = bool(nof_creation_ops != nof_annhiliation_ops)
-
-        # omega and H need to satisfy all b/d requirements of the t terms, t terms cannot join with each other!!
-        t_joining = _t_joining_with_t_terms(omega, h, s_group, nof_creation_ops)
-
-        # Omega must connect with at least 1 b/d operator from h or a t_term otherwise it 'joins' with itself
-        omega_joining = _omega_joining_with_itself(omega, h, s_group, nof_annhiliation_ops)
-
-        # do not record invalid s operators
-        if cannot_pair_off_b_d_operators or t_joining or omega_joining:
-            continue
-
-        # record a valid group of s operators
-        valid_permutations.append(s_group)
-
-    return valid_permutations
 
 
 # ---------------------- generating basic operators ------------------------- #
@@ -2262,9 +946,9 @@ def _remove_duplicate_s_permutations(s_list):
     for i, a in enumerate(s_list):
         a.sort()
         a = tuple(a)
-        # print(h_string, i, a)
+        # old_print_wrapper(h_string, i, a)
         if a not in duplicate_set:
-            # print("Added")
+            # old_print_wrapper("Added")
             duplicate_set.add(a)
         else:
             pass
@@ -2437,7 +1121,7 @@ def _seperate_s_terms_by_connection(total_list):
                 else:
                     # this shouldn't happen, but we check just in case
                     if omega.rank == 1:
-                        print('??', s, term)
+                        old_print_wrapper('??', s, term)
                         raise Exception("Linear terms should always be connected or disconnected")
 
                     """ We record that we found a linked disconnected term, but we don't stop here.
@@ -2449,7 +1133,7 @@ def _seperate_s_terms_by_connection(total_list):
 
             # this shouldn't happen, but we check just in case
             else:
-                print('??', s, term)
+                old_print_wrapper('??', s, term)
                 raise Exception("term contains something other than connected/disconnected namedtuple??\n")
 
         # if we never broke out of the loop this implies we didn't see any unlinked disconnected terms
@@ -2600,62 +1284,6 @@ def _validate_s_terms(s_list):
     return
 
 
-def _old_generate_linked_common_terms(omega):
-
-    # length = max(omega.m, omega.n)
-    # print(length)
-
-    # generate lower permutations
-    maximum = 2
-    base_list = list(range(0, maximum+1))
-    all_permutations = [sorted(x) for x in it.product(base_list, repeat=maximum)]
-    unique_permutations = set([tuple(x) for x in all_permutations])
-    valid_lower_perms = [list(it.dropwhile(lambda y: y == 0, x)) for x in unique_permutations if (maximum >= sum(x))]
-    valid_lower_perms[valid_lower_perms.index([])] = [0]
-
-    print(f"{base_list=}")
-    print(f"{all_permutations=}")
-    print(f"{unique_permutations=}")
-    print(f"{valid_lower_perms=}\n")
-
-    # generate upper permutations
-    maximum = omega.n
-    base_list = list(range(0, maximum+1))
-    all_permutations = [sorted(x) for x in it.product(base_list, repeat=maximum)]
-    unique_permutations = set([tuple(x) for x in all_permutations])
-    valid_upper_perms = [list(it.dropwhile(lambda y: y == 0, x)) for x in unique_permutations if (maximum >= sum(x))]
-    valid_upper_perms[valid_upper_perms.index([])] = [0]
-
-    print(f"{base_list=}")
-    print(f"{all_permutations=}")
-    print(f"{unique_permutations=}")
-    print(f"{valid_upper_perms=}\n")
-
-    d = list(it.product(valid_upper_perms, valid_lower_perms))
-    print(f"{d=}")
-    del d[d.index(([omega.n], [2]))]
-    del d[d.index(([0], [0]))]
-    print(f"{d=}")
-
-    return_list = []
-    for term in d:
-        temp_set = set()
-        print('y', term)
-        for m in term[0]:
-            for n in term[1]:
-                temp_set.add(disconnected_namedtuple(0, 0, m_o=m, n_o=n))
-
-        print('A', temp_set)
-        return_list.append(temp_set)
-    for x in return_list:
-        print('B', x)
-
-    # e = [x for x in d]
-
-    sys.exit(0)
-    return
-
-
 def _generate_linked_common_terms(term_list):
     """ x """
     aset = set()
@@ -2664,36 +1292,36 @@ def _generate_linked_common_terms(term_list):
 
     for x in term_list:
         o, t = x[0], x[2]
-        # print('x', o, t)
+        # old_print_wrapper('x', o, t)
 
         a = [t[i] for i in range(len(o.m_t)) if isinstance(t[i], disconnected_namedtuple)]
-        # print('a', a)
+        # old_print_wrapper('a', a)
         aset.add(tuple(a))
 
-    print(f'Final {omega}\n', aset,)
+    old_print_wrapper(f'Final {omega}\n', aset,)
     # for x in aset:
-    #     print([f't^{y.m_o}_{y.n_o}' for y in x])
+    #     old_print_wrapper([f't^{y.m_o}_{y.n_o}' for y in x])
 
     # make sure the list is in descending order
     z = sorted([list(x) for x in aset], key=len, reverse=True)
-    # print('\n\n')
+    # old_print_wrapper('\n\n')
 
     # for a in z:
-    #     print(len(a))
+    #     old_print_wrapper(len(a))
 
-    # print(z)
-    # print('\n\n')
+    # old_print_wrapper(z)
+    # old_print_wrapper('\n\n')
 
-    # print(z)
+    # old_print_wrapper(z)
     # sys.exit(0)
     return z
 
-    # print('\n\n')
+    # old_print_wrapper('\n\n')
     # for x in an:
-    #     print([f't^{y.m_o}_{y.n_o}' for y in x])
+    #     old_print_wrapper([f't^{y.m_o}_{y.n_o}' for y in x])
 
     # if omega.m > 0:
-    #     print(omega)
+    #     old_print_wrapper(omega)
     #     sys.exit(0)
 
     return
@@ -2740,7 +1368,7 @@ def prepare_condensed_terms(term_list, linked_condense=False, unlinked_condense=
             # we store the different common factors in here
             # linked_commonfactor_list = [None, ]*omega.rank
 
-            # print(omega)
+            # old_print_wrapper(omega)
             # for char in omega.name:
             #     if char == "b":
             #         term = disconnected_namedtuple(h_m=0, h_n=0, o_m=1, o_n=0)
@@ -2751,7 +1379,7 @@ def prepare_condensed_terms(term_list, linked_condense=False, unlinked_condense=
 
             # # # we store the latex representations of the common factors in here
             # # linked_commonfactor_latex_list = _build_t_term_latex_group(linked_commonfactor_list)
-            # print(omega, linked_commonfactor_list)
+            # old_print_wrapper(omega, linked_commonfactor_list)
 
             # generate common factor lists here
             # _generate_linked_common_terms(term_list)
@@ -2760,56 +1388,6 @@ def prepare_condensed_terms(term_list, linked_condense=False, unlinked_condense=
             linked_commonfactor_list = _generate_linked_common_terms(term_list)
 
         return linked_commonfactor_list
-
-
-def _sort_linked_term_strings(rank, term_string, linked_condense=False, unlinked_condense=False):
-    """ x """
-    return_list = []
-    other_terms_list = []
-
-    if linked_condense:
-        # print("\nB\n")
-        if (tk_latex in term_string) and (tj_latex in term_string) and (ti_latex in term_string):
-            # print('all', tk_latex, tj_latex, ti_latex, term_string)
-            ti_tj_tk_list.append(
-                term_string.replace(ti_latex, '').replace(tj_latex, '').replace(tk_latex, '')
-            )
-
-        elif (ti_latex in term_string) and (tj_latex in term_string):
-            ti_tj_list.append(term_string.replace(tj_latex, '').replace(ti_latex, ''))
-
-        elif (ti_latex in term_string) and (tk_latex in term_string):
-            ti_tk_list.append(term_string.replace(tk_latex, '').replace(ti_latex, ''))
-
-        elif (tj_latex in term_string) and (tk_latex in term_string):
-            tj_tk_list.append(term_string.replace(tk_latex, '').replace(tj_latex, ''))
-
-        elif ti_latex in term_string:
-            ti_list.append(term_string.replace(ti_latex, ''))
-
-        elif tj_latex in term_string:
-            tj_list.append(term_string.replace(tj_latex, ''))
-
-        elif tk_latex in term_string:
-            tk_list.append(term_string.replace(tk_latex, ''))
-
-        # for cubic these are all the hard to condense terms
-        else:
-            term = [omega, h, term_string]
-            # print(f'Factors: {ti_latex}  {tj_latex} {tk_latex}')
-            # print('Mislabeled term', *term)
-            other_terms_list.append(term_string)
-
-    elif unlinked_condense:
-        return_list.append(term_string)
-    else:
-        return_list.append(term_string)
-
-    return
-
-
-def _glue_linked_disconnected_latex_together(rank, term_list, common_linked_factor_list, linked_return_list):
-    return f"Glued rank {rank} linked_disconnected terms back together\n"
 
 
 def _build_latex_prefactor(h, t_list, simplify_flag=True):
@@ -2851,11 +1429,11 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
     )
 
     if debug_flag:
-        print('\n\n\nzzzzzzzzz')
-        print(connected_ts)
-        print(set(connected_ts))
-        print(len(set(connected_ts)))
-        print('zzzzzzzzz\n\n\n')
+        old_print_wrapper('\n\n\nzzzzzzzzz')
+        old_print_wrapper(connected_ts)
+        old_print_wrapper(set(connected_ts))
+        old_print_wrapper(len(set(connected_ts)))
+        old_print_wrapper('zzzzzzzzz\n\n\n')
 
     if x > 1:
         numerator_list.append(f'{x}!')
@@ -2925,7 +1503,7 @@ def _linked_condensed_adjust_t_terms(common_linked_factor_list, h, t_list):
             else:
                 new_t_list = t_list
 
-    print(new_t_list)
+    old_print_wrapper(new_t_list)
     return linked_list_index, new_t_list, t_offset_dict
 
 
@@ -2965,7 +1543,7 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
     for term in term_list:
         # extract elements of list `term`
         omega, h, t_list = term[0], term[1], term[2]
-        print(type(t_list), t_list)
+        old_print_wrapper(type(t_list), t_list)
 
         # make sure all s_terms are valid objects
         _validate_s_terms(t_list)
@@ -3032,7 +1610,7 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
             common_latex = _build_t_term_latex(common_unlinked_factor)
             return_list = [r'\disconnected{' + term.replace(common_latex, '') + r'}' for term in return_list]
 
-        # print(return_list)
+        # old_print_wrapper(return_list)
 
         return f"({' + '.join(return_list)}){common_latex}"
 
@@ -3044,22 +1622,22 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
 
         for i, factor in enumerate(common_linked_factor_list):
             common_latex = ''.join(_build_t_term_latex_group(factor))
-            # print('z', i, linked_return_list[i], '\n\n')
-            # print(factor)
+            # old_print_wrapper('z', i, linked_return_list[i], '\n\n')
+            # old_print_wrapper(factor)
 
             # if common_latex == '\\bt^{z}_{}\\bt^{y}_{}':
-            #     print('z', common_latex)
+            #     old_print_wrapper('z', common_latex)
             #     for term in linked_return_list[i]:
             #         if common_latex in term:
-            #             print('\n\n', term)
+            #             old_print_wrapper('\n\n', term)
             #             sys.exit(0)
 
             #             if "\\bh^{z}_{}\\bt^{}_{y}\\bt^{x}_{}" in term:
-            #                 print('\n\n', term)
+            #                 old_print_wrapper('\n\n', term)
             #                 sys.exit(0)
 
             # linked_return_list[i] = [term.replace(common_latex, '') for term in linked_return_list[i]]
-            # print('z', i, linked_return_list[i])
+            # old_print_wrapper('z', i, linked_return_list[i])
             return_strings.append(f"({' + '.join(linked_return_list[i])}){common_latex}")
 
         # join the lists with the equation splitting string
@@ -3172,7 +1750,7 @@ def _generate_cc_latex_equations(omega, H, s_taylor_expansion, remove_f_terms=Tr
     for count, s_series_term in enumerate(s_taylor_expansion):
 
         if False:  # debugging
-            print(s_series_term, "-"*100, "\n\n")
+            old_print_wrapper(s_series_term, "-"*100, "\n\n")
 
         _filter_out_valid_s_terms(omega, H, s_series_term, simple_repr_list, valid_term_list, remove_f_terms=remove_f_terms)
 
@@ -3475,7 +2053,7 @@ def _full_cc_einsum_vibrational_components(h, t_list):
     """ x """
     vibrational_components = []  # store return values here
 
-    print(h, t_list)
+    old_print_wrapper(h, t_list)
 
     h_labels = _build_h_term_python_labels(h)
 
@@ -3537,13 +2115,13 @@ def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
     for string in numerator_list:
         numerator_dict[string] += 1
 
-    print('nnnn', numerator_dict)
+    old_print_wrapper('nnnn', numerator_dict)
 
     denominator_dict = dict([(key, 0) for key in denominator_set])
     for string in denominator_list:
         denominator_dict[string] += 1
 
-    print('dddd', denominator_dict)
+    old_print_wrapper('dddd', denominator_dict)
 
     for key in intersection:
         a, b = numerator_dict[key], denominator_dict[key]
@@ -3566,8 +2144,8 @@ def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
         denominator_list.extend([k, ]*v)
 
     if len(numerator_list) > 2 or len(denominator_list) > 2:
-        print('xxxx', numerator_list)
-        print('yyyy', denominator_list)
+        old_print_wrapper('xxxx', numerator_list)
+        old_print_wrapper('yyyy', denominator_list)
 
     return numerator_list, denominator_list
 
@@ -3614,11 +2192,11 @@ def _build_full_cc_python_prefactor(h, t_list, simplify_flag=True):
     )
 
     if debug_flag:
-        print('\n\n\nzzzzzzzzz')
-        print(connected_ts)
-        print(set(connected_ts))
-        print(len(set(connected_ts)))
-        print('zzzzzzzzz\n\n\n')
+        old_print_wrapper('\n\n\nzzzzzzzzz')
+        old_print_wrapper(connected_ts)
+        old_print_wrapper(set(connected_ts))
+        old_print_wrapper(len(set(connected_ts)))
+        old_print_wrapper('zzzzzzzzz\n\n\n')
 
     if x > 1:
         numerator_list.append(f'factorial({x})')
@@ -3671,7 +2249,7 @@ def _multiple_perms_logic(term):
     #     # lst = []
     #     # for v in unique_dict.values():
     #     #     lst.append(*unique_permutations(range(v)))
-    #     print([unique_permutations(range(v)) for k, v in unique_dict.items()])
+    #     old_print_wrapper([unique_permutations(range(v)) for k, v in unique_dict.items()])
     #     return dict([(k, list(*unique_permutations(range(v)))) for k, v in unique_dict.items()]), unique_dict
 
     raise Exception("Shouldn't get here")
@@ -3706,7 +2284,7 @@ def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_
         permutations, unique_dict = _multiple_perms_logic(term)
         prefactor = _build_full_cc_python_prefactor(h, t_list)
         max_t_rank = max(_rank_of_t_term_namedtuple(t) for t in t_list)
-        print(omega, h, t_list, permutations, sep='\n')
+        old_print_wrapper(omega, h, t_list, permutations, sep='\n')
         # if omega.rank == 1 and permutations != None:
         #     sys.exit(0)
 
@@ -3732,8 +2310,8 @@ def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_
                 for perm in unique_permutations(remaining_indices):
                     string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
                     string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
-                    print(perm)
-                    print(remaining_indices)
+                    old_print_wrapper(perm)
+                    old_print_wrapper(remaining_indices)
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
                 if len(remaining_indices) >= 2:
@@ -3813,7 +2391,7 @@ def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_
                 for prefactor, string_list in hamiltonian_rank_list[i][j].items():
                     _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=2)
 
-    # print(return_list)
+    # old_print_wrapper(return_list)
     # sys.exit(0)
 
     return return_list
@@ -3874,7 +2452,7 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
             einsums = _generate_full_cc_einsums(omega_term, truncations)
         else:
             einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
-            # print(einsums)
+            # old_print_wrapper(einsums)
             # sys.exit(0)
 
         six_tab = "\n" + tab*6
@@ -4064,10 +2642,9 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # ------------------------------------------------------------------------------------------- #
     # header for optimized paths function
     string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", s4)
-    # write the code for generating optimized paths for
-    # string += _write_optimized_vemx_paths_function(max_order) + '\n'
-    # write the code for generating optimized paths for
-    # string += _write_optimized_vecc_paths_function(max_order) + '\n'
+    # write the code for generating optimized paths for full CC, this is probably different than the W code?!?
+    # maybe... im not sure?
+    # both VEMX and VECC
     # ------------------------------------------------------------------------------------------- #
     return string
 
@@ -4196,7 +2773,7 @@ def write_residual_function_string(residual_terms_list, order):
 
     # this line of python code labels the terms in the `w_args` tuple
     w_args_string = ", ".join([w_dict[n] for n in range(1, order+3)] + ["*unusedargs"])
-    # print(f"{w_args_string=}")
+    # old_print_wrapper(f"{w_args_string=}")
 
     # the function definition and initialization of the residual array
     string += (
@@ -4277,7 +2854,7 @@ def write_residual_function_string(residual_terms_list, order):
 def generate_python_code_for_residual_functions(term_lists, max_order):
     """Return a string containing the python code to generate residual functions up to (and including) `max_order`.
     `term_lists` is a list of lists, each of which contain tuples `(prefactor, h, w)`,
-    representing terms of that particular residual.
+        representing terms of that particular residual.
     Requires the following header: `"import numpy as np"`.
     """
     lst = [write_residual_function_string(term_lists[order], order=order) for order in range(max_order+1)]
@@ -4290,7 +2867,7 @@ def generate_residual_equations_file(max_residual_order, maximum_h_rank, path=".
     # generate the Hamiltonian data
     H = generate_hamiltonian_operator(maximum_h_rank)
     for h in H.operator_list:
-        print(h)
+        old_print_wrapper(h)
 
     # generate the residual data
     R_lists, term_lists = generate_residual_data(H.operator_list, max_order=max_residual_order)
@@ -4385,7 +2962,7 @@ def _generate_t_terms_dictionary(n):
         t_term = []  # stores t_i, t_ij, t_ijk....
         for n in num_term:
             t_str = "t_" + "".join(t_tag_list[:n])  # add i,j,k.....to "t_"
-            # print(n, t_str, t_terms[n-1].string)
+            # old_print_wrapper(n, t_str, t_terms[n-1].string)
             t_term.append(t_str)
         result[tuple(num_term)] = tuple(t_term)
     return result
@@ -4436,83 +3013,6 @@ def _write_permutations(perm_t, perm_char_list, W_array, prefactor):
         # add the whole line to the main string
         result += f"{tab}{W_array} += {prefactor} * ({sum_of_einsums})\n"
     return result
-
-
-def old_write_w_function_strings_show_all(order):
-    """ x """
-
-    string = ""  # we store the output in this string
-
-    num_tag = ["zero", "1st", "2nd", "3rd", "4th", "5th"]
-    word_tag = ["", "Singles", "Doubles", "Triples", "Quadruples", "Quintuples"]
-    einsum_surface_tags = "acdef"
-    tag_str = "ijklmn"
-    W_array = f"W_{order}"
-
-    string += (
-        f"\ndef calculate_order_{order}_w_operator(A, N, t_args):\n"
-        f'{tab}"""Calculate the {order} order W operator for use in the calculation of the residuals."""\n'
-        f"{tab}t_i, t_ij, t_ijk, t_ijkl = t_args\n"
-        f"{tab}# Creating the {num_tag[order]} order W operator\n"
-        f"{tab}{W_array} = np.zeros(({', '.join(['A','A',] + ['N',]*order)}), dtype=complex)\n"
-    )
-
-    # simple cases, zero and 1st order
-    if order == 0:
-        return f"{tab}return {W_array}\n"
-    if order == 1:
-        string += (
-            f"{tab}# Singles contribution\n"
-            f"{tab}{W_array} += t_i\n"
-            f"{tab}return {W_array}\n"
-        )
-        return string
-
-    t_term_dict = _generate_t_terms_dictionary(order)
-
-    previous_max = order
-    for num_group in t_term_dict.keys():
-
-        current_max = max(num_group)
-        w_prefactor = None  # generate_w_prefactors(list(num_group))
-
-        # Add comment
-        string += f"{tab}# {word_tag[current_max]} contribution\n"
-
-        if len(num_group) == 1:  # no permutation is needed for this term
-            string += f"{tab}{W_array} += {w_prefactor} * {t_term_dict[num_group][0]}\n"
-            continue
-
-        einsum_fixed = []  # contains [ac, cd, de.....]
-        # einsum_perm = []
-
-        t_perm = it.permutations(t_term_dict[num_group])  # permutations of t_i, t_ij, t_ijk....
-
-        # generate the list of tensor indices that we don't iterate over
-        i = 0
-        # previous_sum = 0
-        for n in num_group:
-            if i == len(num_group)-1:
-                einsum_fixed.append(einsum_surface_tags[i]+"b")
-                print(f"{einsum_fixed=}")
-            else:
-                einsum_fixed.append(einsum_surface_tags[i:i+2])
-                print(f"{einsum_fixed=}")
-            i += 1
-
-        if current_max < previous_max:  # check for the new type of contribution
-            previous_max = current_max
-        elif current_max == previous_max:  # if is the same type of contribution
-            string += "\n"
-
-        tag_perm = it.permutations(tag_str[:order])  # permutation of (i,j,k), (i,k,j).....
-        t_list = list(t_perm)
-        e_combination = _permutation_function(t_list, einsum_fixed, list(tag_perm), order)  # a list
-        string += _write_permutations(t_list, e_combination, W_array, w_prefactor)
-
-    string += f"{tab}return {W_array}\n"
-
-    return string
 
 
 # ------------------------------------------------------- #
@@ -4621,7 +3121,7 @@ def _w_einsum_list(partition, order):
         # the names of the arguments to the einsum call are stored in the list `t_terms`
         # and the objects are accessed using each integer in the tuple (2, 1) -> ("t_ij", "t_i")
         pterms = ", ".join([t_terms[n].string for n in tupl])
-        # print(f"np.einsum('{in_dims}->{out_dims}', {pterms})")
+        # old_print_wrapper(f"np.einsum('{in_dims}->{out_dims}', {pterms})")
         return_list.append(f"np.einsum('{in_dims}->{out_dims}', {pterms})")
 
     return return_list
@@ -4734,7 +3234,7 @@ def _generate_vemx_contributions(order, opt_einsum=False):
 
         # order 1 case is simple
         if len(partition) == 1:  # no permutation is needed for this term
-            print(partition, partition[0])
+            old_print_wrapper(partition, partition[0])
             # we have to space the line correct (how many tabs)
             if max(partition) >= 2:
                 return_string += f"{tab}{tab}{W_array} += {prefactor} * {t_terms[partition[0]].string}\n"
@@ -4857,7 +3357,7 @@ def _generate_vecc_contributions(order, opt_einsum=False):
 
         # order 1 case is simple
         if len(partition) == 1:  # no permutation is needed for this term
-            print(partition, partition[0])
+            old_print_wrapper(partition, partition[0])
             # we have to space the line correct (how many tabs)
             if max(partition) >= 2:
                 return_string += f"{tab}{tab}{W_array} += {prefactor} * {t_terms[partition[0]].string}\n"
@@ -5150,97 +3650,12 @@ def _contracted_expressions(partition_list, order):
             # determined by the integer elements of each tuple `tupl`
             # so (2, 1) -> ("(A, A, N, N)", "(A, A, N")
             pterms = ", ".join([_t_term_shape_string(n) for n in tupl])
-            # print(f"np.einsum('{in_dims}->{out_dims}', {pterms})")
+            # old_print_wrapper(f"np.einsum('{in_dims}->{out_dims}', {pterms})")
             temp_list.append(f"oe.contract_expression('{in_dims}->{out_dims}', {pterms}),\n")
 
         exp_list.append([max(partition), ] + temp_list)
 
     return exp_list
-
-
-def _old_write_optimized_vemx_paths_function(max_order):
-    """Return strings to write all the `oe.contract_expression` calls.
-    Unfortunately the code got a lot messier when I had to add in the truncation if statements.
-    It should get a rework/factorization at some point
-    """
-
-    raise Exception("shouldn't use this code")
-
-    assert max_order <= 6, "Only implemented up to 6th order"
-
-    string = (
-        f"\ndef compute_optimized_vemx_paths(A, N, truncation):\n"
-        f'{tab}"""Calculate optimized paths for the einsum calls up to `highest_order`."""\n'
-        "\n"
-        f"{tab}order_1_list, order_2_list, order_3_list = [], [], []\n"
-        f"{tab}order_4_list, order_5_list, order_6_list = [], [], []\n"
-        "\n"
-    )
-
-    optimized_orders = list(range(2, max_order+1))
-
-    for order in optimized_orders:
-        print("A")
-
-        # generate all the elements in the `order_{order}_list`
-        partitions = generate_un_linked_disconnected_partitions_of_n(order)
-        optimized_paths = _contracted_expressions(partitions, order)
-
-        # we always calculate Singles which requires (W^1, W^2, W^3)
-        if order == 2:
-            string += (
-                f"{tab}order_2_list.extend([\n"
-                f"{tab}{tab}{optimized_paths[0]}"
-                f"{tab}])\n\n"
-            )
-        elif order == 3:
-            string += (
-                f"{tab}if truncation.doubles:\n"
-                f"{tab}{tab}order_3_list.extend([\n"
-                f"{tab}{tab}{tab}{optimized_paths[0]}"
-                f"{tab}{tab}{tab}{optimized_paths[1]}"
-                f"{tab}{tab}])\n"
-                "\n"
-                f"{tab}order_3_list.extend([\n"
-                f"{tab}{tab}{optimized_paths[2]}"
-                f"{tab}])\n\n"
-            )
-
-        # for Doubles and higher truncations we want to add multiple`if` statement
-        # since we don't need to calculate these optimal paths
-        elif order >= 4:
-            # the string representation (doubles, triples, quadruples... etc)
-            contribution_name = lambda n: taylor_series_order_tag[n].lower()
-
-            string += f"{tab}if truncation.{contribution_name(order-2)}:\n"
-
-            string += (
-                f"{tab}{tab}if truncation.{contribution_name(order-1)}:\n"
-                f"{tab}{tab}{tab}order_{order}_list.extend([\n"
-                f"{tab}{tab}{tab}{tab}{optimized_paths[0]}"
-                f"{tab}{tab}{tab}{tab}{optimized_paths[1]}"
-                f"{tab}{tab}{tab}])\n\n"
-            )
-
-            # we need to a big long string, and also remove the first two opt paths
-            optimized_paths = "".join([
-                s.replace("oe", f"{tab}{tab}{tab}oe") for s in optimized_paths[2:]
-            ])
-
-            string += (
-                # f"{tab}if truncation.{contribution_name(order-2)}:\n"
-                f"{tab}{tab}order_{order}_list.extend([\n"
-                f"{optimized_paths}"
-                f"{tab}{tab}])\n"
-                f"{tab}else:\n"
-                f"""{tab}{tab}log.warning("Didn't calculate optimized paths of the W^{order} operator ")\n\n"""
-            )
-
-    return_list = ', '.join(['order_1_list', ] + [f'order_{order}_list' for order in optimized_orders])
-
-    string += f"{tab}return [{return_list}]\n"
-
-    return string
 
 
 def _write_optimized_vemx_paths_function(max_order):
@@ -5271,7 +3686,7 @@ def _write_optimized_vemx_paths_function(max_order):
         for optimized_paths in optimized_path_list:
             current_max_order = optimized_paths[0]
             del optimized_paths[0]
-            # print('ZZ', optimized_paths)
+            # old_print_wrapper('ZZ', optimized_paths)
 
             # the string representation (doubles, triples, quadruples... etc)
             contribution_name = lambda n: taylor_series_order_tag[n].lower()
@@ -5317,7 +3732,7 @@ def _write_optimized_vecc_paths_function(max_order):
     string += (
         f"{tab}if not truncation.doubles:\n"
         f"{tab}{tab}log.warning('Did not calculate optimized VECC paths of the dt amplitudes')\n"
-        f"{tab}{tab}return {[[], ]*len(6)}\n"
+        f"{tab}{tab}return {[[], ]*6}\n"
         "\n"
     )
 
@@ -5330,7 +3745,7 @@ def _write_optimized_vecc_paths_function(max_order):
         for optimized_paths in optimized_path_list:
             current_max_order = optimized_paths[0]
             del optimized_paths[0]
-            # print('ZZ', optimized_paths)
+            # old_print_wrapper('ZZ', optimized_paths)
 
             # the string representation (doubles, triples, quadruples... etc)
             contribution_name = lambda n: taylor_series_order_tag[n].lower()
@@ -5360,8 +3775,12 @@ def generate_w_operators_string(max_order, s1=75, s2=28):
     """Return a string containing the python code to generate w operators up to (and including) `max_order`.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
     """
+
     spacing_line = "# " + "-"*s1 + " #\n"
-    named_line = lambda name, width: "# " + "-"*width + f" {name} " + "-"*width + " #\n"
+
+    def named_line(name, width):
+        """ x """
+        return "# " + "-"*width + f" {name} " + "-"*width + " #\n"
 
     # ------------------------------------------------------------------------------------------- #
     # header for default functions (as opposed to the optimized functions)
@@ -5413,9 +3832,9 @@ def generate_w_operators_string(max_order, s1=75, s2=28):
     # header for optimized paths function
     string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", s2)
     # write the code for generating optimized paths for VECI/CC (mixed) contributions
-    # string += _write_optimized_vemx_paths_function(max_order) + '\n'
+    string += _write_optimized_vemx_paths_function(max_order) + '\n'
     # write the code for generating optimized paths for VECC contributions
-    # string += _write_optimized_vecc_paths_function(max_order) + '\n'
+    string += _write_optimized_vecc_paths_function(max_order) + '\n'
     # ------------------------------------------------------------------------------------------- #
     return string
 
@@ -5473,7 +3892,7 @@ def _generate_disconnected_einsum_operands_list(dt_index, tupl):
     """
     term_list = []
     for t_index, num in enumerate(tupl):
-        # print(f"{dt_index=} {t_index=} {num=} {tupl=}")
+        # old_print_wrapper(f"{dt_index=} {t_index=} {num=} {tupl=}")
         if dt_index == t_index:
             term_list.append(dt_terms[num].string)
         else:
@@ -5969,6 +4388,7 @@ def generate_dt_amplitude_string(max_order, s1=75, s2=28):
     """Return a string containing the python code to generate dt up to (and including) `max_order`.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
     """
+
     spacing_line = "# " + "-"*s1 + " #\n"
 
     def named_line(name, width):
@@ -6199,7 +4619,7 @@ def _generate_t_symmetric_latex_equations(omega, H, s_taylor_expansion, remove_f
     for count, s_series_term in enumerate(s_taylor_expansion):
 
         if False:  # debugging
-            print(s_series_term, "-"*100, "\n\n")
+            old_print_wrapper(s_series_term, "-"*100, "\n\n")
 
         _filter_out_valid_s_terms(omega, H, s_series_term, simple_repr_list, valid_term_list, remove_f_terms=remove_f_terms)
 
@@ -6337,7 +4757,7 @@ def _make_z_symmetric_latex(rank, term_list, linked_condense=False, unlinked_con
     for term in term_list:
         # extract elements of list `term`
         LHS, h, t_list = term[0], term[1], term[2]
-        print(type(t_list), t_list)
+        old_print_wrapper(type(t_list), t_list)
 
         # make sure all s_terms are valid objects
         _validate_s_terms(t_list)
@@ -6399,7 +4819,7 @@ def _make_z_symmetric_latex(rank, term_list, linked_condense=False, unlinked_con
         common_latex = _build_t_term_latex(common_unlinked_factor)
         return_list = [term.replace(common_latex, '') for term in return_list]
 
-        # print(return_list)
+        # old_print_wrapper(return_list)
 
         return f"({' + '.join(return_list)}){common_latex}"
 
@@ -6411,22 +4831,22 @@ def _make_z_symmetric_latex(rank, term_list, linked_condense=False, unlinked_con
 
         for i, factor in enumerate(common_linked_factor_list):
             common_latex = ''.join(_build_t_term_latex_group(factor))
-            # print('z', i, linked_return_list[i], '\n\n')
-            # print(factor)
+            # old_print_wrapper('z', i, linked_return_list[i], '\n\n')
+            # old_print_wrapper(factor)
 
             # if common_latex == '\\bt^{z}_{}\\bt^{y}_{}':
-            #     print('z', common_latex)
+            #     old_print_wrapper('z', common_latex)
             #     for term in linked_return_list[i]:
             #         if common_latex in term:
-            #             print('\n\n', term)
+            #             old_print_wrapper('\n\n', term)
             #             sys.exit(0)
 
             #             if "\\bh^{z}_{}\\bt^{}_{y}\\bt^{x}_{}" in term:
-            #                 print('\n\n', term)
+            #                 old_print_wrapper('\n\n', term)
             #                 sys.exit(0)
 
             # linked_return_list[i] = [term.replace(common_latex, '') for term in linked_return_list[i]]
-            # print('z', i, linked_return_list[i])
+            # old_print_wrapper('z', i, linked_return_list[i])
             return_strings.append(f"({' + '.join(linked_return_list[i])}){common_latex}")
 
         # join the lists with the equation splitting string
@@ -6586,8 +5006,8 @@ def _generate_all_valid_z_connection_permutations(LHS, h, z_term_list, log_inval
 
         n_perms.append(temp_list)
 
-    # print(f"{m_perms=}")
-    # print(f"{n_perms=}")
+    # old_print_wrapper(f"{m_perms=}")
+    # old_print_wrapper(f"{n_perms=}")
 
     # validate upper pairing
     combined_m_perms = list(it.product(*m_perms))
@@ -6595,11 +5015,11 @@ def _generate_all_valid_z_connection_permutations(LHS, h, z_term_list, log_inval
 
         total_lhs_m = sum([t[0] for t in m_perm])
         total_h_m = sum([t[1] for t in m_perm])
-        print(f"{m_perm=}")
-        print(LHS)
-        print(f"{total_lhs_m=}")
-        print(h)
-        print(f"{total_h_m=}")
+        old_print_wrapper(f"{m_perm=}")
+        old_print_wrapper(LHS)
+        old_print_wrapper(f"{total_lhs_m=}")
+        old_print_wrapper(h)
+        old_print_wrapper(f"{total_h_m=}")
 
         total_lhs_balanced = bool(total_lhs_m <= LHS.n)
         total_h_balanced = bool(total_h_m <= h.n)
@@ -6630,20 +5050,20 @@ def _generate_all_valid_z_connection_permutations(LHS, h, z_term_list, log_inval
 
         total_lhs_n = sum([t[0] for t in n_perm])
         total_h_n = sum([t[1] for t in n_perm])
-        print(f"{n_perm=}")
-        print(LHS)
-        print(f"{total_lhs_n=}")
-        print(h)
-        print(f"{total_h_n=}")
+        old_print_wrapper(f"{n_perm=}")
+        old_print_wrapper(LHS)
+        old_print_wrapper(f"{total_lhs_n=}")
+        old_print_wrapper(h)
+        old_print_wrapper(f"{total_h_n=}")
 
         total_lhs_balanced = bool(total_lhs_n <= LHS.m)
         total_h_balanced = bool(total_h_n <= h.m)
         left_z_balanced_right = bool(n_perm[0][2] <= right_z.m)
         right_z_balanced_left = bool(n_perm[1][2] <= left_z.m)
-        print(f"{total_lhs_balanced=}")
-        print(f"{total_h_balanced=}")
-        print(f"{left_z_balanced_right=}")
-        print(f"{right_z_balanced_left=}")
+        old_print_wrapper(f"{total_lhs_balanced=}")
+        old_print_wrapper(f"{total_h_balanced=}")
+        old_print_wrapper(f"{left_z_balanced_right=}")
+        old_print_wrapper(f"{right_z_balanced_left=}")
 
         if total_h_balanced and total_lhs_balanced and left_z_balanced_right and right_z_balanced_left:
             log.debug(f"Valid lower perm:   LHS={total_lhs_n}, zL={n_perm[0]}, h={total_h_n}, zR={n_perm[1]}")
@@ -6670,8 +5090,8 @@ def _generate_all_o_h_z_connection_permutations(LHS, h, valid_z_permutations, fo
     """ Generate all possible permutations of matching with LHS and h for t_terms """
 
     annotated_permutations = []  # store output here
-    log_conf.setLevelDebug()
-    print('-'*30 + 'here' + '-'*30)
+    log_conf.setLevelDebug(log)
+    old_print_wrapper('-'*30 + 'here' + '-'*30)
     i = 0
     for perm in valid_z_permutations:
         left_z, right_z = perm
@@ -6753,33 +5173,15 @@ def _generate_all_o_h_z_connection_permutations(LHS, h, valid_z_permutations, fo
                 log.debug(f"{z_list}")
                 annotated_permutations.append(z_list)
 
-        print(annotated_permutations)
-        print(f'{i=}\n\n')
+        old_print_wrapper(annotated_permutations)
+        old_print_wrapper(f'{i=}\n\n')
 
         # if i == 3:
         #     sys.exit(0)
         i += 1
-    log_conf.setLevelInfo()
+    log_conf.setLevelInfo(log)
 
     return annotated_permutations
-
-
-def _remove_duplicate_z_permutations(z_list):
-    """ x """
-    duplicate_set = set()
-
-    for i, a in enumerate(z_list):
-        a.sort()
-        a = tuple(a)
-        # print(h_string, i, a)
-        if a not in duplicate_set:
-            print("Added")
-            duplicate_set.add(a)
-        else:
-            pass
-            log.debug("Duplicate")
-
-    return duplicate_set
 
 
 def _generate_explicit_z_connections(LHS, h, unique_s_permutations):
@@ -6817,10 +5219,10 @@ def _generate_explicit_z_connections(LHS, h, unique_s_permutations):
             'n_r': z_right.m_lhs if z_right_exists else 0
         }
 
-        print(z_list)
-        print(z_left)
-        print(z_right)
-        print(f"{lhs_kwargs=}")
+        old_print_wrapper(z_list)
+        old_print_wrapper(z_left)
+        old_print_wrapper(z_right)
+        old_print_wrapper(f"{lhs_kwargs=}")
 
         h_kwargs = {
             'm_l': z_left.n_h if z_left_exists else 0,
@@ -6859,10 +5261,10 @@ def _generate_explicit_z_connections(LHS, h, unique_s_permutations):
 
         labeled_permutations.append([new_LHS, new_h, z_list])
         for p in labeled_permutations:
-            print('\n\np')
+            old_print_wrapper('\n\np')
             for x in p:
-                print(x)
-            print('\n\n')
+                old_print_wrapper(x)
+            old_print_wrapper('\n\n')
         # sys.exit(0)
 
     return labeled_permutations
@@ -6908,13 +5310,13 @@ def _filter_out_valid_z_terms(LHS, H, Z_left, Z_right, term_list, total_list):
     if zhz_debug or False:  # debug prints
         # print all possible pairings
         for a in all_z_permutations:
-            print('Z PAIRING', a)
+            old_print_wrapper('Z PAIRING', a)
 
         # we may not need the unique permutations... unclear at this moment
         if zhz_debug or False:
             unique_z_permutation_list = sorted(list(set(all_z_permutations)))
             for a in unique_z_permutation_list:
-                print('Z TERM1', a)
+                old_print_wrapper('Z TERM1', a)
 
     # next we process the z operators inside z_term_list
     for h in H.operator_list:
@@ -6928,14 +5330,14 @@ def _filter_out_valid_z_terms(LHS, H, Z_left, Z_right, term_list, total_list):
 
         if zhz_debug or False:  # debug prints
             for a in valid_permutations:
-                print('VALID TERM', LHS, h, a)
+                old_print_wrapper('VALID TERM', LHS, h, a)
 
         # we need to generate all possible combinations of each z with the LHS and h operators and the other z
         s_connection_permutations = _generate_all_o_h_z_connection_permutations(LHS, h, valid_permutations)
 
         if zhz_debug or False:  # debug prints
             for s in s_connection_permutations:
-                print('CONNECTED TERMS', LHS, h, s)
+                old_print_wrapper('CONNECTED TERMS', LHS, h, s)
 
         # NOTE - at the moment I don't believe the Z term logic generates any permutations
         # (remove all duplicate permutations)
@@ -6944,13 +5346,13 @@ def _filter_out_valid_z_terms(LHS, H, Z_left, Z_right, term_list, total_list):
 
         if True:  # debug prints
             for s in unique_s_permutations:
-                print('UNIQUE TERMS', LHS, h, s)
+                old_print_wrapper('UNIQUE TERMS', LHS, h, s)
 
         # generate all the explicit connections
         # this also removes all invalid terms
         labeled_permutations = _generate_explicit_z_connections(LHS, h, unique_s_permutations)
 
-        print('labeled', labeled_permutations)
+        old_print_wrapper('labeled', labeled_permutations)
 
         # we record
         for term in labeled_permutations:
@@ -6959,7 +5361,7 @@ def _filter_out_valid_z_terms(LHS, H, Z_left, Z_right, term_list, total_list):
                 # if it is not an empty set
                 total_list.append(term)
             else:
-                print('exit?')
+                old_print_wrapper('exit?')
                 sys.exit(0)
 
     return
@@ -7150,11 +5552,11 @@ def _build_z_latex_prefactor(h, t_list, simplify_flag=True):
     )
 
     if False and debug_flag:
-        print('\n\n\nzzzzzzzzz')
-        print(connected_ts)
-        print(set(connected_ts))
-        print(len(set(connected_ts)))
-        print('zzzzzzzzz\n\n\n')
+        old_print_wrapper('\n\n\nzzzzzzzzz')
+        old_print_wrapper(connected_ts)
+        old_print_wrapper(set(connected_ts))
+        old_print_wrapper(len(set(connected_ts)))
+        old_print_wrapper('zzzzzzzzz\n\n\n')
 
     if x > 1:
         numerator_list.append(f'{x}!')
@@ -7179,20 +5581,6 @@ def _build_z_latex_prefactor(h, t_list, simplify_flag=True):
         return ''
     else:
         return f"\\frac{{{numerator}}}{{{denominator}}}"
-
-
-def _creates_f_prefactor_for_z(LHS, h):
-    """ Define this check as a function to allow for modification later.
-    For example if we change the definition of d and b operators or do the thermal theory later.
-    """
-    return bool(LHS.m_h >= 1 and h.n_lhs >= 1)
-
-
-def _creates_fbar_prefactor_for_z(LHS, h):
-    """ Define this check as a function to allow for modification later.
-    For example if we change the definition of d and b operators or do the thermal theory later.
-    """
-    return bool(LHS.n_h >= 1 and h.m_lhs >= 1)
 
 
 def _f_zL_h_contributions(z_left, h):
@@ -7335,7 +5723,7 @@ def _prepare_third_z_latex(term_list, split_width=7, remove_f_terms=False, print
     for term in term_list:
         term_string = ''
 
-        # print("TERM", term)
+        # old_print_wrapper("TERM", term)
         # extract elements of list `term`
         LHS, h, z_left, z_right = term[0], term[1], *term[2]
 
@@ -7416,7 +5804,7 @@ def _prepare_fourth_z_latex(term_list, split_width=7, remove_f_terms=False, prin
     for term in term_list:
         term_string = ''
 
-        # print("TERM", term)
+        # old_print_wrapper("TERM", term)
         # extract elements of list `term`
         LHS, h, z_left, z_right = term[0], term[1], *term[2]
 
@@ -7493,7 +5881,7 @@ def _prepare_fourth_z_latex(term_list, split_width=7, remove_f_terms=False, prin
     splitting_string = r'\\  &+  % split long equation'
     final_string = f"\n{tab}{splitting_string}\n".join(split_equation_list)
     # if LHS.n == 2:
-    #     print(len(return_list))
+    #     old_print_wrapper(len(return_list))
     #     sys.exit(0)
 
     # and we're done!
@@ -7661,112 +6049,6 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
     # remove all empty ^{}/_{} terms that are no longer needed
     return return_string.replace("^{}", "").replace("_{}", "")
     # return r'%'
-
-
-def _generate_z_symmetric_left_hand_side(LHS):
-    """ Generate the latex code for the LHS (left hand side) of the CC equation.
-    The order of the `LHS` operator determines all terms on the LHS.
-    """
-
-    LHS_order = LHS.m + LHS.n
-
-    if LHS_order == 0:
-        return r'''i\left(\dv{\bz_{0,\gamma}}{\tau}\right) = \hat{g}_{0,xb,\gamma}'''
-
-    # generate all possible tuples (m, n) representing t terms t^m_n
-    single_t_list = [[m, n] for m in range(0, LHS_order+1) for n in range(0, LHS_order+1) if ((n == m != 0) or (n != m))]
-
-    all_combinations_list = []
-
-    # generate all possible combinations of t^m_n
-    # such as t_1, t^2, t^1 * t^1, t^1 * t^2_3, ... etc
-    for length in range(1, LHS_order+1):
-        all_combinations_list.append(list(it.product(single_t_list, repeat=length)))
-
-    """ Next we filter out the combinations that don't match LHS.
-    Suppose LHS is o^2_1:
-        - it can match with  (t^1 * t^1 * t_1) or (t^2_1) and so forth
-        - it cant match with (t^1 * t^1 * t^1) or (t^1_1) and so forth
-    """
-    matched_set = set()
-    for list_of_t_terms in all_combinations_list:
-        for t_terms in list_of_t_terms:
-            upper_sum = sum([t[0] for t in t_terms])  # the sum over all m superscripts (t^m)
-            lower_sum = sum([t[1] for t in t_terms])  # the sum over all n superscripts (t_n)
-
-            # remember that a t_1 contracts with o^1
-            # so the `lower_sum` needs to be compared to o^n
-            if LHS.m == lower_sum and LHS.n == upper_sum:
-                """ The "filtering" is accomplished by adding sorted tuples of tuples to a set.
-                We cannot use lists because sets require hashable elements (immutable) such as tuples.
-                However with tuples, we can end up with duplicates like ((2, 0), (0, 1)) and ((0, 1), (2, 0)).
-                So we have to:
-                    - generate lists of tuples:             [(0, 1), (0, 2)]
-                    - sort those lists in reverse order:    [(0, 2), (0, 1)]
-                    - make a tuple from the list:           ((0, 2), (0, 1))
-                    - add the tuple to `matched_set`
-                """
-                matched_set.add(tuple(sorted([tuple(x) for x in t_terms], reverse=True)))
-
-    """ Transform the set into a list of lists sort by increasing length
-    Two examples:
-        - LHS is `operator(name='bb', m=0, n=2)`
-        then `sorted_list` is [[(2, 0)], [(1, 0), (1, 0)]]
-
-        - LHS is `operator(name='ddd', m=3, n=0)`
-        then `sorted_list` is [[(0, 3)], [(0, 2), (0, 1)], [(0, 1), (0, 1), (0, 1)]]
-    """
-    sorted_list = sorted([[b for b in a] for a in matched_set], key=len)
-
-    """ Next we generate the latex code for each t term represented by the (m, n) tuples
-    One possible `t_group` could be:
-        - [[(0, 2)], [(0, 1), (0, 1)]]
-    and its corresponding `group_list` would be:
-        - [['\\bt^{}_{ij}'], ['\\bt^{}_{i}', '\\bt^{}_{j}']]
-    """
-    latex_t_terms_list = []  # store the latex code for each valid t term here
-    for t_group in sorted_list:
-        count = 0  # keep track of what index labels have been used
-        group_list = []
-
-        for t in t_group:
-            upper_label = summation_indices[count:count+t[0]]
-            count += t[0]
-
-            lower_label = summation_indices[count:count+t[1]]
-            count += t[1]
-
-            lower_label += r'\gamma' if lower_label == "" else r',\gamma'
-
-            group_list.append(f"{bold_z_latex}^{{{upper_label}}}_{{{lower_label}}}")
-
-        latex_t_terms_list.append(group_list)
-
-    # create derivative terms
-    derivative_list = []
-    for t_group in latex_t_terms_list:
-        # loop over each t in the group and take the derivative of that specific t
-        for i in range(len(t_group)):
-            string = ""
-
-            # if there are t terms to the left of the current index
-            if len(t_group[0:i]) > 0:
-                string += f"{''.join(t_group[0:i])}"
-
-            # the t term we are currently taking the derivative of
-            string += rf'\dv{{{t_group[i]}}}{{\tau}}'
-
-            # if there are t terms to the right of the current index
-            if len(t_group[i:]) > 0:
-                string += f"{''.join(t_group[i+1:])}"
-
-            derivative_list.append(string)
-            break
-        break
-
-    # order the derivative terms before the epsilon terms
-    return_string = ' + '.join(derivative_list)
-    return rf'''i\left({return_string}\right)'''
 
 
 def generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex"):
@@ -8129,8 +6411,8 @@ def excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex
             if len(sub) == 1 and sub[0][1] != 0:
                 continue
             item_dict = count_items(list(sub))
-            #  print("------------item_dict-------------")
-            #  print(item_dict)
+            #  old_print_wrapper("------------item_dict-------------")
+            #  old_print_wrapper(item_dict)
             prefactor = generate_w_prefactor(item_dict)
             latex_code += prefactor
             for n in item_dict.keys():
@@ -8153,7 +6435,6 @@ def excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex
     latex_code += "\\end{equation}\n"
 
     # if file already exists then update it
-    import os
     if os.path.isfile(path):
 
         # read the entire file contents
@@ -8244,7 +6525,16 @@ def generate_python_files(truncations, only_ground_state=True, thermal=False):
 
 if (__name__ == '__main__'):
     import log_conf
-    from log_conf import log
+
+    # for now make a second argument the filepath for logging output
+    if len(sys.argv) > 1:
+        logging_output_filename = str(sys.argv[1])
+        log = log_conf.get_filebased_logger(logging_output_filename)
+    else:
+        log = log_conf.get_stdout_logger()
+
+    # dump_all_stdout_to_devnull()   # calling this removes all prints / logs from stdout
+    # log.setLevel('CRITICAL')
 
     maximum_h_rank = 4
     maximum_cc_rank = 4
@@ -8260,3 +6550,4 @@ if (__name__ == '__main__'):
         file='z_t ansatz'
     )
     # generate_python_files(truncations, only_ground_state=True, thermal=False)
+    print("We reached the end of main")
