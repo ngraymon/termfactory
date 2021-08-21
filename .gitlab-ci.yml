@@ -10,9 +10,8 @@ default:
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
-  # set pip environment variables
+  # get rid of some unneeded warnings
   PIP_DISABLE_PIP_VERSION_CHECK: "True"
-  PIP_LOG: "setup_output.txt"
 
   # prevent gitlab from running git clean on every job and destroying the cache
   GIT_STRATEGY: "fetch"
@@ -34,11 +33,11 @@ before_script:
 
   # prepare the virtual environment
   - python -V               # Print out python version for debugging
-  - python -m pip install virtualenv
+  - python -m pip install virtualenv >> setup_output.txt
   - virtualenv venv  >> setup_output.txt
   - source venv/bin/activate
-  - python -m pip install -r requirements.txt
-  - python -m pip install -r test_requirements.txt
+  - python -m pip install -r requirements.txt >> setup_output.txt
+  - python -m pip install -r test_requirements.txt >> setup_output.txt
 
 cov_test:
   stage: code_analysis
