@@ -12,7 +12,7 @@ variables:
 
   # prevent gitlab from running git clean on every job and destroying the cache
   GIT_STRATEGY: "fetch"
-  GIT_CLEAN_FLAGS: "-ffdx -e .cache/"
+  GIT_CLEAN_FLAGS: "-ffdx --exclude=.cache/,venv/"
   # GIT_CHECKOUT: "false"
 
 # Pip's cache doesn't store the python packages
