@@ -10,6 +10,10 @@ default:
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
+  # set pip environment variables
+  PIP_DISABLE_PIP_VERSION_CHECK: True
+  PIP_LOG: "setup_output.txt"
+
   # prevent gitlab from running git clean on every job and destroying the cache
   GIT_STRATEGY: "fetch"
   GIT_CLEAN_FLAGS: "-ffdx -e .cache/ -e venv/"
@@ -27,9 +31,6 @@ variables:
 #     - venv/
 
 before_script:
-  # set pip environment variables
-  - PIP_DISABLE_PIP_VERSION_CHECK=True
-  - PIP_LOG="setup_output.txt"
 
   # prepare the virtual environment
   - python -V               # Print out python version for debugging
