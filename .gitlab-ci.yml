@@ -28,8 +28,8 @@ variables:
 
 before_script:
   # set pip environment variables
-  PIP_DISABLE_PIP_VERSION_CHECK=True
-  PIP_LOG="setup_output.txt"
+  - PIP_DISABLE_PIP_VERSION_CHECK=True
+  - PIP_LOG="setup_output.txt"
 
   # prepare the virtual environment
   - python -V               # Print out python version for debugging
