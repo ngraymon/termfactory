@@ -31,7 +31,7 @@ before_script:
   # - python -m pip install virtualenv
   # - virtualenv venv
   # - source venv/bin/activate
-  - '[[ ! -d "venv" ]] && python -m venv venv && source venv/bin/activate && python -m pip install -r requirements.txt && python -m pip install -r test_requirements.txt || source venv/bin/activate'
+  - '[[ ! -d "venv" ]] && python -m pip install virtualenv && source venv/bin/activate && python -m pip install -r requirements.txt && python -m pip install -r test_requirements.txt || source venv/bin/activate'
   - python -m pip install -r requirements.txt
   - python -m pip install -r test_requirements.txt
 
