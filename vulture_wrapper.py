@@ -1,9 +1,15 @@
 import subprocess
+import sys
 
 if (__name__ == '__main__'):
 
+    # sys.stdout = open('vulture_output.txt', 'w')
+    # sys.stderr = sys.stdout
+
+    # print("testing stdout")
+
     ret = subprocess.run(
-        ['python', '-m', 'vulture', 'generate_residual_equations.py'],
+        ['py', '-m', 'vulture', '--min-confidence', '100', 'generate_residual_equations.py'],
         capture_output=True,
         text=True,
     )
@@ -11,3 +17,5 @@ if (__name__ == '__main__'):
     with open('vulture_output.txt', 'w') as fp:
         fp.write(ret.stdout)
         fp.write(ret.stderr)
+
+    # sys.stdout.close()

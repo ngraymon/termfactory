@@ -2,62 +2,27 @@ stages:
     - code_analysis
 
 default:
-  image: python:3.9
-  tags: [lightsail]
-
-# Change pip's cache directory to be inside the project directory since we can
-# only cache local items.
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-
-  # get rid of some unneeded warnings
-  PIP_DISABLE_PIP_VERSION_CHECK: "True"
-
-  # prevent gitlab from running git clean on every job and destroying the cache
-  GIT_STRATEGY: "fetch"
-  GIT_CLEAN_FLAGS: "-ffdx -e .cache/ -e venv/"
-  # GIT_CHECKOUT: "false"
-
-# Pip's cache doesn't store the python packages
-# https://pip.pypa.io/en/stable/reference/pip_install/#caching
-#
-# If you want to also cache the installed packages, you have to install
-# them in a virtualenv and cache it as well.
-cache:
-  key: "$CI_PIPELINE_ID"
-  paths:
-    - .cache/pip
-    - venv/
-
-before_script:
-
-  # prepare the virtual environment
-  - python -V               # Print out python version for debugging
-  - python -m pip install virtualenv >> setup_output.txt
-  - virtualenv venv  >> setup_output.txt
-  - source venv/bin/activate
-  - python -m pip install -r requirements.txt >> setup_output.txt
-  - python -m pip install -r test_requirements.txt >> setup_output.txt
+  image: python:3.8
 
 cov_test:
   stage: code_analysis
+  tags: [ci]
   script:
-    - python vulture_wrapper.py
-    - python -m coverage run generate_residual_equations.py logging_output.txt
-    - python -m coverage html
-    - python -m coverage report
-
+    - py -m pip install -r requirements.txt --no-cache-dir --compile
+    - py -m pip install -r test_requirements.txt --no-cache-dir --compile
+    - py vulture_wrapper.py
+    - py -m coverage run generate_residual_equations.py
+    - py -m coverage html
+    - py -m coverage report
   artifacts:
     paths:
-        - ./setup_output.txt
-        - ./logging_output.txt
-        - ./vulture_output.txt
-        - ./htmlcov/*.css
-        - ./htmlcov/*.js
-        - ./htmlcov/generate_residual_equations_py.html
+        - .\vulture_output.txt
+        - .\htmlcov\*.css
+        - .\htmlcov\*.js
+        - .\htmlcov\generate_residual_equations_py.html
 
     # reports:
     #   cobertura:
-    #     - ./htmlcov/*.css
-    #     - ./htmlcov/*.js
-    #     - ./htmlcov/generate_residual_equations_py.html, ./htmlcov/*.css
+    #     - .\htmlcov\*.css
+    #     - .\htmlcov\*.js
+    #     - .\htmlcov\generate_residual_equations_py.html, .\htmlcov\*.css
