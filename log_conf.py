@@ -23,55 +23,39 @@ class MyLogger(logging.Logger):
             self._log(logging.FLOW, message, args, **kwargs)
 
 
-def get_stdout_logger(*args, **kwargs):
-    logging.setLoggerClass(MyLogger)
-    logging.basicConfig(
-        format="%(asctime)-13s [%(levelname)s] %(funcName)s: %(message)s",
-        # datefmt='%m/%d/%Y %I:%M:%S %p',
-        datefmt='%d %I:%M:%S ',
-        # level=logging.FLOW,
-        level=logging.INFO,
-        # level=logging.DEBUG,
-        # level=logging.LOCK,
-    )
-    return logging.getLogger(__name__)
+logging.setLoggerClass(MyLogger)
+log = logging.getLogger(__name__)
+
+logging.basicConfig(
+    format="%(asctime)-13s [%(levelname)s] %(funcName)s: %(message)s",
+    # datefmt='%m/%d/%Y %I:%M:%S %p',
+    datefmt='%d %I:%M:%S ',
+    # level=logging.FLOW,
+    level=logging.INFO,
+    # level=logging.DEBUG,
+    # level=logging.LOCK,
+)
 
 
-def get_filebased_logger(filename, *args, **kwargs):
-    logging.setLoggerClass(MyLogger)
-    logging.basicConfig(
-        filename=filename,
-        filemode='w',
-        format="%(asctime)-13s [%(levelname)s] %(funcName)s: %(message)s",
-        # datefmt='%m/%d/%Y %I:%M:%S %p',
-        datefmt='%d %I:%M:%S ',
-        # level=logging.FLOW,
-        level=logging.INFO,
-        # level=logging.DEBUG,
-        # level=logging.LOCK,
-    )
-    return logging.getLogger(__name__)
-
-
-def setLevelCritical(log):
+def setLevelCritical():
     log.setLevel(logging.CRITICAL)
 
 
-def setLevelError(log):
+def setLevelError():
     log.setLevel(logging.ERROR)
 
 
-def setLevelWarning(log):
+def setLevelWarning():
     log.setLevel(logging.WARNING)
 
 
-def setLevelFlow(log):
+def setLevelFlow():
     log.setLevel(logging.FLOW)
 
 
-def setLevelInfo(log):
+def setLevelInfo():
     log.setLevel(logging.INFO)
 
 
-def setLevelDebug(log):
+def setLevelDebug():
     log.setLevel(logging.DEBUG)
