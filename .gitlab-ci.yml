@@ -28,11 +28,12 @@ cache:
 
 before_script:
   - python -V               # Print out python version for debugging
+  - virtualenv || echo 'nope?'
   - python -m pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
-  - python -m pip install -r requirements.txt
-  - python -m pip install -r test_requirements.txt
+  - python -m pip install -r requirements.txt | grep -v 'already satisfied'
+  - python -m pip install -r test_requirements.txt | grep -v 'already satisfied'
 
 cov_test:
   stage: code_analysis
