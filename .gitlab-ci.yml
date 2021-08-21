@@ -12,7 +12,7 @@ variables:
 
   # prevent gitlab from running git clean on every job and destroying the cache
   GIT_STRATEGY: "fetch"
-  GIT_CLEAN_FLAGS: "-ffdx"
+  GIT_CLEAN_FLAGS: "-ffdx -e .cache/ -e venv/"
   # GIT_CHECKOUT: "false"
 
 # Pip's cache doesn't store the python packages
@@ -20,11 +20,11 @@ variables:
 #
 # If you want to also cache the installed packages, you have to install
 # them in a virtualenv and cache it as well.
-cache:
-  key: "$CI_PIPELINE_ID"
-  paths:
-    - .cache/pip
-    - venv/
+# cache:
+#   key: "$CI_PIPELINE_ID"
+#   paths:
+#     - .cache/pip
+#     - venv/
 
 before_script:
   - python -V               # Print out python version for debugging
