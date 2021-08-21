@@ -27,12 +27,17 @@ variables:
 #     - venv/
 
 before_script:
+  # set pip environment variables
+  PIP_DISABLE_PIP_VERSION_CHECK=True
+  PIP_LOG="setup_output.txt"
+
+  # prepare the virtual environment
   - python -V               # Print out python version for debugging
-  - python -m pip install virtualenv  >> setup_output.txt
+  - python -m pip install virtualenv
   - virtualenv venv  >> setup_output.txt
   - source venv/bin/activate
-  - python -m pip install -r requirements.txt >> setup_output.txt
-  - python -m pip install -r test_requirements.txt >> setup_output.txt
+  - python -m pip install -r requirements.txt
+  - python -m pip install -r test_requirements.txt
 
 cov_test:
   stage: code_analysis
