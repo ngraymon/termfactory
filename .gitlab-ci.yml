@@ -11,8 +11,8 @@ variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
   # prevent gitlab from running git clean on every job and destroying the cache
-  GIT_CLEAN_FLAGS: "-ffdx -e .cache/,venv/"
   GIT_STRATEGY: "fetch"
+  GIT_CLEAN_FLAGS: "-ffdx -e .cache/"
   # GIT_CHECKOUT: "false"
 
 # Pip's cache doesn't store the python packages
@@ -28,12 +28,11 @@ cache:
 
 before_script:
   - python -V               # Print out python version for debugging
-  - virtualenv || echo 'nope?'
   - python -m pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
-  - python -m pip install -r requirements.txt | grep -v 'already satisfied'
-  - python -m pip install -r test_requirements.txt | grep -v 'already satisfied'
+  - python -m pip install -r requirements.txt >
+  - python -m pip install -r test_requirements.txt >>
 
 cov_test:
   stage: code_analysis
