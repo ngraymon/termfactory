@@ -6487,12 +6487,17 @@ def _generate_valid_eT_z_n_operator_permutations(LHS, eT, h, all_z_permutations)
 
             if len(perm_T) == 1:
                 # record a valid permutation
-                valid_permutations.append((perm_T, left_z, right_z))
                 log.debug(('Good Permutation', group))
+                valid_permutations.append((perm_T, left_z, right_z))
             else:
+                # record a valid permutation
+                log.debug(('Good Permutation', group))
+                valid_permutations.append((perm_T, left_z, right_z))
+
                 # for now we cheat
-                print(perm_T)
-                continue
+                # print("CHEATING", perm_T)
+                # continue
+
                 # raise Exception()
 
     return valid_permutations
@@ -6552,6 +6557,9 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
     # validate upper pairing
     combined_m_perms = list(it.product(*m_perms))
     for m_perm in combined_m_perms:
+        # and `m_perm` is [Z_left, Z_right]
+        # where each Z is [LHS, t_list, h, other_Z]
+        # with numbers: [0, [0, ...], 0, 0]
 
         total_lhs_m = sum([t[0] for t in m_perm])
         total_eT_m = sum([sum(t[1]) for t in m_perm])
@@ -6577,7 +6585,29 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         old_print_wrapper(f"{left_z_balanced_right=}")
         old_print_wrapper(f"{right_z_balanced_left=}")
 
-        if total_h_balanced and total_lhs_balanced and total_eT_balanced and left_z_balanced_right and right_z_balanced_left:
+        # check eT balance
+        each_eT_balanced = True
+        for i, t in enumerate(t_list):
+            # print(f"{t.n= }", f"{m_perm[0][1][i]= }", f"{m_perm[1][1][i]= }")
+            each_eT_balanced &= bool(t.n == (m_perm[0][1][i] + m_perm[1][1][i]))
+
+        # print(m_perm)
+        # print(each_eT_balanced)
+        # print(LHS)
+        # print(t_list)
+        # print(h)
+        # print(left_z)
+        # print(right_z)
+        # if len(t_list) == 2:
+        #     print(f"{total_h_balanced      =}")
+        #     print(f"{total_lhs_balanced    =}")
+        #     print(f"{total_eT_balanced     =}")
+        #     print(f"{each_eT_balanced      =}")
+        #     print(f"{left_z_balanced_right =}")
+        #     print(f"{right_z_balanced_left =}")
+        #     import pdb; pdb.set_trace()
+
+        if total_h_balanced and total_lhs_balanced and total_eT_balanced and each_eT_balanced and left_z_balanced_right and right_z_balanced_left:
             log.debug(f"Valid upper perm:   LHS={total_lhs_m}, eT={total_eT_m}, zL={m_perm[0]}, h={total_h_m}, zR={m_perm[1]}")
             valid_upper_perm_combinations.append(m_perm)
 
@@ -6600,6 +6630,9 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
     # validate lower pairing
     combined_n_perms = list(it.product(*n_perms))
     for n_perm in combined_n_perms:
+        # and `n_perm` is [Z_left, Z_right]
+        # where each Z is [LHS, t_list, h, other_Z]
+        # with numbers: [0, [0, ...], 0, 0]
 
         total_lhs_n = sum([t[0] for t in n_perm])
         total_eT_n = sum([sum(t[1]) for t in n_perm])
@@ -6625,7 +6658,13 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         old_print_wrapper(f"{left_z_balanced_right=}")
         old_print_wrapper(f"{right_z_balanced_left=}")
 
-        if total_h_balanced and total_lhs_balanced and total_eT_balanced and left_z_balanced_right and right_z_balanced_left:
+        # check eT balance
+        each_eT_balanced = True
+        for i, t in enumerate(t_list):
+            old_print_wrapper(f"{t.m= }", f"{n_perm[0][1][i]= }", f"{n_perm[1][1][i]= }")
+            each_eT_balanced &= bool(t.m == (n_perm[0][1][i] + n_perm[1][1][i]))
+
+        if total_h_balanced and total_lhs_balanced and total_eT_balanced and each_eT_balanced and left_z_balanced_right and right_z_balanced_left:
             log.debug(f"Valid lower perm:   LHS={total_lhs_n}, eT={total_eT_n}, zL={n_perm[0]}, h={total_h_n}, zR={n_perm[1]}")
             valid_lower_perm_combinations.append(n_perm)
 
@@ -6653,28 +6692,118 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
     with LHS, z_left, h, and z_right over all index distributions.
     By convention the tuples are (lhs, eT, h, other_z).
     """
+
     z_left, z_right = z_pair
-    print(z_pair)
+
+    if z_left is None:
+        args = [0, 0, 0, 0, 0, [0, ]*len(t_list), [0, ]*len(t_list), 0, 0, 0, 0]
+        z_left = disconnected_eT_z_left_operator_namedtuple(*args)
+
+    if z_right is None:
+        args = [0, 0, 0, 0, 0, [0, ]*len(t_list), [0, ]*len(t_list), 0, 0, 0, 0]
+        z_right = disconnected_eT_z_right_operator_namedtuple(*args)
+
+    valid_upper_perm_combinations = []
+    valid_lower_perm_combinations = []
+    m_perms, n_perms = [], []
 
     remaining_m = sum([t.m for t in t_list])
+    remaining_m -= sum(z_left.n_t)
+    remaining_m -= sum(z_right.n_t)
+
     remaining_n = sum([t.n for t in t_list])
+    remaining_n -= sum(z_left.m_t)
+    remaining_n -= sum(z_right.m_t)
 
-    if z_left is not None:
-        remaining_m -= sum(z_left.n_t)
-        remaining_n -= sum(z_left.m_t)
-
-    if z_right is not None:
-        remaining_m -= sum(z_right.n_t)
-        remaining_n -= sum(z_right.m_t)
+    print('\nKK', remaining_m, remaining_n, t_list)
 
     if remaining_n == remaining_m == 0:
-        return [
-            (0, 0, 0, 0)
-        ]
 
+        temp_upper, temp_lower = [], []
+        print('VV1', z_left.n_t, z_right.n_t)
+        print('VV2', z_left.m_t, z_right.m_t)
+        # print(z_left)
+        # print(z_right)
+        # print(t_list)
+
+        for i, t in enumerate(t_list):
+            temp_upper.append([0, z_left.n_t[i], 0, z_right.n_t[i]])
+            temp_lower.append([0, z_left.m_t[i], 0, z_right.m_t[i]])
+
+        valid_upper_perm_combinations.append(temp_upper)
+        valid_lower_perm_combinations.append(temp_lower)
 
     elif remaining_m == 0:
-        print(f"{remaining_n=}")
+        print(f"\n{remaining_n=}")
+        print(t_list)
+
+        # ----------------------------------------------------------
+        for i, t in enumerate(t_list):
+            M = t.m - z_left.n_t[i] - z_right.n_t[i]
+            N = t.n - z_left.m_t[i] - z_right.m_t[i]
+
+            temp_list = []
+            print(f"{M=} {N=}")
+            for a in range(M+1):
+                temp_list.append((a, z_left.n_t[i], M-a, z_right.n_t[i]))
+
+            m_perms.append(temp_list)
+
+            temp_list = []
+            for a in range(N+1):
+                temp_list.append((a, z_left.m_t[i], N-a, z_right.m_t[i]))
+
+            n_perms.append(temp_list)
+
+        print(f"original {n_perms=}")
+        # ----------------------------------------------------------
+        combined_n_perms = list(it.product(*n_perms))
+        for n_perm in combined_n_perms:
+            print(f"{n_perm=}")
+
+            total_lhs_n = sum([t[0] for t in n_perm])
+            total_h_n = sum([t[2] for t in n_perm])
+
+            total_lhs_balanced = bool(total_lhs_n <= LHS.m)
+            total_h_balanced = bool(total_h_n <= h.m)
+
+            if total_h_balanced and total_lhs_balanced:
+                log.debug(f"Valid lower perm:   LHS={total_lhs_n}, T={n_perm}, zL={z_left}, h={total_h_n}, zR={z_right}")
+                valid_lower_perm_combinations.append(n_perm)
+
+            elif log_invalid:
+                log.debug(
+                    "Invalid lower perm: "
+                    f"h={total_h_n} > {h.m}"
+                    " or "
+                    f"LHS={total_lhs_n} > {LHS.m}"
+                    f"{'': >6s}{n_perm}"
+                )
+
+        print(f"original {m_perms=}")
+        # ----------------------------------------------------------
+        combined_m_perms = list(it.product(*m_perms))
+        for m_perm in combined_m_perms:
+            print(f"{m_perm=}")
+
+            total_lhs_m = sum([t[0] for t in m_perm])
+            total_h_m = sum([t[2] for t in m_perm])
+
+            total_lhs_balanced = bool(total_lhs_m <= LHS.n)
+            total_h_balanced = bool(total_h_m <= h.n)
+
+            if total_h_balanced and total_lhs_balanced:
+                log.debug(f"Valid upper perm:   LHS={total_lhs_m}, T={m_perm}, zL={z_left}, h={total_h_m}, zR={z_right}")
+                valid_upper_perm_combinations.append(m_perm)
+
+            elif log_invalid:
+                log.debug(
+                    "Invalid upper perm: "
+                    f"h={total_h_m} > {h.n}"
+                    " or "
+                    f"LHS={total_lhs_m} > {LHS.n}"
+                    f"{'': >6s}{m_perm}"
+                )
 
     elif remaining_n == 0:
         raise Exception("have not coded this yet")
@@ -6682,7 +6811,7 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
     else:
         raise Exception("have not coded this yet")
 
-    return True
+    return valid_upper_perm_combinations, valid_lower_perm_combinations
 
 
 def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, found_it_bool=False):
@@ -6690,10 +6819,9 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
 
     annotated_permutations = []  # store output here
     annotated_z_permutations = []  # store intermediate output here
-    annotated_t_permutations = []  # store intermediate output here
 
     log_conf.setLevelDebug(log)
-    old_print_wrapper('-'*30 + 'here' + '-'*30)
+    old_print_wrapper('-'*30 + 'here' + '-'*3)
     i = 0
 
     for perm in valid_permutations:
@@ -6715,6 +6843,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                 z_left_kwargs, z_right_kwargs = {}, {}
 
                 z_list = []
+
                 # for each Z operator we make a `connected_namedtuple` or a `disconnected_namedtuple`
                 if left_z.name is None:
                     # make sure this permutation is okay for no z left
@@ -6786,56 +6915,93 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                         continue
 
                 log.debug(f"{z_list=}")
-                annotated_z_permutations.append(z_list)
+                annotated_z_permutations.append(tuple(z_list))
 
         old_print_wrapper(annotated_z_permutations)
         old_print_wrapper(f'{i=}\n\n')
 
         for z_pair in annotated_z_permutations:
 
+            print('t_list', t_list)
             # now we have to compute all the permutations for t
-            permutations = _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair)
+            if len(t_list) == 1 and t_list[0].rank == 0:
+                upper_perms = [[[0, ] * 4, ], ]
+                lower_perms = [[[0, ] * 4, ], ]
+            else:
+                upper_perms, lower_perms = _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair)
 
-            t_upper, t_lower = [], []
+            log.debug(f"{upper_perms=}")
+            log.debug(f"{lower_perms=}")
 
-            for p in permutations:
+            # compute all the permutations for t
+            for upper in upper_perms:   # for now the upper_perms only have 1 permutation (all zeros)
+                for lower in lower_perms:
 
-                t_list = []
+                    perm_list = []
+                    print('XX', upper, lower)
+                    # for each t operator we make a `connected_namedtuple` or a `disconnected_namedtuple`
+                    for i, t in enumerate(t_list):
+                        print(f"{i=}", t)
+                        t_upper = upper[i]
+                        t_lower = lower[i]
+                        print('YY', t_upper, t_lower)
+                        assert list(t_upper) == [0, 0, 0, 0]  # for now t's can't have upper components
 
-                # for each t operator we make a `connected_namedtuple` or a `disconnected_namedtuple`
-                for i, t in enumerate(t_list):
-                    assert t_upper == [0, 0, 0, 0]  # for now t's can't have upper components
+                        t_kwargs = {
+                            'rank': t.rank,
+                            'm': t.m,
+                            'm_lhs': t_upper[0],
+                            'm_l':   t_upper[1],
+                            'm_h':   t_upper[2],
+                            'm_r':   t_upper[-1],
+                            'n': t.n,
+                            'n_lhs': t_lower[0],
+                            'n_l':   t_lower[1],
+                            'n_h':   t_lower[2],
+                            'n_r':   t_lower[-1],
+                        }
 
-                    t_kwargs = {
-                        'rank': t.rank,
-                        'm': t.m,
-                        'm_lhs': t_upper[0],
-                        'm_l':   t_upper[1],
-                        'm_h':   t_upper[2],
-                        'm_r':   t_upper[-1],
-                        'n': t.n,
-                        'n_lhs': t_lower[0],
-                        'n_l':   t_lower[1],
-                        'n_h':   t_lower[2],
-                        'n_r':   t_lower[-1],
-                    }
+                        print(len(t_list), t_list)
+                        assert t.m == sum(t_upper), f"{t.m = } {t_upper = }"
+                        assert t.n == sum(t_lower), f"{t.n = } {t_lower = }"
 
-                    # if the t operator is disconnected (meaning no connections to H)
-                    if t_kwargs['m_h'] == t_kwargs['n_h'] == 0:
-                        t_list.append(disconnected_t_operator_namedtuple(**t_kwargs))
-                    # if the t operator is connected (at least 1 connection to H)
-                    else:
-                        t_list.append(connected_t_operator_namedtuple(**t_kwargs))
+                        # if the t operator is disconnected (meaning no connections to H)
+                        if t_kwargs['m_h'] == t_kwargs['n_h'] == 0:
+                            perm_list.append(disconnected_t_operator_namedtuple(**t_kwargs))
+                        # if the t operator is connected (at least 1 connection to H)
+                        else:
+                            perm_list.append(connected_t_operator_namedtuple(**t_kwargs))
 
-                annotated_t_permutations.append(t_list)
+                    # after looping over t_list we append the list of operators
+                    # for this specific permutation
 
-            # another question is how do we join the t permutations and the z permutations
+            annotated_permutations.append([tuple(perm_list), z_pair])
 
-        sys.exit(0)
+        # print(annotated_t_permutations)
+        # print(annotated_z_permutations)
 
-        annotated_permutations = list(it.product(
-            annotated_t_permutations, annotated_z_permutations
-        ))
+        # assert len(annotated_t_permutations) == len(annotated_z_permutations), (
+        #     "Wrong lengths\n"
+        #     f"t len: {len(annotated_t_permutations)}\n"
+        #     f"z len: {len(annotated_z_permutations)}\n"
+        # )
+
+        # for i in range(len(annotated_t_permutations)):
+        #     print(i)
+        #     print('\n annotated_t_permutations:\n', annotated_t_permutations[i])
+        #     print('\n annotated_z_permutations:\n', annotated_z_permutations[i])
+        #     print('\n zip:\n', zip(annotated_t_permutations[i], annotated_z_permutations[i]))
+        #     print('\n prod:')
+        #     for a in list(it.product(annotated_t_permutations[i], annotated_z_permutations[i])):
+        #         print(a)
+        #     print('\n')
+
+        print(annotated_permutations)
+        # import pdb; pdb.set_trace()
+
+        for perm in annotated_permutations:
+            log.debug(f"perm=\n{perm[0]}\n{perm[1]}")
+            print(f"perm=\n{perm[0]}\n{perm[1]}")
 
         # if i == 3:
         #     sys.exit(0)
@@ -6859,8 +7025,6 @@ def _generate_explicit_eT_z_connections(LHS, h, unique_permutations):
         z_left, z_right = z_pair
         lhs_kwargs, h_kwargs = {}, {}
 
-        t_kwargs_list = [{} for t in t_list]
-
         assert len(perm) == 2
 
         # bool declarations for readability
@@ -6880,50 +7044,32 @@ def _generate_explicit_eT_z_connections(LHS, h, unique_permutations):
             'm_l': z_left.n_lhs if z_left_exists else 0,
             'n_l': z_left.m_lhs if z_left_exists else 0,
             'm_r': z_right.n_lhs if z_right_exists else 0,
-            'n_r': z_right.m_lhs if z_right_exists else 0
+            'n_r': z_right.m_lhs if z_right_exists else 0,
+            'm_t': [t.n_lhs for t in t_list],
+            'n_t': [t.m_lhs for t in t_list]
         }
-
-        old_print_wrapper(perm)
-        old_print_wrapper(t_list)
-        old_print_wrapper(z_left)
-        old_print_wrapper(z_right)
-        old_print_wrapper(f"{lhs_kwargs=}")
 
         h_kwargs = {
             'm_l': z_left.n_h if z_left_exists else 0,
             'n_l': z_left.m_h if z_left_exists else 0,
             'm_r': z_right.n_h if z_right_exists else 0,
-            'n_r': z_right.m_h if z_right_exists else 0
+            'n_r': z_right.m_h if z_right_exists else 0,
+            'm_t': [t.n_h for t in t_list],
+            'n_t': [t.m_h for t in t_list]
         }
 
         lhs_kwargs.update({'rank': LHS.m + LHS.n, 'm': LHS.m, 'n': LHS.n})
         h_kwargs.update({'rank': h.m + h.n, 'm': h.m, 'n': h.n})
 
-        # temporary functions
-        get_leftover_n = lambda d: d['n'] - (d['m_l'] + d['m_r'])
-        get_leftover_m = lambda d: d['m'] - (d['n_l'] + d['n_r'])
-
-        for i in range(len(t_kwargs_list)):
-            t_kwargs_list[i] = {
-                'm_l': z_left.n_t[i] if z_left_exists else 0,
-                'n_l': z_left.m_t[i] if z_left_exists else 0,
-                'm_r': z_right.n_t[i] if z_right_exists else 0,
-                'n_r': z_right.m_t[i] if z_right_exists else 0
-            }
-            t_kwargs_list[i].update({'rank': t_list[i].m + t_list[i].n, 'm': t_list[i].m, 'n': t_list[i].n})
-            if get_leftover_n(t_kwargs_list[i]) == 0:
-                print("no left over n")
-
-            print('leftover n', get_leftover_n(t_kwargs_list[i]))
-            print('leftover m', get_leftover_m(t_kwargs_list[i]))
-
         # calculate the contractions as the remainder after all other contractions
-        lhs_kwargs['m_h'] = lhs_kwargs['m'] - (lhs_kwargs['m_l'] + lhs_kwargs['m_r'])
-        lhs_kwargs['n_h'] = lhs_kwargs['n'] - (lhs_kwargs['n_l'] + lhs_kwargs['n_r'])
-        h_kwargs['m_lhs'] = h_kwargs['m'] - (h_kwargs['m_l'] + h_kwargs['m_r'])
-        h_kwargs['n_lhs'] = h_kwargs['n'] - (h_kwargs['n_l'] + h_kwargs['n_r'])
+        lhs_kwargs['m_h'] = lhs_kwargs['m'] - (sum(lhs_kwargs['m_t']) + lhs_kwargs['m_l'] + lhs_kwargs['m_r'])
+        lhs_kwargs['n_h'] = lhs_kwargs['n'] - (sum(lhs_kwargs['n_t']) + lhs_kwargs['n_l'] + lhs_kwargs['n_r'])
+        h_kwargs['m_lhs'] = h_kwargs['m'] - (sum(h_kwargs['m_t']) + h_kwargs['m_l'] + h_kwargs['m_r'])
+        h_kwargs['n_lhs'] = h_kwargs['n'] - (sum(h_kwargs['n_t']) + h_kwargs['n_l'] + h_kwargs['n_r'])
 
         # make sure these values are not negative
+        # otherwise our math went horribly wrong somewhere and we over counted?
+        # the balancing math should have been already worked out before we get to this function
         assert lhs_kwargs['m_h'] >= 0 and lhs_kwargs['n_h'] >= 0
         assert h_kwargs['m_lhs'] >= 0 and h_kwargs['n_lhs'] >= 0
 
@@ -6940,15 +7086,11 @@ def _generate_explicit_eT_z_connections(LHS, h, unique_permutations):
             continue
 
         # cheating for the moment
-        lhs_kwargs.update({'m_t': 0, 'n_t': 0})
-        h_kwargs.update({'m_t': 0, 'n_t': 0})
-        # t_kwargs.update({})
 
         new_LHS = connected_eT_lhs_operator_namedtuple(**lhs_kwargs)
         new_h = connected_eT_h_z_operator_namedtuple(**h_kwargs)
-        new_t_list = [connected_t_operator_namedtuple(**kwargs) for kwargs in t_kwargs_list]
 
-        labeled_permutations.append([new_LHS, new_t_list, new_h, z_pair])
+        labeled_permutations.append([new_LHS, t_list, new_h, z_pair])
         for p in labeled_permutations:
             old_print_wrapper('\n\np')
             for x in p:
@@ -6961,26 +7103,110 @@ def _generate_explicit_eT_z_connections(LHS, h, unique_permutations):
 
 # -------------------------------------------------------------------------------- #
 
+def _f_t_h_contributions(t_list, h):
+    """ x """
+    return_list = []
+
+    for i, t in enumerate(t_list):
+        if isinstance(t, disconnected_t_operator_namedtuple):
+            assert 0 == t.m_h == h.n_t[i]
+            return_list.append(0)
+        else:
+            assert t.m_h == h.n_t[i] >= 1
+            return_list.append(t.m_h)
+
+    return return_list
+
+
+def _fbar_t_h_contributions(t_list, h):
+    """ x """
+    return_list = []
+
+    for i, t in enumerate(t_list):
+        if isinstance(t, disconnected_t_operator_namedtuple):
+            assert 0 == t.n_h == h.m_t[i]
+            return_list.append(0)
+        else:
+            assert t.n_h == h.m_t[i] >= 1
+            return_list.append(t.n_h)
+
+    return return_list
+
+
+def _f_t_zR_contributions(t_list, z_right):
+    """ x """
+    return_list = []
+
+    for i, t in enumerate(t_list):
+        assert t.m_r == z_right.n_t[i]
+        if t.m_r >= 1:
+            return_list.append(t.m_r)
+
+    return return_list
+
+
+def _fbar_t_zR_contributions(t_list, z_right):
+    """ x """
+    return_list = []
+
+    for i, t in enumerate(t_list):
+        assert t.n_r == z_right.m_t[i]
+        if t.n_r >= 1:
+            return_list.append(t.n_r)
+
+    return return_list
+
+
+def _f_t_zL_contributions(t_list, z_left):
+    """ x """
+    return_list = []
+
+    for i, t in enumerate(t_list):
+        assert t.m_l == z_left.n_t[i]
+        if t.m_l >= 1:
+            return_list.append(t.m_l)
+
+    return return_list
+
+
+def _fbar_t_zL_contributions(t_list, z_left):
+    """ x """
+    return_list = []
+
+    for i, t in enumerate(t_list):
+        assert t.n_l == z_left.m_t[i]
+        if t.n_l >= 1:
+            return_list.append(t.n_l)
+
+    return return_list
+
+
 def _build_eT_term_latex_labels(t_list, offset_dict, color=True):
     """ Builds latex code for labeling a `connected_t_operator_namedtuple`."""
 
     return_list = []
 
-    print(t_list)
+    print("t_list\n", t_list, '\n')
     for t in t_list:
         if t.rank == 0:
-            return f"{bold_h_latex}_0"
+            return f"{bold_t_latex}_0"
 
         upper_indices, lower_indices = '', ''
 
         # subscript indices
         if t.n > 0:
             # contract with left z
-            lower_indices += r'\blue{' + z_summation_indices[0:t.n_l] + '}'
+            lower_indices += r'\magenta{' + z_summation_indices[0:t.n_l] + '}'
+            offset_dict['summation_index'] += t.n_l
+
+            # contract with h
+            b = offset_dict['summation_index']
+            lower_indices += r'\blue{' + z_summation_indices[b:b + t.n_h] + '}'
+            offset_dict['summation_index'] += t.n_h
 
             # contract with right z
             s = offset_dict['summation_index']
-            lower_indices += r'\blue{' + z_summation_indices[s:s + t.n_r] + '}'
+            lower_indices += r'\magenta{' + z_summation_indices[s:s + t.n_r] + '}'
             offset_dict['summation_index'] += t.n_r
 
             # pair with left hand side (LHS)
@@ -6991,12 +7217,18 @@ def _build_eT_term_latex_labels(t_list, offset_dict, color=True):
         # superscript indices
         if t.m > 0:
             # contract with left z
-            a = offset_dict['left_upper']
-            upper_indices += r'\blue{' + z_summation_indices[a:a + t.m_l] + '}'
+            a = offset_dict['summation_index']
+            upper_indices += r'\magenta{' + z_summation_indices[a:a + t.m_l] + '}'
+            offset_dict['summation_index'] += t.m_l
+
+            # contract with h
+            b = offset_dict['summation_index']
+            lower_indices += r'\blue{' + z_summation_indices[b:b + t.n_h] + '}'
+            offset_dict['summation_index'] += t.n_h
 
             # contract with right z
             s = offset_dict['summation_index']
-            upper_indices += r'\blue{' + z_summation_indices[s:s + t.m_r] + '}'
+            upper_indices += r'\magenta{' + z_summation_indices[s:s + t.m_r] + '}'
             offset_dict['summation_index'] += t.m_r
 
             # pair with left hand side (LHS)
@@ -7006,7 +7238,111 @@ def _build_eT_term_latex_labels(t_list, offset_dict, color=True):
 
         return_list.append(f"{bold_t_latex}^{{{upper_indices}}}_{{{lower_indices}}}")
 
-    return ' * '.join(return_list)
+    return ''.join(return_list)
+
+
+def _build_eT_hz_term_latex_labels(h, offset_dict, color=True):
+    """ Builds latex code for labeling a `connected_h_operator_namedtuple`."""
+
+    if h.rank == 0:
+        return f"{bold_h_latex}_0"
+
+    upper_indices, lower_indices = '', ''
+
+    # subscript indices
+    if h.n > 0:
+        # contract with left t terms
+        lower_indices += r'\blue{' + z_summation_indices[0:sum(h.n_t)] + '}'
+
+        # contract with left z
+        s = offset_dict['summation_index']
+        lower_indices += r'\blue{' + z_summation_indices[s:s + h.n_l] + '}'
+        offset_dict['summation_index'] += h.n_l
+
+        # contract with right z
+        s = offset_dict['summation_index']
+        lower_indices += r'\blue{' + z_summation_indices[s:s + h.n_r] + '}'
+        offset_dict['summation_index'] += h.n_r
+
+        # pair with left hand side (LHS)
+        u = offset_dict['unlinked_index']
+        lower_indices += r'\red{' + z_unlinked_indices[u:u + h.n_lhs] + '}'
+        offset_dict['unlinked_index'] += h.n_lhs
+
+    # superscript indices
+    if h.m > 0:
+        # contract with right t terms
+        a = offset_dict['t_upper']
+        upper_indices += r'\blue{' + z_summation_indices[a:a + sum(h.m_t)] + '}'
+
+        # contract with left z
+        a = offset_dict['left_upper']
+        upper_indices += r'\blue{' + z_summation_indices[a:a + h.m_l] + '}'
+
+        # contract with right z
+        s = offset_dict['summation_index']
+        upper_indices += r'\blue{' + z_summation_indices[s:s + h.m_r] + '}'
+        offset_dict['summation_index'] += h.m_r
+
+        # pair with left hand side (LHS)
+        u = offset_dict['unlinked_index']
+        upper_indices += r'\red{' + z_unlinked_indices[u:u + h.m_lhs] + '}'
+        offset_dict['unlinked_index'] += h.m_lhs
+
+    return f"{bold_h_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
+
+
+def _build_eT_right_z_term(h, z_right, offset_dict, color=True):
+    """ Builds latex code for labeling a `connected_z_right_operator_namedtuple`.
+
+    The `condense_offset` is an optional argument which is needed when creating latex code
+    for linked disconnected terms in a condensed format.
+    """
+    if z_right.rank == 0:
+        return f"{bold_z_latex}_0"
+
+    a, b = 0, 0
+    upper_indices, lower_indices = '', ''
+
+    # subscript indices
+    if z_right.n > 0:
+        # contract with left t terms
+        a = offset_dict['t_lower']
+        lower_indices += r'\magenta{' + z_summation_indices[a:a + sum(z_right.n_t)] + '}'
+
+        # contract with left z
+        b = offset_dict['left_lower']
+        lower_indices += r'\magenta{' + z_summation_indices[a+b:a+b + z_right.n_l] + '}'
+
+        # contract with h
+        c = offset_dict['h_lower']
+        lower_indices += r'\blue{' + z_summation_indices[c:c + z_right.n_h] + '}'
+
+        # pair with left hand side (LHS)
+        u = offset_dict['unlinked_index']
+        lower_indices += r'\red{' + z_unlinked_indices[u:u + z_right.n_lhs] + '}'
+        offset_dict['unlinked_index'] += z_right.n_lhs
+
+    # superscript indices
+    if z_right.m > 0:
+        # contract with right t terms
+        a = offset_dict['t_upper']
+        upper_indices += r'\magenta{' + z_summation_indices[a:a + sum(z_right.m_t)] + '}'
+
+        # contract with left z
+        b = offset_dict['left_upper']
+        upper_indices += r'\magenta{' + z_summation_indices[b:b + z_right.m_l] + '}'
+
+        # contract with h
+        c = offset_dict['h_upper']
+        upper_indices += r'\blue{' + z_summation_indices[c:c + z_right.m_h] + '}'
+
+        # pair with left hand side (LHS)
+        u = offset_dict['unlinked_index']
+        upper_indices += r'\red{' + z_unlinked_indices[u:u + z_right.m_lhs] + '}'
+        offset_dict['unlinked_index'] += z_right.m_lhs
+
+    return f"{bold_z_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
 
 
 def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False):
@@ -7025,12 +7361,16 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
         term_string = ''
 
         # old_print_wrapper("TERM", term)
+
         # extract elements of list `term`
-        print("TERM", term)
+        print("TERM", term, '\n\n')
         LHS, t_list, h, z_left, z_right = term[0], term[1], term[2], *term[3]
 
         # if needed add f prefactors
         nof_fs = _f_h_zR_contributions(h, z_right)
+        nof_fs += sum(_f_t_h_contributions(t_list, h))
+        nof_fs += sum(_f_t_zR_contributions(t_list, z_right))
+
         if remove_f_terms and (nof_fs > 0):
             continue
         if nof_fs > 0:
@@ -7038,6 +7378,8 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
 
         # if needed add fbar prefactors
         nof_fbars = _fbar_h_zR_contributions(h, z_right)
+        nof_fbars += sum(_fbar_t_h_contributions(t_list, h))
+        nof_fbars += sum(_fbar_t_zR_contributions(t_list, z_right))
         if nof_fbars > 0:
             term_string += "\\bar{f}" if (nof_fbars == 1) else f"\\bar{{f}}^{{{nof_fbars}}}"
 
@@ -7048,23 +7390,37 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
 
         # prepare the z terms
         h_offset_dict = {
+            't_upper': sum([t.m - t.m_lhs for t in t_list]),
             'left_upper': 0,
-            'summation_index': 0,
-            'unlinked_index': 0
+            'summation_index': sum([t.rank - t.m_lhs - t.n_lhs for t in t_list]),
+            'unlinked_index': sum([t.m_lhs + t.n_lhs for t in t_list])
         }
 
         right_z_offset_dict = {
+            't_lower': sum([t.m_h for t in t_list]),
+            't_upper': h_offset_dict['left_upper'] + sum([t.n_h for t in t_list]),
             'left_lower': 0,
             'left_upper': 0,
-            'h_lower': h.n_r,
-            'h_upper': 0,
-            'unlinked_index': h.m_lhs + h.n_lhs
+            'h_lower': h_offset_dict['summation_index'] + h.n_r,
+            'h_upper': h_offset_dict['summation_index'],
+            'unlinked_index': h_offset_dict['unlinked_index'] + h.m_lhs + h.n_lhs
         }
 
-        t_terms = _build_eT_term_latex_labels(t_list, {})
+        t_terms = _build_eT_term_latex_labels(
+            t_list,
+            {
+                'left_upper': 0,
+                'summation_index': 0,
+                'unlinked_index': 0
+            }
+        )
+
+        # print(t_terms)
+        # import pdb; pdb.set_trace()
+
         left_z = ''
-        h_term = _build_hz_term_latex_labels(h, h_offset_dict)
-        right_z = _build_right_z_term(h, z_right, right_z_offset_dict)
+        h_term = _build_eT_hz_term_latex_labels(h, h_offset_dict)
+        right_z = _build_eT_right_z_term(h, z_right, right_z_offset_dict)
 
         # build the latex code representing this term in the sum
         term_string += t_terms + left_z + h_term + right_z
@@ -7072,16 +7428,22 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
         # store the result
         return_list.append(term_string)
 
+    # print(len(return_list), split_width*2)
+    # import pdb; pdb.set_trace()
+
     # if the line is so short we don't need to split
-    if len(return_list) < split_width*2:
+    if len(return_list) <= split_width:
         return f"({' + '.join(return_list)})"
 
     split_equation_list = []
+    # print('a', len(return_list) // split_width)
+
     for i in range(0, len(return_list) // split_width):
         split_equation_list.append(' + '.join(return_list[i*split_width:(i+1)*split_width]))
 
     # make sure we pickup the last few terms
-    last_few_terms = (len(return_list) % split_width)-split_width+1
+    last_few_terms = (len(return_list) % split_width)-(split_width+1)
+    assert last_few_terms < 0, 'whoops, math error'
     split_equation_list.append(' + '.join(return_list[last_few_terms:]))
 
     # join the lists with the equation splitting string
@@ -7090,6 +7452,8 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
 
     # and we're done!
     return f"(\n{final_string}\n"
+
+# -------------------------------------------------------------------------------- #
 
 
 def _prepare_eTz_z_terms(Z_left, Z_right, zhz_debug=False):
@@ -7188,10 +7552,16 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
 
         if True:  # debug
             nof_terms = sum([len(x) for x in eT])
-            if eT_order == 0 or nof_terms < 5:
+            if eT_order == 0:
                 log.debug(
                     f"Checking the T^{eT_order} term:"
                     f"\n{LHS=}\n{eT=}\nZ_left=?\n{h=}\nZ_right=?\n"
+                )
+            elif nof_terms < 60:
+                spread_string = 'eT=\n' + ''.join([str(x) + '\n' for x in eT])
+                log.debug(
+                    f"Checking the T^{eT_order} term:"
+                    f"\n{LHS=}\n{spread_string}\nZ_left=?\n{h=}\nZ_right=?\n"
                 )
             else:
                 log.debug(
@@ -7224,16 +7594,28 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
         # unique_s_permutations = _remove_duplicate_z_permutations(eT_connection_permutations)
         unique_eT_permutations = eT_connection_permutations
 
+        # assert list(eT_connection_permutations) != []
+
         if True:  # debug prints
-            for z in unique_eT_permutations:
+            for T, z in unique_eT_permutations:
                 old_print_wrapper('UNIQUE TERMS', LHS, eT, h, z)
+                print('UNIQUE TERMS', LHS, eT, h, z)
+
+        # import pdb; pdb.set_trace()
 
         # generate all the explicit connections
         # this also removes all invalid terms
         labeled_permutations = _generate_explicit_eT_z_connections(LHS, h, unique_eT_permutations)
 
-        print('labeled', labeled_permutations)
-
+        for i, a in enumerate(labeled_permutations):
+            print(
+                '-'*20 + f'labeled {i}' + '-'*20,
+                a[0],
+                a[1],
+                a[2],
+                a[3],
+                sep='\n'
+            )
         # we record
         for term in labeled_permutations:
             log.debug(f"{term=}")
@@ -7243,6 +7625,18 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
             else:
                 old_print_wrapper('exit?')
                 sys.exit(0)
+
+        for i, a in enumerate(total_list):
+            if i < len(total_list) - 1:
+                continue
+            print(
+                '-'*20 + f'total_list {i}' + '-'*20,
+                a[0],
+                a[1],
+                a[2],
+                a[3],
+                sep='\n'
+            )
 
     return
 
@@ -7273,6 +7667,9 @@ def _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False):
         # generate all valid combinations
         _filter_out_valid_eTz_terms(LHS, eT_series_term, H, None, Z, valid_term_list)
         log.setLevel('INFO')
+
+    print('WOPWOOW', valid_term_list)
+    # sys.exit(0)
 
     if valid_term_list == []:
         return ""
@@ -7329,13 +7726,13 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
 def generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex"):
     """Generates and saves to a file the latex equations for full CC expansion."""
 
-    assert len(truncations) == 4, "truncations argument needs to be tuple of four integers!!"
-    maximum_h_rank, maximum_cc_rank, eT_taylor_max_order, omega_max_order = truncations
+    assert len(truncations) == 5, "truncations argument needs to be tuple of five integers!!"
+    maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order = truncations
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
     raw_H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
     Z = generate_z_operator(maximum_cc_rank, only_ground_state)
-    eT_taylor_expansion = generate_eT_taylor_expansion(maximum_cc_rank, eT_taylor_max_order)
+    eT_taylor_expansion = generate_eT_taylor_expansion(maximum_T_rank, eT_taylor_max_order)
 
     """ omega and e^T only generate annihilation operators
         H and Z both generate creation operators
@@ -7840,13 +8237,14 @@ if (__name__ == '__main__'):
     # # Z ansatz
     # truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
 
-    maximum_h_rank = 4
-    maximum_cc_rank = 4
-    eT_taylor_max_order = 2
-    omega_max_order = 4
+    maximum_h_rank = 3
+    maximum_cc_rank = 3
+    maximum_T_rank = 2
+    eT_taylor_max_order = 4
+    omega_max_order = 2
 
     # need to have truncation of e^T
-    eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, eT_taylor_max_order, omega_max_order
+    eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order
 
     generate_latex_files(
         eT_z_t_truncations,

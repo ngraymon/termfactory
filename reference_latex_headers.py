@@ -13,7 +13,7 @@
 w_equations_latex_header = r"""
 \documentclass{article}
 
-\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{geometry}
 \usepackage{natbib}
 \usepackage{graphicx}
@@ -56,7 +56,7 @@ w_equations_latex_header = r"""
 full_vecc_latex_header = r"""
 \documentclass{article}
 
-\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{geometry}
 \usepackage{natbib}
 \usepackage{graphicx}
@@ -171,7 +171,7 @@ The amplitude equation is
 ground_state_vecc_latex_header = r"""
 \documentclass{article}
 
-\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{geometry}
 \usepackage{natbib}
 \usepackage{graphicx}
@@ -284,7 +284,7 @@ The amplitude equation is
 full_z_t_symmetric_latex_header = r"""
 \documentclass{article}
 
-\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{geometry}
 \usepackage{natbib}
 \usepackage{graphicx}
@@ -476,7 +476,7 @@ We have the relation that
 ground_state_z_t_symmetric_latex_header = r"""
 \documentclass{article}
 
-\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage{geometry}
 \usepackage{natbib}
 \usepackage{graphicx}
