@@ -17,6 +17,29 @@ import logging
 # logging.addLevelName(logging.FLOW, "FLOW")
 # "[%(asctime)-13s] [%(levelname)s] %(funcName)s: %(message)s"
 
+line_length = 120
+
+
+class HeaderAdapter(logging.LoggerAdapter):
+    """ The purpose is to allow for logging with short messages
+    that standout in the resulting logs to delineate larger sections of logs
+    """
+    def process(self, msg, kwargs):
+        ss = (line_length - len(msg)) // 2
+        ls2 = '-'*line_length
+        spacer = '-'*ss
+        return f"\n{ls2}\n{spacer} {msg} {spacer}\n{ls2}\n", kwargs
+
+
+class SubHeaderAdapter(logging.LoggerAdapter):
+    """ The purpose is to allow for logging with short messages
+    that standout in the resulting logs to delineate larger sections of logs
+    """
+    def process(self, msg, kwargs):
+        ss = (line_length - len(msg)) // 2
+        spacer = '-'*ss
+        return f"\n{spacer} {msg} {spacer}\n", kwargs
+
 
 class MyLogger(logging.Logger):
     def flow(self, message, *args, **kwargs):
@@ -48,7 +71,7 @@ def get_filebased_logger(filename, *args, **kwargs):
             kwargs['level'] = [logging.INFO, logging.DEBUG][0]
         # trying out the f string log formatting
         else:
-            kwargs['format'] = "[{asctime:<13s}] [{name:s}] [{levelname:^10s}] ({lineno}): {funcName}(): {message}"
+            kwargs['format'] = "[{asctime:<13s}] [{name:s}] [{levelname:^10s}] ({lineno}): {funcName}():{message}"
             kwargs['datefmt'] = ["%m-%d-%Y %I:%M:%S %p", "%d %I:%M:%S"][1]
             kwargs['level'] = [logging.INFO, logging.DEBUG][0]
             kwargs['style'] = '{'

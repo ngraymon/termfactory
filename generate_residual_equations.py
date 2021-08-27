@@ -6453,14 +6453,21 @@ def _generate_valid_eT_z_n_operator_permutations(LHS, eT, h, all_z_permutations)
 
     valid_permutations = []
 
-    print(f"{eT = }")
+    log.info(f"\n{tab}eT=" + f'\n{tab}{tab}'.join(['']+[str(t) for t in eT]))
     # generate all the possible valid permutations
     for perm_T in eT:
-        print(f"{perm_T = }")
+        subheader_log.info(f"{perm_T = }")
         for perm_Z in all_z_permutations:
             left_z, right_z = perm_Z
 
-            str_group = '\n'.join(map(str, [LHS, perm_T, h, perm_Z]))
+            str_group = f'\n{tab}'.join([
+                '',
+                f'{"LHS":<12s}{LHS}',
+                f'{"T":<12s}{perm_T}',
+                f'{"Z_left":<12s}{left_z}',
+                f'{"h":<12s}{h}',
+                f'{"Z_right":<12s}{right_z}',
+            ])
 
             nof_creation_ops = LHS.m + h.m + left_z.m + right_z.m + sum([t.m for t in perm_T])
             nof_annhiliation_ops = LHS.n + h.n + left_z.n + right_z.n + sum([t.n for t in perm_T])
@@ -6468,38 +6475,38 @@ def _generate_valid_eT_z_n_operator_permutations(LHS, eT, h, all_z_permutations)
 
             # only terms which can pair off all operators are non zero
             if cannot_pair_off_b_d_operators:
-                log.debug('Bad Permutation (b and d are not balanced):\n' + str_group)
+                log.debug(f'Bad Permutation (b={nof_creation_ops} and d={nof_annhiliation_ops} are not balanced)' + str_group)
                 continue
 
             # Omega/LHS and H need to satisfy all b/d requirements of the z terms
             # z terms can join with each other, but a single z term should not be able to join to itself!!
             if _z_joining_with_z_terms_eT(LHS, perm_T, h, left_z, right_z):
-                log.debug('Bad Permutation (z joins with itself):\n' + str_group)
+                log.debug('Bad Permutation (z joins with itself)' + str_group)
                 continue
 
             # Omega/LHS and H need to satisfy all b/d requirements of the t terms
             # t terms can join with each other, but a single t term should not be able to join to itself!!
             if _t_joining_with_t_terms_eT(LHS, perm_T, h, left_z, right_z):
-                log.debug('Bad Permutation (t joins with itself):\n' + str_group)
+                log.debug('Bad Permutation (t joins with itself)' + str_group)
                 continue
 
             # Omega/LHS must be able to connect with at least 1 b/d operator from h or a z_term otherwise it 'joins' with itself
             if _omega_joining_with_itself_eT(LHS, perm_T, h, left_z, right_z):
-                log.debug('Bad Permutation (LHS joins with itself):\n' + str_group)
+                log.debug('Bad Permutation (LHS joins with itself)' + str_group)
                 continue
 
             # h must connect with at least 1 b/d operator from Omega/LHS or a z_term otherwise it 'joins' with itself
             if _h_joining_with_itself_eT(LHS, perm_T, h, left_z, right_z):
-                log.debug('Bad Permutation (h joins with itself):\n' + str_group)
+                log.debug('Bad Permutation (h joins with itself)' + str_group)
                 continue
 
             if len(perm_T) == 1:
                 # record a valid permutation
-                log.debug('Good Permutation\n' + str_group)
+                log.debug('Good Permutation' + str_group)
                 valid_permutations.append((tuple(perm_T), left_z, right_z))
             else:
                 # record a valid permutation
-                log.debug('Good Permutation\n' + str_group)
+                log.debug('Good Permutation' + str_group)
                 valid_permutations.append((tuple(perm_T), left_z, right_z))
 
     return valid_permutations
@@ -6547,8 +6554,14 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
 
         n_perms.append(temp_list)
 
-    old_print_wrapper(f"{m_perms=}")
-    old_print_wrapper(f"{n_perms=}")
+    expander = lambda lst: f" {lst}" if len(lst) < 2 else ''.join([f'\n{tab}{tab}{m}' for m in lst])
+    log.debug(''.join([
+        "Uncombined permutations:",
+        f"\n{tab}Z_left M perms:{expander(m_perms[0])}",
+        f"\n{tab}Z_left N perms:{expander(n_perms[0])}",
+        f"\n{tab}Z_right M perms:{expander(m_perms[1])}",
+        f"\n{tab}Z_right N perms:{expander(n_perms[1])}",
+    ]))
 
     # validate upper pairing
     combined_m_perms = list(it.product(*m_perms))
@@ -6561,67 +6574,43 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         total_eT_m = sum([sum(t[1]) for t in m_perm])
         total_h_m = sum([t[2] for t in m_perm])
 
-        old_print_wrapper(f"{m_perm=}")
-        old_print_wrapper(LHS)
-        old_print_wrapper(f"{total_lhs_m=}")
-        old_print_wrapper(t_list)
-        old_print_wrapper(f"{total_eT_m=}")
-        old_print_wrapper(h)
-        old_print_wrapper(f"{total_h_m=}")
-
         total_lhs_balanced = bool(total_lhs_m <= LHS.n)
         total_eT_balanced = bool(total_eT_m <= sum([t.n for t in t_list]))
         total_h_balanced = bool(total_h_m <= h.n)
         left_z_balanced_right = bool(m_perm[0][-1] <= right_z.n)
         right_z_balanced_left = bool(m_perm[1][-1] <= left_z.n)
 
-        old_print_wrapper(f"{total_lhs_balanced=}")
-        old_print_wrapper(f"{total_eT_balanced=}")
-        old_print_wrapper(f"{total_h_balanced=}")
-        old_print_wrapper(f"{left_z_balanced_right=}")
-        old_print_wrapper(f"{right_z_balanced_left=}")
+        each_eT_balanced = all([
+            bool(t.m == (m_perm[0][1][i] + m_perm[1][1][i]))
+            for i, t in enumerate(t_list)
+        ])
 
-        # check eT balance
-        each_eT_balanced = True
-        for i, t in enumerate(t_list):
-            # print(f"{t.n= }", f"{m_perm[0][1][i]= }", f"{m_perm[1][1][i]= }")
-            each_eT_balanced &= bool(t.n == (m_perm[0][1][i] + m_perm[1][1][i]))
+        dense_output = f"\n{tab}".join([
+            '',
+            f"{'Z_left  perm '}{m_perm[0]}",
+            f"{'Z_right perm '}{m_perm[1]}",
+            f"{'LHS':<4}{total_lhs_m:>2d} >= {LHS.n:>2d}  {total_lhs_balanced}",
+            f"{'eT':<4}{total_eT_m:>2d} >= {sum([t.n for t in t_list]):>2d}  {total_eT_balanced}",
+            f"{'h':<4}{total_h_m:>2d} >= {h.n:>2d}  {total_h_balanced}",
+            f"{'zL':<4}{m_perm[0][-1]:>2d} >= {right_z.n:>2d}  {left_z_balanced_right}",
+            f"{'zR':<4}{m_perm[1][-1]:>2d} >= {left_z.n:>2d}  {right_z_balanced_left}",
+        ])
 
-        # print('m', m_perm)
-        # print(LHS)
-        # print(t_list)
-        # print(h)
-        # print(left_z)
-        # print(right_z)
-        # if len(t_list) == 2:
-        #     print(f"{total_h_balanced      =}")
-        #     print(f"{total_lhs_balanced    =}")
-        #     print(f"{total_eT_balanced     =}")
-        #     print(f"{each_eT_balanced      =}")
-        #     print(f"{left_z_balanced_right =}")
-        #     print(f"{right_z_balanced_left =}")
+        bool_list = [
+            total_h_balanced,
+            total_lhs_balanced,
+            total_eT_balanced,
+            each_eT_balanced,
+            left_z_balanced_right,
+            right_z_balanced_left
+        ]
 
-        if total_h_balanced and total_lhs_balanced and total_eT_balanced and each_eT_balanced and left_z_balanced_right and right_z_balanced_left:
-            # if len(t_list) == 2:
-            #     import pdb; pdb.set_trace()
-            log.debug(f"Valid upper perm:   LHS={total_lhs_m}, eT={total_eT_m}, zL={m_perm[0]}, h={total_h_m}, zR={m_perm[1]}")
+        if all(bool_list):
+            log.debug("  Valid upper perm" + dense_output)
             valid_upper_perm_combinations.append(m_perm)
 
         elif log_invalid:
-            log.debug(
-                "Invalid upper perm: "
-                f"h={total_h_m} > {h.n}"
-                " or "
-                f"LHS={total_lhs_m} > {LHS.n}"
-                " or "
-                f"eT={total_eT_m} > {sum([t.n for t in t_list])}"
-                " or "
-                f"zL={m_perm[0][-1]} > {right_z.n}"
-                " or "
-                f"zR={m_perm[1][-1]} > {left_z.n}"
-                f"{'': >6s}"
-                f"{m_perm}"
-            )
+            log.debug("Invalid upper perm" + dense_output)
 
     # validate lower pairing
     combined_n_perms = list(it.product(*n_perms))
@@ -6634,65 +6623,43 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         total_eT_n = sum([sum(t[1]) for t in n_perm])
         total_h_n = sum([t[2] for t in n_perm])
 
-        old_print_wrapper(f"{n_perm=}")
-        old_print_wrapper(LHS)
-        old_print_wrapper(f"{total_lhs_n=}")
-        old_print_wrapper(t_list)
-        old_print_wrapper(f"{total_eT_n=}")
-        old_print_wrapper(h)
-        old_print_wrapper(f"{total_h_n=}")
-
         total_lhs_balanced = bool(total_lhs_n <= LHS.m)
         total_eT_balanced = bool(total_eT_n <= sum([t.m for t in t_list]))
         total_h_balanced = bool(total_h_n <= h.m)
         left_z_balanced_right = bool(n_perm[0][-1] <= right_z.m)
         right_z_balanced_left = bool(n_perm[1][-1] <= left_z.m)
 
-        old_print_wrapper(f"{total_lhs_balanced=}")
-        old_print_wrapper(f"{total_eT_balanced=}")
-        old_print_wrapper(f"{total_h_balanced=}")
-        old_print_wrapper(f"{left_z_balanced_right=}")
-        old_print_wrapper(f"{right_z_balanced_left=}")
+        each_eT_balanced = all([
+            bool(t.m == (n_perm[0][1][i] + n_perm[1][1][i]))
+            for i, t in enumerate(t_list)
+        ])
 
-        # check eT balance
-        each_eT_balanced = True
-        for i, t in enumerate(t_list):
-            old_print_wrapper(f"{t.m= }", f"{n_perm[0][1][i]= }", f"{n_perm[1][1][i]= }")
-            each_eT_balanced &= bool(t.m == (n_perm[0][1][i] + n_perm[1][1][i]))
+        dense_output = f"\n{tab}".join([
+            '',
+            f"{'Z_left  perm '}{n_perm[0]}",
+            f"{'Z_right perm '}{n_perm[1]}",
+            f"{'LHS':<4}{total_lhs_n:>2d} >= {LHS.m:>2d}  {total_lhs_balanced}",
+            f"{'eT':<4}{total_eT_n:>2d} >= {sum([t.m for t in t_list]):>2d}  {total_eT_balanced}",
+            f"{'h':<4}{total_h_n:>2d} >= {h.m:>2d}  {total_h_balanced}",
+            f"{'zL':<4}{n_perm[0][-1]:>2d} >= {right_z.m:>2d}  {left_z_balanced_right}",
+            f"{'zR':<4}{n_perm[1][-1]:>2d} >= {left_z.m:>2d}  {right_z_balanced_left}",
+        ])
 
-        # print('n', n_perm)
-        # print(LHS)
-        # print(t_list)
-        # print(h)
-        # print(left_z)
-        # print(right_z)
-        # if len(t_list) == 2:
-        #     print(f"{total_h_balanced      =}")
-        #     print(f"{total_lhs_balanced    =}")
-        #     print(f"{total_eT_balanced     =}")
-        #     print(f"{each_eT_balanced      =}")
-        #     print(f"{left_z_balanced_right =}")
-        #     print(f"{right_z_balanced_left =}")
+        bool_list = [
+            total_h_balanced,
+            total_lhs_balanced,
+            total_eT_balanced,
+            each_eT_balanced,
+            left_z_balanced_right,
+            right_z_balanced_left
+        ]
 
-        if total_h_balanced and total_lhs_balanced and total_eT_balanced and each_eT_balanced and left_z_balanced_right and right_z_balanced_left:
-            log.debug(f"Valid lower perm:   LHS={total_lhs_n}, eT={total_eT_n}, zL={n_perm[0]}, h={total_h_n}, zR={n_perm[1]}")
+        if all(bool_list):
+            log.debug("  Valid lower perm" + dense_output)
             valid_lower_perm_combinations.append(n_perm)
 
         elif log_invalid:
-            log.debug(
-                "Invalid lower perm: "
-                f"h={total_h_n} > {h.m}"
-                " or "
-                f"LHS={total_lhs_n} > {LHS.m}"
-                " or "
-                f"eT={total_eT_n} > {sum([t.m for t in t_list])}"
-                " or "
-                f"zL={n_perm[0][-1]} > {right_z.m}"
-                " or "
-                f"zR={n_perm[1][-1]} > {left_z.m}"
-                f"{'': >6s}"
-                f"{n_perm}"
-            )
+            log.debug("Invalid lower perm" + dense_output)
 
     return valid_upper_perm_combinations, valid_lower_perm_combinations
 
@@ -6831,34 +6798,45 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
     annotated_z_permutations = []  # store intermediate output here
 
     log_conf.setLevelDebug(log)
-    old_print_wrapper('-'*30 + 'here' + '-'*3)
-    i = 0
 
-    for perm in valid_permutations:
-        print('p', perm)
-        t_list, left_z, right_z = perm
-        print('p2', t_list)
+    def print_triplet(i, p):
+        return str(
+            f'\n{tab}{i+1:<4}{"eT":<12s}{p[0]}'
+            f'\n{tab}{tab}{"Z left":<12s}{p[1]}'
+            f'\n{tab}{tab}{"Z right":<12s}{p[2]}'
+        )
 
-        # if len(t_list) >= 2:
-        #     import pdb; pdb.set_trace()
+    log.info(f"\n{tab}valid_permutations=" + ''.join([
+        print_triplet(i, p)
+        for i, p in enumerate(valid_permutations)
+    ]))
 
-        log.debug(f'\n{t_list=}\n{left_z=}\n{right_z=}\n')
+    for i, triplet in enumerate(valid_permutations):
+
+        subheader_log.debug(f"PERMUTATION{i+1:>4}")
+        log.debug(print_triplet(i, triplet))
+
+        # unpack the triplet
+        t_list, left_z, right_z = triplet
 
         upper_perms, lower_perms = _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, right_z)
-        log.debug(f"{upper_perms=}")
-        log.debug(f"{lower_perms=}")
+
+        expander = lambda lst: f" {lst}" if len(lst) < 2 else ''.join([f'\n{tab}{tab}{m}' for m in lst])
+        log.debug(''.join([
+            f"\n{tab}Connected permutations (Z left / Z right):",
+            f"\n{tab}M perms:{expander(upper_perms)}",
+            f"\n{tab}N perms:{expander(lower_perms)}",
+        ]))
 
         # compute all the permutations for z
         for upper in upper_perms:
             for lower in lower_perms:
                 assert len(upper) == len(lower)
-                log.debug(f"{upper=}")
-                log.debug(f"{lower=}")
+
                 left_z_upper, right_z_upper = upper
                 left_z_lower, right_z_lower = lower
                 z_left_kwargs, z_right_kwargs = {}, {}
-
-                z_list = []
+                z_pair = []
 
                 # for each Z operator we make a `connected_namedtuple` or a `disconnected_namedtuple`
                 if left_z.name is None:
@@ -6866,7 +6844,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                     assert left_z_upper == left_z_lower
                     assert left_z_upper[0] == 0 and left_z_upper[2:] == (0, 0)
                     assert all([x == 0 for x in left_z_upper[1]])
-                    z_list.append(None)
+                    z_pair.append(None)
                 else:
                     z_left_kwargs = {
                         'rank': left_z.rank,
@@ -6883,17 +6861,17 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                     }
                     # if the Z operator is disconnected (meaning no connections to H)
                     if z_left_kwargs['m_h'] == z_left_kwargs['n_h'] == 0:
-                        z_list.append(disconnected_eT_z_left_operator_namedtuple(**z_left_kwargs))
+                        z_pair.append(disconnected_eT_z_left_operator_namedtuple(**z_left_kwargs))
                     # if the Z operator is connected (at least 1 connection to H)
                     else:
-                        z_list.append(connected_eT_z_left_operator_namedtuple(**z_left_kwargs))
+                        z_pair.append(connected_eT_z_left_operator_namedtuple(**z_left_kwargs))
 
                 if right_z.name is None:
                     # make sure this permutation is okay for no z right
                     assert right_z_upper == right_z_lower
                     assert right_z_upper[0] == 0 and right_z_upper[2:] == (0, 0)
                     assert all([x == 0 for x in right_z_upper[1]])
-                    z_list.append(None)
+                    z_pair.append(None)
                 else:
                     z_right_kwargs = {
                         'rank': right_z.rank,
@@ -6910,31 +6888,37 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                     }
                     # if the Z operator is disconnected (meaning no connections to H)
                     if z_right_kwargs['m_h'] == z_right_kwargs['n_h'] == 0:
-                        z_list.append(disconnected_eT_z_right_operator_namedtuple(**z_right_kwargs))
+                        z_pair.append(disconnected_eT_z_right_operator_namedtuple(**z_right_kwargs))
                     # if the Z operator is connected (at least 1 connection to H)
                     else:
-                        z_list.append(connected_eT_z_right_operator_namedtuple(**z_right_kwargs))
+                        z_pair.append(connected_eT_z_right_operator_namedtuple(**z_right_kwargs))
 
-                # if we have the ZHZ terms then we need to check that the Z <-> Z
-                # contractions are correct
+                # if we have the ZHZ terms then we need to check that the Z <-> Z contractions are correct
                 if (z_left_kwargs != {}) and (z_right_kwargs != {}):
+
                     # if these contractions are not equal
                     if z_left_kwargs['m_r'] != z_right_kwargs['n_l']:
-                        term_string = f"{tab}{LHS}, {h}, {perm}\n{tab}{z_left_kwargs=}\n{tab}{z_right_kwargs=}\n"
-                        log.debug(f"Found an invalid term (z_left.m_r != z_right.n_l)\n{term_string}")
+                        term_string = f"{tab}{LHS}, {h}, {triplet}\n{tab}{z_left_kwargs=}\n{tab}{z_right_kwargs=}\n"
+                        log.debug(
+                            f"Invalid term (z_left.m_r({z_left_kwargs['m_r']}) != z_right.n_l({z_right_kwargs['n_l']}))\n"
+                            f"{term_string}"
+                        )
                         continue
 
                     # if these contractions are not equal
                     if z_left_kwargs['n_r'] != z_right_kwargs['m_l']:
-                        term_string = f"{tab}{LHS}, {h}, {perm}\n{tab}{z_left_kwargs=}\n{tab}{z_right_kwargs=}\n"
-                        log.debug(f"Found an invalid term (z_left.n_r != z_right.m_l)\n{term_string}")
+                        term_string = f"{tab}{LHS}, {h}, {triplet}\n{tab}{z_left_kwargs=}\n{tab}{z_right_kwargs=}\n"
+                        log.debug(
+                            f"Invalid term (z_left.n_r({z_left_kwargs['n_r']}) != z_right.m_l({z_right_kwargs['m_l']}))\n"
+                            f"{term_string}"
+                        )
                         continue
 
-                log.debug(f"{z_list=}")
-                annotated_z_permutations.append(tuple(z_list))
-
-        old_print_wrapper(annotated_z_permutations)
-        old_print_wrapper(f'{i=}\n\n')
+                log.debug(
+                    f"\n{tab}Z left  {z_pair[0]}"
+                    f"\n{tab}Z right {z_pair[1]}"
+                )
+                annotated_z_permutations.append(tuple(z_pair))
 
         for z_pair in annotated_z_permutations:
 
@@ -7002,9 +6986,6 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
             log.debug(f"perm=\n{perm[0]}\n{perm[1]}")
             print(f"perm=\n{perm[0]}\n{perm[1]}")
 
-        # if i == 3:
-        #     sys.exit(0)
-        # i += 1
     log_conf.setLevelInfo(log)
 
     return annotated_permutations
@@ -7460,14 +7441,14 @@ def _prepare_eTz_z_terms(Z_left, Z_right, zhz_debug=False):
 
     # H*Z terms, straightforward
     if Z_left is None:
-        log.info("Z is on the right\n")
+        header_log.info("Z is on the right")
         z_left_terms = [general_operator_namedtuple(None, 0, 0, 0), ]
         z_right_terms = Z_right.operator_list
         assert isinstance(z_right_terms, list) and isinstance(z_right_terms[0], general_operator_namedtuple)
 
     # Z*H terms, straightforward
     elif Z_right is None:
-        log.info("Z is on the left\n")
+        header_log.info("Z is on the left")
         z_left_terms = Z_left.operator_list
         z_right_terms = [general_operator_namedtuple(None, 0, 0, 0), ]
         # z_right_terms = Z_left.operator_list
@@ -7479,7 +7460,7 @@ def _prepare_eTz_z_terms(Z_left, Z_right, zhz_debug=False):
     # Z*H*Z terms, most complicated
     else:
         zhz_debug = True
-        log.info("Z is on both sides\n")
+        header_log.info("Z is on both sides")
         z_left_terms = Z_left.operator_list
         z_right_terms = Z_right.operator_list
         assert isinstance(z_right_terms, list) and isinstance(z_right_terms[0], general_operator_namedtuple)
@@ -7511,19 +7492,19 @@ def _prepare_eTz_T_terms(eT_series_term):
 
     # T^0 operator is simply 1 in this case
     if isinstance(eT_series_term, general_operator_namedtuple):
-        log.info("T^0\n")
+        subheader_log.info("PROCESSING T^0")
         order = 0
         eT_series_term = [[eT_series_term, ], ]  # wrap in a list of lists
 
     # T^1 operator, straightforward
     elif isinstance(eT_series_term, list) and isinstance(eT_series_term[0], general_operator_namedtuple):
-        log.info("T^1\n")
+        subheader_log.info("PROCESSING T^1")
         order = 1
         eT_series_term = [[term, ] for term in eT_series_term]  # wrap in a list
 
     # T^n operator, most complicated
     elif isinstance(eT_series_term, list) and isinstance(eT_series_term[0], list) and len(eT_series_term[0]) >= 2:
-        log.info("T^n\n")
+        subheader_log.info("PROCESSING T^n")
         order = 'n'
         # no wrapping necessary
 
@@ -7551,22 +7532,38 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
 
         if True:  # debug
             nof_terms = sum([len(x) for x in eT])
+            subheader_log.debug(f"Checking the T^{eT_order} term:")
+
             if eT_order == 0:
-                log.debug(
-                    f"Checking the T^{eT_order} term:"
-                    f"\n{LHS=}\n{eT=}\nZ_left=?\n{h=}\nZ_right=?\n"
-                )
+                log.debug(f'\n{tab}'.join([
+                    '',
+                    f'{"LHS":<12s}{LHS}',
+                    f'{"eT":<12s}{eT}',
+                    f'{"Z_left":<12s}None',
+                    f'{"h":<12s}{h}',
+                    f'{"Z_right":<12s}None',
+                ]))
+
             elif nof_terms < 60:
                 spread_string = 'eT=\n' + ''.join([str(x) + '\n' for x in eT])
-                log.debug(
-                    f"Checking the T^{eT_order} term:"
-                    f"\n{LHS=}\n{spread_string}\nZ_left=?\n{h=}\nZ_right=?\n"
-                )
+
+                log.debug(f'\n{tab}'.join([
+                    '',
+                    f'{"LHS":<12s}{LHS}',
+                    f'{"eT":<12s}{spread_string}',
+                    f'{"Z_left":<12s}None',
+                    f'{"h":<12s}{h}',
+                    f'{"Z_right":<12s}None',
+                ]))
             else:
-                log.debug(
-                    f"Checking the T^{eT_order} term:"
-                    f"\n{LHS=} number of s terms: {nof_terms}\nZ_left=?\n{h=}\nZ_right=?\n"
-                )
+                log.debug(f'\n{tab}'.join([
+                    '',
+                    f'{"LHS":<12s}{LHS}',
+                    f'number of s terms: {nof_terms}',
+                    f'{"Z_left":<12s}None',
+                    f'{"h":<12s}{h}',
+                    f'{"Z_right":<12s}None',
+                ]))
 
         # valid pairings of s operators given a specific `LHS` and `h`
         valid_permutations = _generate_valid_eT_z_n_operator_permutations(LHS, eT, h, all_z_permutations)
@@ -8224,6 +8221,9 @@ if (__name__ == '__main__'):
         log = log_conf.get_filebased_logger(logging_output_filename)
     else:
         log = log_conf.get_stdout_logger()
+
+    header_log = log_conf.HeaderAdapter(log, {})
+    subheader_log = log_conf.SubHeaderAdapter(log, {})
 
     # dump_all_stdout_to_devnull()   # calling this removes all prints / logs from stdout
     # log.setLevel('CRITICAL')
