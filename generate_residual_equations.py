@@ -7460,14 +7460,14 @@ def _prepare_eTz_z_terms(Z_left, Z_right, zhz_debug=False):
 
     # H*Z terms, straightforward
     if Z_left is None:
-        log.info("Z on the right\n")
+        log.info("Z is on the right\n")
         z_left_terms = [general_operator_namedtuple(None, 0, 0, 0), ]
         z_right_terms = Z_right.operator_list
         assert isinstance(z_right_terms, list) and isinstance(z_right_terms[0], general_operator_namedtuple)
 
     # Z*H terms, straightforward
     elif Z_right is None:
-        log.info("Z on the left\n")
+        log.info("Z is on the left\n")
         z_left_terms = Z_left.operator_list
         z_right_terms = [general_operator_namedtuple(None, 0, 0, 0), ]
         # z_right_terms = Z_left.operator_list
@@ -7479,7 +7479,7 @@ def _prepare_eTz_z_terms(Z_left, Z_right, zhz_debug=False):
     # Z*H*Z terms, most complicated
     else:
         zhz_debug = True
-        log.info("Z on both sides\n")
+        log.info("Z is on both sides\n")
         z_left_terms = Z_left.operator_list
         z_right_terms = Z_right.operator_list
         assert isinstance(z_right_terms, list) and isinstance(z_right_terms[0], general_operator_namedtuple)
