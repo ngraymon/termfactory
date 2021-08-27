@@ -6354,13 +6354,17 @@ def _omega_joining_with_itself_eT(omega, t_list, h, z_left, z_right):
         if (h.m > 0) or (z_left.m > 0) or (z_right.m > 0):
             return False
 
+        for t in t_list:
+            if t.m > 0:
+                return False
+
     if omega.m > 0:
         if (h.n > 0) or (z_left.n > 0) or (z_right.n > 0):
             return False
 
-    for t in t_list:
-        if (omega.n > 0 and t.m > 0) or (omega.m > 0 and t.n > 0):
-            return False
+        for t in t_list:
+            if t.n > 0:
+                return False
 
     return True
 
@@ -6382,13 +6386,17 @@ def _h_joining_with_itself_eT(omega, t_list, h, z_left, z_right):
         if (omega.m > 0) or (z_left.m > 0) or (z_right.m > 0):
             return False
 
+        for t in t_list:
+            if t.m > 0:
+                return False
+
     if h.m > 0:
         if (omega.n > 0) or (z_left.n > 0) or (z_right.n > 0):
             return False
 
-    for t in t_list:
-        if (h.n > 0 and t.m > 0) or (h.m > 0 and t.n > 0):
-            return False
+        for t in t_list:
+            if t.n > 0:
+                return False
 
     return True
 
@@ -6452,7 +6460,7 @@ def _generate_valid_eT_z_n_operator_permutations(LHS, eT, h, all_z_permutations)
         for perm_Z in all_z_permutations:
             left_z, right_z = perm_Z
 
-            group = (LHS, perm_T, h, perm_Z)
+            str_group = '\n'.join(map(str, [LHS, perm_T, h, perm_Z]))
 
             nof_creation_ops = LHS.m + h.m + left_z.m + right_z.m + sum([t.m for t in perm_T])
             nof_annhiliation_ops = LHS.n + h.n + left_z.n + right_z.n + sum([t.n for t in perm_T])
@@ -6460,45 +6468,39 @@ def _generate_valid_eT_z_n_operator_permutations(LHS, eT, h, all_z_permutations)
 
             # only terms which can pair off all operators are non zero
             if cannot_pair_off_b_d_operators:
-                log.debug(('Bad Permutation (b and d are not balanced):', group))
+                log.debug('Bad Permutation (b and d are not balanced):\n' + str_group)
                 continue
 
             # Omega/LHS and H need to satisfy all b/d requirements of the z terms
             # z terms can join with each other, but a single z term should not be able to join to itself!!
             if _z_joining_with_z_terms_eT(LHS, perm_T, h, left_z, right_z):
-                log.debug(('Bad Permutation (z joins with itself):', group))
+                log.debug('Bad Permutation (z joins with itself):\n' + str_group)
                 continue
 
             # Omega/LHS and H need to satisfy all b/d requirements of the t terms
             # t terms can join with each other, but a single t term should not be able to join to itself!!
             if _t_joining_with_t_terms_eT(LHS, perm_T, h, left_z, right_z):
-                log.debug(('Bad Permutation (t joins with itself):', group))
+                log.debug('Bad Permutation (t joins with itself):\n' + str_group)
                 continue
 
             # Omega/LHS must be able to connect with at least 1 b/d operator from h or a z_term otherwise it 'joins' with itself
             if _omega_joining_with_itself_eT(LHS, perm_T, h, left_z, right_z):
-                log.debug(('Bad Permutation (LHS joins with itself):', group))
+                log.debug('Bad Permutation (LHS joins with itself):\n' + str_group)
                 continue
 
             # h must connect with at least 1 b/d operator from Omega/LHS or a z_term otherwise it 'joins' with itself
             if _h_joining_with_itself_eT(LHS, perm_T, h, left_z, right_z):
-                log.debug(('Bad Permutation (h joins with itself):', group))
+                log.debug('Bad Permutation (h joins with itself):\n' + str_group)
                 continue
 
             if len(perm_T) == 1:
                 # record a valid permutation
-                log.debug(('Good Permutation', group))
-                valid_permutations.append((perm_T, left_z, right_z))
+                log.debug('Good Permutation\n' + str_group)
+                valid_permutations.append((tuple(perm_T), left_z, right_z))
             else:
                 # record a valid permutation
-                log.debug(('Good Permutation', group))
-                valid_permutations.append((perm_T, left_z, right_z))
-
-                # for now we cheat
-                # print("CHEATING", perm_T)
-                # continue
-
-                # raise Exception()
+                log.debug('Good Permutation\n' + str_group)
+                valid_permutations.append((tuple(perm_T), left_z, right_z))
 
     return valid_permutations
 
@@ -6521,12 +6523,6 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
     # we need to dynamically adjust the temporary lists if we add more t terms
     nof_t_terms = len(t_list)
 
-    if False:
-        print(t_list)
-        t_list = [t_list[0], t_list[0]]
-        print(t_list)
-        nof_t_terms = len(t_list)
-
     """ generate all possible individual t assignments
 
     Here `a` represents LHS and `b` represents h so that we don't clobber the argument
@@ -6539,7 +6535,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         for a, b, *t in it.product(range(M+1), repeat=2+nof_t_terms):
             total = a+b+sum(t)
             if total <= M:
-                temp_list.append((a, t, b, M-total))
+                temp_list.append((a, tuple(t), b, M-total))
 
         m_perms.append(temp_list)
 
@@ -6547,7 +6543,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         for a, b, *t in it.product(range(N+1), repeat=2+nof_t_terms):
             total = a+b+sum(t)
             if total <= N:
-                temp_list.append((a, t, b, N-total))
+                temp_list.append((a, tuple(t), b, N-total))
 
         n_perms.append(temp_list)
 
@@ -6591,8 +6587,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
             # print(f"{t.n= }", f"{m_perm[0][1][i]= }", f"{m_perm[1][1][i]= }")
             each_eT_balanced &= bool(t.n == (m_perm[0][1][i] + m_perm[1][1][i]))
 
-        # print(m_perm)
-        # print(each_eT_balanced)
+        # print('m', m_perm)
         # print(LHS)
         # print(t_list)
         # print(h)
@@ -6605,9 +6600,10 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         #     print(f"{each_eT_balanced      =}")
         #     print(f"{left_z_balanced_right =}")
         #     print(f"{right_z_balanced_left =}")
-        #     import pdb; pdb.set_trace()
 
         if total_h_balanced and total_lhs_balanced and total_eT_balanced and each_eT_balanced and left_z_balanced_right and right_z_balanced_left:
+            # if len(t_list) == 2:
+            #     import pdb; pdb.set_trace()
             log.debug(f"Valid upper perm:   LHS={total_lhs_m}, eT={total_eT_m}, zL={m_perm[0]}, h={total_h_m}, zR={m_perm[1]}")
             valid_upper_perm_combinations.append(m_perm)
 
@@ -6663,6 +6659,20 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         for i, t in enumerate(t_list):
             old_print_wrapper(f"{t.m= }", f"{n_perm[0][1][i]= }", f"{n_perm[1][1][i]= }")
             each_eT_balanced &= bool(t.m == (n_perm[0][1][i] + n_perm[1][1][i]))
+
+        # print('n', n_perm)
+        # print(LHS)
+        # print(t_list)
+        # print(h)
+        # print(left_z)
+        # print(right_z)
+        # if len(t_list) == 2:
+        #     print(f"{total_h_balanced      =}")
+        #     print(f"{total_lhs_balanced    =}")
+        #     print(f"{total_eT_balanced     =}")
+        #     print(f"{each_eT_balanced      =}")
+        #     print(f"{left_z_balanced_right =}")
+        #     print(f"{right_z_balanced_left =}")
 
         if total_h_balanced and total_lhs_balanced and total_eT_balanced and each_eT_balanced and left_z_balanced_right and right_z_balanced_left:
             log.debug(f"Valid lower perm:   LHS={total_lhs_n}, eT={total_eT_n}, zL={n_perm[0]}, h={total_h_n}, zR={n_perm[1]}")
@@ -6825,7 +6835,13 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
     i = 0
 
     for perm in valid_permutations:
+        print('p', perm)
         t_list, left_z, right_z = perm
+        print('p2', t_list)
+
+        # if len(t_list) >= 2:
+        #     import pdb; pdb.set_trace()
+
         log.debug(f'\n{t_list=}\n{left_z=}\n{right_z=}\n')
 
         upper_perms, lower_perms = _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, right_z)
@@ -6923,6 +6939,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
         for z_pair in annotated_z_permutations:
 
             print('t_list', t_list)
+            print('z_pair', z_pair)
             # now we have to compute all the permutations for t
             if len(t_list) == 1 and t_list[0].rank == 0:
                 upper_perms = [[[0, ] * 4, ], ]
@@ -6962,6 +6979,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                         }
 
                         print(len(t_list), t_list)
+                        print(upper, lower)
                         assert t.m == sum(t_upper), f"{t.m = } {t_upper = }"
                         assert t.n == sum(t_lower), f"{t.n = } {t_lower = }"
 
@@ -6977,26 +6995,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
 
             annotated_permutations.append([tuple(perm_list), z_pair])
 
-        # print(annotated_t_permutations)
-        # print(annotated_z_permutations)
-
-        # assert len(annotated_t_permutations) == len(annotated_z_permutations), (
-        #     "Wrong lengths\n"
-        #     f"t len: {len(annotated_t_permutations)}\n"
-        #     f"z len: {len(annotated_z_permutations)}\n"
-        # )
-
-        # for i in range(len(annotated_t_permutations)):
-        #     print(i)
-        #     print('\n annotated_t_permutations:\n', annotated_t_permutations[i])
-        #     print('\n annotated_z_permutations:\n', annotated_z_permutations[i])
-        #     print('\n zip:\n', zip(annotated_t_permutations[i], annotated_z_permutations[i]))
-        #     print('\n prod:')
-        #     for a in list(it.product(annotated_t_permutations[i], annotated_z_permutations[i])):
-        #         print(a)
-        #     print('\n')
-
-        print(annotated_permutations)
+        # print(annotated_permutations)
         # import pdb; pdb.set_trace()
 
         for perm in annotated_permutations:
@@ -7432,7 +7431,7 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
     # import pdb; pdb.set_trace()
 
     # if the line is so short we don't need to split
-    if len(return_list) <= split_width:
+    if len(return_list) <= split_width+2:
         return f"({' + '.join(return_list)})"
 
     split_equation_list = []
@@ -8238,7 +8237,7 @@ if (__name__ == '__main__'):
     # truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
 
     maximum_h_rank = 3
-    maximum_cc_rank = 3
+    maximum_cc_rank = 2
     maximum_T_rank = 2
     eT_taylor_max_order = 4
     omega_max_order = 2
