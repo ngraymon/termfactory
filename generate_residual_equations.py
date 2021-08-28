@@ -6744,18 +6744,21 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
             total_lhs_balanced = bool(total_lhs_n <= LHS.m)
             total_h_balanced = bool(total_h_n <= h.m)
 
+            dense_output = f"\n{tab}".join([
+                '',
+                f"{'LHS':<4}{total_lhs_n:>2d} >= {LHS.m:>2d}  {total_lhs_balanced}",
+                f"{'h':<4}{total_h_n:>2d} >= {h.m:>2d}  {total_h_balanced}",
+                f"{'T':<4}{n_perm}",
+                f"{'zL':<4}{z_left}",
+                f"{'zR':<4}{z_right}",
+            ])
+
             if total_h_balanced and total_lhs_balanced:
-                log.debug(f"Valid lower perm:   LHS={total_lhs_n}, T={n_perm}, zL={z_left}, h={total_h_n}, zR={z_right}")
+                log.debug("  Valid lower perm" + dense_output)
                 valid_lower_perm_combinations.append(n_perm)
 
             elif log_invalid:
-                log.debug(
-                    "Invalid lower perm: "
-                    f"h={total_h_n} > {h.m}"
-                    " or "
-                    f"LHS={total_lhs_n} > {LHS.m}"
-                    f"{'': >6s}{n_perm}"
-                )
+                log.debug("Invalid lower perm" + dense_output)
 
         print(f"original {m_perms=}")
         # ----------------------------------------------------------
@@ -6769,18 +6772,21 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
             total_lhs_balanced = bool(total_lhs_m <= LHS.n)
             total_h_balanced = bool(total_h_m <= h.n)
 
+            dense_output = f"\n{tab}".join([
+                '',
+                f"{'LHS':<4}{total_lhs_m:>2d} >= {LHS.n:>2d}  {total_lhs_balanced}",
+                f"{'h':<4}{total_h_m:>2d} >= {h.n:>2d}  {total_h_balanced}",
+                f"{'T':<4}{m_perm}",
+                f"{'zL':<4}{z_left}",
+                f"{'zR':<4}{z_right}",
+            ])
+
             if total_h_balanced and total_lhs_balanced:
-                log.debug(f"Valid upper perm:   LHS={total_lhs_m}, T={m_perm}, zL={z_left}, h={total_h_m}, zR={z_right}")
+                log.debug("  Valid upper perm" + dense_output)
                 valid_upper_perm_combinations.append(m_perm)
 
             elif log_invalid:
-                log.debug(
-                    "Invalid upper perm: "
-                    f"h={total_h_m} > {h.n}"
-                    " or "
-                    f"LHS={total_lhs_m} > {LHS.n}"
-                    f"{'': >6s}{m_perm}"
-                )
+                log.debug("Invalid upper perm" + dense_output)
 
     elif remaining_n == 0:
         raise Exception("have not coded this yet")
@@ -6800,8 +6806,14 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
     log_conf.setLevelDebug(log)
 
     def print_triplet(i, p):
+        et_string = ''.join([
+            f"{'(':<8s}",
+            f'\n{tab}{tab}{tab}{tab}{tab}'.join([str(t) for t in p[0]]),
+            f"\n{tab}{tab})"
+        ])
+
         return str(
-            f'\n{tab}{i+1:<4}{"eT":<12s}{p[0]}'
+            f'\n{tab}{i+1:<4}{"eT":<4s}{et_string}'
             f'\n{tab}{tab}{"Z left":<12s}{p[1]}'
             f'\n{tab}{tab}{"Z right":<12s}{p[2]}'
         )
@@ -6814,7 +6826,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
     for i, triplet in enumerate(valid_permutations):
 
         subheader_log.debug(f"PERMUTATION{i+1:>4}")
-        log.debug(print_triplet(i, triplet))
+        log.debug(f"\n{tab}Processing permutation" + print_triplet(i, triplet))
 
         # unpack the triplet
         t_list, left_z, right_z = triplet
@@ -6982,9 +6994,14 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
         # print(annotated_permutations)
         # import pdb; pdb.set_trace()
 
+        splitperm = lambda array: f'\n{tab}{tab}'.join(['']+[str(t) for t in array[0]])
+
         for perm in annotated_permutations:
-            log.debug(f"perm=\n{perm[0]}\n{perm[1]}")
-            print(f"perm=\n{perm[0]}\n{perm[1]}")
+            log.debug(
+                f"\n{tab}Accepted Permutation ({splitperm(perm)}"
+                f"\n{tab})"
+                f"\n{tab}{perm[1]}"
+            )
 
     log_conf.setLevelInfo(log)
 
@@ -7092,7 +7109,7 @@ def _f_t_h_contributions(t_list, h):
             assert 0 == t.m_h == h.n_t[i]
             return_list.append(0)
         else:
-            assert t.m_h == h.n_t[i] >= 1
+            assert t.m_h == h.n_t[i]
             return_list.append(t.m_h)
 
     return return_list
@@ -7119,8 +7136,7 @@ def _f_t_zR_contributions(t_list, z_right):
 
     for i, t in enumerate(t_list):
         assert t.m_r == z_right.n_t[i]
-        if t.m_r >= 1:
-            return_list.append(t.m_r)
+        return_list.append(t.m_r)
 
     return return_list
 
@@ -7131,8 +7147,7 @@ def _fbar_t_zR_contributions(t_list, z_right):
 
     for i, t in enumerate(t_list):
         assert t.n_r == z_right.m_t[i]
-        if t.n_r >= 1:
-            return_list.append(t.n_r)
+        return_list.append(t.n_r)
 
     return return_list
 
@@ -7143,8 +7158,7 @@ def _f_t_zL_contributions(t_list, z_left):
 
     for i, t in enumerate(t_list):
         assert t.m_l == z_left.n_t[i]
-        if t.m_l >= 1:
-            return_list.append(t.m_l)
+        return_list.append(t.m_l)
 
     return return_list
 
@@ -7155,8 +7169,7 @@ def _fbar_t_zL_contributions(t_list, z_left):
 
     for i, t in enumerate(t_list):
         assert t.n_l == z_left.m_t[i]
-        if t.n_l >= 1:
-            return_list.append(t.n_l)
+        return_list.append(t.n_l)
 
     return return_list
 
@@ -7343,7 +7356,6 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
         # old_print_wrapper("TERM", term)
 
         # extract elements of list `term`
-        print("TERM", term, '\n\n')
         LHS, t_list, h, z_left, z_right = term[0], term[1], term[2], *term[3]
 
         # if needed add f prefactors
@@ -7407,6 +7419,11 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
 
         # store the result
         return_list.append(term_string)
+
+    unique_list = list(set(return_list))
+    assert len(unique_list) == len(return_list), "Duplicate terms, logic is incorrect"
+
+    log.info(f'\n{tab}Prepared:\n{tab}' + f'\n{tab}'.join([s for s in return_list]))
 
     # print(len(return_list), split_width*2)
     # import pdb; pdb.set_trace()
@@ -7545,7 +7562,7 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
                 ]))
 
             elif nof_terms < 60:
-                spread_string = 'eT=\n' + ''.join([str(x) + '\n' for x in eT])
+                spread_string = f'\n{tab}{tab}{tab}{tab}'.join([str(x) for x in eT])
 
                 log.debug(f'\n{tab}'.join([
                     '',
@@ -8236,10 +8253,10 @@ if (__name__ == '__main__'):
     # # Z ansatz
     # truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
 
-    maximum_h_rank = 3
+    maximum_h_rank = 2
     maximum_cc_rank = 2
     maximum_T_rank = 2
-    eT_taylor_max_order = 4
+    eT_taylor_max_order = 2
     omega_max_order = 2
 
     # need to have truncation of e^T
