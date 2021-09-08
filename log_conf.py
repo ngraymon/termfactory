@@ -15,6 +15,30 @@ import logging
 
 # add names
 # logging.addLevelName(logging.FLOW, "FLOW")
+# "[%(asctime)-13s] [%(levelname)s] %(funcName)s: %(message)s"
+
+line_length = 120
+
+
+class HeaderAdapter(logging.LoggerAdapter):
+    """ The purpose is to allow for logging with short messages
+    that standout in the resulting logs to delineate larger sections of logs
+    """
+    def process(self, msg, kwargs):
+        ss = (line_length - len(msg)) // 2
+        ls2 = '-'*line_length
+        spacer = '-'*ss
+        return f"\n{ls2}\n{spacer} {msg} {spacer}\n{ls2}\n", kwargs
+
+
+class SubHeaderAdapter(logging.LoggerAdapter):
+    """ The purpose is to allow for logging with short messages
+    that standout in the resulting logs to delineate larger sections of logs
+    """
+    def process(self, msg, kwargs):
+        ss = (line_length - len(msg)) // 2
+        spacer = '-'*ss
+        return f"\n{spacer} {msg} {spacer}\n", kwargs
 
 
 class MyLogger(logging.Logger):
@@ -25,31 +49,40 @@ class MyLogger(logging.Logger):
 
 def get_stdout_logger(*args, **kwargs):
     logging.setLoggerClass(MyLogger)
-    logging.basicConfig(
-        format="%(asctime)-13s [%(levelname)s] %(funcName)s: %(message)s",
-        # datefmt='%m/%d/%Y %I:%M:%S %p',
-        datefmt='%d %I:%M:%S ',
-        # level=logging.FLOW,
-        level=logging.INFO,
-        # level=logging.DEBUG,
-        # level=logging.LOCK,
-    )
+
+    if kwargs == {}:
+        kwargs['format'] = "[%(asctime)-13s] [%(name)s] [{levelname:^8}] (%(lineno)s): %(funcName)s(): %(message)s"
+        kwargs['datefmt'] = ["%m/%d/%Y %I:%M:%S %p ", "%d %I:%M:%S "][1]
+        kwargs['level'] = [logging.INFO, logging.DEBUG][0]
+
+    logging.basicConfig(**kwargs)
     return logging.getLogger(__name__)
 
 
 def get_filebased_logger(filename, *args, **kwargs):
     logging.setLoggerClass(MyLogger)
-    logging.basicConfig(
-        filename=filename,
-        filemode='w',
-        format="%(asctime)-13s [%(levelname)s] %(funcName)s: %(message)s",
-        # datefmt='%m/%d/%Y %I:%M:%S %p',
-        datefmt='%d %I:%M:%S ',
-        # level=logging.FLOW,
-        level=logging.INFO,
-        # level=logging.DEBUG,
-        # level=logging.LOCK,
-    )
+
+    if kwargs == {}:
+
+        # old % style
+        if False:
+            kwargs['format'] = "[%(asctime)-13s] [%(name)s] [%(levelname)-8s] (%(lineno)s): %(funcName)s(): %(message)s"
+            kwargs['datefmt'] = ["%m/%d/%Y %I:%M:%S %p ", "%d %I:%M:%S "][1]
+            kwargs['level'] = [logging.INFO, logging.DEBUG][0]
+        # trying out the f string log formatting
+        else:
+            kwargs['format'] = "[{asctime:<13s}] [{name:s}] [{levelname:^10s}] ({lineno}): {funcName}():{message}"
+            kwargs['datefmt'] = ["%m-%d-%Y %I:%M:%S %p", "%d %I:%M:%S"][1]
+            kwargs['level'] = [logging.INFO, logging.DEBUG][0]
+            kwargs['style'] = '{'
+
+    kwargs.update({
+        'filename': filename,
+        'filemode': 'w',
+    })
+
+    print(kwargs)
+    logging.basicConfig(**kwargs)
     return logging.getLogger(__name__)
 
 
