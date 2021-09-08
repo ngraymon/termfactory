@@ -3,6 +3,7 @@ w_operator_equations.py
 residual_equations.py
 full_cc_equations.py
 dt_amplitude_equations.py
+output.txt
 *.pdf
 *.tex
 
