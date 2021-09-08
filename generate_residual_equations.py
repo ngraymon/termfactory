@@ -6581,19 +6581,24 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         right_z_balanced_left = bool(m_perm[1][-1] <= left_z.n)
 
         each_eT_balanced = all([
-            bool(t.m == (m_perm[0][1][i] + m_perm[1][1][i]))
+            bool(t.n <= (LHS.m + h.m + m_perm[0][1][i] + m_perm[1][1][i]))
             for i, t in enumerate(t_list)
         ])
+
+        print(f"{each_eT_balanced=}")
+        print([(t.n, LHS.m, h.m, m_perm[0][1][i], m_perm[1][1][i]) for i, t in enumerate(t_list)])
+        # import pdb; pdb.set_trace()
 
         dense_output = f"\n{tab}".join([
             '',
             f"{'Z_left  perm '}{m_perm[0]}",
             f"{'Z_right perm '}{m_perm[1]}",
-            f"{'LHS':<4}{total_lhs_m:>2d} >= {LHS.n:>2d}  {total_lhs_balanced}",
-            f"{'eT':<4}{total_eT_m:>2d} >= {sum([t.n for t in t_list]):>2d}  {total_eT_balanced}",
-            f"{'h':<4}{total_h_m:>2d} >= {h.n:>2d}  {total_h_balanced}",
-            f"{'zL':<4}{m_perm[0][-1]:>2d} >= {right_z.n:>2d}  {left_z_balanced_right}",
-            f"{'zR':<4}{m_perm[1][-1]:>2d} >= {left_z.n:>2d}  {right_z_balanced_left}",
+            f"{'LHS':<4}{total_lhs_m:>2d} <= {LHS.n:>2d}  {total_lhs_balanced}",
+            f"{'eT':<4}{total_eT_m:>2d} <= {sum([t.n for t in t_list]):>2d}  {total_eT_balanced}",
+            f"{each_eT_balanced=}",
+            f"{'h':<4}{total_h_m:>2d} <= {h.n:>2d}  {total_h_balanced}",
+            f"{'zL':<4}{m_perm[0][-1]:>2d} <= {right_z.n:>2d}  {left_z_balanced_right}",
+            f"{'zR':<4}{m_perm[1][-1]:>2d} <= {left_z.n:>2d}  {right_z_balanced_left}",
         ])
 
         bool_list = [
@@ -6630,7 +6635,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         right_z_balanced_left = bool(n_perm[1][-1] <= left_z.m)
 
         each_eT_balanced = all([
-            bool(t.m == (n_perm[0][1][i] + n_perm[1][1][i]))
+            bool(t.m <= (LHS.n + h.n + n_perm[0][1][i] + n_perm[1][1][i]))
             for i, t in enumerate(t_list)
         ])
 
@@ -6638,11 +6643,12 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
             '',
             f"{'Z_left  perm '}{n_perm[0]}",
             f"{'Z_right perm '}{n_perm[1]}",
-            f"{'LHS':<4}{total_lhs_n:>2d} >= {LHS.m:>2d}  {total_lhs_balanced}",
-            f"{'eT':<4}{total_eT_n:>2d} >= {sum([t.m for t in t_list]):>2d}  {total_eT_balanced}",
-            f"{'h':<4}{total_h_n:>2d} >= {h.m:>2d}  {total_h_balanced}",
-            f"{'zL':<4}{n_perm[0][-1]:>2d} >= {right_z.m:>2d}  {left_z_balanced_right}",
-            f"{'zR':<4}{n_perm[1][-1]:>2d} >= {left_z.m:>2d}  {right_z_balanced_left}",
+            f"{'LHS':<4}{total_lhs_n:>2d} <= {LHS.m:>2d}  {total_lhs_balanced}",
+            f"{'eT':<4}{total_eT_n:>2d} <= {sum([t.m for t in t_list]):>2d}  {total_eT_balanced}",
+            f"{each_eT_balanced=}",
+            f"{'h':<4}{total_h_n:>2d} <= {h.m:>2d}  {total_h_balanced}",
+            f"{'zL':<4}{n_perm[0][-1]:>2d} <= {right_z.m:>2d}  {left_z_balanced_right}",
+            f"{'zR':<4}{n_perm[1][-1]:>2d} <= {left_z.m:>2d}  {right_z_balanced_left}",
         ])
 
         bool_list = [
@@ -6803,8 +6809,6 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
     annotated_permutations = []  # store output here
     annotated_z_permutations = []  # store intermediate output here
 
-    log_conf.setLevelDebug(log)
-
     def print_triplet(i, p):
         et_string = ''.join([
             f"{'(':<8s}",
@@ -6915,6 +6919,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                             f"Invalid term (z_left.m_r({z_left_kwargs['m_r']}) != z_right.n_l({z_right_kwargs['n_l']}))\n"
                             f"{term_string}"
                         )
+                        assert False
                         continue
 
                     # if these contractions are not equal
@@ -6924,6 +6929,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                             f"Invalid term (z_left.n_r({z_left_kwargs['n_r']}) != z_right.m_l({z_right_kwargs['m_l']}))\n"
                             f"{term_string}"
                         )
+                        assert False
                         continue
 
                 log.debug(
@@ -6951,7 +6957,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                 for lower in lower_perms:
 
                     perm_list = []
-                    print('XX', upper, lower)
+                    print('XX', upper, lower, t_list)
                     # for each t operator we make a `connected_namedtuple` or a `disconnected_namedtuple`
                     for i, t in enumerate(t_list):
                         print(f"{i=}", t)
@@ -6959,6 +6965,14 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                         t_lower = lower[i]
                         print('YY', t_upper, t_lower)
                         assert list(t_upper) == [0, 0, 0, 0]  # for now t's can't have upper components
+
+                        if t.m != sum(t_upper):
+                            log.debug(f"Bad t perms + z perms: {t.m = } {t_upper = }")
+                            raise Exception('sds')
+
+                        if t.n != sum(t_lower):
+                            log.debug(f"Bad t perms + z perms: {t.n = } {t_lower = }")
+                            raise Exception('sds')
 
                         t_kwargs = {
                             'rank': t.rank,
@@ -6974,11 +6988,6 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                             'n_r':   t_lower[-1],
                         }
 
-                        print(len(t_list), t_list)
-                        print(upper, lower)
-                        assert t.m == sum(t_upper), f"{t.m = } {t_upper = }"
-                        assert t.n == sum(t_lower), f"{t.n = } {t_lower = }"
-
                         # if the t operator is disconnected (meaning no connections to H)
                         if t_kwargs['m_h'] == t_kwargs['n_h'] == 0:
                             perm_list.append(disconnected_t_operator_namedtuple(**t_kwargs))
@@ -6989,7 +6998,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                     # after looping over t_list we append the list of operators
                     # for this specific permutation
 
-            annotated_permutations.append([tuple(perm_list), z_pair])
+            annotated_permutations.append((tuple(perm_list), z_pair))
 
         # print(annotated_permutations)
         # import pdb; pdb.set_trace()
@@ -7003,9 +7012,32 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                 f"\n{tab}{perm[1]}"
             )
 
-    log_conf.setLevelInfo(log)
-
     return annotated_permutations
+
+
+def _remove_duplicate_eT_z_permutations(LHS, h, eT_connection_permutations):
+    """ x """
+    duplicate_set = set()
+
+    # print('\n\n', eT_connection_permutations)
+    for i, perm in enumerate(eT_connection_permutations):
+        t_tuple, z_pair = perm
+
+        print('\n', perm)
+        print('\n', i, t_tuple, z_pair)
+        # a.sort()
+        # a = tuple(a)
+
+        splitperm = lambda array: f'\n{tab}{tab}'.join(['']+[str(t) for t in array[0]])
+
+        if perm not in duplicate_set:
+            log.debug(f"\n{tab}Added unique: ({splitperm(perm)}\n{tab})\n{tab}{perm[1]}")
+            duplicate_set.add(perm)
+        else:
+            log.debug(f"\n{tab}Removed duplicate: {splitperm(perm)}\n{tab})\n{tab}{perm[1]}")
+            pass
+
+    return duplicate_set
 
 
 def _generate_explicit_eT_z_connections(LHS, h, unique_permutations):
@@ -7146,6 +7178,7 @@ def _fbar_t_zR_contributions(t_list, z_right):
     return_list = []
 
     for i, t in enumerate(t_list):
+        print(t, z_right)
         assert t.n_r == z_right.m_t[i]
         return_list.append(t.n_r)
 
@@ -7346,8 +7379,19 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
     If `remove_f_terms` is true terms then terms where nof_fs > 0 will are not written to latex.
     If `print_prefactors` is true then we add the prefactor string generated by `_build_z_latex_prefactor`.
     """
-
+    print('\n\n')
     return_list = []  # store output here
+
+    # for term in term_list:
+    #     LHS, t_list, h, z_left, z_right = term[0], term[1], term[2], *term[3]
+    #     print(z_right)
+    # print('\n\n')
+
+    # for term in term_list:
+    #     LHS, t_list, h, z_left, z_right = term[0], term[1], term[2], *term[3]
+    #     print(h)
+
+    # import pdb; pdb.set_trace()
 
     # prepare all the latex strings
     for term in term_list:
@@ -7421,6 +7465,10 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
         return_list.append(term_string)
 
     unique_list = list(set(return_list))
+
+    for i, a in enumerate(return_list):
+        print(i+1, a)
+
     assert len(unique_list) == len(return_list), "Duplicate terms, logic is incorrect"
 
     log.info(f'\n{tab}Prepared:\n{tab}' + f'\n{tab}'.join([s for s in return_list]))
@@ -7589,32 +7637,34 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
         if valid_permutations == []:
             continue
 
-        if zhz_debug or False:  # debug prints
+        if zhz_debug or True:  # debug prints
             for pair in valid_permutations:
-                eT, z_pair = pair
-                old_print_wrapper('VALID TERM', LHS, eT, h, z_pair)
+                old_print_wrapper('VALID TERM', LHS, pair[0], h, pair[1], pair[2])
+                print('VALID TERM', LHS, pair[0], h, pair[1], pair[2])
 
+        log_conf.setLevelDebug(log)
         # we need to generate all possible combinations of
         # each z with the LHS, eT, h operators and the other z
         eT_connection_permutations = _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations)
 
-        if zhz_debug or False:  # debug prints
+        if zhz_debug or True:  # debug prints
             for p in eT_connection_permutations:
                 old_print_wrapper('CONNECTED TERMS', LHS, p[0], h, p[1])
+                print('CONNECTED TERMS', LHS, p[0], h, p[1])
 
-        # NOTE - at the moment I don't believe the Z term logic generates any permutations
-        # (remove all duplicate permutations)
-        # unique_s_permutations = _remove_duplicate_z_permutations(eT_connection_permutations)
-        unique_eT_permutations = eT_connection_permutations
+        # import pdb; pdb.set_trace()
+        # continue
+
+        # we need to remove duplicate permutations
+        unique_eT_permutations = _remove_duplicate_eT_z_permutations(LHS, h, eT_connection_permutations)
+        log_conf.setLevelInfo(log)
 
         # assert list(eT_connection_permutations) != []
 
         if True:  # debug prints
             for T, z in unique_eT_permutations:
                 old_print_wrapper('UNIQUE TERMS', LHS, eT, h, z)
-                print('UNIQUE TERMS', LHS, eT, h, z)
-
-        # import pdb; pdb.set_trace()
+                print('UNIQUE TERMS', LHS, T, h, z)
 
         # generate all the explicit connections
         # this also removes all invalid terms
