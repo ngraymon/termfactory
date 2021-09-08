@@ -6567,6 +6567,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
     combined_m_perms = list(it.product(*m_perms))
     for m_perm in combined_m_perms:
         # and `m_perm` is [Z_left, Z_right]
+        left_m_perm, right_m_perm = m_perm
         # where each Z is [LHS, t_list, h, other_Z]
         # with numbers: [0, [0, ...], 0, 0]
 
@@ -6577,28 +6578,30 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         total_lhs_balanced = bool(total_lhs_m <= LHS.n)
         total_eT_balanced = bool(total_eT_m <= sum([t.n for t in t_list]))
         total_h_balanced = bool(total_h_m <= h.n)
-        left_z_balanced_right = bool(m_perm[0][-1] <= right_z.n)
-        right_z_balanced_left = bool(m_perm[1][-1] <= left_z.n)
+        left_z_balanced_right = bool(left_m_perm[-1] <= right_z.n)
+        right_z_balanced_left = bool(right_m_perm[-1] <= left_z.n)
 
         each_eT_balanced = all([
-            bool(t.n <= (LHS.m + h.m + m_perm[0][1][i] + m_perm[1][1][i]))
+            bool(t.n <= (LHS.m + h.m + left_m_perm[1][i] + right_m_perm[1][i]))
+            and
+            bool(t.rank >= (left_m_perm[1][i] + right_m_perm[1][i]))
             for i, t in enumerate(t_list)
         ])
 
         print(f"{each_eT_balanced=}")
-        print([(t.n, LHS.m, h.m, m_perm[0][1][i], m_perm[1][1][i]) for i, t in enumerate(t_list)])
+        print([(t.n, LHS.m, h.m, left_m_perm[1][i], right_m_perm[1][i]) for i, t in enumerate(t_list)])
         # import pdb; pdb.set_trace()
 
         dense_output = f"\n{tab}".join([
             '',
-            f"{'Z_left  perm '}{m_perm[0]}",
-            f"{'Z_right perm '}{m_perm[1]}",
+            f"{'Z_left  perm '}{left_m_perm}",
+            f"{'Z_right perm '}{right_m_perm}",
             f"{'LHS':<4}{total_lhs_m:>2d} <= {LHS.n:>2d}  {total_lhs_balanced}",
             f"{'eT':<4}{total_eT_m:>2d} <= {sum([t.n for t in t_list]):>2d}  {total_eT_balanced}",
             f"{each_eT_balanced=}",
             f"{'h':<4}{total_h_m:>2d} <= {h.n:>2d}  {total_h_balanced}",
-            f"{'zL':<4}{m_perm[0][-1]:>2d} <= {right_z.n:>2d}  {left_z_balanced_right}",
-            f"{'zR':<4}{m_perm[1][-1]:>2d} <= {left_z.n:>2d}  {right_z_balanced_left}",
+            f"{'zL':<4}{left_m_perm[-1]:>2d} <= {right_z.n:>2d}  {left_z_balanced_right}",
+            f"{'zR':<4}{right_m_perm[-1]:>2d} <= {left_z.n:>2d}  {right_z_balanced_left}",
         ])
 
         bool_list = [
@@ -6621,6 +6624,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
     combined_n_perms = list(it.product(*n_perms))
     for n_perm in combined_n_perms:
         # and `n_perm` is [Z_left, Z_right]
+        left_n_perm, right_n_perm = m_perm
         # where each Z is [LHS, t_list, h, other_Z]
         # with numbers: [0, [0, ...], 0, 0]
 
@@ -6631,24 +6635,26 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         total_lhs_balanced = bool(total_lhs_n <= LHS.m)
         total_eT_balanced = bool(total_eT_n <= sum([t.m for t in t_list]))
         total_h_balanced = bool(total_h_n <= h.m)
-        left_z_balanced_right = bool(n_perm[0][-1] <= right_z.m)
-        right_z_balanced_left = bool(n_perm[1][-1] <= left_z.m)
+        left_z_balanced_right = bool(left_n_perm[-1] <= right_z.m)
+        right_z_balanced_left = bool(right_n_perm[-1] <= left_z.m)
 
         each_eT_balanced = all([
-            bool(t.m <= (LHS.n + h.n + n_perm[0][1][i] + n_perm[1][1][i]))
+            bool(t.m <= (LHS.n + h.n + left_n_perm[1][i] + right_n_perm[1][i]))
+            and
+            bool(t.rank >= (left_n_perm[1][i] + right_n_perm[1][i]))
             for i, t in enumerate(t_list)
         ])
 
         dense_output = f"\n{tab}".join([
             '',
-            f"{'Z_left  perm '}{n_perm[0]}",
-            f"{'Z_right perm '}{n_perm[1]}",
+            f"{'Z_left  perm '}{left_n_perm}",
+            f"{'Z_right perm '}{right_n_perm}",
             f"{'LHS':<4}{total_lhs_n:>2d} <= {LHS.m:>2d}  {total_lhs_balanced}",
             f"{'eT':<4}{total_eT_n:>2d} <= {sum([t.m for t in t_list]):>2d}  {total_eT_balanced}",
             f"{each_eT_balanced=}",
             f"{'h':<4}{total_h_n:>2d} <= {h.m:>2d}  {total_h_balanced}",
-            f"{'zL':<4}{n_perm[0][-1]:>2d} <= {right_z.m:>2d}  {left_z_balanced_right}",
-            f"{'zR':<4}{n_perm[1][-1]:>2d} <= {left_z.m:>2d}  {right_z_balanced_left}",
+            f"{'zL':<4}{left_n_perm[-1]:>2d} <= {right_z.m:>2d}  {left_z_balanced_right}",
+            f"{'zR':<4}{right_n_perm[-1]:>2d} <= {left_z.m:>2d}  {right_z_balanced_left}",
         ])
 
         bool_list = [
@@ -6988,6 +6994,18 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                             'n_r':   t_lower[-1],
                         }
 
+                        if z_pair[0] is not None and t_kwargs['n_l'] != z_pair[0].m_t[i]:
+                            raise Exception('nope')
+
+                        if z_pair[0] is not None and t_kwargs['m_l'] != z_pair[0].n_t[i]:
+                            raise Exception('nope')
+
+                        if t_kwargs['n_r'] != z_pair[1].m_t[i]:
+                            raise Exception('nope')
+
+                        if t_kwargs['m_r'] != z_pair[1].n_t[i]:
+                            raise Exception('nope')
+
                         # if the t operator is disconnected (meaning no connections to H)
                         if t_kwargs['m_h'] == t_kwargs['n_h'] == 0:
                             perm_list.append(disconnected_t_operator_namedtuple(**t_kwargs))
@@ -7000,7 +7018,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
 
             annotated_permutations.append((tuple(perm_list), z_pair))
 
-        # print(annotated_permutations)
+        # print('A\n', annotated_permutations)
         # import pdb; pdb.set_trace()
 
         splitperm = lambda array: f'\n{tab}{tab}'.join(['']+[str(t) for t in array[0]])
@@ -7179,7 +7197,7 @@ def _fbar_t_zR_contributions(t_list, z_right):
 
     for i, t in enumerate(t_list):
         print(t, z_right)
-        assert t.n_r == z_right.m_t[i]
+        # assert t.n_r == z_right.m_t[i]
         return_list.append(t.n_r)
 
     return return_list
@@ -7415,6 +7433,7 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
         # if needed add fbar prefactors
         nof_fbars = _fbar_h_zR_contributions(h, z_right)
         nof_fbars += sum(_fbar_t_h_contributions(t_list, h))
+        print('zz', h)
         nof_fbars += sum(_fbar_t_zR_contributions(t_list, z_right))
         if nof_fbars > 0:
             term_string += "\\bar{f}" if (nof_fbars == 1) else f"\\bar{{f}}^{{{nof_fbars}}}"
@@ -7469,7 +7488,7 @@ def _prepare_third_eTz_latex(term_list, split_width=7, remove_f_terms=False, pri
     for i, a in enumerate(return_list):
         print(i+1, a)
 
-    assert len(unique_list) == len(return_list), "Duplicate terms, logic is incorrect"
+    # assert len(unique_list) == len(return_list), "Duplicate terms, logic is incorrect"
 
     log.info(f'\n{tab}Prepared:\n{tab}' + f'\n{tab}'.join([s for s in return_list]))
 
