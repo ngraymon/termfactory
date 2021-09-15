@@ -41,7 +41,7 @@ cov_test:
   stage: code_analysis
   script:
     - python vulture_wrapper.py
-    - python -m coverage run generate_residual_equations.py logging_output.txt
+    - python -m coverage run code_cov.py logging_output.txt
     - python -m coverage html
     - python -m coverage report
 
@@ -52,7 +52,7 @@ cov_test:
         - ./vulture_output.txt
         - ./htmlcov/*.css
         - ./htmlcov/*.js
-        - ./htmlcov/generate_residual_equations_py.html
+        - ./htmlcov/driver.html
 
     # reports:
     #   cobertura:
