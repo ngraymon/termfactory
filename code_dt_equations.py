@@ -4,6 +4,20 @@
 
 # local imports
 from namedtuple_defines import t_term_namedtuple
+from code_residual_equations import w_dict
+from code_w_equations import (
+    _generate_surface_index,
+    _generate_mode_index,
+    tag_str,
+    num_tag,
+    _generate_w_operator_prefactor,
+    taylor_series_order_tag,
+    t_terms)
+from helper_funcs import (
+    unique_permutations,
+    generate_linked_disconnected_partitions_of_n,
+    generate_un_linked_disconnected_partitions_of_n)
+from common_imports import tab, tab_length
 
 
 # ----------------------------------------------------------------------------------------------- #
@@ -618,4 +632,3 @@ def generate_dt_amplitude_equations_file(max_w_order, path="./dt_amplitude_equat
         fp.write(file_data)
 
     return
-

@@ -1,20 +1,26 @@
 # system imports
 from collections import namedtuple
+import math
 
 # third party imports
 import numpy as np
 
 # local imports
-
+from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple, h_namedtuple, w_namedtuple
+from helper_funcs import print_residual_data
+from code_w_equations import taylor_series_order_tag
+from common_imports import tab, old_print_wrapper
 
 # rterm_namedtuple = namedtuple('rterm_namedtuple', ['prefactor', 'h', 'w'])
 # we originally defined a class so that we can overload the `__eq__` operator
 # because we needed to compare the rterm tuples, however I think I might have removed that code
 # so Shanmei or I should check if we even need the class anymore
+
+
 class residual_term(namedtuple('residual_term', ['prefactor', 'h', 'w'])):
+
     __slots__ = ()
 
-    #
     def __eq__(self, other_term):
         return bool(
             self.prefactor == other_term.prefactor and
@@ -281,7 +287,7 @@ def generate_residual_string_list(hamiltonian, order):
         h_result += construct_upper_h_label(h_operator, order)
         h_result += construct_lower_h_label(h_operator, order)
         w_result += construct_upper_w_label(h_operator, order)
-        prefactor = construct_prefactor(h_operator,  order, True)
+        prefactor = construct_prefactor(h_operator, order, True)
 
         if h_result == "h":
             continue

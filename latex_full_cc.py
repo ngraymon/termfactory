@@ -1,13 +1,23 @@
 # system imports
 from collections import namedtuple
-
+import itertools as it
 # third party imports
 
 # local imports
 from latex_defines import *
 import reference_latex_headers as headers
-from common_imports import tab, summation_indices, unlinked_indices
+from common_imports import tab, summation_indices, unlinked_indices, old_print_wrapper
 from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
+from code_full_cc import _simplify_full_cc_python_prefactor
+
+# temp
+
+# temp logging fix
+import log_conf
+
+log = log_conf.get_filebased_logger('output.txt')
+header_log = log_conf.HeaderAdapter(log, {})
+subheader_log = log_conf.SubHeaderAdapter(log, {})
 
 
 # ----------------------------------------------------------------------------------------------- #

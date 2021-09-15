@@ -1,6 +1,24 @@
+# system imports
 import os
 import sys
+
+# third party imports
+
+# local import
 from driver import generate_latex_files, generate_python_files
+
+import log_conf
+
+# for now make a second argument the filepath for logging output
+if len(sys.argv) > 1:
+    logging_output_filename = str(sys.argv[1])
+    log = log_conf.get_filebased_logger(logging_output_filename)
+else:
+    log = log_conf.get_stdout_logger()
+
+header_log = log_conf.HeaderAdapter(log, {})
+subheader_log = log_conf.SubHeaderAdapter(log, {})
+
 
 #  begin testing portion below is a test for CI
 if (__name__ == '__main__'):
@@ -30,3 +48,4 @@ if (__name__ == '__main__'):
         thermal=False,
         file='eT_z_t ansatz'
     )
+    generate_python_files(truncations, only_ground_state=True, thermal=False)
