@@ -3,7 +3,7 @@ import subprocess
 if (__name__ == '__main__'):
 
     ret = subprocess.run(
-        ['python', '-m', 'vulture', 'generate_residual_equations.py'],
+        ['python', '-m', 'vulture', 'driver.py'],
         capture_output=True,
         text=True,
     )
