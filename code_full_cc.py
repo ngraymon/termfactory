@@ -3,7 +3,59 @@
 # third party imports
 
 # local imports
+from namedtuple_defines import general_operator_namedtuple, namedtuple
+from helper_funcs import unique_permutations
+from latex_full_cc import disconnected_namedtuple
+from common_imports import tab, tab_length, summation_indices, unlinked_indices, old_print_wrapper
+from latex_full_cc import (
+    generate_full_cc_hamiltonian_operator,
+    generate_s_taylor_expansion,
+    _filter_out_valid_s_terms,
+    _seperate_s_terms_by_connection,
+    _debug_print_valid_term_list,
+    _debug_print_different_types_of_terms)
+from code_w_equations import taylor_series_order_tag, hamiltonian_order_tag
+# temp
+omega_namedtuple = namedtuple('Omega', ['maximum_rank', 'operator_list'])
+def generate_omega_operator(maximum_cc_rank=2, omega_max_order=3):
+    """Return an `omega_namedtuple` whose attributes are determined by `maximum_cc_rank`.
 
+    The `operator_list` contains all permutations of (`m`,`n`) for `m` & `n` in `range(maximum_cc_rank + 1)`.
+    The name is a string of the chars `d` and `b` according to `m` and `n` respectively.
+    `m` is associated with creation operators (d) and `n` is associated with annihilation operators (b).
+
+    For m == n == 0 we generate `operator(name='', m=0, n=0)` which represents the zero order equation
+    """
+
+    return_list = []
+
+    for m in range(maximum_cc_rank + 1):          # m is the upper label (creation operators)
+        for n in range(maximum_cc_rank + 1 - m):  # n is the lower label (annihilation operators)
+
+            name = "d"*m + "b"*n
+
+            if m+n <= omega_max_order:
+                return_list.append(general_operator_namedtuple(name, m+n, m, n))
+
+    return_list.sort(key=lambda x: len(x.name))
+
+    return omega_namedtuple(maximum_cc_rank, return_list)
+# temp logging fix
+import log_conf
+
+log = log_conf.get_filebased_logger('output.txt')
+header_log = log_conf.HeaderAdapter(log, {})
+subheader_log = log_conf.SubHeaderAdapter(log, {})
+
+# temp truncations fix
+maximum_h_rank = 2
+maximum_cc_rank = 2
+s_taylor_max_order = 2  # this doesn't matter for the Z ansatz
+omega_max_order = 2
+
+# for the 'z_t ansatz'
+truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
+##########################################################################################
 
 # ----------------------------------------------------------------------------------------------- #
 # -------------------------  GENERATING FULL CC PYTHON EQUATIONS  ------------------------------- #
@@ -726,4 +778,3 @@ def generate_full_cc_python(truncations, only_ground_state=False, path="./full_c
         fp.write(file_data)
 
     return
-
