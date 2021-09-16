@@ -5,18 +5,22 @@
 # local imports
 from namedtuple_defines import general_operator_namedtuple, namedtuple
 from helper_funcs import unique_permutations
-from latex_full_cc import disconnected_namedtuple
 from common_imports import tab, tab_length, summation_indices, unlinked_indices, old_print_wrapper
 from latex_full_cc import (
+    disconnected_namedtuple,
     generate_full_cc_hamiltonian_operator,
     generate_s_taylor_expansion,
     _filter_out_valid_s_terms,
     _seperate_s_terms_by_connection,
     _debug_print_valid_term_list,
-    _debug_print_different_types_of_terms)
+    _debug_print_different_types_of_terms
+)
 from code_w_equations import taylor_series_order_tag, hamiltonian_order_tag
+
 # temp
 omega_namedtuple = namedtuple('Omega', ['maximum_rank', 'operator_list'])
+
+
 def generate_omega_operator(maximum_cc_rank=2, omega_max_order=3):
     """Return an `omega_namedtuple` whose attributes are determined by `maximum_cc_rank`.
 
@@ -40,6 +44,8 @@ def generate_omega_operator(maximum_cc_rank=2, omega_max_order=3):
     return_list.sort(key=lambda x: len(x.name))
 
     return omega_namedtuple(maximum_cc_rank, return_list)
+
+
 # temp logging fix
 import log_conf
 

@@ -8,7 +8,6 @@ from latex_defines import *
 import reference_latex_headers as headers
 from common_imports import tab, summation_indices, unlinked_indices, old_print_wrapper
 from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
-from code_full_cc import _simplify_full_cc_python_prefactor
 
 # temp
 
@@ -925,6 +924,62 @@ def prepare_condensed_terms(term_list, linked_condense=False, unlinked_condense=
             linked_commonfactor_list = _generate_linked_common_terms(term_list)
 
         return linked_commonfactor_list
+
+
+def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
+    """ x """
+
+    # if one of the lists is empty there is no easy simplification
+    if numerator_list == [] or denominator_list == []:
+        return numerator_list, denominator_list
+
+    numerator_set = set(numerator_list)
+    denominator_set = set(denominator_list)
+
+    # if the numerator and denominator do not share the same factors
+    # there is no easy simplification
+    if numerator_set.isdisjoint(denominator_set):
+        return numerator_list, denominator_list
+    else:
+        intersection = numerator_set & denominator_set
+
+    numerator_dict = dict([(key, 0) for key in numerator_set])
+    for string in numerator_list:
+        numerator_dict[string] += 1
+
+    old_print_wrapper('nnnn', numerator_dict)
+
+    denominator_dict = dict([(key, 0) for key in denominator_set])
+    for string in denominator_list:
+        denominator_dict[string] += 1
+
+    old_print_wrapper('dddd', denominator_dict)
+
+    for key in intersection:
+        a, b = numerator_dict[key], denominator_dict[key]
+        if a > b:
+            denominator_dict[key] = 0
+            numerator_dict[key] = a - b
+        elif a < b:
+            denominator_dict[key] = b - a
+            numerator_dict[key] = 0
+        elif a == b:
+            denominator_dict[key] = 0
+            numerator_dict[key] = 0
+
+    # make updated lists
+    numerator_list, denominator_list = [], []
+
+    for k, v in numerator_dict.items():
+        numerator_list.extend([k, ]*v)
+    for k, v in denominator_dict.items():
+        denominator_list.extend([k, ]*v)
+
+    if len(numerator_list) > 2 or len(denominator_list) > 2:
+        old_print_wrapper('xxxx', numerator_list)
+        old_print_wrapper('yyyy', denominator_list)
+
+    return numerator_list, denominator_list
 
 
 def _build_latex_prefactor(h, t_list, simplify_flag=True):

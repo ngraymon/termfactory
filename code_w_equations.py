@@ -4,7 +4,11 @@
 
 # local imports
 from namedtuple_defines import t_term_namedtuple
-from helper_funcs import generate_un_linked_disconnected_partitions_of_n, unique_permutations, generate_linked_disconnected_partitions_of_n
+from helper_funcs import (
+    generate_un_linked_disconnected_partitions_of_n,
+    generate_linked_disconnected_partitions_of_n,
+    unique_permutations,
+)
 from common_imports import tab, tab_length, old_print_wrapper
 
 # ----------------------------------------------------------------------------------------------- #
