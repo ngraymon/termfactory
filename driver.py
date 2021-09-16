@@ -86,12 +86,12 @@ def generate_python_files(truncations, only_ground_state=True, thermal=False):
     else:
         generate_full_cc_python(truncations, only_ground_state=False)
 
-    max_residual_order = 6
-    generate_residual_equations_file(max_residual_order, maximum_h_rank)
-    max_w_order = 6
-    generate_w_operator_equations_file(max_w_order)
-    dt_order = 6
-    generate_dt_amplitude_equations_file(dt_order)
+    # max_residual_order = 6
+    # generate_residual_equations_file(max_residual_order, truncations[0])
+    # max_w_order = 6
+    # generate_w_operator_equations_file(max_w_order)
+    # dt_order = 6
+    # generate_dt_amplitude_equations_file(dt_order)
     return
 
 
@@ -133,12 +133,22 @@ if (__name__ == '__main__'):
     # need to have truncation of e^T
     eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order
 
-    generate_latex_files(
-        eT_z_t_truncations,
-        only_ground_state=True,
-        remove_f_terms=False,
-        thermal=False,
-        file='eT_z_t ansatz'
-    )
+    if False:
+        generate_latex_files(
+            eT_z_t_truncations,
+            only_ground_state=True,
+            remove_f_terms=False,
+            thermal=False,
+            file='eT_z_t ansatz'
+        )
+    else:
+        generate_latex_files(
+            truncations,
+            only_ground_state=True,
+            remove_f_terms=False,
+            thermal=False,
+            file='full cc'
+        )
+
     # generate_python_files(truncations, only_ground_state=True, thermal=False)
     print("We reached the end of main")

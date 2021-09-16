@@ -3,7 +3,10 @@
 # third party imports
 
 # local imports
-from namedtuple_defines import general_operator_namedtuple, namedtuple
+from namedtuple_defines import (
+    general_operator_namedtuple,
+    omega_namedtuple,
+)
 from helper_funcs import unique_permutations
 from common_imports import tab, tab_length, summation_indices, unlinked_indices, old_print_wrapper
 from latex_full_cc import (
@@ -16,9 +19,6 @@ from latex_full_cc import (
     _debug_print_different_types_of_terms
 )
 from code_w_equations import taylor_series_order_tag, hamiltonian_order_tag
-
-# temp
-omega_namedtuple = namedtuple('Omega', ['maximum_rank', 'operator_list'])
 
 
 def generate_omega_operator(maximum_cc_rank=2, omega_max_order=3):
@@ -53,14 +53,6 @@ log = log_conf.get_filebased_logger('output.txt')
 header_log = log_conf.HeaderAdapter(log, {})
 subheader_log = log_conf.SubHeaderAdapter(log, {})
 
-# temp truncations fix
-maximum_h_rank = 2
-maximum_cc_rank = 2
-s_taylor_max_order = 2  # this doesn't matter for the Z ansatz
-omega_max_order = 2
-
-# for the 'z_t ansatz'
-truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
 ##########################################################################################
 
 # ----------------------------------------------------------------------------------------------- #
@@ -669,7 +661,7 @@ def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
     return trimmed_string
 
 
-def _wrap_full_cc_generation(master_omega, s2, named_line, spaced_named_line, only_ground_state=False, opt_einsum=False):
+def _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state=False, opt_einsum=False):
     """ x """
     return_string = ""
 
@@ -720,7 +712,7 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # header
     string += '\n' + named_line("INDIVIDUAL TERMS", s4) + '\n\n'
     # generate
-    string += _wrap_full_cc_generation(master_omega, s2, named_line, spaced_named_line, only_ground_state)
+    string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state)
     # ----------------------------------------------------------------------- #
     # header
     string += '\n' + named_line("RESIDUAL FUNCTIONS", s4)
@@ -738,7 +730,7 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # header
     string += '\n' + named_line("INDIVIDUAL TERMS", s4) + '\n\n'
     # generate
-    string += _wrap_full_cc_generation(master_omega, s2, named_line, spaced_named_line, only_ground_state, opt_einsum=True)
+    string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state, opt_einsum=True)
     # ----------------------------------------------------------------------- #
     # generate
     string += '\n' + named_line("RESIDUAL FUNCTIONS", s4)

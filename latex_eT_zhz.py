@@ -795,11 +795,11 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
 
                         if t.m != sum(t_upper):
                             log.debug(f"Bad t perms + z perms: {t.m = } {t_upper = }")
-                            raise Exception('sds')
+                            raise Exception('''Code is not robust and I'm not sure what is wrong, To-Do!''')
 
                         if t.n != sum(t_lower):
                             log.debug(f"Bad t perms + z perms: {t.n = } {t_lower = }")
-                            raise Exception('sds')
+                            raise Exception('''Code is not robust and I'm not sure what is wrong, To-Do!''')
 
                         t_kwargs = {
                             'rank': t.rank,

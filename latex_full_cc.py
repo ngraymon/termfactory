@@ -7,7 +7,11 @@ import itertools as it
 from latex_defines import *
 import reference_latex_headers as headers
 from common_imports import tab, summation_indices, unlinked_indices, old_print_wrapper
-from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
+from namedtuple_defines import (
+    general_operator_namedtuple,
+    hamiltonian_namedtuple,
+    omega_namedtuple,
+)
 
 # temp
 
@@ -31,8 +35,6 @@ h_operator_namedtuple = namedtuple('h_operator', ['rank', 'm', 'n'])
 # these serve the same purpose as `hamiltonian_namedtuple`
 # we changed the typename from "operator" to distinguish the specific role and improve debugging
 s_operator_namedtuple = namedtuple('s_operator', ['maximum_rank', 'operator_list'])
-omega_namedtuple = namedtuple('Omega', ['maximum_rank', 'operator_list'])
-
 """
 Note that the attributes for these `namedtuples` operate in a specific manner.
 The general rule that can be followed is the m/n refers to the object it is an attribute of:
