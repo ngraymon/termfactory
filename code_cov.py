@@ -17,7 +17,7 @@ from code_dt_equations import generate_dt_amplitude_equations_file
 import log_conf
 # for now make a second argument the filepath for logging output
 if len(sys.argv) > 1:
-    logging_output_filename = str(sys.argv[1])
+    logging_output_filename = str(sys.argv[-1])
     log = log_conf.get_filebased_logger(logging_output_filename)
 else:
     log = log_conf.get_stdout_logger()
@@ -68,7 +68,7 @@ def _generate_all_eT_truncations():
     # eT_taylor_max_order = 2
     # omega_max_order = 2
 
-    h, cc, T, eT, omega = 5, 5, 5, 5, 5
+    h, cc, T, eT, omega = 2, 2, 2, 2, 2
 
     permutations_list.append((h, cc, T, eT, omega))
 
@@ -131,7 +131,7 @@ def test_code_w_operator(MAX_W=6):
 def test_code_dt_amplitude(MAX_dt=6):
     """ x """
     for dt_order in range(0, MAX_dt+1):
-        generate_w_operator_equations_file(dt_order)
+        generate_dt_amplitude_equations_file(dt_order)
 
 
 def test_generate_python_files():

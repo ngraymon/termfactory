@@ -30,7 +30,6 @@ cache:
     - venv/
 
 before_script:
-
   # prepare the virtual environment
   - python -V               # Print out python version for debugging
   - python -m pip install virtualenv >> setup_output.txt
@@ -41,18 +40,21 @@ cov_test:
   stage: code_analysis
   script:
     - python vulture_wrapper.py
-    - python -m coverage run code_cov.py logging_output.txt
+    - python -m coverage run code_cov.py >> printing_output.txt
     - python -m coverage html
     - python -m coverage report
+    - ls ./htmlcov
 
   artifacts:
     paths:
         - ./setup_output.txt
         - ./logging_output.txt
+        - ./printing_output.txt
         - ./vulture_output.txt
-        - ./htmlcov/*.css
-        - ./htmlcov/*.js
-        - ./htmlcov/driver.html
+        - ./htmlcov/*
+        # - ./htmlcov/*.css
+        # - ./htmlcov/*.js
+        # - ./htmlcov/*.html
 
     # reports:
     #   cobertura:
