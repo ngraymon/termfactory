@@ -1,8 +1,20 @@
 # .coveragerc to control coverage.py
 [run]
 include =
-    generate_residual_equations.py
+    code_cov.py
+    driver.py
     reference_latex_headers.py
+    code_dt_equations.py
+    code_full_cc.py
+    code_residual_equations.py
+    code_w_equations.py
+    common_imports.py
+    helper_funcs.py
+    latex_defines.py
+    latex_eT_zhz.py
+    latex_full_cc.py
+    latex_w_equations.py
+    latex_zhz.py
 
 [report]
 # Regexes for lines to exclude from consideration
