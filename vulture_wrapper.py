@@ -3,7 +3,7 @@ import subprocess
 if (__name__ == '__main__'):
 
     ret = subprocess.run(
-        ['python', '-m', 'vulture', 'driver.py'],
+        ['python', '-m', 'vulture', 'code_cov.py'],
         capture_output=True,
         text=True,
     )
