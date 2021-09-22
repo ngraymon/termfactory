@@ -14,6 +14,7 @@ from code_w_equations import generate_w_operator_equations_file
 from code_dt_equations import generate_dt_amplitude_equations_file
 
 
+
 import log_conf
 # for now make a second argument the filepath for logging output
 if len(sys.argv) > 1:
@@ -94,11 +95,23 @@ def test_latex_eT_z_t_ansatz():
                 file='eT_z_t ansatz'
             )
 
+def test_latex_w_equations():
+    """ x """
+    for truncation_permutation in _generate_all_full_cc_truncations():#think full_cc should cover most unless we wanna expand the max_h rank
+        for b1, b2 in it.product(true_or_false, repeat=2):
+            generate_latex_files(
+                truncation_permutation,
+                only_ground_state=True,#the excited_state_w_equations_latex has not been verified
+                remove_f_terms=b1,
+                thermal=b2,
+                file='w equations'
+            )
 
 def test_generate_latex_files():
     """ x """
     test_latex_full_cc_ansatz()
     test_latex_eT_z_t_ansatz()
+    test_latex_w_equations()
 
 
 def test_code_full_cc_ansatz():

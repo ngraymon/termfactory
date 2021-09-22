@@ -9,6 +9,7 @@ from latex_defines import *
 from common_imports import tab
 import reference_latex_headers as headers
 from namedtuple_defines import t_namedtuple_latex, w_namedtuple_latex
+from helper_funcs import generate_partitions_of_n
 
 
 # ----------------------------------------------------------------------------------------------- #
