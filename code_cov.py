@@ -107,11 +107,24 @@ def test_latex_w_equations():
                 file='w equations'
             )
 
+def test_latex_z_t_ansatz():
+    """ x """
+    for truncation_permutation in _generate_all_full_cc_truncations():#think full_cc should cover most unless we wanna expand the max_h rank
+        for b1, b2, b3 in it.product(true_or_false, repeat=3):
+            generate_latex_files(
+                truncation_permutation,
+                only_ground_state=b1,
+                remove_f_terms=b2,
+                thermal=b3,
+                file='z_t ansatz'
+            )
+
 def test_generate_latex_files():
     """ x """
     test_latex_full_cc_ansatz()
     test_latex_eT_z_t_ansatz()
     test_latex_w_equations()
+    test_latex_z_t_ansatz()
 
 
 def test_code_full_cc_ansatz():
