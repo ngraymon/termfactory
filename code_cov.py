@@ -84,8 +84,8 @@ def test_latex_eT_z_t_ansatz():
             # temporary fix as
             # ```The excited state TZT terms for the 5th ansatz has not been properly implemented```
             # per line 1610 in `latex_eT_zhz.py`, will hang due to many asserts that are working as intended
-            # if b1 is False:
-            #     continue
+            if b1 is False:
+                continue
 
             generate_latex_files(
                 truncation_permutation,
