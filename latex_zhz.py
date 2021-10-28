@@ -1422,6 +1422,9 @@ def _prepare_fourth_z_latex(term_list, split_width=7, remove_f_terms=False, prin
 
 # ------------------------------------------------------------------------ #
 def _build_first_z_term(LHS):
+    """ LHS *  H
+    The first ZHZ permutation has no Z terms and is therefore quite simple
+    """
     if LHS.rank == 0:
         return f"{bold_h_latex}" + r'_{0,xb}(1-\delta_{x\gamma})'
     else:
@@ -1444,7 +1447,7 @@ def _build_first_z_term(LHS):
 
 
 def _build_second_z_term(LHS, H, Z, remove_f_terms=False):
-    """
+    """ LHS * Z * H
     This one basically needs to be like the t term stuff EXCEPT:
         - there is a single z term
         - it is always on the left side
@@ -1462,9 +1465,9 @@ def _build_second_z_term(LHS, H, Z, remove_f_terms=False):
 
 
 def _build_third_z_term(LHS, H, Z, remove_f_terms=False):
-    """
+    """ LHS * H * Z
     This one basically needs to be like the t term stuff EXCEPT:
-        - there is a single z term
+        - there is a `single z term
         - it is always on the right side
         - always bond to projection operator in opposite dimension (^i _i)
     """
@@ -1480,7 +1483,7 @@ def _build_third_z_term(LHS, H, Z, remove_f_terms=False):
 
 
 def _build_fourth_z_term(LHS, H, Z, remove_f_terms=False):
-    """
+    """ LHS * Z * H * Z
     This one basically needs to be like the t term stuff EXCEPT:
         - there is always two z terms
         - one on each side
