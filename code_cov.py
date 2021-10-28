@@ -82,8 +82,8 @@ def test_latex_eT_z_t_ansatz():
         for b1, b2, b3 in it.product(true_or_false, repeat=3):
 
             # temporary fix as
-            # ```The excited state ZT terms for the 5th ansatz has not been properly implemented```
-            # per line 1610 in `latex_eT_zhz.py`
+            # ```The excited state TZT terms for the 5th ansatz has not been properly implemented```
+            # per line 1610 in `latex_eT_zhz.py`, will hang due to many asserts that are working as intended
             if b1 is False:
                 continue
 
