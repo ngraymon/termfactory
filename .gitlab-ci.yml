@@ -35,6 +35,8 @@ before_script:
   - python -m pip install virtualenv >> setup_output.txt
   - virtualenv venv  >> setup_output.txt
   - source venv/bin/activate
+  - python -m pip install -r requirements.txt >> setup_output.txt
+  - python -m pip install -r test_requirements.txt >> setup_output.txt
 
 cov_test:
   stage: code_analysis
