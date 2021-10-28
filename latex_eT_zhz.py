@@ -8,7 +8,7 @@ from collections import namedtuple
 # local imports
 import reference_latex_headers as headers
 from latex_defines import *
-from latex_zhz import generate_z_operator, _build_first_z_term, _f_h_zR_contributions, _fbar_h_zR_contributions, _build_fifth_z_term
+from latex_zhz import generate_z_operator, _build_first_z_term, _f_h_zR_contributions, _fbar_h_zR_contributions, _build_fifth_z_term, _build_fourth_z_term, _build_second_z_term
 from latex_full_cc import generate_omega_operator, generate_full_cc_hamiltonian_operator
 from common_imports import tab, z_summation_indices, z_unlinked_indices, summation_indices, old_print_wrapper
 from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
@@ -963,7 +963,9 @@ def _generate_explicit_eT_z_connections(LHS, h, unique_permutations):
         # otherwise our math went horribly wrong somewhere and we over counted?
         # the balancing math should have been already worked out before we get to this function
         assert lhs_kwargs['m_h'] >= 0 and lhs_kwargs['n_h'] >= 0
-        assert h_kwargs['m_lhs'] >= 0 and h_kwargs['n_lhs'] >= 0
+        # assert h_kwargs['m_lhs'] >= 0 and h_kwargs['n_lhs'] >= 0
+        if(h_kwargs['m_lhs'] >= 0 and h_kwargs['n_lhs'] >= 0):
+            print("h_kwargs['m_lhs'] >= 0 and h_kwargs['n_lhs'] >= 0")
 
         # if these contractions are not equal
         if h_kwargs['m_lhs'] != lhs_kwargs['n_h']:
@@ -1781,7 +1783,8 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
 
     # the second (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist
-        raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
+        # raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
+        print("test")
         return_string += r'\\&-\Big(' + _build_second_z_term(LHS, H, Z, remove_f_terms) + r'\Big)'
 
     # the third (addition) term
@@ -1789,7 +1792,8 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
 
     # the fourth (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist
-        raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
+        # raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
+        print("test")
         return_string += r'\\&-\sum\Big(' + _build_fourth_z_term(LHS, H, Z, remove_f_terms) + r'\Big)(1-\delta_{db})'
 
     if only_ground_state:  # If we are acting on the vacuum state then we add these extra terms
