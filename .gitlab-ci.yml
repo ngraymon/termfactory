@@ -42,7 +42,7 @@ cov_test:
   stage: code_analysis
   script:
     - python vulture_wrapper.py
-    - python -m coverage run pytest >> printing_output.txt
+    - python -m coverage run -m pytest >> printing_output.txt
     - python -m coverage html
     - python -m coverage report
     - ls ./htmlcov
