@@ -148,9 +148,10 @@ def generate_s_taylor_expansion(maximum_cc_rank=2, s_taylor_max_order=3, only_gr
 
     # create the list
     s_taylor_expansion = [None, ]*(s_taylor_max_order+1)
-
     s_taylor_expansion[0] = general_operator_namedtuple("1", 0, 0, 0)  # 1 term
-    s_taylor_expansion[1] = S.operator_list                         # S term
+
+    if s_taylor_max_order >= 1:
+        s_taylor_expansion[1] = S.operator_list                        # S term
 
     """ We compute all combinations including non unique ones ON PURPOSE!!
     The products of S operators do not have indices mapping them to omega and H.
@@ -1500,6 +1501,8 @@ def generate_full_cc_latex(truncations, only_ground_state=False, path="./generat
     """Generates and saves to a file the latex equations for full CC expansion."""
 
     assert len(truncations) == 4, "truncations argument needs to be tuple of four integers!!"
+    for trunc in truncations:
+        assert trunc >= 1, "Truncations need to be positive integers"
     maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)

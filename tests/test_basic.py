@@ -44,19 +44,25 @@ class TestFullccLatex():
     # add a bunch of fixtures for the truncations and maybe they are similar to the fixtures in `ExcitedStateTesting`
     # and then you can move them to a global scope, you'll have to test this
 
-    @pytest.fixture(scope="class", params=[0, 1, 2])
+    def test_zero_value_ground_state(self):
+        # check that it fails with the specific assert
+        # `Truncations need to be positive integers`
+        # fcc.generate_full_cc_latex([0, 1, 1, 1], only_ground_state=True, path="./ground_state_full_cc_equations.tex")
+        pass
+
+    @pytest.fixture(scope="class", params=[1, 2, 3])
     def A(self, request):
         return request.param
 
-    @pytest.fixture(scope="class", params=[0, 1, 2])
+    @pytest.fixture(scope="class", params=[1, 2, 3])
     def B(self, request):
         return request.param
 
-    @pytest.fixture(scope="class", params=[0, 1, 2])
+    @pytest.fixture(scope="class", params=[1, 2, 3])
     def C(self, request):
         return request.param
 
-    @pytest.fixture(scope="class", params=[0, 1, 2])
+    @pytest.fixture(scope="class", params=[1, 2, 3])
     def D(self, request):
         return request.param
 
@@ -73,15 +79,15 @@ class TestFullccLatex():
 
 class TestExcitedState():
 
-    @pytest.fixture(params=[0, 1, 2, 3])
+    @pytest.fixture(params=[1, 2, 3])
     def maximum_h_rank(self, request):
         return request.param
 
-    @pytest.fixture(params=[0, 1, 2])
+    @pytest.fixture(params=[1, 2])
     def omega_max_order(self, request):
         return request.param
 
-    @pytest.fixture(params=[0, 1, 2])
+    @pytest.fixture(params=[1, 2])
     def maximum_cc_rank(self, request):
         return request.param
 
