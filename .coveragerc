@@ -1,8 +1,6 @@
 # .coveragerc to control coverage.py
 [run]
 include =
-    code_cov.py
-    driver.py
     reference_latex_headers.py
     code_dt_equations.py
     code_full_cc.py
