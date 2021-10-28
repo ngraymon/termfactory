@@ -1,5 +1,6 @@
 # system imports
 import os
+import itertools as it
 from collections import namedtuple
 
 # third party imports

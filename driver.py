@@ -47,7 +47,8 @@ def generate_latex_files(truncations, only_ground_state=True, remove_f_terms=Fal
             ground_state_w_equations_latex(max_w_order, path)
         else:
             path = "./excited_state_w_equations.tex"
-            assert False, 'the excited_state_w_equations_latex has not been verified'
+            # assert False, 'the excited_state_w_equations_latex has not been verified'
+            print('WARNING: The excited_state_w_equations_latex has not been verified')
             excited_state_w_equations_latex(max_w_order, path)
 
     # the `s_taylor_max_order` isn't relevant for this execution pathway

@@ -1563,7 +1563,8 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
 
     # the second (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist
-        raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
+        #raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
+        print("WARNING: The excited state ZT terms for the 5th ansatz has not been properly implemented")
         return_string += r'\\&-\Big(' + _build_second_z_term(LHS, H, Z, remove_f_terms) + r'\Big)'
 
     # the third (addition) term
@@ -1571,7 +1572,8 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
 
     # the fourth (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist
-        raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
+        #raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
+        print("WARNING: The excited state ZT terms for the 5th ansatz has not been properly implemented")
         return_string += r'\\&-\sum\Big(' + _build_fourth_z_term(LHS, H, Z, remove_f_terms) + r'\Big)(1-\delta_{db})'
 
     if only_ground_state:  # If we are acting on the vacuum state then we add these extra terms

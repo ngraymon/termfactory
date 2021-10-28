@@ -98,24 +98,24 @@ def test_latex_eT_z_t_ansatz():
 def test_latex_w_equations():
     """ x """
     for truncation_permutation in _generate_all_full_cc_truncations():#think full_cc should cover most unless we wanna expand the max_h rank
-        for b1, b2 in it.product(true_or_false, repeat=2):
+        for b2, b3 in it.product(true_or_false, repeat=2):
             generate_latex_files(
                 truncation_permutation,
-                only_ground_state=True, #the excited_state_w_equations_latex has not been verified
-                remove_f_terms=b1,
-                thermal=b2,
+                only_ground_state=True, # the excited_state_w_equations_latex has not been verified, generate_t_terms_group all_combinations_list itertools product hangs on False
+                remove_f_terms=b2,
+                thermal=b3,
                 file='w equations'
             )
 
 def test_latex_z_t_ansatz():
     """ x """
     for truncation_permutation in _generate_all_full_cc_truncations():#think full_cc should cover most unless we wanna expand the max_h rank
-        for b1, b2 in it.product(true_or_false, repeat=2):
+        for b1, b2, b3 in it.product(true_or_false, repeat=3):
             generate_latex_files(
                 truncation_permutation,
-                only_ground_state=True, #The excited state ZT terms for the 5th ansatz has not been properly implemented
-                remove_f_terms=b1,
-                thermal=b2,
+                only_ground_state=b1, #The excited state ZT terms for the 5th ansatz has not been properly implemented
+                remove_f_terms=b2,
+                thermal=b3,
                 file='z_t ansatz'
             )
 
