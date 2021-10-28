@@ -1781,7 +1781,12 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
 
     # the second (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist
-        raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
+        raise Exception(
+            "The excited state second eTZH terms are not implemented.\n"
+            "To properly implement this Z term we need to write a new function `_build_second_eTz_term`"
+            "Which loops over `eT_taylor_expansion` in the same way as `_build_third_eTz_term`"
+            "Do not remove this exception unless you have fully implemented the new function `_build_second_eTz_term`"
+        )
         return_string += r'\\&-\Big(' + _build_second_z_term(LHS, H, Z, remove_f_terms) + r'\Big)'
 
     # the third (addition) term
@@ -1789,7 +1794,12 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
 
     # the fourth (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist
-        raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
+        raise Exception(
+            "The excited state second eTZHZ terms are not implemented.\n"
+            "To properly implement this Z term we need to write a new function `_build_fourth_eTz_term`"
+            "Which loops over `eT_taylor_expansion` in the same way as `_build_third_eTz_term`"
+            "Do not remove this exception unless you have fully implemented the new function `_build_fourth_eTz_term`"
+        )
         return_string += r'\\&-\sum\Big(' + _build_fourth_z_term(LHS, H, Z, remove_f_terms) + r'\Big)(1-\delta_{db})'
 
     if only_ground_state:  # If we are acting on the vacuum state then we add these extra terms

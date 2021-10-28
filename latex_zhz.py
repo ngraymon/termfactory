@@ -1564,10 +1564,16 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
     # the first H term
     return_string += _build_first_z_term(LHS)
 
+    not_implemented_yet_message = (
+        "The logic for the supporting functions (such as `_filter_out_valid_z_terms` and others)\n"
+        "Has only been verified to work for the LHS * H * Z (`third_z`) case.\n"
+        "The code may produce some output without halting, but the output is meaningless from a theory standpoint.\n"
+        "Do not remove this Exception without consulting with someone else and implementing the requisite functions."
+    )
+
     # the second (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist
-        #raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
-        print("WARNING: The excited state ZT terms for the 5th ansatz has not been properly implemented")
+        raise Exception(not_implemented_yet_message)
         return_string += r'\\&-\Big(' + _build_second_z_term(LHS, H, Z, remove_f_terms) + r'\Big)'
 
     # the third (addition) term
@@ -1575,8 +1581,7 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
 
     # the fourth (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist
-        #raise Exception('The excited state ZT terms for the 5th ansatz has not been properly implemented')
-        print("WARNING: The excited state ZT terms for the 5th ansatz has not been properly implemented")
+        raise Exception(not_implemented_yet_message)
         return_string += r'\\&-\sum\Big(' + _build_fourth_z_term(LHS, H, Z, remove_f_terms) + r'\Big)(1-\delta_{db})'
 
     if only_ground_state:  # If we are acting on the vacuum state then we add these extra terms
