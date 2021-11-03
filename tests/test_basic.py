@@ -7,6 +7,13 @@
 # local imports
 from .context import latex_zhz as zhz
 from .context import latex_full_cc as fcc
+from .context import latex_eT_zhz as eTzhz
+from .context import latex_w_equations as weqn
+
+from .context import code_full_cc as code_fcc
+from .context import code_residual_equations as code_res
+from .context import code_w_equations as code_weqn
+from .context import code_dt_equations as code_dt_eqn
 
 # third party imports
 import pytest
@@ -47,8 +54,12 @@ class TestFullccLatex():
     def test_zero_value_ground_state(self):
         # check that it fails with the specific assert
         # `Truncations need to be positive integers`
-        # fcc.generate_full_cc_latex([0, 1, 1, 1], only_ground_state=True, path="./ground_state_full_cc_equations.tex")
-        pass
+        with pytest.raises(AssertionError,  match="Truncations need to be positive integers") as exc_info:
+            fcc.generate_full_cc_latex((0, 1, 1, 1), only_ground_state=True, path="./ground_state_full_cc_equations.tex")
+            # exception_raised = exc_info.value
+
+
+        
 
     @pytest.fixture(scope="class", params=[1, 2, 3])
     def A(self, request):
@@ -76,7 +87,139 @@ class TestFullccLatex():
     def test_excited_state(self, truncations):
         fcc.generate_full_cc_latex(truncations, only_ground_state=False, path="./full_cc_equations.tex")
 
+class Test_latex_eT_z_t_ansatz():
+    
+    @pytest.fixture(scope="class", params=[1, 2])
+    def A(self, request):
+        return request.param
 
+    @pytest.fixture(scope="class", params=[1, 2])
+    def B(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 2])
+    def C(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 2])
+    def D(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 2])
+    def E(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class")
+    def truncations(self, A, B, C, D, E):
+        return [A, B, C, D, E]
+
+    def test_ground_state(self, truncations):
+        eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, path="./generated_latex.tex")
+
+    # def test_excited_state(self, truncations):
+    #     eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=False, path="./generated_latex.tex")
+
+    # add a pytest.raise for Exception: The excited state second eTZH terms are not implemented.
+
+class Test_latex_w_equations:
+    @pytest.fixture(scope="class", params=[1, 2, 3, 4])
+    def max_w_order(self, request):
+        return request.param
+
+    def test_ground_state(self, max_w_order):
+        weqn.ground_state_w_equations_latex(max_w_order, path="./ground_state_w_equations.tex")
+
+    def test_excited_state(self, max_w_order):
+         weqn.excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex")
+
+class Test_latex_zhz():
+
+    @pytest.fixture(scope="class", params=[1, 3])
+    def A(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 3])
+    def B(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 3])
+    def C(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 3])
+    def D(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class")
+    def truncations(self, A, B, C, D):
+        return [A, B, C, D]
+
+    def test_ground_state(self, truncations):
+        zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex")
+
+    # def test_excited_state(self, truncations):
+    #     zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=False, remove_f_terms=False, path="./generated_latex.tex")
+
+    # need to add pytest.raise for 2, 4 case / excited case
+    
+class Test_code_fcc():
+
+    @pytest.fixture(scope="class", params=[1, 2, 3])
+    def A(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 2, 3])
+    def B(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 2, 3])
+    def C(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 2, 3])
+    def D(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class")
+    def truncations(self, A, B, C, D):
+        return [A, B, C, D]
+
+    def test_fcc_code(self, truncations):
+        code_fcc.generate_full_cc_python(truncations, only_ground_state=False, path="./full_cc_equations.py")
+    
+class Test_code_residuals():
+
+    @pytest.fixture(scope="class", params=[4])
+    def max_residual_order(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[2])
+    def maximum_h_rank(self, request):
+        return request.param
+    
+    def test_residuals_code(self, max_residual_order,maximum_h_rank):
+        code_res.generate_residual_equations_file(max_residual_order, maximum_h_rank, path="./residual_equations.py")
+
+    ## need to resolve key error for certain combinations
+
+class Test_code_w_equations():
+
+    @pytest.fixture(scope="class", params=[1, 2, 3])
+    def max_w_order(self, request):
+        return request.param
+
+    def test_code_w_equations(self, max_w_order):
+        code_weqn.generate_w_operator_equations_file(max_w_order, path="./w_operator_equations.py")
+
+class Test_code_dt_equations():
+
+    @pytest.fixture(scope="class", params=[1, 2, 3])
+    def max_w_order(self, request):
+        return request.param
+
+    def test_code_dt_equations(self, max_w_order):
+        code_dt_eqn.generate_dt_amplitude_equations_file(max_w_order, path="./dt_amplitude_equations.py")
+    
 class TestExcitedState():
 
     @pytest.fixture(params=[1, 2, 3])
