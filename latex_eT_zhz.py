@@ -1085,13 +1085,6 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
     a = [0, ] * 11
     print('-'*100)
 
-    # special case because our logic only works for taylor expansion of single t operators
-    # t=0 h_2 Z_2
-    if len(t_list) == 1 and len(h.m_t) == len(h.n_t) == 0:
-        assert h.rank <= 3, "doesn't properly support h^2_2 types"
-        max_h_rank = max(h.m, h.n)
-        return f"\\frac{{{1}}}{{{max_h_rank}}}" if max_h_rank > 1 else ''
-
     numerator = 1
     denominator = 1
 
@@ -1105,6 +1098,17 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
     if f > 1:
         denominator *= math.factorial(f)
 
+    # ---------------------------------------------------------------------------------------------------------
+    # the N factor
+    assert z_right.m_h == h.n_r, 'should be the same, but just in case'
+    n_z = z_right.m_h
+
+    denominator_list.append(f'{n_z}!')
+    if n_z > 1:
+        denominator *= math.factorial(n_z)
+
+    # ---------------------------------------------------------------------------------------------------------
+    # the combinatorial factor
     # number of contractions on all t operators
     n_t = sum([int(t.n - t.m_lhs) for t in t_list])
 
