@@ -1924,7 +1924,7 @@ def generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, remove_
 
         # for debugging purposes
         # if you only want to generate the linear terms for example; change the False to True
-        if False and omega_term.rank not in [1, ]:
+        if False and omega_term.rank not in [1, ]:  # pragma: no cover
             continue
 
         # for the new ansatz v5 we only print the annihilation operator projections

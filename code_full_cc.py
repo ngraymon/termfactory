@@ -171,7 +171,7 @@ def _full_cc_einsum_vibrational_components(h, t_list):
     return vibrational_components, ''.join(remaining_list)
 
 
-def _full_cc_einsum_subscript_generator(h, t_list):
+def _full_cc_einsum_subscript_generator(h, t_list):  # pragma: no cover
     """ x """
     return_string = ""
 
@@ -188,7 +188,7 @@ def _full_cc_einsum_subscript_generator(h, t_list):
     return return_string
 
 
-def _full_cc_einsum_prefactor(term):
+def _full_cc_einsum_prefactor(term):  # pragma: no cover
     """ x """
     string = ""
 
