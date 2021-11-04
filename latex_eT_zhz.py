@@ -3,6 +3,8 @@ import sys
 import math
 import itertools as it
 from collections import namedtuple
+import inspect
+import pdb
 
 # third party imports
 
@@ -412,7 +414,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
 
         print(f"{each_eT_balanced=}")
         print([(t.n, LHS.m, h.m, left_m_perm[1][i], right_m_perm[1][i]) for i, t in enumerate(t_list)])
-        # import pdb; pdb.set_trace()
+        # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
         dense_output = f"\n{tab}".join([
             '',
@@ -856,7 +858,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
             annotated_permutations.append((tuple(perm_list), z_pair))
 
         # print('A\n', annotated_permutations)
-        # import pdb; pdb.set_trace()
+        # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
         splitperm = lambda array: f'\n{tab}{tab}'.join(['']+[str(t) for t in array[0]])
 
@@ -888,7 +890,7 @@ def _remove_duplicate_eT_z_permutations(LHS, h, eT_connection_permutations):
 
         # print('\n', perm)
         # print('\n', i, t_tuple, z_pair)
-        # import pdb; pdb.set_trace()
+        # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
         # a.sort()
         # a = tuple(a)
 
@@ -1170,7 +1172,7 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
 
     # print(numerator_list)
     # print(denominator_list)
-    import pdb; pdb.set_trace()
+    pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
     # ---------------------------------------------------------------------------------------------------------
 
     # simplify
@@ -1467,7 +1469,7 @@ def _prepare_third_eTz_latex(
             print(z_left)
             print(z_right)
 
-        import pdb; pdb.set_trace()
+        pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
     # prepare all the latex strings
     for term in term_list:
@@ -1536,12 +1538,12 @@ def _prepare_third_eTz_latex(
         right_z = _build_eT_right_z_term(h, z_right, t_offset_dict)
 
         # print('Check t terms:\n', t_terms)
-        # import pdb; pdb.set_trace()
+        # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
         # build the latex code representing this term in the sum
         term_string += t_terms + left_z + h_term + right_z
         print(f"{term_string=}\n")
-        import pdb; pdb.set_trace()
+        pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
         # store the result
         return_list.append(term_string)
@@ -1742,7 +1744,7 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
                 old_print_wrapper('CONNECTED TERMS', LHS, p[0], h, p[1])
                 print('CONNECTED TERMS', LHS, p[0], h, p[1])
 
-        # import pdb; pdb.set_trace()
+        # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
         # continue
 
         # we need to remove duplicate permutations
@@ -1827,7 +1829,7 @@ def _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False):
         print('\n\n\n')
         for i, a in enumerate(valid_term_list):
             print(f"{i+1:>4d}", a)
-        import pdb; pdb.set_trace()
+        pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
     if valid_term_list == []:
         return ""
