@@ -1,6 +1,7 @@
 # system imports
 import sys
 import math
+import fractions
 import itertools as it
 from collections import namedtuple
 import inspect
@@ -1081,15 +1082,15 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
 
     A single h with no t list is a special case where the prefactor is always 1.
     """
-    simplify_flag = False
     a = [0, ] * 11
     print('-'*100)
 
-    # special case, single h
-    # if len(t_list) == 1 and t_list[0] == disconnected_eT_z_right_operator_namedtuple(*a):
-    #     print(t_list)
-    #     print('escaped')
-    #     return ''
+    # special case because our logic only works for taylor expansion of single t operators
+    # t=0 h_2 Z_2
+    if len(t_list) == 1 and len(h.m_t) == len(h.n_t) == 0:
+        assert h.rank <= 3, "doesn't properly support h^2_2 types"
+        max_h_rank = max(h.m, h.n)
+        return f"\\frac{{{1}}}{{{max_h_rank}}}" if max_h_rank > 1 else ''
 
     numerator = 1
     denominator = 1
@@ -1097,87 +1098,51 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
     numerator_list, denominator_list = [], []
 
     # ---------------------------------------------------------------------------------------------------------
-    # do the hZ prefactor first
+    # do the f factor
+    f = len(t_list)
 
-    # this is the Z (1/n!) (which we cancelled our by using the condensed form)
-    # if z_right.m > 1:
-    #     denominator_list.append(f'{z_right.m}!')
-    #     denominator *= math.factorial(int(z_right.m))
+    denominator_list.append(f'{f}!')
+    if f > 1:
+        denominator *= math.factorial(f)
 
-    # do the permutations (n choose nk)
-    n = z_right.m
-    nk = z_right.m_h
-    print(f"{n=}  {nk=}")
+    # number of contractions on all t operators
+    n_t = sum([int(t.n - t.m_lhs) for t in t_list])
 
-    choose_result = math.comb(n, nk)
+    # number of contractions h has with any t operator
+    n_h = sum(h.m_t)
 
-    print(f'hZ choose {choose_result}')
-    # the condensed formula is 1/ (nk! * (n - nk)!)
+    choose_result = math.comb(n_t, n_h)
+    # print(f'{n_t = }')
+    # print(f'{n_h = }')
+    # print(f'n_t choose n_h: {choose_result}')
+    numerator_list.append(f'{choose_result}')
 
-    if nk > 1:
-        denominator_list.append(f'{nk}!')
-        denominator *= math.factorial(int(nk))
+    if choose_result > 1:
+        numerator *= choose_result
 
-    if (n - nk) > 1:
-        denominator_list.append(f'{n - nk}!')
-        denominator *= math.factorial(int(n - nk))
+    # if I wanted to have logic to express prefactors in terms of factorials?
+    # numerator_list.append(f'{n_t}!')
+    # denominator_list.append(f'{n_h}!')
+    # denominator_list.append(f'{1}!')
 
-    if False:  # apparently we don't do the h order (1/n!)
-        if h.m > 1:
-            denominator_list.append(f'{h.m}!')
-            denominator *= math.factorial(int(h.m))
-        if h.n > 1:
-            denominator_list.append(f'{h.n}!')
-            denominator *= math.factorial(int(h.n))
+    # print(f"{numerator_list = }")
+    numerator_list = [n for n in numerator_list if n not in ['1', '1!']]
+    # print(f"{numerator_list = }")
 
-    print(numerator_list)
-    print(denominator_list)
-    # ---------------------------------------------------------------------------------------------------------
-    # do the V prefactor next
-
-    # account for the number of permutations of all t-amplitudes
-    # or said another way the order of the T operator
-    t_op_order = len(t_list)
-
-    if t_op_order > 1:
-        denominator_list.append(f'{t_op_order}!')
-        denominator *= math.factorial(int(t_op_order))
-
-    # do the permutations (n choose nk)
-    n = t_op_order
-
-    t_count = {}
-    for t in t_list:
-        if t.rank not in t_count:
-            t_count[t.rank] = 1
-        else:
-            t_count[t.rank] += 1
-
-    ny = max(t_count.values())
-
-    choose_result = math.comb(n, ny)
-    print(f'V choose {choose_result}')
-    # the condensed formula is 1/ (nk! * (n - nk)!)
-
-    # if choose_result > 1:
-    #     numerator_list.append(f'{choose_result}')
-    #     numerator *= choose_result
-
-    # for each t with rank 2 or higher we need to add their 1/n!
-    # rank_list = [t.rank for t in t_list if t.rank > 1]
-
-    # for rank in rank_list:
-    #     denominator_list.append(f'{rank}!')
-    #     denominator *= math.factorial(int(rank))
-
-    # print(numerator_list)
-    # print(denominator_list)
-    pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
+    # print(f"{denominator_list = }")
+    denominator_list = [d for d in denominator_list if d not in ['1', '1!']]
+    # print(f"{denominator_list = }")
     # ---------------------------------------------------------------------------------------------------------
 
-    # simplify
+    # # simplify
     if simplify_flag:
-        numerator_list, denominator_list = _simplify_full_cc_python_prefactor(numerator_list, denominator_list)
+        fraction = fractions.Fraction(numerator, denominator)
+        if fraction == 1:
+            return ''
+        else:
+            return f"\\frac{{{fraction.numerator}}}{{{fraction.denominator}}}"
+
+        # numerator_list, denominator_list = _simplify_full_cc_python_prefactor(numerator_list, denominator_list)
 
     # glue the numerator and denominator together
     numerator = '1' if (numerator_list == []) else f"{''.join(numerator_list)}"
@@ -1469,7 +1434,7 @@ def _prepare_third_eTz_latex(
             print(z_left)
             print(z_right)
 
-        pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
+        # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
     # prepare all the latex strings
     for term in term_list:
@@ -1543,7 +1508,7 @@ def _prepare_third_eTz_latex(
         # build the latex code representing this term in the sum
         term_string += t_terms + left_z + h_term + right_z
         print(f"{term_string=}\n")
-        pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
+        # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
         # store the result
         return_list.append(term_string)
