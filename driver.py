@@ -14,6 +14,7 @@ from latex_eT_zhz import generate_eT_z_t_symmetric_latex
 
 
 # -- python code generators
+from code_eT_zhz import generate_eT_zhz_python
 from code_full_cc import generate_full_cc_python
 from code_residual_equations import generate_residual_equations_file
 from code_w_equations import generate_w_operator_equations_file
@@ -82,10 +83,9 @@ def generate_latex_files(truncations, only_ground_state=True, remove_f_terms=Fal
 def generate_python_files(truncations, only_ground_state=True, thermal=False):
     """ generates .py files which will be used when calculating desired quantities """
 
-    if only_ground_state:
-        generate_full_cc_python(truncations, only_ground_state=True)
-    else:
-        generate_full_cc_python(truncations, only_ground_state=False)
+    # generate_full_cc_python(truncations, only_ground_state)
+
+    generate_eT_zhz_python(truncations, only_ground_state)
 
     # max_residual_order = 6
     # generate_residual_equations_file(max_residual_order, truncations[0])
@@ -134,22 +134,22 @@ if (__name__ == '__main__'):
     # need to have truncation of e^T
     eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order
 
-    if True:
-        generate_latex_files(
-            eT_z_t_truncations,
-            only_ground_state=True,
-            remove_f_terms=False,
-            thermal=False,
-            file='eT_z_t ansatz'
-        )
-    else:
-        generate_latex_files(
-            truncations,
-            only_ground_state=True,
-            remove_f_terms=False,
-            thermal=False,
-            file='full cc'
-        )
+    # if True:
+    #     generate_latex_files(
+    #         eT_z_t_truncations,
+    #         only_ground_state=True,
+    #         remove_f_terms=False,
+    #         thermal=False,
+    #         file='eT_z_t ansatz'
+    #     )
+    # else:
+    #     generate_latex_files(
+    #         truncations,
+    #         only_ground_state=True,
+    #         remove_f_terms=False,
+    #         thermal=False,
+    #         file='full cc'
+    #     )
 
-    # generate_python_files(truncations, only_ground_state=True, thermal=False)
+    generate_python_files(eT_z_t_truncations, only_ground_state=True, thermal=False)
     print("We reached the end of main")
