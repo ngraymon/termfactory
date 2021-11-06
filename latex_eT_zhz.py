@@ -97,8 +97,20 @@ def generate_eT_taylor_expansion(maximum_eT_rank=2, eT_taylor_max_order=3):
     return eT_taylor_expansion
 
 
-# --------------------- Validating operator pairings ------------------------ #
+def generate_pruned_H_operator(maximum_h_rank):
+    """ Wrapper for pruning bottom term ranks
+    This allows us to have h^0_3 but not h^3 or h^2_1 or h^1_2
+    """
 
+    raw_H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
+
+    # aug 4th songhao says this is because of theory
+    pruned_list = [term for term in raw_H.operator_list if (term.rank < 3) or (term.m == 0)]
+    H = hamiltonian_namedtuple(raw_H.maximum_rank, pruned_list)
+    return H
+
+
+# --------------------- Validating operator pairings ------------------------ #
 def _z_joining_with_z_terms_eT(LHS, t_list, h, left_z, right_z):
     """Remove terms like `z^1_3 h^2` which require the z^1_3 to join with itself.
 
@@ -1787,14 +1799,12 @@ def _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False):
     """
     for count, eT_series_term in enumerate(eT_taylor_expansion):
 
-        # _filter_out_valid_eT_terms(LHS, eT_series_term, H, Z, valid_term_list, remove_f_terms=remove_f_terms)
-
         log.setLevel('DEBUG')
         # generate all valid combinations
         _filter_out_valid_eTz_terms(LHS, eT_series_term, H, None, Z, valid_term_list)
         log.setLevel('INFO')
 
-    if False:
+    if False:  # debug
         print('\n\n\n')
         for i, a in enumerate(valid_term_list):
             print(f"{i+1:>4d}", a)
@@ -1869,7 +1879,7 @@ def generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, remove_
     maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order = truncations
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
-    raw_H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
+    H = generate_pruned_H_operator(maximum_h_rank)
     Z = generate_z_operator(maximum_cc_rank, only_ground_state)
     eT_taylor_expansion = generate_eT_taylor_expansion(maximum_T_rank, eT_taylor_max_order)
 
@@ -1878,10 +1888,6 @@ def generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, remove_
         therefore `rank(e^T)` is restricted to `rank(H) + rank(Z)`
     """
     # assert maximum_eT_rank <= maximum_h_rank + maximum_cc_rank, 'ranks are wrong'
-
-    # aug 4th songhao says this is because of theory
-    pruned_list = [term for term in raw_H.operator_list if (term.rank < 3) or (term.m == 0)]
-    H = hamiltonian_namedtuple(raw_H.maximum_rank, pruned_list)
 
     latex_code = ""  # store result in here
 

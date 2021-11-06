@@ -1,10 +1,12 @@
 # system imports
+import functools
 
 # third party imports
 
 # local imports
+import helper_funcs
+from helper_funcs import unique_permutations, named_line
 from namedtuple_defines import general_operator_namedtuple, omega_namedtuple
-from helper_funcs import unique_permutations
 from common_imports import tab, tab_length, summation_indices, unlinked_indices, old_print_wrapper
 from latex_full_cc import (
     generate_full_cc_hamiltonian_operator,
@@ -661,34 +663,26 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
 
     # ------------------------------------------------------------------------------------------- #
-    # for generating labels and spacing
-    def named_line(name, width):
-        return "# " + "-"*width + f" {name} " + "-"*width + " #"
+    # Defines for labels and spacing
 
     s1, s2 = 75, 28
-    spacing_line = "# " + "-"*s1 + " #\n"
+    l1, l2 = 109, 45
 
-    def spaced_named_line(name, width):
-        return spacing_line + named_line(name, width) + '\n' + spacing_line
-
-    s3, s4 = 109, 45
-    large_spacing_line = "# " + "-"*s3 + " #\n"
-
-    def long_spaced_named_line(name, width):
-        return large_spacing_line + named_line(name, width) + '\n' + large_spacing_line
+    spaced_named_line = functools.partial(helper_funcs.spaced_named_line(), spacing_line=f"# {'-'*s1} #\n")
+    long_spaced_named_line = functools.partial(helper_funcs.spaced_named_line(), large_spacing_line=f"# {'-'*l1} #\n")
     # ------------------------------------------------------------------------------------------- #
     #
     # ------------------------------------------------------------------------------------------- #
     # header for default functions (as opposed to the optimized functions)
-    string = long_spaced_named_line("DEFAULT FUNCTIONS", s4)
+    string = long_spaced_named_line("DEFAULT FUNCTIONS", l2)
     # ----------------------------------------------------------------------- #
     # header
-    string += '\n' + named_line("INDIVIDUAL TERMS", s4) + '\n\n'
+    string += '\n' + named_line("INDIVIDUAL TERMS", l2) + '\n\n'
     # generate
     string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state)
     # ----------------------------------------------------------------------- #
     # header
-    string += '\n' + named_line("RESIDUAL FUNCTIONS", s4)
+    string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
     # generate
     string += "".join([
         _write_master_full_cc_compute_function(omega_term)
@@ -698,15 +692,15 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     #
     # ------------------------------------------------------------------------------------------- #
     # header for optimized functions
-    string += long_spaced_named_line("OPTIMIZED FUNCTIONS", s4-1)
+    string += long_spaced_named_line("OPTIMIZED FUNCTIONS", l2-1)
     # ----------------------------------------------------------------------- #
     # header
-    string += '\n' + named_line("INDIVIDUAL TERMS", s4) + '\n\n'
+    string += '\n' + named_line("INDIVIDUAL TERMS", l2) + '\n\n'
     # generate
     string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state, opt_einsum=True)
     # ----------------------------------------------------------------------- #
     # generate
-    string += '\n' + named_line("RESIDUAL FUNCTIONS", s4)
+    string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
     string += "".join([
         _write_master_full_cc_compute_function(omega_term, opt_einsum=True)
         for omega_term in master_omega.operator_list
@@ -715,7 +709,7 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     #
     # ------------------------------------------------------------------------------------------- #
     # header for optimized paths function
-    string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", s4)
+    string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", l2)
     # write the code for generating optimized paths for full CC, this is probably different than the W code?!?
     # maybe... im not sure?
     # both VEMX and VECC

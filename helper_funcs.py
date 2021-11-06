@@ -102,3 +102,32 @@ def generate_un_linked_disconnected_partitions_of_n(n):
     """
     new_set = set(_partitions(n)) - set(generate_mixed_partitions_of_n(n))
     return sorted(list(new_set), reverse=True)
+
+
+# ----------------------------------------------------------------------------------------------- #
+# Helper functions for writing code / spacing the text out
+
+def named_line(name, width):
+    """ Generate a header like
+        (# ---- <name> ---- #)
+    `width` argument determines how many `-` chars on BOTH sides.
+    """
+    return "# " + "-"*width + f" {name} " + "-"*width + " #"
+
+
+def spaced_named_line(name, width=28, spacing_line=f"# {'-'*75} #\n"):
+    """ Generate a header like
+        (# ---------------- #)
+        (# ---- <name> ---- #)
+        (# ---------------- #)
+    `width` argument determines how many `-` chars on BOTH sides in the middle line
+    """
+    return spacing_line + named_line(name, width) + '\n' + spacing_line
+
+
+def long_spaced_named_line(name, width=45, large_spacing_line=f"# {'-'*109} #\n"):
+    """ Wrapper for `spaced_named_line` to distinguish larger headers. """
+    return spaced_named_line(name, width, spacing_line=large_spacing_line)
+
+
+# ----------------------------------------------------------------------------------------------- #
