@@ -3,47 +3,20 @@
 # third party imports
 
 # local imports
-from namedtuple_defines import (
-    general_operator_namedtuple,
-    omega_namedtuple,
-)
+from namedtuple_defines import general_operator_namedtuple, omega_namedtuple
 from helper_funcs import unique_permutations
 from common_imports import tab, tab_length, summation_indices, unlinked_indices, old_print_wrapper
 from latex_full_cc import (
-    disconnected_namedtuple,
     generate_full_cc_hamiltonian_operator,
     generate_s_taylor_expansion,
+    generate_omega_operator,
     _filter_out_valid_s_terms,
     _seperate_s_terms_by_connection,
     _debug_print_valid_term_list,
     _debug_print_different_types_of_terms
 )
+from namedtuple_defines import disconnected_namedtuple
 from code_w_equations import taylor_series_order_tag, hamiltonian_order_tag
-
-
-def generate_omega_operator(maximum_cc_rank=2, omega_max_order=3):
-    """Return an `omega_namedtuple` whose attributes are determined by `maximum_cc_rank`.
-
-    The `operator_list` contains all permutations of (`m`,`n`) for `m` & `n` in `range(maximum_cc_rank + 1)`.
-    The name is a string of the chars `d` and `b` according to `m` and `n` respectively.
-    `m` is associated with creation operators (d) and `n` is associated with annihilation operators (b).
-
-    For m == n == 0 we generate `operator(name='', m=0, n=0)` which represents the zero order equation
-    """
-
-    return_list = []
-
-    for m in range(maximum_cc_rank + 1):          # m is the upper label (creation operators)
-        for n in range(maximum_cc_rank + 1 - m):  # n is the lower label (annihilation operators)
-
-            name = "d"*m + "b"*n
-
-            if m+n <= omega_max_order:
-                return_list.append(general_operator_namedtuple(name, m+n, m, n))
-
-    return_list.sort(key=lambda x: len(x.name))
-
-    return omega_namedtuple(maximum_cc_rank, return_list)
 
 
 # temp logging fix
