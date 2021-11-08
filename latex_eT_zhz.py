@@ -885,21 +885,40 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
     return annotated_permutations
 
 
-def _remove_duplicate_eT_z_permutations(LHS, h, eT_connection_permutations):
-    """ x """
+def _remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations):
+    """ This removes duplicate permutations of the t tuple for a given z_pair.
+    Specifically it removes permuting the t1t2 - t2t1 kind of thing.
+    However if you only have t1s it (probably) won't remove any permutations.
+    """
     unique_list = []
     unique_set = set()
+    unique_count = {}
+
+    tstorage = []
+    zstorage = []
 
     # print('\n\n', eT_connection_permutations)
     for i, perm in enumerate(eT_connection_permutations):
         t_tuple, z_pair = perm
         if t_tuple is not None:
-            print('\n', t_tuple)
+            print('\n', f"{t_tuple = }")
             t_tuple = list(t_tuple)
             t_tuple.sort()
-            print('\n', t_tuple)
+            if len(t_tuple) == 2:
+                print('\n', f"{t_tuple = }")
+                zstorage.append(z_pair)
+                for i, a in enumerate(tstorage):
+                    if t_tuple == a:
+                        print('t1\n', t_tuple, '\nt2\n', a)
+                        print('z1\n', zstorage[-1], '\nz2\n', zstorage[i])
+                        # import pdb; pdb.set_trace()
+                else:
+                    tstorage.append(t_tuple)
+                print('\ns\n', tstorage)
+                print('\n\n')
+                # import pdb; pdb.set_trace()
             print('\n', perm)
-            perm = (tuple(t_tuple), z_pair)
+            new_perm = (tuple(t_tuple), z_pair)
 
         # print('\n', perm)
         # print('\n', i, t_tuple, z_pair)
@@ -909,21 +928,30 @@ def _remove_duplicate_eT_z_permutations(LHS, h, eT_connection_permutations):
 
         splitperm = lambda array: f'\n{tab}{tab}'.join(['']+[str(t) for t in array[0]])
 
-        if perm not in unique_set:
-            log.debug(f"\n{tab}Added unique: ({splitperm(perm)}\n{tab})\n{tab}{perm[1]}")
-            unique_list.append(perm)
-            unique_set.add(perm)
+        if new_perm not in unique_set:
+            log.debug(f"\n{tab}Added unique: ({splitperm(new_perm)}\n{tab})\n{tab}{new_perm[1]}")
+            unique_list.append(new_perm)
+            unique_set.add(new_perm)
+            unique_count[new_perm] = 1
+        elif new_perm in unique_set:
+            log.debug(f"\n{tab}Removed duplicate: {splitperm(new_perm)}\n{tab})\n{tab}{new_perm[1]}")
+            unique_count[new_perm] += 1
         else:
-            log.debug(f"\n{tab}Removed duplicate: {splitperm(perm)}\n{tab})\n{tab}{perm[1]}")
-            pass
+            raise Exception('')
 
-    return unique_list
+    # print('a', unique_count)
+    # print('b', unique_set)
+    # import pdb; pdb.set_trace()
+
+    return unique_list, unique_count
 
 
-def _generate_explicit_eT_z_connections(LHS, h, unique_permutations):
+def _generate_explicit_eT_z_connections(LHS, h, unique_permutations, prefactor_count):
     """ Generate new namedtuples for LHS and h explicitly labeling how they connect with each other and t.
     We make `connected_lhs_operator_namedtuple` and `connected_h_z_operator_namedtuple`.
-    The output `labeled_permutations` is a list where each element is `[new_LHS, new_eT, new_h, z_left, z_right]`.
+    The output `labeled_permutations` is a list where each element is `[new_LHS, new_eT, new_h, z_left, z_right, p]`.
+    Note that the `p` allows for "remembering" how many duplicate terms the specific element represents and therefore we
+    need to (when writing the latex at the end) multiply by the corresponding number when building its associated prefactor.
     We also check to make sure each term is valid.
     """
 
@@ -1004,7 +1032,7 @@ def _generate_explicit_eT_z_connections(LHS, h, unique_permutations):
             log.debug(f"Found an invalid term (unbalanced {upper}!={lower})\n{term_string}")
             continue
 
-        labeled_permutations.append([new_LHS, t_list, new_h, z_pair])
+        labeled_permutations.append([new_LHS, t_list, new_h, z_pair, prefactor_count[perm]])
 
         for p in labeled_permutations:
             old_print_wrapper('\n\np')
@@ -1073,7 +1101,7 @@ def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
     return numerator_list, denominator_list
 
 
-def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
+def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefactor, simplify_flag=True):
     """Attempt to return latex code representing appropriate prefactor term.
 
     All prefactors begin with 1/n! where n is the number of t amplitudes in given term.
@@ -1091,6 +1119,8 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
         FOR H AND Z OTHERWISE EVERYTHING IS BALANCED
         - h and z contribute x!/m!n! where x is the number of UNIQUE t terms that h contracts with
 
+    `overcounting_prefactor` is to deal with the fact that we previously pruned duplicate terms
+    and so we must now multiply each unique term by how many duplicate terms it represents
 
     A single h with no t list is a special case where the prefactor is always 1.
     """
@@ -1101,6 +1131,9 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
     denominator = 1
 
     numerator_list, denominator_list = [], []
+    # ---------------------------------------------------------------------------------------------------------
+    numerator *= overcounting_prefactor
+    numerator_list.append(f'{numerator}')
 
     # ---------------------------------------------------------------------------------------------------------
     # do the f factor
@@ -1443,12 +1476,14 @@ def _prepare_third_eTz_latex(
     if False:
         for term in term_list:
             # extract elements of list `term`
-            LHS, t_list, h, z_left, z_right = term[0], term[1], term[2], *term[3]
+            LHS, t_list, h, z_left, z_right, prefactor = term[0], term[1], term[2], *term[3], term[4]
             print(LHS)
             print(t_list)
             print(h)
             print(z_left)
             print(z_right)
+            print(prefactor)
+            # import pdb; pdb.set_trace()
 
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
@@ -1457,7 +1492,7 @@ def _prepare_third_eTz_latex(
         term_string = ''
 
         # extract elements of list `term`
-        LHS, t_list, h, z_left, z_right = term[0], term[1], term[2], *term[3]
+        LHS, t_list, h, z_left, z_right, overcounting_prefactor = term[0], term[1], term[2], *term[3], term[4]
 
         # if needed add f prefactors
         nof_fs = _f_h_zR_contributions(h, z_right)
@@ -1479,7 +1514,7 @@ def _prepare_third_eTz_latex(
 
         # add any prefactors if they exist
         if print_prefactors:
-            term_string += _build_eT_z_latex_prefactor(t_list, h, z_left, z_right)
+            term_string += _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefactor)
 
         # prepare the z terms
         t_offset_dict = {
@@ -1728,9 +1763,10 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
         # continue
 
-        # we need to remove duplicate permutations
-        unique_eT_permutations = _remove_duplicate_eT_z_permutations(LHS, h, eT_connection_permutations)
-        # unique_eT_permutations = eT_connection_permutations
+        # we need to remove duplicate permutations on the t's
+        unique_eT_permutations, unique_count = _remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations)
+        # unique_eT_permutations, unique_count = eT_connection_permutations, {perm: 1 for perm in eT_connection_permutations}
+
         log_conf.setLevelInfo(log)
 
         # assert list(eT_connection_permutations) != []
@@ -1742,7 +1778,7 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
 
         # generate all the explicit connections
         # this also removes all invalid terms
-        labeled_permutations = _generate_explicit_eT_z_connections(LHS, h, unique_eT_permutations)
+        labeled_permutations = _generate_explicit_eT_z_connections(LHS, h, unique_eT_permutations, unique_count)
 
         # for i, a in enumerate(labeled_permutations):
         #     print(
@@ -1751,6 +1787,7 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
         #         a[1],
         #         a[2],
         #         a[3],
+        #         a[-1],
         #         sep='\n'
         #     )
 

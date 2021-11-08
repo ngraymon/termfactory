@@ -117,9 +117,9 @@ if (__name__ == '__main__'):
     # log.setLevel('CRITICAL')
 
     maximum_h_rank = 2
-    maximum_cc_rank = 2
+    maximum_cc_rank = 3
     s_taylor_max_order = 2  # this doesn't matter for the Z ansatz
-    omega_max_order = 2
+    omega_max_order = 3
 
     # for the 'z_t ansatz'
     truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
@@ -134,22 +134,33 @@ if (__name__ == '__main__'):
     # need to have truncation of e^T
     eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order
 
-    # if True:
-    #     generate_latex_files(
-    #         eT_z_t_truncations,
-    #         only_ground_state=True,
-    #         remove_f_terms=False,
-    #         thermal=False,
-    #         file='eT_z_t ansatz'
-    #     )
-    # else:
-    #     generate_latex_files(
-    #         truncations,
-    #         only_ground_state=True,
-    #         remove_f_terms=False,
-    #         thermal=False,
-    #         file='full cc'
-    #     )
+    switch = 1
 
-    generate_python_files(eT_z_t_truncations, only_ground_state=True, thermal=False)
+    if switch == 1:
+        generate_latex_files(
+            eT_z_t_truncations,
+            only_ground_state=True,
+            remove_f_terms=False,
+            thermal=False,
+            file='eT_z_t ansatz'
+        )
+    if switch == 2:
+        generate_latex_files(
+            truncations,
+            only_ground_state=True,
+            remove_f_terms=False,
+            thermal=False,
+            file='z_t ansatz'
+        )
+    if switch == 3:
+        generate_latex_files(
+            truncations,
+            only_ground_state=True,
+            remove_f_terms=False,
+            thermal=False,
+            file='full cc'
+        )
+    if switch == 4:
+        generate_python_files(eT_z_t_truncations, only_ground_state=True, thermal=False)
+
     print("We reached the end of main")
