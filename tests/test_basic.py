@@ -169,21 +169,24 @@ class Test_latex_w_equations:
     def test_excited_state(self, max_w_order):
          weqn.excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex")
 
+    def test_zero_case(self):
+        weqn.generate_t_terms_group(nt.w_namedtuple_latex(0,0))
+
 class Test_latex_zhz():
 
-    @pytest.fixture(scope="class", params=[1, 3])
+    @pytest.fixture(scope="class", params=[1, 2, 3])
     def A(self, request):
         return request.param
 
-    @pytest.fixture(scope="class", params=[1, 3])
+    @pytest.fixture(scope="class", params=[1, 2, 3])
     def B(self, request):
         return request.param
 
-    @pytest.fixture(scope="class", params=[1, 3])
+    @pytest.fixture(scope="class", params=[1, 2, 3])
     def C(self, request):
         return request.param
 
-    @pytest.fixture(scope="class", params=[1, 3])
+    @pytest.fixture(scope="class", params=[1, 2, 3])
     def D(self, request):
         return request.param
 
@@ -194,10 +197,16 @@ class Test_latex_zhz():
     def test_ground_state(self, truncations):
         zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex")
 
-    # def test_excited_state(self, truncations):
-    #     zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=False, remove_f_terms=False, path="./generated_latex.tex")
+    def test_excited_state(self, truncations):
+        not_implemented_yet_message = (
+        "The logic for the supporting functions (such as `_filter_out_valid_z_terms` and others)\n"
+        "Has only been verified to work for the LHS * H * Z (`third_z`) case.\n"
+        "The code may produce some output without halting, but the output is meaningless from a theory standpoint.\n"
+        "Do not remove this Exception without consulting with someone else and implementing the requisite functions.")
+        with pytest.raises(Exception,  match=re.escape(not_implemented_yet_message)):
+            zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=False, remove_f_terms=False, path="./generated_latex.tex")
 
-    # need to add pytest.raise for 2, 4 case / excited case
+    # need to add more tests for niche cases
     
 class Test_code_fcc():
 
@@ -241,7 +250,7 @@ class Test_code_residuals():
 
 class Test_code_w_equations():
 
-    @pytest.fixture(scope="class", params=[1, 2, 3])
+    @pytest.fixture(scope="class", params=[1, 2, 3, 5])
     def max_w_order(self, request):
         return request.param
 
@@ -250,7 +259,7 @@ class Test_code_w_equations():
 
 class Test_code_dt_equations():
 
-    @pytest.fixture(scope="class", params=[1, 2, 3])
+    @pytest.fixture(scope="class", params=[1, 2, 5])
     def max_w_order(self, request):
         return request.param
 

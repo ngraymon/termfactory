@@ -7,7 +7,7 @@ from collections import namedtuple
 # local imports
 from latex_defines import *
 from common_imports import tab, z_summation_indices, z_unlinked_indices, summation_indices, old_print_wrapper
-from latex_full_cc import generate_omega_operator, generate_full_cc_hamiltonian_operator, _omega_joining_with_itself, _h_joining_with_itself
+from latex_full_cc import generate_omega_operator, generate_full_cc_hamiltonian_operator, _omega_joining_with_itself, _h_joining_with_itself, disconnected_namedtuple
 from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
 import reference_latex_headers as headers
 
@@ -892,7 +892,7 @@ def _filter_out_valid_z_terms(LHS, H, Z_left, Z_right, total_list):
             if term[2] != set():
                 # if it is not an empty set
                 total_list.append(term)
-            else:
+            else: #pragma: no cover
                 old_print_wrapper('exit?')
                 sys.exit(0)
 

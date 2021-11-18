@@ -28,14 +28,28 @@ exclude_lines =
     raise e
     pass
     continue
+    def old_print_wrapper
     new_t_list = t_list
     # currently unused functions
-    # full cc latex
+        # full cc latex
     def _build_latex_h_string
     def _build_latex_t_string
     def _build_h_string
+        #latex zhz
+    def _generate_t_symmetric_left_hand_side
+    def _write_t_symmetric_latex_from_lists
+    def _generate_t_symmetric_latex_equations
+    def _generate_t_symmetric_left_hand_side
+    def _make_z_symmetric_latex
+        #code w
+    def _next_list
+    def _generate_t_lists
+    def _generate_t_terms_dictionary
+    def _permutation_function
+    def _write_permutations
     #color based exceptions
     if not color:
+
     
 
 
