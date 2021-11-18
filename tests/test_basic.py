@@ -1,6 +1,7 @@
-"""A basic test of the multiple modules"""
+"""A blanket test of the multiple modules"""
 
 # system imports
+import re
 # import os
 # from os.path import dirname, join, abspath
 
@@ -14,6 +15,8 @@ from .context import code_full_cc as code_fcc
 from .context import code_residual_equations as code_res
 from .context import code_w_equations as code_weqn
 from .context import code_dt_equations as code_dt_eqn
+
+from .context import namedtuple_defines as nt
 
 # third party imports
 import pytest
@@ -58,9 +61,6 @@ class TestFullccLatex():
             fcc.generate_full_cc_latex((0, 1, 1, 1), only_ground_state=True, path="./ground_state_full_cc_equations.tex")
             # exception_raised = exc_info.value
 
-
-        
-
     @pytest.fixture(scope="class", params=[1, 2, 3])
     def A(self, request):
         return request.param
@@ -86,6 +86,43 @@ class TestFullccLatex():
 
     def test_excited_state(self, truncations):
         fcc.generate_full_cc_latex(truncations, only_ground_state=False, path="./full_cc_equations.tex")
+
+    def test_m_h_omega_cannot_equal_h_n_o(self): #ie h_kwargs['n_o'] != o_kwargs['m_h']
+        #ADD RAISE EXCEPTION, AS NON-BLANKET VERSION WILL BREAK THIS LATER
+        fcc._generate_explicit_connections(nt.general_operator_namedtuple('b', 1, 1, 1), fcc.h_operator_namedtuple(2, 2, 2), {(fcc.connected_namedtuple(0, 1, 0, 0),)})
+
+    def test_sep_s_terms_by_connection_linear_exception(self):
+        with pytest.raises(Exception,  match="Linear terms should always be connected or disconnected") as exc_info:
+            #total_list=[[fcc.connected_omega_operator_namedtuple(1, 0, 0, 0, 0, [0], [0]),fcc.connected_h_operator_namedtuple(0, 0, 0, 0, 0, [0], [0]),fcc.disconnected_namedtuple((0, 0, 0, 0))],[],[]]
+            total_list=[[fcc.connected_omega_operator_namedtuple(1, 1, 1, 1, 1, [1], [1]),
+                        fcc.connected_h_operator_namedtuple(1, 0, 0, 0, 0, [0], [0]),
+                        (fcc.disconnected_namedtuple(1, 1, 2, 1),)],
+                        [fcc.connected_omega_operator_namedtuple(1, 0, 0, 0, 0, [0], [0]),
+                        fcc.connected_h_operator_namedtuple(1, 0, 1, 0, 0, [0], [1]),
+                        (fcc.connected_namedtuple(1, 0, 0, 0),)],
+                        [fcc.connected_omega_operator_namedtuple(0, 0, 0, 0, 0, [0], [0]),
+                        fcc.connected_h_operator_namedtuple(1, 1, 0, 0, 0, [1], [0]),
+                        (fcc.connected_namedtuple(0, 1, 0, 0),)]]
+            fcc._seperate_s_terms_by_connection(total_list)
+
+    def test_sep_s_terms_by_connection_tuple_except(self):
+        with pytest.raises(Exception,  match=re.escape("term contains something other than connected/disconnected namedtuple??\n")) as exc_info:
+                total_list=[[(1, 1, 1, 1, 1, [1], [1]),
+                (1, 0, 0, 0, 0, [0], [0]),
+                ((1,1, 2, 1),)],
+                [(1, 0, 0, 0, 0, [0], [0]),
+                (1, 0, 1, 0, 0, [0], [1]),
+                ((1, 0, 0, 0),)],
+                [(0, 0, 0, 0, 0, [0], [0]),
+                (1, 1, 0, 0, 0, [1], [0]),
+                ((0, 1, 0, 0),)]]
+                fcc._seperate_s_terms_by_connection(total_list)
+
+    def test_simplify_full_cc_python_prefactor_numerator_greater_than_denom(self):
+        fcc._simplify_full_cc_python_prefactor(['2!', '2!', '2!'], ['2!', '2!'])
+
+    def test_simplify_full_cc_python_prefactor_long_list_printer(self):
+        fcc._simplify_full_cc_python_prefactor(['2!', '2!', '2!','2!', '2!', '2!'], ['2!', '2!'])
 
 class Test_latex_eT_z_t_ansatz():
     

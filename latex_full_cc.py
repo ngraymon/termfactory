@@ -863,7 +863,7 @@ def _generate_linked_common_terms(term_list):
     #     old_print_wrapper(omega)
     #     sys.exit(0)
 
-    return
+    # return
 
 
 def prepare_condensed_terms(term_list, linked_condense=False, unlinked_condense=False):
@@ -897,9 +897,9 @@ def prepare_condensed_terms(term_list, linked_condense=False, unlinked_condense=
             "is only supported for omega's of rank (2,3) "
             f"not rank {omega.rank}"
         )
-
-        if omega.rank == 1:
-            raise Exception("Linear omega operators (omega.rank == 1) do not have linked disconnected terms!")
+        # above assert prevents this from ever being reached
+        # if omega.rank == 1:
+        #     raise Exception("Linear omega operators (omega.rank == 1) do not have linked disconnected terms!")
 
         if omega.rank == 2:
             linked_commonfactor_list = _generate_linked_common_terms(term_list)
