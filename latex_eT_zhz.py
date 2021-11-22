@@ -1132,56 +1132,42 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
 
     numerator_list, denominator_list = [], []
     # ---------------------------------------------------------------------------------------------------------
-    numerator *= overcounting_prefactor
-    numerator_list.append(f'{numerator}')
+    # numerator *= overcounting_prefactor
+    # numerator_list.append(f'{numerator}')
 
     # ---------------------------------------------------------------------------------------------------------
-    # do the f factor
-    f = len(t_list)
+    if h.m > 1:
+        denominator_list.append(f'{h.m}!')
+        denominator *= math.factorial(h.m)
+    if h.n > 1:
+        denominator_list.append(f'{h.n}!')
+        denominator *= math.factorial(h.n)
 
-    denominator_list.append(f'{f}!')
-    if f > 1:
-        denominator *= math.factorial(f)
+    if z_right.m > 1:
+        denominator_list.append(f'{z_right.m}!')
+        denominator *= math.factorial(z_right.m)
+    if z_right.n > 1:
+        denominator_list.append(f'{z_right.n}!')
+        denominator *= math.factorial(z_right.n)
+
+    # account for the taylor series prefactor
+    if len(t_list) > 1:
+        denominator_list.append(f'{len(t_list)}!')
+
+    for t in t_list:
+
+        if t.m > 1:
+            denominator_list.append(f'{t.m}!')
+            denominator *= math.factorial(t.m)
+        if t.n > 1:
+            denominator_list.append(f'{t.n}!')
+            denominator *= math.factorial(t.n)
 
     # ---------------------------------------------------------------------------------------------------------
-    # the N factor
-    assert z_right.m_h == h.n_r, 'should be the same, but just in case'
-    n_z = z_right.m_h
 
-    denominator_list.append(f'{n_z}!')
-    if n_z > 1:
-        denominator *= math.factorial(n_z)
-
-    # ---------------------------------------------------------------------------------------------------------
-    # the combinatorial factor
-    # number of contractions on all t operators
-    n_t = sum([int(t.n - t.m_lhs) for t in t_list])
-
-    # number of contractions h has with any t operator
-    n_h = sum(h.m_t)
-
-    choose_result = math.comb(n_t, n_h)
-    # print(f'{n_t = }')
-    # print(f'{n_h = }')
-    # print(f'n_t choose n_h: {choose_result}')
-    numerator_list.append(f'{choose_result}')
-
-    if choose_result > 1:
-        numerator *= choose_result
-
-    # if I wanted to have logic to express prefactors in terms of factorials?
-    # numerator_list.append(f'{n_t}!')
-    # denominator_list.append(f'{n_h}!')
-    # denominator_list.append(f'{1}!')
-
-    # print(f"{numerator_list = }")
-    numerator_list = [n for n in numerator_list if n not in ['1', '1!']]
-    # print(f"{numerator_list = }")
-
-    # print(f"{denominator_list = }")
-    denominator_list = [d for d in denominator_list if d not in ['1', '1!']]
-    # print(f"{denominator_list = }")
-    # ---------------------------------------------------------------------------------------------------------
+    print(denominator)
+    print(numerator)
+    import pdb; pdb.set_trace()
 
     # # simplify
     if simplify_flag:
@@ -1764,8 +1750,8 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
         # continue
 
         # we need to remove duplicate permutations on the t's
-        unique_eT_permutations, unique_count = _remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations)
-        # unique_eT_permutations, unique_count = eT_connection_permutations, {perm: 1 for perm in eT_connection_permutations}
+        # unique_eT_permutations, unique_count = _remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations)
+        unique_eT_permutations, unique_count = eT_connection_permutations, {perm: 1 for perm in eT_connection_permutations}
 
         log_conf.setLevelInfo(log)
 

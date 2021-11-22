@@ -340,9 +340,9 @@ def _multiple_perms_logic(term):
     raise Exception("Shouldn't get here")
 
 
-def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_name='truncation'):
-    """ x """
-    maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order = truncations
+def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name='truncation'):
+    """ Still being written """
+    H, Z, eT_taylor_expansion = operators
 
     if t_term_list == []:
         return ["pass  # no valid terms here", ]
@@ -517,12 +517,10 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     if valid_term_list == []:
         return ""
 
-    return _prepare_third_eTz_latex(valid_term_list, remove_f_terms=remove_f_terms)
+    # return _prepare_third_eTz_latex(valid_term_list, remove_f_terms=remove_f_terms)
 
     return_list = [
-        _write_cc_einsum_python_from_list(LHS.rank, operators, fully),
-        _write_cc_einsum_python_from_list(LHS.rank, operators, linked),
-        _write_cc_einsum_python_from_list(LHS.rank, operators, unlinked),
+        _write_third_eTz_einsum_python(LHS.rank, operators, valid_term_list),
     ]
 
     return return_list

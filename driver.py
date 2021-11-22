@@ -126,15 +126,15 @@ if (__name__ == '__main__'):
 
     # for the 'eT_z_t ansatz' only
     maximum_h_rank = 3
-    maximum_cc_rank = 2
+    maximum_cc_rank = 3
     maximum_T_rank = 1
     eT_taylor_max_order = 4
-    omega_max_order = 2
+    omega_max_order = 3
 
     # need to have truncation of e^T
     eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order
 
-    switch = 1
+    switch = 4
 
     if switch == 1:
         generate_latex_files(
