@@ -668,8 +668,8 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     s1, s2 = 75, 28
     l1, l2 = 109, 45
 
-    spaced_named_line = functools.partial(helper_funcs.spaced_named_line(), spacing_line=f"# {'-'*s1} #\n")
-    long_spaced_named_line = functools.partial(helper_funcs.spaced_named_line(), large_spacing_line=f"# {'-'*l1} #\n")
+    spaced_named_line = functools.partial(helper_funcs.spaced_named_line, spacing_line=f"# {'-'*s1} #\n")
+    long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, large_spacing_line=f"# {'-'*l1} #\n")
     # ------------------------------------------------------------------------------------------- #
     #
     # ------------------------------------------------------------------------------------------- #
