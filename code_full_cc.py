@@ -331,10 +331,10 @@ def _multiple_perms_logic(term):
     raise Exception("Shouldn't get here")
 
 
-def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_name='truncation'):
+def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='truncation'):
     """ x """
 
-    maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
+    maximum_h_rank, maximum_cc_rank, _, _ = truncations
 
     if t_term_list == []:
         return ["pass  # no valid terms here", ]
@@ -503,9 +503,9 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
         _debug_print_different_types_of_terms(fully, linked, unlinked)
 
     return_list = [
-        _write_cc_einsum_python_from_list(omega_term.rank, truncations, fully),
-        _write_cc_einsum_python_from_list(omega_term.rank, truncations, linked),
-        _write_cc_einsum_python_from_list(omega_term.rank, truncations, unlinked),
+        _write_cc_einsum_python_from_list(truncations, fully),
+        _write_cc_einsum_python_from_list(truncations, linked),
+        _write_cc_einsum_python_from_list(truncations, unlinked),
     ]
 
     return return_list
