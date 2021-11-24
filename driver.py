@@ -83,7 +83,7 @@ def generate_latex_files(truncations, only_ground_state=True, remove_f_terms=Fal
 def generate_python_files(truncations, only_ground_state=True, thermal=False):
     """ generates .py files which will be used when calculating desired quantities """
 
-    # generate_full_cc_python(truncations, only_ground_state)
+    generate_full_cc_python(truncations, only_ground_state)
 
     generate_eT_zhz_python(truncations, only_ground_state)
 
@@ -161,6 +161,7 @@ if (__name__ == '__main__'):
             file='full cc'
         )
     if switch == 4:
-        generate_python_files(eT_z_t_truncations, only_ground_state=True, thermal=False)
+        # generate_eT_zhz_python(eT_z_t_truncations, only_ground_state=True)
+        generate_full_cc_python(truncations, only_ground_state=True)
 
     print("We reached the end of main")

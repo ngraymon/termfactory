@@ -332,7 +332,28 @@ def _multiple_perms_logic(term):
 
 
 def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='truncation'):
-    """ x """
+    """ Do all the work here.
+    Context: for a given omega(m,n) we generate (based on on `trunc_obj_name`'s value):
+     - fully
+     - linked-disconnected
+     - disconnected
+     terms.
+
+    We do this by first building up all einsums in a big list of dicts of dicts of lists
+    The `hamiltonian_rank_list` stores all the einsums, and they are glued together after
+    the loop over `t_term_list` is done.
+    1 - The outer list is indexed by the maximum rank of h, effectively checking the rank of h.
+    2 - For a given dict in the outer list it is indexed by the maximum t-rank.
+    3 - The value associated with a given t-rank is a dictionary
+    4 - an individual key,value pair is a string representation of a prefactor
+        in a minimal fractional form; if the prefactor is 0.25 then the string representation
+        is `1/4`
+
+    An example:
+        `outer_list = [e1, e2, e3, ....]`
+        `e1 = {'0': d1, '1': d2, 2: d3, ....}`
+        ``
+    """
 
     maximum_h_rank, maximum_cc_rank, _, _ = truncations
 
@@ -344,6 +365,8 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
     hamiltonian_rank_list = []
     for i in range(maximum_h_rank+1):
         hamiltonian_rank_list.append(dict([(i, {}) for i in range(maximum_cc_rank+1)]))
+    print('\n', hamiltonian_rank_list, '\n')
+    import pdb; pdb.set_trace()
 
     for term in t_term_list:
 
@@ -369,6 +392,7 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
         # -----------------------------------------------------------------------------------------
         # build with permutations
         hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor] = []
+        print(hamiltonian_rank_list)
 
         if permutations is None:
             t_operands = ', '.join([f"t_args[({t.m_h + t.m_o}, {t.n_h + t.n_o})]" for t in t_list])
@@ -422,6 +446,7 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
 
         else:
             raise Exception('')
+        print(hamiltonian_rank_list)
 
     # -----------------------------------------------------------------------------------------
     # remove any duplicates

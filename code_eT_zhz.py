@@ -348,9 +348,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         return ["pass  # no valid terms here", ]
 
     return_list = []
+    import pdb; pdb.set_trace()
 
     hamiltonian_rank_list = []
-    for i in range(maximum_h_rank+1):
+    for i in range(H.maximum_rank+1):
         hamiltonian_rank_list.append(dict([(i, {}) for i in range(maximum_cc_rank+1)]))
 
     for term in t_term_list:
@@ -463,7 +464,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
             for prefactor, string_list in hamiltonian_rank_list[0][j].items():
                 _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=1)
 
-    for i in range(1, maximum_h_rank+1):
+    for i in range(1, H.maximum_rank+1):
         return_list.append('')
         return_list.append(f"if {trunc_obj_name}.at_least_{hamiltonian_order_tag[i]}:")
         for prefactor, string_list in hamiltonian_rank_list[i][0].items():
@@ -510,8 +511,8 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
 
     if True:  # debug
         print('\n\n\n')
-        for i, a in enumerate(valid_term_list):
-            print(f"{i+1:>4d}", a)
+        # for i, a in enumerate(valid_term_list):
+        #     print(f"{i+1:>4d}", a)
         pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
     if valid_term_list == []:
@@ -547,7 +548,7 @@ def _generate_eT_zhz_compute_function(LHS, operators, only_ground_state=False, o
 
         six_tab = "\n" + tab*6
 
-        for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
+        for i, term_type in enumerate(['hz']):  # ['h', 'zh', 'hz', 'zhz']
             # write function definition
             function_string = f'''
                 def add_{specifier_string}_{term_type}_terms(R, ansatz, truncation, h_args, t_args):
@@ -579,7 +580,7 @@ def _generate_eT_zhz_compute_function(LHS, operators, only_ground_state=False, o
 
         six_tab = "\n" + tab*6
 
-        for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
+        for i, term_type in enumerate(['hz']):
             # write function definition
             function_string = f'''
                 def add_{specifier_string}_{term_type}_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
@@ -676,7 +677,7 @@ def _generate_eT_zhz_python_file_contents(truncations, only_ground_state=False):
     maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order = truncations
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
-    H = generate_pruned_H_operator(maximum_h_rank)
+    H = generate_pruned_H_operator(maximum_h_rank)  # remember this is not just ordinary H
     Z = generate_z_operator(maximum_cc_rank, only_ground_state)
     eT_taylor_expansion = generate_eT_taylor_expansion(maximum_T_rank, eT_taylor_max_order)
     operators = H, Z, eT_taylor_expansion
