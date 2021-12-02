@@ -177,15 +177,15 @@ def generate_s_taylor_expansion(maximum_cc_rank=2, s_taylor_max_order=3, only_gr
     s_taylor_expansion = [None, ]*(s_taylor_max_order+1)
 
     # 1 term
-    s_taylor_expansion = _zero_order_s_taylor_expansion(s_taylor_expansion)
+    _zero_order_s_taylor_expansion(s_taylor_expansion)
 
     # S term
     if s_taylor_max_order >= 1:
-        s_taylor_expansion = _1st_order_s_taylor_expansion(s_taylor_expansion, S)
+        _1st_order_s_taylor_expansion(s_taylor_expansion, S)
 
     # S^(n > 2) terms
     if s_taylor_max_order >= 2:
-        s_taylor_expansion = _2nd_or_higher_order_s_taylor_expansion(s_taylor_expansion, S, s_taylor_max_order)
+        _2nd_or_higher_order_s_taylor_expansion(s_taylor_expansion, S, s_taylor_max_order)
 
     return s_taylor_expansion
 
