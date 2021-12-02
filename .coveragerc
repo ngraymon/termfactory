@@ -1,14 +1,11 @@
 # .coveragerc to control coverage.py
 [run]
 include =
-    reference_latex_headers.py
     code_dt_equations.py
     code_full_cc.py
     code_residual_equations.py
     code_w_equations.py
-    common_imports.py
     helper_funcs.py
-    latex_defines.py
     latex_eT_zhz.py
     latex_full_cc.py
     latex_w_equations.py
@@ -24,11 +21,12 @@ exclude_lines =
     if __name__ == .__main__.:
     def _debug
     log.debug
-    if unlinked_condense:
     raise e
     pass
     continue
+    if debug_flag:
     def old_print_wrapper
+    old_print_wrapper
     new_t_list = t_list
     # currently unused functions
         # full cc latex

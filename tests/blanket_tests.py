@@ -2,8 +2,6 @@
 
 # system imports
 import re
-# import os
-# from os.path import dirname, join, abspath
 
 # local imports
 from .context import latex_zhz as zhz
