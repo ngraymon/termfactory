@@ -919,6 +919,7 @@ def prepare_condensed_terms(term_list, linked_condense=False, unlinked_condense=
             "is only supported for omega's of rank (2,3) "
             f"not rank {omega.rank}"
         )
+
         # above assert prevents this from ever being reached
         # if omega.rank == 1:
         #     raise Exception("Linear omega operators (omega.rank == 1) do not have linked disconnected terms!")
