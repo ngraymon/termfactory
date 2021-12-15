@@ -670,64 +670,67 @@ def _wrap_eT_zhz_generation(master_omega, operators, only_ground_state=False, op
 
 
 def _generate_eT_zhz_python_file_contents(truncations, only_ground_state=False):
-    """Return a string containing the python code.
+    """ Return a string containing the python code.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
     """
+
+    # unpack truncations
     assert len(truncations) == 5, "truncations argument needs to be tuple of five integers!!"
     maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order = truncations
 
+    # generate our quantum mechanical operators
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
     H = generate_pruned_H_operator(maximum_h_rank)  # remember this is not just ordinary H
     Z = generate_z_operator(maximum_cc_rank, only_ground_state)
     eT_taylor_expansion = generate_eT_taylor_expansion(maximum_T_rank, eT_taylor_max_order)
+
+    # stick them in a tuple
     operators = H, Z, eT_taylor_expansion
 
     # ------------------------------------------------------------------------------------------- #
-
-    # ------------------------------------------------------------------------------------------- #
-    #
     # ------------------------------------------------------------------------------------------- #
     # header for default functions (as opposed to the optimized functions)
     string = long_spaced_named_line("DEFAULT FUNCTIONS", l2)
     # ----------------------------------------------------------------------- #
     # header
     string += '\n' + named_line("INDIVIDUAL TERMS", l2) + '\n\n'
-    # generate
+    # the actual code
     string += _wrap_eT_zhz_generation(master_omega, operators, only_ground_state)
     # ----------------------------------------------------------------------- #
     # header
     string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
-    # generate
+    # the wrapper functions that call the code made inside `_wrap_eT_zhz_generation`
     string += "".join([
         _write_master_eT_zhz_compute_function(LHS)
         for LHS in master_omega.operator_list
     ])
+
     # ------------------------------------------------------------------------------------------- #
-    #
     # ------------------------------------------------------------------------------------------- #
     # header for optimized functions
     string += long_spaced_named_line("OPTIMIZED FUNCTIONS", l2-1)
     # ----------------------------------------------------------------------- #
     # header
     string += '\n' + named_line("INDIVIDUAL TERMS", l2) + '\n\n'
-    # generate
+    # the actual code
     string += _wrap_eT_zhz_generation(master_omega, operators, only_ground_state, opt_einsum=True)
     # ----------------------------------------------------------------------- #
-    # generate
+    # header
     string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
+    # the wrapper functions that call the code made inside `_wrap_eT_zhz_generation`
     string += "".join([
         _write_master_eT_zhz_compute_function(LHS, opt_einsum=True)
         for LHS in master_omega.operator_list
     ])
+
     # ------------------------------------------------------------------------------------------- #
-    #
-    # ------------------------------------------------------------------------------------------- #
+
     # header for optimized paths function
     string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", l2)
+
     # write the code for generating optimized paths for full CC, this is probably different than the W code?!?
     # maybe... im not sure?
-    # both VEMX and VECC
-    # ------------------------------------------------------------------------------------------- #
+
     return string
 
 

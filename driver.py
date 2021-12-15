@@ -161,7 +161,7 @@ if (__name__ == '__main__'):
             file='full cc'
         )
     if switch == 4:
-        # generate_eT_zhz_python(eT_z_t_truncations, only_ground_state=True)
-        generate_full_cc_python(truncations, only_ground_state=True)
+        generate_eT_zhz_python(eT_z_t_truncations, only_ground_state=True)
+        # generate_full_cc_python(truncations, only_ground_state=True)
 
     print("We reached the end of main")
