@@ -371,7 +371,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
         # -----------------------------------------------------------------------------------------
         # build with permutations
-        hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor] = []
+        hamiltonian_rank_list[max(h.m, h.n)].setdefault(max_t_rank, {}).setdefault(prefactor, [])
 
         if permutations is None:
             t_operands = ', '.join([f"t_args[({t.m_h + t.m_lhs}, {t.n_h + t.n_lhs})]" for t in t_list])
