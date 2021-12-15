@@ -345,7 +345,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
     hamiltonian_rank_list = []
     for i in range(H.maximum_rank+1):
-        hamiltonian_rank_list.append(dict([(i, {}) for i in range(maximum_cc_rank+1)]))
+        hamiltonian_rank_list.append(dict([(i, {}) for i in range(rank+1)]))
 
     for term in t_term_list:
 
@@ -452,7 +452,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
     for prefactor, string_list in hamiltonian_rank_list[0][0].items():
         _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=0)
 
-    for j in range(1, maximum_cc_rank+1):
+    for j in range(1, rank+1):
         if hamiltonian_rank_list[0][j] != {}:
             return_list.append(f"if {trunc_obj_name}.{taylor_series_order_tag[j]}:")
             for prefactor, string_list in hamiltonian_rank_list[0][j].items():
@@ -464,7 +464,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         for prefactor, string_list in hamiltonian_rank_list[i][0].items():
             _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=1)
 
-        for j in range(1, maximum_cc_rank+1):
+        for j in range(1, rank+1):
             if hamiltonian_rank_list[i][j] != {}:
                 return_list.append(f"{tab}if {trunc_obj_name}.{taylor_series_order_tag[j]}:")
                 for prefactor, string_list in hamiltonian_rank_list[i][j].items():
