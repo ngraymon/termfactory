@@ -601,6 +601,25 @@ def _generate_eT_zhz_compute_function(LHS, operators, only_ground_state=False, o
     return return_string
 
 
+def _wrap_eT_zhz_generation(master_omega, operators, only_ground_state=False, opt_einsum=False):
+    """ x """
+    return_string = ""
+
+    for i, LHS in enumerate(master_omega.operator_list):
+
+        # only print the header when we change rank (from linear to quadratic for example)
+        if LHS.rank > master_omega.operator_list[i-1].rank:
+            return_string += spaced_named_line(f"RANK {LHS.rank:2d} FUNCTIONS", s2) + '\n'
+
+        # header
+        return_string += '\n' + named_line(f"{LHS} TERMS", s2//2)
+
+        # functions
+        return_string += _generate_eT_zhz_compute_function(LHS, operators, only_ground_state, opt_einsum)
+
+    return return_string
+
+
 def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
     """ Write the wrapper function which `vibronic_hamiltonian.py` calls. """
 
@@ -660,25 +679,6 @@ def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
     trimmed_string = "\n".join([line[tab_length*3:] for line in lines])
 
     return trimmed_string
-
-
-def _wrap_eT_zhz_generation(master_omega, operators, only_ground_state=False, opt_einsum=False):
-    """ x """
-    return_string = ""
-
-    for i, LHS in enumerate(master_omega.operator_list):
-
-        # only print the header when we change rank (from linear to quadratic for example)
-        if LHS.rank > master_omega.operator_list[i-1].rank:
-            return_string += spaced_named_line(f"RANK {LHS.rank:2d} FUNCTIONS", s2) + '\n'
-
-        # header
-        return_string += '\n' + named_line(f"{LHS} TERMS", s2//2)
-
-        # functions
-        return_string += _generate_eT_zhz_compute_function(LHS, operators, only_ground_state, opt_einsum)
-
-    return return_string
 
 
 def _generate_eT_zhz_python_file_contents(truncations, only_ground_state=False):
