@@ -65,13 +65,13 @@ def _build_h_term_python_labels(h, condense_offset=0):
         return sum_label, unlinked_label
 
     # do the upper indices first
-    sum_label += summation_indices[0:h.m - h.m_o]
-    unlinked_label += unlinked_indices[condense_offset:condense_offset+h.m_o]
+    sum_label += summation_indices[0:h.m - h.m_lhs]
+    unlinked_label += unlinked_indices[condense_offset:condense_offset+h.m_lhs]
 
     # now do the lower indices
-    h_offset = h.m - h.m_o
-    sum_label += summation_indices[h_offset:h_offset + (h.n - h.n_o)]
-    unlinked_label += unlinked_indices[condense_offset+h.m_o:condense_offset+h.m_o+h.n_o]
+    h_offset = h.m - h.m_lhs
+    sum_label += summation_indices[h_offset:h_offset + (h.n - h.n_lhs)]
+    unlinked_label += unlinked_indices[condense_offset+h.m_lhs:condense_offset+h.m_lhs+h.n_lhs]
 
     return sum_label, unlinked_label
 
@@ -81,26 +81,26 @@ def _build_t_term_python_labels(term, offset_dict):
     sum_label, unlinked_label = "", ""
 
     # subscript indices
-    if (term.n_h > 0) or (term.n_o > 0):
+    if (term.n_h > 0) or (term.n_lhs > 0):
         a, b = offset_dict['summation_lower'], offset_dict['unlinked']
 
         sum_label += summation_indices[a:a+term.n_h]
-        unlinked_label += unlinked_indices[b:b+term.n_o]
+        unlinked_label += unlinked_indices[b:b+term.n_lhs]
 
         # record the change in the offset
         offset_dict['summation_lower'] += term.n_h
-        offset_dict['unlinked'] += term.n_o
+        offset_dict['unlinked'] += term.n_lhs
 
     # superscript indices
-    if (term.m_h > 0) or (term.m_o > 0):
+    if (term.m_h > 0) or (term.m_lhs > 0):
         a, b = offset_dict['summation_upper'], offset_dict['unlinked']
 
         sum_label += summation_indices[a:a+term.m_h]
-        unlinked_label += unlinked_indices[b:b+term.m_o]
+        unlinked_label += unlinked_indices[b:b+term.m_lhs]
 
         # record the change in the offset
         offset_dict['summation_upper'] += term.m_h
-        offset_dict['unlinked'] += term.m_o
+        offset_dict['unlinked'] += term.m_lhs
 
     return sum_label, unlinked_label
 
@@ -113,8 +113,8 @@ def _build_t_term_python_group(t_list, h):
     offset_dict = {'summation_upper': 0, 'summation_lower': 0, 'unlinked': 0}
 
     # here we have to account for the indices already use in h
-    offset_dict['summation_upper'] += (h.m - h.m_o)
-    offset_dict['unlinked'] += h.m_o + h.n_o
+    offset_dict['summation_upper'] += (h.m - h.m_lhs)
+    offset_dict['unlinked'] += h.m_lhs + h.n_lhs
 
     log.info(offset_dict)
 
@@ -264,9 +264,9 @@ def _build_eT_zhz_python_prefactor(h, t_list, simplify_flag=True):
         and h.m == 0
         and len(t_list) == 2
         and t_list[0].m_h == 1
-        and t_list[0].m_o == 1
+        and t_list[0].m_lhs == 1
         and t_list[1].m_h == 1
-        and t_list[1].m_o == 1
+        and t_list[1].m_lhs == 1
     )
 
     if debug_flag:
@@ -374,7 +374,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor] = []
 
         if permutations is None:
-            t_operands = ', '.join([f"t_args[({t.m_h + t.m_o}, {t.n_h + t.n_o})]" for t in t_list])
+            t_operands = ', '.join([f"t_args[({t.m_h + t.m_lhs}, {t.n_h + t.n_lhs})]" for t in t_list])
 
             e_a = _eT_zhz_einsum_electronic_components(t_list)
             v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(h, t_list)
@@ -399,7 +399,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
         elif len(unique_dict.keys()) == 1:
 
-            t_operands = ', '.join([f"t_args[({t.m_h + t.m_o}, {t.n_h + t.n_o})]" for t in t_list])
+            t_operands = ', '.join([f"t_args[({t.m_h + t.m_lhs}, {t.n_h + t.n_lhs})]" for t in t_list])
 
             e_a = _eT_zhz_einsum_electronic_components(t_list)
             v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(h, t_list)
@@ -416,7 +416,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
             for perm in permutations:
                 t_operands = ', '.join([
-                    f"t_args[({t_list[i].m_h + t_list[i].m_o}, {t_list[i].n_h + t_list[i].n_o})]"
+                    f"t_args[({t_list[i].m_h + t_list[i].m_lhs}, {t_list[i].n_h + t_list[i].n_lhs})]"
                     for i in perm
                 ])
                 string = ", ".join([f"{e_a[0]}{v_a[0]}"] + [f"{e_a[i+1]}{v_a[p+1]}" for i, p in enumerate(perm)])
