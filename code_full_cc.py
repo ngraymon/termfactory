@@ -551,71 +551,59 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
 
     return_string = ""
     specifier_string = f"m{omega_term.m}_n{omega_term.n}"
+    five_tab = "\n" + tab*5
 
-    if not opt_einsum:
+    # generate ground state einsums
+    ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True, opt_einsum=opt_einsum)
 
-        # generate ground state einsums
-        ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True)
-
-        # generate einsums if not ground state
-        if not only_ground_state:
-            einsums = _generate_full_cc_einsums(omega_term, truncations)
-        else:
-            einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
-            # old_print_wrapper(einsums)
-            # sys.exit(0)
-
-        six_tab = "\n" + tab*6
-
-        for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
-            # write function definition
-            function_string = f'''
-                def add_{specifier_string}_{term_type}_terms(R, ansatz, truncation, h_args, t_args):
-                    """Compute the {omega_term} {term_type} terms."""
-                    if ansatz.ground_state:
-                        {six_tab.join(ground_state_only_einsums[i])}
-                    else:
-                        {six_tab.join(einsums[i])}
-                    return
-            '''
-            # remove space fr
-
-            # remove 4 consecutive tabs from the multi-line string `function_string`
-            function_string = "\n".join([line[tab_length*4:].rstrip() for line in function_string.splitlines()])
-            # two lines between each function
-            return_string += function_string + '\n'
-
-    # optimized term calculations
+    # generate ground + excited state einsums
+    if not only_ground_state:
+        einsums = _generate_full_cc_einsums(omega_term, truncations, opt_einsum=opt_einsum)
     else:
+        einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
 
-        # generate ground state einsums
-        ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True, opt_einsum=True)
+    for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
 
-        # generate einsums if not ground state
-        if not only_ground_state:
-            einsums = _generate_full_cc_einsums(omega_term, truncations, opt_einsum=True)
+        # the name of the function
+        if not opt_einsum:
+            func_name = f"add_{specifier_string}_{term_type}_terms"
         else:
-            einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
+            func_name = f"add_{specifier_string}_{term_type}_terms_optimized"
 
-        six_tab = "\n" + tab*6
+        # the positional arguments it takes (no keyword arguments are used currently)
+        if not opt_einsum:
+            positional_arguments = "R, ansatz, truncation, h_args, t_args"
+        else:
+            positional_arguments = "R, ansatz, truncation, h_args, t_args, opt_paths"
 
-        for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
-            # write function definition
-            function_string = f'''
-                def add_{specifier_string}_{term_type}_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
-                    """Optimized calculation of the of the {omega_term} {term_type} terms."""
+        # the docstring of the function
+        if not opt_einsum:
+            docstring = f"Calculate the {omega_term} {term_type} terms."
+        else:
+            docstring = f"Optimized calculation of the of the {omega_term} {term_type} terms."
 
-                    if ansatz.ground_state:
-                        {six_tab.join(ground_state_only_einsums[i])}
-                    else:
-                        {six_tab.join(einsums[i])}
-                    return
-            '''
+        # glue all these strings together in a specific manner to form the function definition
+        function_string = f'''
+            def {func_name}({positional_arguments}):
+                """{docstring}"""
 
-            # remove 4 consecutive tabs from the multi-line string `function_string`
-            function_string = "\n".join([line[tab_length*4:] for line in function_string.splitlines()])
-            # two lines between each function
-            return_string += function_string + '\n'
+                if ansatz.ground_state:
+                    {five_tab.join(ground_state_only_einsums[i])}
+                else:
+                    {five_tab.join(einsums[i])}
+                return
+        '''
+
+        """
+            remove 3 consecutive tabs from the multi-line string `function_string`
+            this is because we use triple single quotes over multiple lines
+            therefore introducing 3 extra tabs of indentation that we DO NOT want
+            to be present when we write the string to a file
+        """
+        function_string = "\n".join([line[tab_length*3:].rstrip() for line in function_string.splitlines()])
+
+        # add an additional line between each function
+        return_string += function_string + '\n'
 
     return return_string
 
