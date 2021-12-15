@@ -495,6 +495,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     """
     H, Z, eT_taylor_expansion = operators
 
+    valid_zero_list = []   # store all valid Omega * (1)        * h * Z  terms here
     valid_term_list = []   # store all valid Omega * (t*t*...t) * h * Z  terms here
 
     """ First we want to generate a list of valid terms.
@@ -503,7 +504,14 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     Specifically we replace the `general_operator_namedtuple`s with `connected_namedtuple`s and/or
     `disconnected_namedtuple`s.
     """
-    for count, eT_series_term in enumerate(eT_taylor_expansion):
+
+    # do the terms without T contributions first
+    zero_eT_term = eT_taylor_expansion[0]
+    log.debug(zero_eT_term, "-"*100, "\n\n")
+    _filter_out_valid_eTz_terms(LHS, zero_eT_term, H, None, Z, valid_zero_list)
+
+    # then do the rest
+    for eT_series_term in eT_taylor_expansion[1:]:
         log.debug(eT_series_term, "-"*100, "\n\n")
 
         # generate all valid combinations
@@ -511,8 +519,15 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
 
     if True:  # debug
         print('\n\n\n')
+
+        # save in a human readable format to a file
+        file_str = '\n]\n'.join([f'\n{tab}'.join(['['] + [str(y) for y in x]) for x in valid_term_list])
+        with open('temp.txt', 'w') as fp:
+            fp.write(file_str + '\n]')
+
         # for i, a in enumerate(valid_term_list):
         #     print(f"{i+1:>4d}", a)
+
         pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
     if valid_term_list == []:
@@ -521,6 +536,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     # return _prepare_third_eTz_latex(valid_term_list, remove_f_terms=remove_f_terms)
 
     return_list = [
+        _write_third_eTz_einsum_python(LHS.rank, operators, valid_zero_list),
         _write_third_eTz_einsum_python(LHS.rank, operators, valid_term_list),
     ]
 
@@ -543,6 +559,8 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
     else:
         einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*2
 
+    # the ordering of the functions is linked to the output ordering from `_generate_eT_zhz_einsums`
+    # they must be in the same order
     for i, term_type in enumerate(['HZ', 'eT_HZ']):  # ['h', 'zh', 'hz', 'zhz']
 
         # the name of the function
