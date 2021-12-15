@@ -43,13 +43,6 @@ long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, 
 # ----------------------  GENERATING FULL e^T *  H * Z PYTHON EQUATIONS  ------------------------ #
 # ----------------------------------------------------------------------------------------------- #
 
-
-def _rank_of_t_term_namedtuple(t):
-    """ Calculate the rank of a `connected_namedtuple` or `disconnected_namedtuple`. """
-    return sum([v for v in t._asdict().values()])
-
-
-# ------------------------------------------------------- #
 def _eT_zhz_einsum_electronic_components(t_list):
     """ x """
     electronic_surface_indices = 'cdefgh'
@@ -368,8 +361,9 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         # generate lists of unique t terms
         permutations, unique_dict = _multiple_perms_logic(term)
         prefactor = _build_eT_zhz_python_prefactor(h, t_list)
-        max_t_rank = max(_rank_of_t_term_namedtuple(t) for t in t_list)
+        max_t_rank = max(t.rank for t in t_list)
         old_print_wrapper(omega, h, t_list, permutations, sep='\n')
+
         # if omega.rank == 1 and permutations != None:
         #     sys.exit(0)
 
