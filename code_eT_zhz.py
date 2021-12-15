@@ -303,7 +303,7 @@ def _build_eT_zhz_python_prefactor(h, t_list, simplify_flag=True):
 
 def _multiple_perms_logic(term):
     """ x """
-    omega, h, t_list = term
+    omega, t_list, h, z_pair, not_sure_what_this_one_is_for = term
 
     unique_dict = {}
     for t in t_list:
@@ -349,7 +349,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
     for term in t_term_list:
 
-        omega, h, t_list = term
+        omega, t_list, h, z_pair, not_sure_what_this_one_is_for = term
 
         h_operand = f"h_args[({h.m}, {h.n})]"
 
