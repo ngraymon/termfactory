@@ -30,6 +30,14 @@ header_log = log_conf.HeaderAdapter(log, {})
 subheader_log = log_conf.SubHeaderAdapter(log, {})
 
 ##########################################################################################
+# Defines for labels and spacing
+
+s1, s2 = 75, 28
+l1, l2 = 109, 45
+
+spaced_named_line = functools.partial(helper_funcs.spaced_named_line, spacing_line=f"# {'-'*s1} #\n")
+long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, large_spacing_line=f"# {'-'*l1} #\n")
+##########################################################################################
 
 # ----------------------------------------------------------------------------------------------- #
 # -------------------------  GENERATING FULL CC PYTHON EQUATIONS  ------------------------------- #
@@ -689,16 +697,6 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
 
     # ------------------------------------------------------------------------------------------- #
-    # Defines for labels and spacing
-
-    s1, s2 = 75, 28
-    l1, l2 = 109, 45
-
-    spaced_named_line = functools.partial(helper_funcs.spaced_named_line, spacing_line=f"# {'-'*s1} #\n")
-    long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, large_spacing_line=f"# {'-'*l1} #\n")
-    # ------------------------------------------------------------------------------------------- #
-    #
-    # ------------------------------------------------------------------------------------------- #
     # header for default functions (as opposed to the optimized functions)
     string = long_spaced_named_line("DEFAULT FUNCTIONS", l2)
     # ----------------------------------------------------------------------- #
@@ -714,8 +712,7 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
         _write_master_full_cc_compute_function(omega_term)
         for omega_term in master_omega.operator_list
     ])
-    # ------------------------------------------------------------------------------------------- #
-    #
+
     # ------------------------------------------------------------------------------------------- #
     # header for optimized functions
     string += long_spaced_named_line("OPTIMIZED FUNCTIONS", l2-1)
@@ -731,8 +728,7 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
         _write_master_full_cc_compute_function(omega_term, opt_einsum=True)
         for omega_term in master_omega.operator_list
     ])
-    # ------------------------------------------------------------------------------------------- #
-    #
+
     # ------------------------------------------------------------------------------------------- #
     # header for optimized paths function
     string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", l2)
