@@ -527,7 +527,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     return return_list
 
 
-def _generate_eT_zhz_compute_function(LHS, operators, only_ground_state=False, opt_einsum=False):
+def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, opt_einsum=False):
     """ x """
 
     return_string = ""
@@ -603,7 +603,7 @@ def _wrap_eT_zhz_generation(master_omega, operators, only_ground_state=False, op
         return_string += '\n' + named_line(f"{LHS} TERMS", s2//2)
 
         # functions
-        return_string += _generate_eT_zhz_compute_function(LHS, operators, only_ground_state, opt_einsum)
+        return_string += _construct_eT_zhz_compute_function(LHS, operators, only_ground_state, opt_einsum)
 
     return return_string
 
