@@ -3,6 +3,7 @@
 # third party imports
 
 # local imports
+import code_import_statements_module
 from namedtuple_defines import t_term_namedtuple
 from code_residual_equations import w_dict
 from code_w_equations import (
@@ -609,20 +610,7 @@ def generate_dt_amplitude_equations_file(max_w_order, path="./dt_amplitude_equat
     """Generates and saves to a file the code to calculate the t-amplitude derivative equations for the CC approach."""
 
     # start with the import statements
-    file_data = (
-        "# system imports\n"
-        "from math import factorial\n"
-        "\n"
-        "# third party imports\n"
-        "import numpy as np\n"
-        "import opt_einsum as oe\n"
-        "\n"
-        "# local imports\n"
-        "from ..log_conf import log\n"
-        "from .symmetrize import symmetrize_tensor\n"
-        "from . import residual_equations\n"
-        "\n"
-    )
+    file_data = code_import_statements_module.dt_equations_import_statements
 
     # write the functions to calculate the derivatives of the t-amplitudes
     file_data += generate_dt_amplitude_string(max_order=max_w_order)

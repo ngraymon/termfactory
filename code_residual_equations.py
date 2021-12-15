@@ -6,6 +6,7 @@ import math
 import numpy as np
 
 # local imports
+import code_import_statements_module
 from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple, h_namedtuple, w_namedtuple
 from helper_funcs import print_residual_data
 from code_w_equations import taylor_series_order_tag
@@ -519,16 +520,7 @@ def generate_residual_equations_file(max_residual_order, maximum_h_rank, path=".
     print_residual_data(R_lists, term_lists, print_equations=False, print_tuples=False)
 
     # start with the import statements
-    file_data = (
-        "# system imports\n"
-        "\n"
-        "# third party imports\n"
-        "import numpy as np\n"
-        "\n"
-        "# local imports\n"
-        "from .symmetrize import symmetrize_tensor\n"
-        "\n"
-    )
+    file_data = code_import_statements_module.residual_equations_import_statements
 
     # write the functions to calculate the residuals
     file_data += generate_python_code_for_residual_functions(term_lists, max_order=max_residual_order)

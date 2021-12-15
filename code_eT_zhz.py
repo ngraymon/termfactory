@@ -20,7 +20,7 @@ from latex_eT_zhz import (
 from latex_full_cc import generate_omega_operator
 from namedtuple_defines import disconnected_namedtuple
 from code_w_equations import taylor_series_order_tag, hamiltonian_order_tag
-
+import code_import_statements_module
 
 # temp logging fix
 import log_conf
@@ -40,7 +40,7 @@ long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, 
 ##########################################################################################
 
 # ----------------------------------------------------------------------------------------------- #
-# -------------------------  GENERATING FULL CC PYTHON EQUATIONS  ------------------------------- #
+# ----------------------  GENERATING FULL e^T *  H * Z PYTHON EQUATIONS  ------------------------ #
 # ----------------------------------------------------------------------------------------------- #
 
 
@@ -735,19 +735,7 @@ def generate_eT_zhz_python(truncations, only_ground_state=False, path="./eT_zhz_
     """Generates and saves to a file the code to calculate the terms for the full CC approach."""
 
     # start with the import statements
-    file_data = (
-        "# system imports\n"
-        "from math import factorial\n"
-        "\n"
-        "# third party imports\n"
-        "import numpy as np\n"
-        "import opt_einsum as oe\n"
-        "\n"
-        "# local imports\n"
-        "from .symmetrize import symmetrize_tensor\n"
-        "from ..log_conf import log\n"
-        "\n"
-    )
+    file_data = code_import_statements_module.eT_zhz_import_statements
 
     # write the functions to calculate the W operators
     file_data += _generate_eT_zhz_python_file_contents(truncations, only_ground_state)
