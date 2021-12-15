@@ -606,19 +606,32 @@ def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
 
     specifier_string = f"m{LHS.m}_n{LHS.n}"
 
+    tab = ' '*4
+    four_tabs = tab*4
+
+    # shared by all functions
+    truncation_checks = 'truncation.confirm_at_least_singles()'
+    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_doubles()' if ((LHS.m >= 2) or (LHS.n >= 2)) else ''
+    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_triples()' if ((LHS.m >= 3) or (LHS.n >= 3)) else ''
+    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_quadruples()' if ((LHS.m >= 4) or (LHS.n >= 4)) else ''
+    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_quintuples()' if ((LHS.m >= 5) or (LHS.n >= 5)) else ''
+    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_sextuples()' if ((LHS.m >= 6) or (LHS.n >= 6)) else ''
+
+    # shared by all functions
+    common_positional_arguments = 'R, ansatz, truncation, h_args, z_args'
+
     if not opt_einsum:
         func_string = f'''
             def compute_{specifier_string}_amplitude(A, N, ansatz, truncation, h_args, t_args):
                 """Compute the {LHS} amplitude."""
-                truncation.confirm_at_least_singles()
+                {truncation_checks:s}
 
                 # the residual tensor
                 R = np.zeros(shape=({', '.join(['A','A',] + ['N',]*LHS.rank)}), dtype=complex)
 
-                # add each of the terms
-                add_{specifier_string}_fully_connected_terms(R, ansatz, truncation, h_args, t_args)
-                add_{specifier_string}_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args)
-                add_{specifier_string}_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)
+                # add the terms
+                add_{specifier_string}_HZ_terms({common_positional_arguments})
+                add_{specifier_string}_eT_HZ_terms({common_positional_arguments}, t_args)
                 return R
 
         '''
@@ -626,18 +639,17 @@ def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
         func_string = f'''
             def compute_{specifier_string}_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_paths):
                 """Compute the {LHS} amplitude."""
-                truncation.confirm_at_least_singles()
+                {truncation_checks:s}
 
                 # the residual tensor
                 R = np.zeros(shape=({', '.join(['A','A',] + ['N',]*LHS.rank)}), dtype=complex)
 
                 # unpack the optimized paths
-                optimized_connected_paths, optimized_linked_paths, optimized_unlinked_paths = opt_paths
+                optimized_HZ_paths, optimized_eT_HZ_paths = opt_paths
 
-                # add each of the terms
-                add_{specifier_string}_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_connected_paths)
-                add_{specifier_string}_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_linked_paths)
-                add_{specifier_string}_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_unlinked_paths)
+                # add the terms
+                add_{specifier_string}_HZ_terms_optimized({common_positional_arguments}, optimized_HZ_paths)
+                add_{specifier_string}_eT_HZ_terms_optimized({common_positional_arguments}, t_args, optimized_eT_HZ_paths)
                 return R
 
         '''
