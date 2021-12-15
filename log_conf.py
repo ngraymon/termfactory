@@ -67,12 +67,13 @@ def get_filebased_logger(filename, *args, **kwargs):
         # old % style
         if False:
             kwargs['format'] = "[%(asctime)-13s] [%(name)s] [%(levelname)-8s] [%(module)-8s] (%(lineno)s): %(funcName)s(): %(message)s"
-            kwargs['datefmt'] = ["%m/%d/%Y %I:%M:%S %p ", "%d %I:%M:%S "][1]
+            kwargs['datefmt'] = ["%m/%d/%Y %I:%M:%S %p ", "%d %I:%M:%S ", "%I:%M:%S "][-1]
             kwargs['level'] = [logging.INFO, logging.DEBUG][0]
         # trying out the f string log formatting
         else:
-            kwargs['format'] = "[{asctime:<13s}] [{name:s}] [{levelname:^10s}] [{module:^8}] ({lineno}): {funcName}():{message}"
-            kwargs['datefmt'] = ["%m-%d-%Y %I:%M:%S %p", "%d %I:%M:%S"][1]
+            # kwargs['format'] = "[{asctime:<13s}] [{name:s}] [{levelname:^10s}] [{module:^8}] ({lineno}): {funcName}():{message}"
+            kwargs['format'] = "{module:<12s}: {funcName:<30s}:({lineno:<4d}): {message:s}"
+            kwargs['datefmt'] = ["%m-%d-%Y %I:%M:%S %p", "%d %I:%M:%S", "%I:%M:%S"][-1]
             kwargs['level'] = [logging.INFO, logging.DEBUG][0]
             kwargs['style'] = '{'
 
@@ -81,8 +82,10 @@ def get_filebased_logger(filename, *args, **kwargs):
         'filemode': 'w',
     })
 
-    print(kwargs)
+    # apply the configuration parameters
     logging.basicConfig(**kwargs)
+
+    # create and return a logging instance
     return logging.getLogger(__name__)
 
 
