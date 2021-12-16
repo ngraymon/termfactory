@@ -1,4 +1,5 @@
 # system imports
+import itertools as it
 import functools
 import inspect
 import pdb
@@ -654,6 +655,36 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     `disconnected_namedtuple`s.
     """
 
+    # remove excited state contributions
+    if only_ground_state:
+
+        # remove all excited state Z's
+        Z.operator_list[:] = it.takewhile(lambda z: z.n == 0,  Z.operator_list)
+
+        # remove all excited state t's
+        # this is a really sloppy method so it should be improved in the future
+        i_list, j_list= [], []
+
+        for i, e1 in enumerate(eT_taylor_expansion):
+            if not isinstance(e1, list):
+                if e1.m > 0:
+                    i_list.append(i)
+                continue
+
+            for j, e2 in enumerate(e1):
+                if not isinstance(e2, list):
+                    if e2.m > 0:
+                        j_list.append(1)
+                    continue
+
+                k_list = [1 for k, e3 in enumerate(e2) if e3.m > 0]
+
+                del e2[:sum(k_list)]
+            del e1[:sum(j_list)]
+        del eT_taylor_expansion[:sum(i_list)]
+
+        eT_taylor_expansion = [x for x in eT_taylor_expansion if x != []]
+
     # do the terms without T contributions first
     zero_eT_term = eT_taylor_expansion[0]
     log.debug(zero_eT_term, "-"*100, "\n\n")
@@ -704,7 +735,7 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
 
     # generate ground + excited state einsums
     if not only_ground_state:
-        einsums = _generate_eT_zhz_einsums(LHS, operators, opt_einsum=opt_einsum)
+        einsums = _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False,  opt_einsum=opt_einsum)
     else:
         einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*2
 
