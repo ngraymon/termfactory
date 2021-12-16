@@ -1,6 +1,5 @@
 # system imports
 import functools
-
 import inspect
 import pdb
 
@@ -62,32 +61,92 @@ def _eT_zhz_einsum_electronic_components(t_list, z_right):
     return electronic_components
 
 
-def _build_z_term_python_labels(z_right, condense_offset=0):
+def _build_z_term_python_labels(z_right, offset_dict):
     """ x """
 
     sum_label, unlinked_label = "", ""
 
-    return sum_label, unlinked_label
+    # first we add the predetermined labels from any t operators
+    sum_label += offset_dict['upper_z_indices'] + offset_dict['lower_z_indices']
+
+    # simple zero case
+    if z_right.rank == 0:
+        assert sum_label == '', 'just in case we got some logic wrong'
+        return (sum_label, unlinked_label), offset_dict
+
+    # superscript indices
+    if (z_right.m > 0):
+        b = offset_dict['unlinked_count']
+
+        # record the characters we will place on the h term
+        unlinked_label += unlinked_indices[b:b + z_right.m_lhs]
+
+        # record the change in the offset
+        offset_dict['unlinked_count'] += z_right.m_lhs
+
+    # subscript indices
+    if (z_right.n > 0):
+        b = offset_dict['unlinked_count']
+
+        # record the characters we will place on the h term
+        unlinked_label += unlinked_indices[b:b + z_right.n_lhs]
+
+        # record the change in the offset
+        offset_dict['unlinked_count'] += z_right.n_lhs
+
+    return (sum_label, unlinked_label), offset_dict
 
 
-def _build_h_term_python_labels(h, condense_offset=0):
+def _build_h_term_python_labels(h, offset_dict):
     """ x """
 
-    sum_label, unlinked_label = "", ""
+    sum_label, unlinked_label = '', ''
 
+    # first we add the predetermined labels from any t operators
+    sum_label += offset_dict['upper_h_indices'] + offset_dict['lower_h_indices']
+
+    # simple zero case
     if h.rank == 0:
-        return sum_label, unlinked_label
+        assert sum_label == '', 'just in case we got some logic wrong'
+        return (sum_label, unlinked_label), offset_dict
 
-    # do the upper indices first
-    sum_label += summation_indices[0:h.m - h.m_lhs]
-    unlinked_label += unlinked_indices[condense_offset:condense_offset+h.m_lhs]
+    # superscript indices
+    if (h.m > 0):
+        a, b = offset_dict['summation_count'], offset_dict['unlinked_count']
 
-    # now do the lower indices
-    h_offset = h.m - h.m_lhs
-    sum_label += summation_indices[h_offset:h_offset + (h.n - h.n_lhs)]
-    unlinked_label += unlinked_indices[condense_offset+h.m_lhs:condense_offset+h.m_lhs+h.n_lhs]
+        # determine the summation indices for contractions with Z_right
+        z_str = summation_indices[a:a + h.m_r]
 
-    return sum_label, unlinked_label
+        # record the characters we will need to place on z
+        offset_dict['lower_z_indices'] += z_str
+
+        # record the characters we will place on the h term
+        sum_label += z_str
+        unlinked_label += unlinked_indices[b:b + h.m_lhs]
+
+        # record the change in the offset
+        offset_dict['summation_count'] += h.m_r
+        offset_dict['unlinked_count'] += h.m_lhs
+
+    # subscript indices
+    if (h.n > 0):
+        a, b = offset_dict['summation_count'], offset_dict['unlinked_count']
+
+        # determine the summation indices for contractions with Z_right
+        z_str = summation_indices[a:a + h.n_r]
+
+        # record the characters we will need to place on z
+        offset_dict['upper_z_indices'] += z_str
+
+        # record the characters we will place on the h term
+        sum_label += z_str
+        unlinked_label += unlinked_indices[b:b + h.n_lhs]
+
+        # record the change in the offset
+        offset_dict['summation_count'] += h.n_r
+        offset_dict['unlinked_count'] += h.n_lhs
+
+    return (sum_label, unlinked_label), offset_dict
 
 
 def _build_t_term_python_labels(term, offset_dict):
@@ -96,26 +155,46 @@ def _build_t_term_python_labels(term, offset_dict):
     sum_label, unlinked_label = "", ""
 
     # subscript indices
-    if (term.n_h > 0) or (term.n_lhs > 0):
-        a, b = offset_dict['summation_lower'], offset_dict['unlinked']
+    if (term.n > 0):
+        a, b = offset_dict['summation_count'], offset_dict['unlinked_count']
 
-        sum_label += summation_indices[a:a+term.n_h]
-        unlinked_label += unlinked_indices[b:b+term.n_lhs]
+        # determine the summation indices
+        h_stop = a + term.n_h
+        h_str = summation_indices[a:h_stop]
+        z_str = summation_indices[h_stop:h_stop + term.n_r]
+
+        # record the characters we will need to place on h and z
+        offset_dict['upper_h_indices'] += h_str
+        offset_dict['upper_z_indices'] += z_str
+
+        # record the characters we will place on this specific t term
+        sum_label += h_str + z_str
+        unlinked_label += unlinked_indices[b:b + term.n_lhs]
 
         # record the change in the offset
-        offset_dict['summation_lower'] += term.n_h
-        offset_dict['unlinked'] += term.n_lhs
+        offset_dict['summation_count'] += term.n_h + term.n_r
+        offset_dict['unlinked_count'] += term.n_lhs
 
     # superscript indices
-    if (term.m_h > 0) or (term.m_lhs > 0):
-        a, b = offset_dict['summation_upper'], offset_dict['unlinked']
+    if (term.m > 0):
+        a, b = offset_dict['summation_count'], offset_dict['unlinked_count']
 
-        sum_label += summation_indices[a:a+term.m_h]
-        unlinked_label += unlinked_indices[b:b+term.m_lhs]
+        # determine the summation indices
+        h_stop = a + term.m_h
+        h_str = summation_indices[a:h_stop]
+        z_str = summation_indices[h_stop:h_stop + term.m_r]
+
+        # record the characters we will need to place on h and z
+        offset_dict['lower_h_indices'] += h_str
+        offset_dict['lower_z_indices'] += z_str
+
+        # record the characters we will place on this specific t term
+        sum_label += h_str + z_str
+        unlinked_label += unlinked_indices[b:b + term.m_lhs]
 
         # record the change in the offset
-        offset_dict['summation_upper'] += term.m_h
-        offset_dict['unlinked'] += term.m_lhs
+        offset_dict['summation_count'] += term.m_h + term.m_r
+        offset_dict['unlinked_count'] += term.m_lhs
 
     return sum_label, unlinked_label
 
@@ -125,13 +204,11 @@ def _build_t_term_python_group(t_list, h, z_right):
 
     sum_list, unlinked_list = [], []
 
-    offset_dict = {'summation_upper': 0, 'summation_lower': 0, 'unlinked': 0}
-
-    # here we have to account for the indices already use in h
-    offset_dict['summation_upper'] += (h.m - h.m_lhs)
-    offset_dict['unlinked'] += h.m_lhs + h.n_lhs
-
-    log.info(offset_dict)
+    offset_dict = {
+        'summation_count': 0, 'unlinked_count': 0,
+        'upper_h_indices': '', 'lower_h_indices': '',
+        'upper_z_indices': '', 'lower_z_indices': '',
+    }
 
     for t in t_list:
         sum_label, unlinked_label = _build_t_term_python_labels(t, offset_dict)
@@ -139,7 +216,12 @@ def _build_t_term_python_group(t_list, h, z_right):
         sum_list.append(sum_label)
         unlinked_list.append(unlinked_label)
 
-    return sum_list, unlinked_list
+    # log.info(offset_dict)
+    # print('\n\n\n\n\n')
+    # print(f"{offset_dict = }")
+    # import pdb; pdb.set_trace()
+
+    return sum_list, unlinked_list, offset_dict
 
 
 def _eT_zhz_einsum_vibrational_components(t_list, h, z_right):
@@ -150,23 +232,20 @@ def _eT_zhz_einsum_vibrational_components(t_list, h, z_right):
     old_print_wrapper(t_list, h, z_right)
 
     # add t term vibrational components
-    alist, blist = _build_t_term_python_group(t_list, h, z_right)
+    alist, blist, offset_dict = _build_t_term_python_group(t_list, h, z_right)
     for i in range(len(alist)):
         vibrational_components.append(alist[i] + blist[i])
 
     # add h term vibrational components
-    h_labels = _build_h_term_python_labels(h)
+    h_labels, offset_dict = _build_h_term_python_labels(h, offset_dict)
     vibrational_components.append(h_labels[0] + h_labels[1])
 
     # add z term vibrational components
-    z_labels = _build_z_term_python_labels(z_right)
+    z_labels, offset_dict = _build_z_term_python_labels(z_right, offset_dict)
     vibrational_components.append(z_labels[0] + z_labels[1])
 
     # remaining term lists
-    remaining_list = [h_labels[1], z_labels[1], ]
-
-    for i in range(len(blist)):
-        remaining_list.append(blist[i])
+    remaining_list = [r for r in blist] + [h_labels[1], z_labels[1], ]
 
     return vibrational_components, ''.join(remaining_list)
 
