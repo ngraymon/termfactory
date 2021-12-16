@@ -374,8 +374,6 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
     hamiltonian_rank_list = []
     for i in range(maximum_h_rank+1):
         hamiltonian_rank_list.append(dict([(i, {}) for i in range(maximum_cc_rank+1)]))
-    print('\n', hamiltonian_rank_list, '\n')
-    import pdb; pdb.set_trace()
 
     for term in t_term_list:
 
