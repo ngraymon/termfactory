@@ -486,7 +486,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(t_list, h, z_right)
 
         if permutations is None:
-            t_operands = ', '.join([f"t_args[({t.m_h + t.m_lhs}, {t.n_h + t.n_lhs})]" for t in t_list])
+            t_operands = ', '.join([f"t_args[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]" for t in t_list])
 
             # string = f"np.einsum('{summation_subscripts}', {h_operand}, {t_operands})"
             if remaining_indices == '':
@@ -508,7 +508,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
         elif len(unique_dict.keys()) == 1:
 
-            t_operands = ', '.join([f"t_args[({t.m_h + t.m_lhs}, {t.n_h + t.n_lhs})]" for t in t_list])
+            t_operands = ', '.join([f"t_args[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]" for t in t_list])
 
             for perm in permutations:
                 string = ", ".join([f"{e_a[i]}{v_a[p]}" for i, p in enumerate(perm)] + [f"{e_a[-2]}{v_a[-2]}"] + [f"{e_a[-1]}{v_a[-1]}"])
@@ -519,7 +519,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
             for perm in permutations:
                 t_operands = ', '.join([
-                    f"t_args[({t_list[i].m_h + t_list[i].m_lhs}, {t_list[i].n_h + t_list[i].n_lhs})]"
+                    f"t_args[({t_list[i].m_lhs + t_list[i].m_h + t_list[i].m_r}, {t_list[i].n_lhs + t_list[i].n_h + t_list[i].n_r})]"
                     for i in perm
                 ])
                 string = ", ".join([f"{e_a[i]}{v_a[p]}" for i, p in enumerate(perm)] + [f"{e_a[-2]}{v_a[-2]}"] + [f"{e_a[-1]}{v_a[-1]}"])
@@ -679,7 +679,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
 
         pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
-    if valid_term_list == []:
+    if valid_zero_list == [] and valid_term_list == []:
         return ""
 
     # return _prepare_third_eTz_latex(valid_term_list, remove_f_terms=remove_f_terms)
