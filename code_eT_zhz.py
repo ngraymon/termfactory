@@ -43,12 +43,17 @@ long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, 
 # ----------------------  GENERATING FULL e^T *  H * Z PYTHON EQUATIONS  ------------------------ #
 # ----------------------------------------------------------------------------------------------- #
 
-def _eT_zhz_einsum_electronic_components(t_list):
+
+def _eT_zhz_einsum_electronic_components(t_list, z_right):
     """ x """
+
     electronic_surface_indices = 'cdefgh'
     electronic_components = ['ac', ]
 
-    for i in range(len(t_list)):
+    # number of t terms plus 1 more term for z_right
+    nof_terms = len(t_list) + 1
+
+    for i in range(nof_terms):
         electronic_components.append(electronic_surface_indices[i:i+2])
 
     # change the last term to end with `b`
@@ -57,8 +62,17 @@ def _eT_zhz_einsum_electronic_components(t_list):
     return electronic_components
 
 
+def _build_z_term_python_labels(z_right, condense_offset=0):
+    """ x """
+
+    sum_label, unlinked_label = "", ""
+
+    return sum_label, unlinked_label
+
+
 def _build_h_term_python_labels(h, condense_offset=0):
     """ x """
+
     sum_label, unlinked_label = "", ""
 
     if h.rank == 0:
@@ -78,6 +92,7 @@ def _build_h_term_python_labels(h, condense_offset=0):
 
 def _build_t_term_python_labels(term, offset_dict):
     """ x """
+
     sum_label, unlinked_label = "", ""
 
     # subscript indices
@@ -105,7 +120,7 @@ def _build_t_term_python_labels(term, offset_dict):
     return sum_label, unlinked_label
 
 
-def _build_t_term_python_group(t_list, h):
+def _build_t_term_python_group(t_list, h, z_right):
     """ x """
 
     sum_list, unlinked_list = [], []
@@ -127,22 +142,30 @@ def _build_t_term_python_group(t_list, h):
     return sum_list, unlinked_list
 
 
-def _eT_zhz_einsum_vibrational_components(h, t_list):
+def _eT_zhz_einsum_vibrational_components(t_list, h, z_right):
     """ x """
+
     vibrational_components = []  # store return values here
 
-    old_print_wrapper(h, t_list)
+    old_print_wrapper(t_list, h, z_right)
 
-    h_labels = _build_h_term_python_labels(h)
-
-    alist, blist = _build_t_term_python_group(t_list, h)
-
-    vibrational_components.append(h_labels[0] + h_labels[1])
+    # add t term vibrational components
+    alist, blist = _build_t_term_python_group(t_list, h, z_right)
     for i in range(len(alist)):
         vibrational_components.append(alist[i] + blist[i])
 
-    remaining_list = [h_labels[1], ]
-    for i in range(len(alist)):
+    # add h term vibrational components
+    h_labels = _build_h_term_python_labels(h)
+    vibrational_components.append(h_labels[0] + h_labels[1])
+
+    # add z term vibrational components
+    z_labels = _build_z_term_python_labels(z_right)
+    vibrational_components.append(z_labels[0] + z_labels[1])
+
+    # remaining term lists
+    remaining_list = [h_labels[1], z_labels[1], ]
+
+    for i in range(len(blist)):
         remaining_list.append(blist[i])
 
     return vibrational_components, ''.join(remaining_list)
@@ -150,6 +173,7 @@ def _eT_zhz_einsum_vibrational_components(h, t_list):
 
 def _eT_zhz_einsum_subscript_generator(h, t_list):  # pragma: no cover
     """ x """
+
     return_string = ""
 
     electronic_components = _eT_zhz_einsum_electronic_components(t_list)
@@ -167,7 +191,7 @@ def _eT_zhz_einsum_subscript_generator(h, t_list):  # pragma: no cover
 
 def _eT_zhz_einsum_prefactor(term):  # pragma: no cover
     """ x """
-    string = ""
+    string = "0.69"
 
     return string
 
@@ -335,13 +359,14 @@ def _multiple_perms_logic(term):
 
 def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name='truncation'):
     """ Still being written """
+
     H, Z, eT_taylor_expansion = operators
+    log.info("Starting this function")
 
     if t_term_list == []:
         return ["pass  # no valid terms here", ]
 
     return_list = []
-    import pdb; pdb.set_trace()
 
     hamiltonian_rank_list = []
     for i in range(H.maximum_rank+1):
@@ -351,7 +376,12 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
         omega, t_list, h, z_pair, not_sure_what_this_one_is_for = term
 
+        # define the indexing of the `h_args` dictionary
         h_operand = f"h_args[({h.m}, {h.n})]"
+
+        # define the indexing of the `z_args` dictionary
+        z_left, z_right = z_pair
+        z_operand = f"z_args[({z_right.m}, {z_right.n})]"
 
         if (len(t_list) == 1) and t_list[0] == disconnected_namedtuple(0, 0, 0, 0):
             return_list.append(f"R += {h_operand}")
@@ -373,22 +403,22 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         # build with permutations
         hamiltonian_rank_list[max(h.m, h.n)].setdefault(max_t_rank, {}).setdefault(prefactor, [])
 
+        e_a = _eT_zhz_einsum_electronic_components(t_list, z_right)
+        v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(t_list, h, z_right)
+
         if permutations is None:
             t_operands = ', '.join([f"t_args[({t.m_h + t.m_lhs}, {t.n_h + t.n_lhs})]" for t in t_list])
-
-            e_a = _eT_zhz_einsum_electronic_components(t_list)
-            v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(h, t_list)
 
             # string = f"np.einsum('{summation_subscripts}', {h_operand}, {t_operands})"
             if remaining_indices == '':
                 string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
-                string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+                string = f"np.einsum('{string} -> ab{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
             elif len(remaining_indices) >= 1:
                 for perm in unique_permutations(remaining_indices):
                     string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
-                    string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+                    string = f"np.einsum('{string} -> ab{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
                     old_print_wrapper(perm)
                     old_print_wrapper(remaining_indices)
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
@@ -401,26 +431,20 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
             t_operands = ', '.join([f"t_args[({t.m_h + t.m_lhs}, {t.n_h + t.n_lhs})]" for t in t_list])
 
-            e_a = _eT_zhz_einsum_electronic_components(t_list)
-            v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(h, t_list)
-
             for perm in permutations:
-                string = ", ".join([f"{e_a[0]}{v_a[0]}"] + [f"{e_a[i+1]}{v_a[p+1]}" for i, p in enumerate(perm)])
-                string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+                string = ", ".join([f"{e_a[i]}{v_a[p]}" for i, p in enumerate(perm)] + [f"{e_a[-2]}{v_a[-2]}"] + [f"{e_a[-1]}{v_a[-1]}"])
+                string = f"np.einsum('{string} -> ab{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
         elif len(unique_dict) > 1:
-
-            e_a = _eT_zhz_einsum_electronic_components(t_list)
-            v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(h, t_list)
 
             for perm in permutations:
                 t_operands = ', '.join([
                     f"t_args[({t_list[i].m_h + t_list[i].m_lhs}, {t_list[i].n_h + t_list[i].n_lhs})]"
                     for i in perm
                 ])
-                string = ", ".join([f"{e_a[0]}{v_a[0]}"] + [f"{e_a[i+1]}{v_a[p+1]}" for i, p in enumerate(perm)])
-                string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+                string = ", ".join([f"{e_a[i]}{v_a[p]}" for i, p in enumerate(perm)] + [f"{e_a[-2]}{v_a[-2]}"] + [f"{e_a[-1]}{v_a[-1]}"])
+                string = f"np.einsum('{string} -> ab{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
         else:
@@ -434,44 +458,96 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
     # -----------------------------------------------------------------------------------------
 
-    def _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=0):
+    def _handle_multiline_same_prefactor(output_list, prefactor, string_list, nof_tabs=0):
+        """ Specific formatting of multiple terms that share the same prefactor
+
+        When we have multiple einsum terms which share the same prefactor
+        we collate them in a specific  manner like so:
+        R += prefactor * (
+            <einsum equation> +
+            <einsum equation> +
+            ...
+            <einsum equation> +
+            <einsum equation>
+        )
+
+        This function simply glues them together in that fashion.
+        """
+
         tabber = tab*nof_tabs
 
         if len(string_list) > 1:
-            return_list.append(f"{tabber}R += {prefactor}(")
+
+            # header
+            output_list.append(f"{tabber}R += {prefactor}(")
+
+            # add each line
             for string in string_list:
-                return_list.append(f"{tabber}{tab}{string} +")
+                output_list.append(f"{tabber}{tab}{string} +")
+
             # remove the last plus symbol
-            return_list[-1] = return_list[-1][:-2]
-            return_list.append(f"{tabber})")
+            output_list[-1] = output_list[-1][:-2]
+
+            # footer
+            output_list.append(f"{tabber})")
+
         else:
-            return_list.append(f"{tabber}R += {prefactor}{string_list[0]}")
+            output_list.append(f"{tabber}R += {prefactor}{string_list[0]}")
+
         return
 
-    # order the terms as we return them
+    h_contribution_list = []
+
+    # h^0_0 with zero order Taylor series contributions
     for prefactor, string_list in hamiltonian_rank_list[0][0].items():
-        _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=0)
+        _handle_multiline_same_prefactor(h_contribution_list, prefactor, string_list, nof_tabs=0)
 
+    # loop over first order (and higher) Taylor series contributions
     for j in range(1, rank+1):
-        if hamiltonian_rank_list[0][j] != {}:
-            return_list.append(f"if {trunc_obj_name}.{taylor_series_order_tag[j]}:")
-            for prefactor, string_list in hamiltonian_rank_list[0][j].items():
-                _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=1)
 
+        # skip if empty
+        if hamiltonian_rank_list[0][j] == {}:
+            continue
+
+        # if not empty
+        h_contribution_list.append(f"if {trunc_obj_name}.{taylor_series_order_tag[j]}:")
+
+        # h^0_0 with first order (and higher) Taylor series contributions
+        for prefactor, string_list in hamiltonian_rank_list[0][j].items():
+            _handle_multiline_same_prefactor(h_contribution_list, prefactor, string_list, nof_tabs=1)
+
+    # loop over first order (and higher) h^i_j terms
     for i in range(1, H.maximum_rank+1):
-        return_list.append('')
-        return_list.append(f"if {trunc_obj_name}.at_least_{hamiltonian_order_tag[i]}:")
+
+        # skip if empty
+        if hamiltonian_rank_list[i][0] == {}:
+            continue
+
+        # if not empty
+        h_contribution_list.append(f"if {trunc_obj_name}.at_least_{hamiltonian_order_tag[i]}:")
+
+        # h^i_j with zero order Taylor series contributions
         for prefactor, string_list in hamiltonian_rank_list[i][0].items():
-            _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=1)
+            _handle_multiline_same_prefactor(h_contribution_list, prefactor, string_list, nof_tabs=1)
 
+        # loop over first order (and higher) Taylor series contributions
         for j in range(1, rank+1):
-            if hamiltonian_rank_list[i][j] != {}:
-                return_list.append(f"{tab}if {trunc_obj_name}.{taylor_series_order_tag[j]}:")
-                for prefactor, string_list in hamiltonian_rank_list[i][j].items():
-                    _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=2)
 
-    # old_print_wrapper(return_list)
-    # sys.exit(0)
+            # skip if empty
+            if hamiltonian_rank_list[i][j] == {}:
+                continue
+
+            # if not empty
+            h_contribution_list.append(f"{tab}if {trunc_obj_name}.{taylor_series_order_tag[j]}:")
+
+            # h^i_j with first order (and higher) Taylor series contributions
+            for prefactor, string_list in hamiltonian_rank_list[i][j].items():
+                _handle_multiline_same_prefactor(h_contribution_list, prefactor, string_list, nof_tabs=2)
+
+    if h_contribution_list == []:
+        return_list.append('pass')
+    else:
+        return_list.extend(h_contribution_list)
 
     return return_list
 
@@ -511,7 +587,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
         # generate all valid combinations
         _filter_out_valid_eTz_terms(LHS, eT_series_term, H, None, Z, valid_term_list)
 
-    if True:  # debug
+    if False:  # debug
         print('\n\n\n')
 
         # save in a human readable format to a file
@@ -584,6 +660,7 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
                     {five_tab.join(ground_state_only_einsums[i])}
                 else:
                     {five_tab.join(einsums[i])}
+
                 return
         '''
 

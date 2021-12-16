@@ -22,10 +22,10 @@ def old_print_wrapper(*args, **kwargs):
 
 
 """ These are the indices used to label the h and t's in the generated latex"""
-summation_indices = 'ijklmno'
-unlinked_indices = 'zyxwuv'
+summation_indices = 'ijklmnopqr'
+unlinked_indices = 'zyxwvuts'
 
 
 """ These are the indices used to label the h and z's in the generated latex"""
 z_summation_indices = 'klmno'
-z_unlinked_indices = 'yxwuv'
+z_unlinked_indices = 'yxwvuts'
