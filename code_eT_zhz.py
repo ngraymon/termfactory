@@ -728,6 +728,7 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
 
     return_string = ""
     specifier_string = f"m{LHS.m}_n{LHS.n}"
+    four_tab = "\n" + tab*4
     five_tab = "\n" + tab*5
 
     # generate ground state einsums
@@ -757,14 +758,23 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
 
         # the docstring of the function
         if not opt_einsum:
-            docstring = f"Calculate the {LHS} {term_type} terms."
+            docstring = (
+                f"Calculate the {LHS} {term_type} terms.\n{four_tab}"
+                f"These terms have no vibrational contribution from the e^T operator.\n{four_tab}"
+                "This reduces the number of possible non-zero permutations of creation/annihilation operators."
+            )
         else:
-            docstring = f"Optimized calculation of the {LHS} {term_type} terms."
+            docstring = (
+                f"Optimized calculation of the {LHS} {term_type} terms.\n{four_tab}"
+                f"These terms include the vibrational contributions from the e^T operator.\n{four_tab}"
+                "This increases the number of possible non-zero permutations of creation/annihilation operators."
+            )
 
         # glue all these strings together in a specific manner to form the function definition
         function_string = f'''
             def {func_name}({positional_arguments}):
-                """{docstring}"""
+                """{docstring}
+                """
 
                 if ansatz.ground_state:
                     {five_tab.join(ground_state_only_einsums[i])}
