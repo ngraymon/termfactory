@@ -834,11 +834,11 @@ def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
     truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_sextuples()' if ((LHS.m >= 6) or (LHS.n >= 6)) else ''
 
     # shared by all functions
-    common_positional_arguments = 'R, ansatz, truncation, h_args, z_args'
+    common_positional_arguments = 'ansatz, truncation, t_args, h_args, z_args'
 
     if not opt_einsum:
         func_string = f'''
-            def compute_{specifier_string}_amplitude(A, N, ansatz, truncation, h_args, t_args):
+            def compute_{specifier_string}_amplitude(A, N, {common_positional_arguments}):
                 """Compute the {LHS} amplitude."""
                 {truncation_checks:s}
 
@@ -846,14 +846,14 @@ def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
                 R = np.zeros(shape=({', '.join(['A','A',] + ['N',]*LHS.rank)}), dtype=complex)
 
                 # add the terms
-                add_{specifier_string}_HZ_terms({common_positional_arguments})
-                add_{specifier_string}_eT_HZ_terms({common_positional_arguments}, t_args)
+                add_{specifier_string}_HZ_terms(R, {common_positional_arguments})
+                add_{specifier_string}_eT_HZ_terms(R, {common_positional_arguments})
                 return R
 
         '''
     else:
         func_string = f'''
-            def compute_{specifier_string}_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_paths):
+            def compute_{specifier_string}_amplitude_optimized(A, N, {common_positional_arguments}, opt_paths):
                 """Compute the {LHS} amplitude."""
                 {truncation_checks:s}
 
@@ -864,8 +864,8 @@ def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
                 optimized_HZ_paths, optimized_eT_HZ_paths = opt_paths
 
                 # add the terms
-                add_{specifier_string}_HZ_terms_optimized({common_positional_arguments}, optimized_HZ_paths)
-                add_{specifier_string}_eT_HZ_terms_optimized({common_positional_arguments}, t_args, optimized_eT_HZ_paths)
+                add_{specifier_string}_HZ_terms_optimized(R, {common_positional_arguments}, optimized_HZ_paths)
+                add_{specifier_string}_eT_HZ_terms_optimized(R, {common_positional_arguments}, optimized_eT_HZ_paths)
                 return R
 
         '''
