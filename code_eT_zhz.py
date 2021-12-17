@@ -751,9 +751,9 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
 
         # the positional arguments it takes (no keyword arguments are used currently)
         if not opt_einsum:
-            positional_arguments = "R, ansatz, truncation, h_args, t_args"
+            positional_arguments = "R, ansatz, truncation, t_args, h_args, z_args"
         else:
-            positional_arguments = "R, ansatz, truncation, h_args, t_args, opt_einsum"
+            positional_arguments = "R, ansatz, truncation, t_args, h_args, z_args, opt_einsum"
 
         # the docstring of the function
         if not opt_einsum:
