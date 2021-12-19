@@ -397,6 +397,10 @@ def _build_eT_zhz_python_prefactor(h, t_list, simplify_flag=True):
     A single h with no t list is a special case where the prefactor is always 1.
     """
 
+    # temporary, we need to redo this whole function anyways
+    if t_list == []:
+        return ''
+
     # special case, single h
     if len(t_list) == 1 and t_list[0] == disconnected_namedtuple(0, 0, 0, 0):
         return ''
@@ -511,19 +515,20 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         z_left, z_right = z_pair
         z_operand = f"z_args[({z_right.m}, {z_right.n})]"
 
-        if (len(t_list) == 1) and t_list[0] == disconnected_namedtuple(0, 0, 0, 0):
-            return_list.append(f"R += {h_operand}")
-            continue
+        # the t counts as identity
+        if t_list == []:
+            permutations = None
+            max_t_rank = 0
+            prefactor = ''
 
-        # logic about multiple permutations
-        # generate lists of unique t terms
-        permutations, unique_dict = _multiple_perms_logic(term)
-        prefactor = _build_eT_zhz_python_prefactor(h, t_list)
-        max_t_rank = max(t.rank for t in t_list)
-        old_print_wrapper(omega, h, t_list, permutations, sep='\n')
-
-        # if omega.rank == 1 and permutations != None:
-        #     sys.exit(0)
+        # if we have one or more t terms we need to figure out the permutations
+        else:
+            # logic about multiple permutations
+            # generate lists of unique t terms
+            permutations, unique_dict = _multiple_perms_logic(term)
+            prefactor = _build_eT_zhz_python_prefactor(h, t_list)
+            max_t_rank = max(t.rank for t in t_list)
+            old_print_wrapper(omega, h, t_list, permutations, sep='\n')
 
         # we still need to account for output/omega permutations
 
@@ -535,18 +540,16 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag)
 
         if permutations is None:
-            t_operands = ', '.join([f"t_args[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]" for t in t_list])
 
-            # string = f"np.einsum('{summation_subscripts}', {h_operand}, {t_operands})"
             if remaining_indices == '':
                 string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
-                string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
+                string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
             elif len(remaining_indices) >= 1:
                 for perm in unique_permutations(remaining_indices):
                     string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
-                    string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
+                    string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
                     old_print_wrapper(perm)
                     old_print_wrapper(remaining_indices)
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
@@ -737,6 +740,10 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     zero_eT_term = eT_taylor_expansion[0]
     log.debug(zero_eT_term, "-"*100, "\n\n")
     _filter_out_valid_eTz_terms(LHS, zero_eT_term, H, None, Z, valid_zero_list)
+
+    # cheat and remove all t terms
+    for i, _ in enumerate(valid_zero_list):
+        valid_zero_list[i][1] = []
 
     # then do the rest
     for eT_series_term in eT_taylor_expansion[1:]:
