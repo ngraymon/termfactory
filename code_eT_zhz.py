@@ -44,20 +44,47 @@ long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, 
 # ----------------------------------------------------------------------------------------------- #
 
 
-def _eT_zhz_einsum_electronic_components(t_list, z_right):
-    """ x """
+def _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag=False):
+    """ Return a list of strings to be used in a numpy.einsum() call.
 
-    electronic_surface_indices = 'cdefgh'
-    electronic_components = ['ac', ]
+    For now this function assumes that `b_loop_flag` is always true.
+    It is unclear what the function should produce when it is False.
 
-    # number of t terms plus 1 more term for z_right
-    nof_terms = len(t_list) + 1
 
-    for i in range(nof_terms):
-        electronic_components.append(electronic_surface_indices[i:i+2])
+    If `b_loop_flag` is True then we instead treat each of the t terms as NOT
+    having an electronic label, the Z term as only having one electronic d.o.f
+    and the H term as having the same two electronic d.o.f Such as
+        `ac, c -> a`
 
-    # change the last term to end with `b`
-    electronic_components[-1] = electronic_components[-1][0] + 'b'
+    """
+    assert b_loop_flag is True, 'Unclear how to implement function for vectorized mode'
+
+    electronic_components = []
+
+    # special b loop case
+    if b_loop_flag:
+
+        # treat the t terms as having no electronic labels
+        electronic_components += ['', ] * len(t_list)
+
+        # the H term always has 2
+        electronic_components.append('ac')
+
+        # we assume Z always contributes
+        electronic_components.append('c')
+
+        return electronic_components
+
+    # otherwise
+
+    # for each t term add 1 electronic label
+    electronic_components += ['a', ] * len(t_list)
+
+    # the H term always has 2
+    electronic_components.append('ac')
+
+    # we assume Z always contributes
+    electronic_components.append('c')
 
     return electronic_components
 
@@ -225,8 +252,29 @@ def _build_t_term_python_group(t_list, h, z_right):
     return sum_list, unlinked_list, offset_dict
 
 
-def _eT_zhz_einsum_vibrational_components(t_list, h, z_right):
-    """ x """
+def _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag=False):
+    """ Return two lists of strings to be used in a numpy.einsum() call.
+
+    The first list is all the vibrational components of each term (t, h, z),
+    to be traced over; which will be appended to the electronic components.
+    The second is the leftover indices, which indicated external labels; these
+    will be appended to the output string.
+
+    Each string is paired with a t, h, or z term.
+    The default is to assume all terms have two electronic degrees of freedom.
+    We also assume that we want the final shape to have electronic dimensions `ab`.
+    Therefore we start with `ac` and simply iterate over `cdefgh` like so:
+        `ac, cd, de, ef, fg, gh, hb -> ab`
+    or
+        `ac, cd, db -> ab`
+    and so clearly the current implementation only supports up to 7 terms.
+
+    If `b_loop_flag` is True then we instead treat each of the t terms as NOT
+    having an electronic label, the Z term as only having one electronic d.o.f
+    and the H term as having the same two electronic d.o.f Such as
+        `ac, c -> a`
+
+    """
 
     vibrational_components = []  # store return values here
 
@@ -437,7 +485,7 @@ def _multiple_perms_logic(term):
     raise Exception("Shouldn't get here")
 
 
-def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name='truncation'):
+def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name='truncation', b_loop_flag=True):
     """ Still being written """
 
     H, Z, eT_taylor_expansion = operators
@@ -483,8 +531,8 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         # build with permutations
         hamiltonian_rank_list[max(h.m, h.n)].setdefault(max_t_rank, {}).setdefault(prefactor, [])
 
-        e_a = _eT_zhz_einsum_electronic_components(t_list, z_right)
-        v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(t_list, h, z_right)
+        e_a = _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag)
+        v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag)
 
         if permutations is None:
             t_operands = ', '.join([f"t_args[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]" for t in t_list])
@@ -492,13 +540,13 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
             # string = f"np.einsum('{summation_subscripts}', {h_operand}, {t_operands})"
             if remaining_indices == '':
                 string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
-                string = f"np.einsum('{string} -> ab{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
+                string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
             elif len(remaining_indices) >= 1:
                 for perm in unique_permutations(remaining_indices):
                     string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
-                    string = f"np.einsum('{string} -> ab{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
+                    string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
                     old_print_wrapper(perm)
                     old_print_wrapper(remaining_indices)
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
@@ -513,7 +561,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
             for perm in permutations:
                 string = ", ".join([f"{e_a[i]}{v_a[p]}" for i, p in enumerate(perm)] + [f"{e_a[-2]}{v_a[-2]}"] + [f"{e_a[-1]}{v_a[-1]}"])
-                string = f"np.einsum('{string} -> ab{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
+                string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
         elif len(unique_dict) > 1:
@@ -524,7 +572,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                     for i in perm
                 ])
                 string = ", ".join([f"{e_a[i]}{v_a[p]}" for i, p in enumerate(perm)] + [f"{e_a[-2]}{v_a[-2]}"] + [f"{e_a[-1]}{v_a[-1]}"])
-                string = f"np.einsum('{string} -> ab{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
+                string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
         else:
