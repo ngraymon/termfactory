@@ -683,6 +683,62 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
     return return_list
 
 
+def remove_all_excited_state_t_terms(eT_taylor_expansion):
+    """ this is a really sloppy method so it should be improved in the future """
+    i_list, j_list = [], []
+
+    # loop over the outer list
+    for i, e1 in enumerate(eT_taylor_expansion):
+
+        # if this element is not a list
+        if not isinstance(e1, list):
+            # and the element has annihilation operators
+            if e1.m > 0:
+                # record this index as one that we have to remove
+                i_list.append(i)
+
+            continue
+
+        # loop over the inner list
+        for j, e2 in enumerate(e1):
+
+            # if this element is not a list
+            if not isinstance(e2, list):
+                # and the element has annihilation operators
+                if e2.m > 0:
+                    # record this index as one that we have to remove
+                    j_list.append(1)
+                continue
+
+            # simply counting how many elements in the inner-most list
+            # have annihilation operators
+            # (note that we have AT MOST lists nested twice, therefore)
+            # (all elements in `e2` are guaranteed to be namedtuples and NOT lists)
+            k_list = [1 for k, e3 in enumerate(e2) if e3.m > 0]
+
+    # here is the "buggy/bad" part
+    # what i want to do is delete specific elements
+    # but if I delete 1-by-1 then other elements index changes
+    # so we cheat for now and just try and delete a # of elements and
+    # hope they're all at the front of the list
+    # obviously this needs to be changed
+
+            # delete # elements
+            del e2[:sum(k_list)]
+
+        # delete # elements
+        del e1[:sum(j_list)]
+
+    # delete # elements
+    del eT_taylor_expansion[:sum(i_list)]
+
+    # filter out all the empty lists
+    filtered_eT_taylor_expansion = [x for x in eT_taylor_expansion if x != []]
+
+    # return
+    return filtered_eT_taylor_expansion
+
+
 def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_terms=False, opt_einsum=False):
     """Return a string containing python code to be placed into a .py file.
     This does all the work of generating the einsums.
@@ -712,29 +768,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
         # remove all excited state Z's
         Z.operator_list[:] = it.takewhile(lambda z: z.n == 0,  Z.operator_list)
 
-        # remove all excited state t's
-        # this is a really sloppy method so it should be improved in the future
-        i_list, j_list= [], []
-
-        for i, e1 in enumerate(eT_taylor_expansion):
-            if not isinstance(e1, list):
-                if e1.m > 0:
-                    i_list.append(i)
-                continue
-
-            for j, e2 in enumerate(e1):
-                if not isinstance(e2, list):
-                    if e2.m > 0:
-                        j_list.append(1)
-                    continue
-
-                k_list = [1 for k, e3 in enumerate(e2) if e3.m > 0]
-
-                del e2[:sum(k_list)]
-            del e1[:sum(j_list)]
-        del eT_taylor_expansion[:sum(i_list)]
-
-        eT_taylor_expansion = [x for x in eT_taylor_expansion if x != []]
+        eT_taylor_expansion = remove_all_excited_state_t_terms(eT_taylor_expansion)
 
     # do the terms without T contributions first
     zero_eT_term = eT_taylor_expansion[0]
@@ -742,8 +776,8 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     _filter_out_valid_eTz_terms(LHS, zero_eT_term, H, None, Z, valid_zero_list)
 
     # cheat and remove all t terms
-    for i, _ in enumerate(valid_zero_list):
-        valid_zero_list[i][1] = []
+    # for i, _ in enumerate(valid_zero_list):
+    #     valid_zero_list[i][1] = []
 
     # then do the rest
     for eT_series_term in eT_taylor_expansion[1:]:
