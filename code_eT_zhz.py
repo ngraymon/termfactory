@@ -815,7 +815,9 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
 def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, opt_einsum=False):
     """ x """
 
-    return_string = ""
+    return_string = ""  # concatenate all results to this
+
+    # pre-defines
     specifier_string = f"m{LHS.m}_n{LHS.n}"
     four_tab = "\n" + tab*4
     five_tab = "\n" + tab*5
@@ -825,9 +827,9 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
 
     # generate ground + excited state einsums
     if not only_ground_state:
-        einsums = _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False,  opt_einsum=opt_einsum)
+        ground_and_excited_state_einsums = _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False,  opt_einsum=opt_einsum)
     else:
-        einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*2
+        ground_and_excited_state_einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*2
 
     # the ordering of the functions is linked to the output ordering from `_generate_eT_zhz_einsums`
     # they must be in the same order
@@ -868,7 +870,7 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
                 if ansatz.ground_state:
                     {five_tab.join(ground_state_only_einsums[i])}
                 else:
-                    {five_tab.join(einsums[i])}
+                    {five_tab.join(ground_and_excited_state_einsums[i])}
 
                 return
         '''
