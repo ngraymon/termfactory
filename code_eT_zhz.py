@@ -755,7 +755,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
     for i in range(1, H.maximum_rank+1):
 
         # skip if empty
-        if hamiltonian_rank_list[i][0] == {}:
+        if hamiltonian_rank_list[i] == {}:
             continue
 
         # if not empty
