@@ -353,12 +353,11 @@ def _multiple_perms_logic(term):
     #     old_print_wrapper([unique_permutations(range(v)) for k, v in unique_dict.items()])
     #     return dict([(k, list(*unique_permutations(range(v)))) for k, v in unique_dict.items()]), unique_dict
 
-    raise Exception("Shouldn't get here")
+    raise Exception("Shouldn't get here")  # pragma: no cover
 
 
 def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_name='truncation'):
     """ x """
-
     maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
 
     if t_term_list == []:
@@ -446,7 +445,7 @@ def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
         else:
-            raise Exception('')
+            raise Exception('')  # pragma: no cover
 
     # -----------------------------------------------------------------------------------------
     # remove any duplicates
@@ -471,7 +470,7 @@ def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_
         return
 
     # order the terms as we return them
-    for prefactor, string_list in hamiltonian_rank_list[0][0].items():
+    for prefactor, string_list in hamiltonian_rank_list[0][0].items():  # pragma: no cover
         _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=0)
 
     for j in range(1, maximum_cc_rank+1):
@@ -483,7 +482,7 @@ def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_
     for i in range(1, maximum_h_rank+1):
         return_list.append('')
         return_list.append(f"if {trunc_obj_name}.at_least_{hamiltonian_order_tag[i]}:")
-        for prefactor, string_list in hamiltonian_rank_list[i][0].items():
+        for prefactor, string_list in hamiltonian_rank_list[i][0].items():  # pragma: no cover
             _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=1)
 
         for j in range(1, maximum_cc_rank+1):
@@ -551,7 +550,7 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
         # generate einsums if not ground state
         if not only_ground_state:
             einsums = _generate_full_cc_einsums(omega_term, truncations)
-        else:
+        else:  # pragma: no cover
             einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
             # old_print_wrapper(einsums)
             # sys.exit(0)
@@ -585,7 +584,7 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
         # generate einsums if not ground state
         if not only_ground_state:
             einsums = _generate_full_cc_einsums(omega_term, truncations, opt_einsum=True)
-        else:
+        else:  # pragma: no cover
             einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
 
         six_tab = "\n" + tab*6
