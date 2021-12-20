@@ -489,10 +489,10 @@ def _multiple_perms_logic(term):
     raise Exception("Shouldn't get here")
 
 
-def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name='truncation', b_loop_flag=True):
+def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name='truncation', b_loop_flag=False):
     """ Still being written """
 
-    H, Z, eT_taylor_expansion = operators
+    master_omega, H, Z, eT_taylor_expansion = operators
     log.info("Starting this function")
 
     if t_term_list == []:
@@ -502,7 +502,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
     hamiltonian_rank_list = []
     for i in range(H.maximum_rank+1):
-        hamiltonian_rank_list.append(dict([(i, {}) for i in range(rank+1)]))
+        hamiltonian_rank_list.append(dict([(i, {}) for i in range(master_omega.maximum_rank+1)]))
 
     for term in t_term_list:
 
@@ -750,7 +750,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
         - it is always on the right side
         - always bond to projection operator in opposite dimension (^i _i)
     """
-    H, Z, eT_taylor_expansion = operators
+    master_omega, H, Z, eT_taylor_expansion = operators
 
     valid_zero_list = []   # store all valid Omega * (1)        * h * Z  terms here
     valid_term_list = []   # store all valid Omega * (t*t*...t) * h * Z  terms here
@@ -985,7 +985,7 @@ def _generate_eT_zhz_python_file_contents(truncations, only_ground_state=False):
     eT_taylor_expansion = generate_eT_taylor_expansion(maximum_T_rank, eT_taylor_max_order)
 
     # stick them in a tuple
-    operators = H, Z, eT_taylor_expansion
+    operators = master_omega, H, Z, eT_taylor_expansion
 
     # ------------------------------------------------------------------------------------------- #
     # ------------------------------------------------------------------------------------------- #
