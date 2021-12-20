@@ -484,8 +484,16 @@ def _multiple_perms_logic(term):
     raise Exception("Shouldn't get here")
 
 
-def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name='truncation', b_loop_flag=False):
-    """ Still being written """
+def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name='truncation', b_loop_flag=False, suppress_empty_if_checks=True):
+    """ Still being written
+
+    the flag `suppress_empty_if_checks` is to toggle the "suppression" of code such as
+    ```
+        if truncation.singles:
+            pass
+    ```
+    which doesn't actually do anything.
+    """
 
     master_omega, H, Z, eT_taylor_expansion = operators
     log.info("Starting this function")
@@ -721,32 +729,44 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         else:
             output_list.append(f"{tabber}R += {prefactor}{string_list[0]}")
 
-        return
+        return output_list
 
     h_contribution_list = []
 
     # h^0_0 with zero order Taylor series contributions
     for prefactor, string_list in hamiltonian_rank_list[0][0].items():
-        print(f"{string_list = }")
+        # print(f"{string_list = }")
         _handle_multiline_same_prefactor(h_contribution_list, prefactor, string_list, nof_tabs=0)
 
     # print(f"\n{h_contribution_list = }")
     # import pdb; pdb.set_trace()
 
     # loop over first order (and higher) Taylor series contributions
+
     for j in range(1, master_omega.maximum_rank+1):
 
         # skip if empty
-        if hamiltonian_rank_list[0][j] == {}:
+        if hamiltonian_rank_list[0][j] is {}:
             continue
 
         # if not empty
-        h_contribution_list.append(f"if {trunc_obj_name}.{taylor_series_order_tag[j]}:")
+        temp_list = []
 
         # h^0_0 with first order (and higher) Taylor series contributions
         for prefactor, string_list in hamiltonian_rank_list[0][j].items():
-            print(f"{j = } {string_list = }")
-            _handle_multiline_same_prefactor(h_contribution_list, prefactor, string_list, nof_tabs=1)
+            # print(f"{j = } {string_list = }")
+            _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=1)
+
+        # processing
+        if temp_list == []:
+            if suppress_empty_if_checks:
+                pass
+            else:
+                h_contribution_list.append(f"if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:")
+                h_contribution_list.append(f"{tab}pass")
+        else:
+            h_contribution_list.append(f"if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:")
+            h_contribution_list.extend(temp_list)
 
     # print(f"\n{h_contribution_list = }")
     # import pdb; pdb.set_trace()
@@ -755,40 +775,66 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
     for i in range(1, H.maximum_rank+1):
 
         # skip if empty
-        if hamiltonian_rank_list[i] == {}:
+        if hamiltonian_rank_list[i] is {}:
             continue
 
         # if not empty
-        h_contribution_list.append(f"if {trunc_obj_name}.at_least_{hamiltonian_order_tag[i]}:")
+        temp_list = []
 
         # h^i_j with zero order Taylor series contributions
         for prefactor, string_list in hamiltonian_rank_list[i][0].items():
-            print(f"{i = } {string_list = }")
-            _handle_multiline_same_prefactor(h_contribution_list, prefactor, string_list, nof_tabs=1)
+            # print(f"{i = } {string_list = }")
+            _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=1)
+
+        # processing
+        h_contribution_list.append(f"if {trunc_obj_name}.h_at_least_{hamiltonian_order_tag[i]}:")
+        if temp_list == []:
+            if suppress_empty_if_checks:
+                pass
+            else:
+                h_contribution_list.append(f"{tab}pass")
+        else:
+            h_contribution_list.extend(temp_list)
 
         # loop over first order (and higher) Taylor series contributions
-        for j in range(1, rank+1):
+        for j in range(1, master_omega.maximum_rank+1):
 
             # skip if empty
-            if hamiltonian_rank_list[i][j] == {}:
+            if hamiltonian_rank_list[i][j] is {}:
                 continue
 
             # if not empty
-            h_contribution_list.append(f"{tab}if {trunc_obj_name}.{taylor_series_order_tag[j]}:")
+            temp_list = []
 
             # h^i_j with first order (and higher) Taylor series contributions
             for prefactor, string_list in hamiltonian_rank_list[i][j].items():
-                print(f"{i = } {j = } {string_list = }")
-                _handle_multiline_same_prefactor(h_contribution_list, prefactor, string_list, nof_tabs=2)
+                # print(f"{i = } {j = } {string_list = }")
+                _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=2)
+
+            # processing
+            if temp_list == []:
+                if suppress_empty_if_checks:
+                    pass
+                else:
+                    h_contribution_list.append(f"{tab}if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:")
+                    h_contribution_list.append(f"{tab}{tab}pass")
+            else:
+                h_contribution_list.append(f"{tab}if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:")
+                h_contribution_list.extend(temp_list)
+
+            if not suppress_empty_if_checks:
+                h_contribution_list.append("")
+        # j loop
+        if not suppress_empty_if_checks:
+            h_contribution_list.append("")
+    # i loop
 
     # print(f"\n{h_contribution_list = }")
-    # import pdb; pdb.set_trace()
-
     # compact_display_of_hamiltonian_rank_list(hamiltonian_rank_list)
     # import pdb; pdb.set_trace()
 
     if h_contribution_list == []:
-        return_list.append('pass')
+        return_list.append("pass")
     else:
         return_list.extend(h_contribution_list)
 
