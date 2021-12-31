@@ -146,7 +146,7 @@ if (__name__ == '__main__'):
     maximum_cc_rank = 3
     maximum_T_rank = 1
     eT_taylor_max_order = 4
-    omega_max_order = 3
+    omega_max_order = 1
 
     # need to have truncation of e^T
     eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order
