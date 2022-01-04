@@ -143,7 +143,7 @@ if (__name__ == '__main__'):
 
     # for the 'eT_z_t ansatz' only
     maximum_h_rank = 3
-    maximum_cc_rank = 3
+    maximum_cc_rank = 2
     maximum_T_rank = 1
     eT_taylor_max_order = 4
     omega_max_order = 1

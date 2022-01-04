@@ -380,7 +380,7 @@ def _simplify_eT_zhz_python_prefactor(numerator_list, denominator_list):
     return numerator_list, denominator_list
 
 
-def _build_eT_zhz_python_prefactor(h, t_list, simplify_flag=True):
+def _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True):
     """Attempt to return python code representing appropriate prefactor term.
 
     All prefactors begin with 1/n! where n is the number of t amplitudes in given term.
@@ -432,12 +432,16 @@ def _build_eT_zhz_python_prefactor(h, t_list, simplify_flag=True):
         old_print_wrapper(len(set(connected_ts)))
         old_print_wrapper('zzzzzzzzz\n\n\n')
 
-    if x > 1:
-        numerator_list.append(f'factorial({x})')
+    # if x > 1:
+    #     numerator_list.append(f'factorial({x})')
     if h.m > 1:
         denominator_list.append(f'factorial({h.m})')
     if h.n > 1:
         denominator_list.append(f'factorial({h.n})')
+    if z_right.m > 1:
+        denominator_list.append(f'factorial({z_right.m})')
+    if z_right.n > 1:
+        denominator_list.append(f'factorial({z_right.n})')
 
     # account for the number of permutations of all t-amplitudes
     if len(t_list) > 1:
@@ -566,10 +570,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
             # generate lists of unique t terms
             permutations, unique_dict = _multiple_perms_logic(term, print_indist_perms=False)
 
-            print(f"{permutations = } \n\n {unique_dict = }\n\n")
-            import pdb; pdb.set_trace()
+            # print(f"{permutations = } \n\n {unique_dict = }\n\n")
+            # import pdb; pdb.set_trace()
 
-            prefactor = _build_eT_zhz_python_prefactor(h, t_list)
+            prefactor = _build_eT_zhz_python_prefactor(t_list, h, z_right)
 
             max_t_rank = max(t.rank for t in t_list)
 
@@ -638,6 +642,8 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 ])
 
                 for perm in permutations:
+                    print(f"{permutations = } {perm = }")
+                    print(t_list, unique_dict)
 
                     # create the t term indices
                     combined_electronic_vibrational = [f"{e_a[i]}{v_a[p]}" for i, p in enumerate(perm)]
