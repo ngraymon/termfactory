@@ -457,24 +457,60 @@ def _build_eT_zhz_python_prefactor(h, t_list, simplify_flag=True):
         return f"{numerator}/{denominator} * "
 
 
-def _multiple_perms_logic(term):
-    """ probably need to re-check the multiple t term permutations? """
+def _multiple_perms_logic(term, print_indist_perms: bool = False):
+    """ probably need to re-check the multiple t term permutations?
+
+    The flag `print_indist_perms` is meant to indicate if we want to print out all possible permutations;
+    even permutations of indistinguishable terms.
+    Normally we don't want to do this for computational efficiency reasons.
+    """
     omega, t_list, h, z_pair, not_sure_what_this_one_is_for = term
 
+    # first create a dictionary counting the number of distinguishable t terms
+    # keys are the terms and the value is the count
     unique_dict = {}
     for t in t_list:
         unique_dict[t] = 1 + unique_dict.get(t, 0)
 
-    # basic permutations on singular t terms
-    if len(unique_dict) == 1:
-        # here permutations is simply all re-ordering of identical t terms
-        # if there is a single t term then the permutation is a tuple: (0, )
-        length = list(unique_dict.values())[0]
-        return unique_permutations(range(length)), unique_dict
+    # 1 unique t term found
+    if len(unique_dict.keys()) == 1:
 
-    # if permutations on multiple t terms
-    if len(unique_dict) > 1:
-        return unique_permutations(range(len(t_list))), unique_dict
+        # how many copies of that t term are present
+        count = list(unique_dict.values())[0]
+
+        # this produces a single permutation
+        if not print_indist_perms:
+            # if there is a single t term (`count` = 1) then the permutation is a tuple: (0, )
+            permutations = [range(count), ]
+
+        # this can produce 1 or more permutations
+        else:
+            # here permutations is simply all re-orderings of identical t terms
+            permutations = unique_permutations(range(count))
+
+        return permutations, unique_dict
+
+    # if multiple distinguishable t terms are present
+    if len(unique_dict.keys()) > 1:
+
+        # print(f"{unique_dict = }")
+        # import pdb; pdb.set_trace()
+
+        # how many copies of that t term are present
+        count = len(t_list)
+
+        # this produces a single permutation
+        if not print_indist_perms:
+            # if there is a single t term (`count` = 1) then the permutation is a tuple: (0, )
+            permutations = [range(count), ]
+
+        # this can produce 1 or more permutations
+        else:
+            # here permutations is simply all re-orderings of identical t terms
+            permutations = unique_permutations(range(count))
+
+        return permutations, unique_dict
+
     #     # lst = []
     #     # for v in unique_dict.values():
     #     #     lst.append(*unique_permutations(range(v)))
@@ -528,10 +564,15 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         else:
             # logic about multiple permutations
             # generate lists of unique t terms
-            permutations, unique_dict = _multiple_perms_logic(term)
-            # print(f"{permutations = } \n\n {unique_dict = }\n\n")
+            permutations, unique_dict = _multiple_perms_logic(term, print_indist_perms=False)
+
+            print(f"{permutations = } \n\n {unique_dict = }\n\n")
+            import pdb; pdb.set_trace()
+
             prefactor = _build_eT_zhz_python_prefactor(h, t_list)
+
             max_t_rank = max(t.rank for t in t_list)
+
             old_print_wrapper(omega, h, t_list, permutations, sep='\n')
 
         # we still need to account for output/omega permutations
@@ -545,13 +586,18 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         # print(f"{e_a = }")
         v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag)
 
+        # if there is only a single distinguishable t term
+        # eg: t1 * t1 * t1 ---> 3 indistinguishable t terms
+        # as opposed to t1 * t2 being two distinguishable t terms
         if len(unique_dict.keys()) == 1:
 
             # extract the single key
             disconnected_t_term = next(iter(unique_dict.keys()))
 
+            # if this is an instance of t^0_0
             if disconnected_t_term.rank == 0:
 
+                # no remaining (external) indices/labels means we simply proceed as normal and glue everything together
                 if remaining_indices == '':
                     # create the initial indices
                     combined_electronic_vibrational = [f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))]
@@ -568,6 +614,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                     # append that string to the current list
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
+                # this means we need to permute over the remaining (external) indices/labels
                 elif len(remaining_indices) >= 1:
                     for perm in unique_permutations(remaining_indices):
                         string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
@@ -575,10 +622,12 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                         string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
                         hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
+                    # wait why are we passing instead of exiting?
                     if len(remaining_indices) >= 2:
                         # sys.exit(0)
                         pass
 
+            # if this is a t term with at least 1 creation or annihilation operator
             elif disconnected_t_term.rank > 0:
 
                 # create the string of (t terms/t_operands) that we are tracing over
@@ -611,6 +660,8 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                     # append that string to the current list
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
+        # if there is multiple distinguishable t terms
+        # eg: t1 * t2 * t1 ---> 2 distinguishable t terms (t1, t2)
         elif len(unique_dict) > 1:
 
             for perm in permutations:
