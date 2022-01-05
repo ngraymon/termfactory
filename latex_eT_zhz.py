@@ -889,6 +889,9 @@ def _remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations):
     """ This removes duplicate permutations of the t tuple for a given z_pair.
     Specifically it removes permuting the t1t2 - t2t1 kind of thing.
     However if you only have t1s it (probably) won't remove any permutations.
+    This is in fact * not true * ! it will remove connected/disconnected permutations of t1's.
+    For example t_i t_j h^i Z^j can permute t_j t_i h^i Z^j.
+    This function will remove all such permutations in the case of only having t1 terms.
     """
     unique_list = []
     unique_set = set()
@@ -1750,8 +1753,8 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
         # continue
 
         # we need to remove duplicate permutations on the t's
-        # unique_eT_permutations, unique_count = _remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations)
-        unique_eT_permutations, unique_count = eT_connection_permutations, {perm: 1 for perm in eT_connection_permutations}
+        unique_eT_permutations, unique_count = _remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations)
+        # unique_eT_permutations, unique_count = eT_connection_permutations, {perm: 1 for perm in eT_connection_permutations}
 
         log_conf.setLevelInfo(log)
 

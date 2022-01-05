@@ -707,12 +707,17 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         # eg: t1 * t2 * t1 ---> 2 distinguishable t terms (t1, t2)
         elif len(unique_dict) > 1:
 
+            print(f"{unique_dict = }")
+            print(f"{len(unique_dict) = } is > 1 ?{len(unique_dict) > 1}")
+
+            # import pdb; pdb.set_trace()
+
             for perm in permutations:
 
                 # create the string of (t terms/t_operands) that we are tracing over
                 # since they are NOT identical, we do have to pay attention to the ordering
 
-                # for simplicty we create a new re-ordered list
+                # for simplicity we create a new re-ordered list
                 re_ordered_t_list = [t_list[i] for i in perm]
 
                 # now we can just easily iterate over the re-ordered list
@@ -739,8 +744,29 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 # append that string to the current list
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
+            print(f"{string = }")
+
+            # import pdb; pdb.set_trace()
+
         else:
             raise Exception('')
+
+    """ lazy hack because we I don't trust myself to properly modify `latex_eT_zhz.py` at the moment
+
+    the point is that we expect to have duplicate strings in our hamiltonian_rank_list and we want to remove them
+    so we just loop over all elements/sub elements of the list and apply list(set(x)) on that respective element
+    """
+    for i, e in enumerate(hamiltonian_rank_list):
+        print(f"{type(e) = }")
+        for key, t_dict in hamiltonian_rank_list[i].items():
+            print(f"{key = } {t_dict = }")
+            for pref, e_list in t_dict.items():
+                print(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
+                print(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }")
+                hamiltonian_rank_list[i][key][pref] = list(set(e_list))
+                print(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
+                print(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }\n")
+                # import pdb; pdb.set_trace()
 
     def compact_display_of_hamiltonian_rank_list(hamiltonian_rank_list):
         """ for debugging purposes """
