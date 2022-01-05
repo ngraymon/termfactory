@@ -1,10 +1,10 @@
 # system imports
 # import re
-import pytest
+# import pytest
 # local imports
 from .context import latex_w_equations as lw
+# from .context import namedtuple_defines as nt
 
-from .context import namedtuple_defines as nt
 
 class Test_Latex_of_W_operators:
 
@@ -50,7 +50,7 @@ class Test_Latex_of_W_operators:
         function_output = lw.generate_t_terms_group(w_ntuple)
         expected_result = [[(2, 0)], [(1, 0), (1, 0)]]
         assert function_output == expected_result
-    
+
     def test_generate_t_terms_group_zero_order(self):
         w_ntuple = lw.w_namedtuple_latex(m=0, n=0)
         function_output = lw.generate_t_terms_group(w_ntuple)
@@ -61,4 +61,3 @@ class Test_Latex_of_W_operators:
         # TODO add file compare assert
         max_w_order = 3
         lw.excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex")
-

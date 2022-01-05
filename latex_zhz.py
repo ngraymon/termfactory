@@ -441,17 +441,17 @@ def _z_joining_with_z_terms(LHS, h, left_z, right_z):
 
     required_b_for_right_z = right_z.m
     required_d_for_right_z = right_z.n
-
-    if (required_b_for_left_z > available_b_for_left_z):
+    # TODO trigger these cases in tests
+    if (required_b_for_left_z > available_b_for_left_z):  # pragma: no cover
         return True
 
-    if (required_d_for_left_z > available_d_for_left_z):
+    if (required_d_for_left_z > available_d_for_left_z):  # pragma: no cover
         return True
 
-    if (required_b_for_right_z > available_b_for_right_z):
+    if (required_b_for_right_z > available_b_for_right_z):  # pragma: no cover
         return True
 
-    if (required_d_for_right_z > available_d_for_right_z):
+    if (required_d_for_right_z > available_d_for_right_z):  # pragma: no cover
         return True
 
     return False
@@ -562,7 +562,7 @@ def _generate_all_valid_z_connection_permutations(LHS, h, z_term_list, log_inval
             log.debug(f"Valid upper perm:   LHS={total_lhs_m}, zL={m_perm[0]}, h={total_h_m}, zR={m_perm[1]}")
             valid_upper_perm_combinations.append(m_perm)
 
-        elif log_invalid:
+        elif log_invalid:  # pragma: no cover
             log.debug(
                 "Invalid upper perm: "
                 f"h={total_h_m} <= {h.n}"
@@ -601,7 +601,7 @@ def _generate_all_valid_z_connection_permutations(LHS, h, z_term_list, log_inval
             log.debug(f"Valid lower perm:   LHS={total_lhs_n}, zL={n_perm[0]}, h={total_h_n}, zR={n_perm[1]}")
             valid_lower_perm_combinations.append(n_perm)
 
-        elif log_invalid:
+        elif log_invalid:  # pragma: no cover
             log.debug(
                 "Invalid lower perm: "
                 f"h={total_h_n} <= {h.m}"
@@ -646,7 +646,7 @@ def _generate_all_o_h_z_connection_permutations(LHS, h, valid_z_permutations, fo
                 if left_z.name is None:
                     assert left_z_upper == left_z_lower == (0, 0, 0)  # make sure this permutation is okay for no z left
                     z_list.append(None)
-                else:
+                else:  # pragma: no cover
                     z_left_kwargs = {
                         'rank': left_z.rank,
                         'm': left_z.m,
@@ -665,7 +665,7 @@ def _generate_all_o_h_z_connection_permutations(LHS, h, valid_z_permutations, fo
                     else:
                         z_list.append(connected_z_left_operator_namedtuple(**z_left_kwargs))
 
-                if right_z.name is None:
+                if right_z.name is None:  # pragma: no cover
                     assert right_z_upper == right_z_lower == (0, 0, 0)  # make sure this permutation is okay for no z right
                     z_list.append(None)
                 else:
@@ -686,10 +686,9 @@ def _generate_all_o_h_z_connection_permutations(LHS, h, valid_z_permutations, fo
                     # if the Z operator is connected (at least 1 connection to H)
                     else:
                         z_list.append(connected_z_right_operator_namedtuple(**z_right_kwargs))
-
                 # if we have the ZHZ terms then we need to check that the Z <-> Z
                 # contractions are correct
-                if (z_left_kwargs != {}) and (z_right_kwargs != {}):
+                if (z_left_kwargs != {}) and (z_right_kwargs != {}):  # pragma: no cover
                     # if these contractions are not equal
                     if z_left_kwargs['m_r'] != z_right_kwargs['n_l']:
                         term_string = f"{tab}{LHS}, {h}, {perm}\n{tab}{z_left_kwargs=}\n{tab}{z_right_kwargs=}\n"

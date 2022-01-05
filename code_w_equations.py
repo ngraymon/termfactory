@@ -352,7 +352,7 @@ def _generate_vemx_contributions(order, opt_einsum=False):
             # code never gets here I think? bc if order < 2 has a return above
             old_print_wrapper(partition, partition[0])
             # we have to space the line correct (how many tabs)
-            if max(partition) >= 2:  
+            if max(partition) >= 2:
                 print('reached')
                 return_string += f"{tab}{tab}{W_array} += {prefactor} * {t_terms[partition[0]].string}\n"
             else:

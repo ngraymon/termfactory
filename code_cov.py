@@ -145,20 +145,20 @@ def test_code_residual_equations(MAX_R=6, MAX_H=2):
     This can be fixed by making the dictionary larger/factoring it out/generating it on the fly...
     maybe there is a class???
     """
-    for max_residual_order in range(0, MAX_R+1):
-        for maximum_h_rank in range(0, MAX_H+1):
+    for max_residual_order in range(0, MAX_R + 1):
+        for maximum_h_rank in range(0, MAX_H + 1):
             generate_residual_equations_file(max_residual_order, maximum_h_rank)
 
 
 def test_code_w_operator(MAX_W=6):
     """ x """
-    for max_w_order in range(0, MAX_W+1):
+    for max_w_order in range(0, MAX_W + 1):
         generate_w_operator_equations_file(max_w_order)
 
 
 def test_code_dt_amplitude(MAX_dt=6):
     """ x """
-    for dt_order in range(0, MAX_dt+1):
+    for dt_order in range(0, MAX_dt + 1):
         generate_dt_amplitude_equations_file(dt_order)
 
 

@@ -1,5 +1,5 @@
 # system imports
-import pytest
+# import pytest
 
 
 # local imports
@@ -23,9 +23,10 @@ def test_generate_omega_operator():
     )
     assert function_output == expected_result
 
+
 class Test_gen_full_cc_py_eqns:
 
-    def test__rank_of_t_term_namedtuple(self):
+    def test_rank_of_t_term_namedtuple(self):
         """x"""
         t = fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0)
         function_output = cfcc._rank_of_t_term_namedtuple(t)
@@ -164,7 +165,7 @@ class Test_gen_full_cc_py_eqns:
     def test_multiple_perms_logic(self):
         """x"""
         term = [
-            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[1, 1],n_t=[0, 0]),
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[1, 1], n_t=[0, 0]),
             fcc.connected_h_operator_namedtuple(rank=1, m=0, n=1, m_o=0, n_o=0, m_t=[0, 0], n_t=[0, 1]),
             (
                 fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=1),

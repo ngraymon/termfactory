@@ -4,7 +4,6 @@ import pytest
 # local imports
 from .context import code_w_equations as cw
 
-from .context import namedtuple_defines as nt
 
 class Test_gen_w_oper:
 
@@ -29,6 +28,7 @@ class Test_gen_w_oper:
         function_output = cw._generate_w_operator_prefactor((2, 1))
         expected_result = '1/(factorial(2) * factorial(2))'
         assert function_output == expected_result
+
 
 class Test_begin_code_gen:
 
@@ -59,6 +59,7 @@ class Test_begin_code_gen:
         expected_result = ['next(optimized_einsum)(t_i, t_i, t_i)']
         assert function_output == expected_result
 
+
 class Test_contributions:
 
     def test_construct_vemx_contributions_definition(self):
@@ -79,14 +80,14 @@ class Test_contributions:
 
     def test_generate_vemx_contributions_basic(self):
         """basic test"""
-        order = 3 
+        order = 3
         function_output = cw._generate_vemx_contributions(order, opt_einsum=False)
         expected_result = '\ndef _add_order_3_vemx_contributions(W_3, t_args, truncation):\n    """Calculate the order 3 VECI/CC (mixed) contributions to the W operator\n    for use in the calculation of the residuals.\n    """\n    # unpack the `t_args`\n    t_i, t_ij, *unusedargs = t_args\n    # DOUBLES contribution\n    if truncation.doubles:\n        W_3 += 1/(factorial(2) * factorial(2)) * (\n            np.einsum(\'aci, cbjk->abijk\', t_i, t_ij) +\n            np.einsum(\'acij, cbk->abijk\', t_ij, t_i)\n        )\n    # SINGLES contribution\n    W_3 += 1/factorial(3) * (np.einsum(\'aci, cdj, dbk->abijk\', t_i, t_i, t_i))\n    return\n'
         assert function_output == expected_result
 
     def test_generate_vemx_contributions_small_order(self):
         """test on small order"""
-        order = 1 
+        order = 1
         function_output = cw._generate_vemx_contributions(order, opt_einsum=False)
         expected_result = '\ndef _add_order_1_vemx_contributions(W_1, t_args, truncation):\n    """Exists for error checking."""\n    raise Exception(\n        "the first possible purely VECI/CC term is (1, 1) or (dt_i * t_i)"\n        "which requires a W operator of at least 2nd order"\n    )\n'
         assert function_output == expected_result

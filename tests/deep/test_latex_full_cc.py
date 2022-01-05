@@ -8,6 +8,8 @@ from .context import namedtuple_defines as nt
 
 # TODO add functions where multiple tests are encased in one function for future debugging
 # TODO fix long lists
+
+
 class Test_Operator_Gens:
 
     def test_generate_omega_operator(self):
@@ -238,8 +240,7 @@ class Test_Gen_Ops:
     # def test_generate_explicit_connections_elif_case(self):
     #     # elif h_kwargs['n_o'] != o_kwargs['m_h']
     #     omega = 2
-    #     h = 
-    
+    #     h = fix
 
         # TODO if req, also add raise excepts for if states?
         # invalid term case 1
@@ -955,7 +956,7 @@ f\bar{f}\bh^{\blue{}\red{z}}_{\blue{}\red{y}} + f\frac{1}{2!}\bh^{\blue{}\red{}}
         function_output = fcc._wrap_align_environment(omega, rank_name, lhs, eqns)
         expected_result = '\\begin{align}\\begin{split}\n    \\hat{\\Omega} = \\down{i}\n\\\\ LHS &=\n    i\\left(\\dv{\\bt^{i}_{}}{\\tau} + \\bt^{i}_{}\\varepsilon\\right)\n\\\\ RHS &=\n%\n%\n(\\bar{f}\\bh^{\\blue{}\\red{z}}_{\\blue{}\\red{}})\n%\n%\n\\\\  &+\n%\n%\n    \\textit{no linked disconnected terms}\n%\n%\n\\\\  &+\n%\n%\n(\\bh_0)\\bt^{\\blue{}\\red{z}}\n\\end{split}\\end{align}\n\n'
         assert function_output == expected_result
-    
+
     def test_wrap_align_environment_d_omega(self):
         omega = fcc.general_operator_namedtuple(name='d', rank=1, m=1, n=0)
         rank_name = 'LINEAR'
