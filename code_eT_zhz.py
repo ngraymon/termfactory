@@ -608,7 +608,12 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 # adjust the prefactor if necessary
                 if n != d:
                     prefactor = f'({n} / {d}) * '
-                    print(f"{prefactor = }")
+
+                # force the prefactor to be 1 (which we represent with an empty string)
+                # this is to take care of the case where `n == d` because of adjustment but
+                # the current value of the string `prefactor` is NOT an empty string
+                else:
+                    prefactor = ''
 
                 # import pdb; pdb.set_trace()
 
@@ -907,14 +912,11 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
             _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=1)
 
         # processing
-        if temp_list == []:
-            if suppress_empty_if_checks:
-                pass
-            else:
-                h_contribution_list.append(f"if {trunc_obj_name}.h_at_least_{hamiltonian_order_tag[i]}:")
-                h_contribution_list.append(f"{tab}pass")
-        else:
-            h_contribution_list.append(f"if {trunc_obj_name}.h_at_least_{hamiltonian_order_tag[i]}:")
+        h_contribution_list.append("")
+
+        h_header_if_string = f"if {trunc_obj_name}.h_at_least_{hamiltonian_order_tag[i]}:"
+        h_contribution_list.append(h_header_if_string)
+        if temp_list != []:
             h_contribution_list.extend(temp_list)
 
         # loop over first order (and higher) Taylor series contributions
@@ -945,9 +947,16 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
             if not suppress_empty_if_checks:
                 h_contribution_list.append("")
+
         # j loop
         if not suppress_empty_if_checks:
             h_contribution_list.append("")
+
+        # if the header didn't actually have any contributions underneath it then simply remove it
+        if h_contribution_list[-1] == h_header_if_string:
+            del h_contribution_list[-1]
+
+    # add empty string -> creates empty line for better formatting
     # i loop
 
     # print(f"\n{h_contribution_list = }")
