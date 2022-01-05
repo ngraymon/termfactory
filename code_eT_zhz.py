@@ -2,6 +2,8 @@
 import itertools as it
 import functools
 import inspect
+import math
+from fractions import Fraction
 import pdb
 
 # third party imports
@@ -405,6 +407,8 @@ def _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True):
     if len(t_list) == 1 and t_list[0] == disconnected_namedtuple(0, 0, 0, 0):
         return ''
 
+    numerator_value = 1
+    denominator_value = 1
     numerator_list = []
     denominator_list = []
 
@@ -413,39 +417,32 @@ def _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True):
     # connections = np.count_nonzero([h.m_t[i]+h.n_t[i] for i in range(len(h.m_t))])
     connected_ts = [t for t in t_list if t.m_h > 0 or t.n_h > 0]
 
-    x = len(set(connected_ts))
-
-    debug_flag = (
-        h.n == 2
-        and h.m == 0
-        and len(t_list) == 2
-        and t_list[0].m_h == 1
-        and t_list[0].m_lhs == 1
-        and t_list[1].m_h == 1
-        and t_list[1].m_lhs == 1
-    )
-
-    if debug_flag:
-        old_print_wrapper('\n\n\nzzzzzzzzz')
-        old_print_wrapper(connected_ts)
-        old_print_wrapper(set(connected_ts))
-        old_print_wrapper(len(set(connected_ts)))
-        old_print_wrapper('zzzzzzzzz\n\n\n')
+    # x = len(set(connected_ts))
 
     # if x > 1:
     #     numerator_list.append(f'factorial({x})')
     if h.m > 1:
+        denominator_value *= math.factorial(h.m)
         denominator_list.append(f'factorial({h.m})')
     if h.n > 1:
+        denominator_value *= math.factorial(h.n)
         denominator_list.append(f'factorial({h.n})')
     if z_right.m > 1:
+        denominator_value *= math.factorial(z_right.m)
         denominator_list.append(f'factorial({z_right.m})')
     if z_right.n > 1:
+        denominator_value *= math.factorial(z_right.m)
         denominator_list.append(f'factorial({z_right.n})')
 
     # account for the number of permutations of all t-amplitudes
     if len(t_list) > 1:
+        denominator_value *= math.factorial(len(t_list))
         denominator_list.append(f'factorial({len(t_list)})')
+
+    for t in t_list:
+        if t.rank > 1:
+            denominator_value *= math.factorial(t.rank)
+            denominator_list.append(f'factorial({t.rank})')
 
     # simplify
     if simplify_flag:
@@ -455,10 +452,12 @@ def _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True):
     numerator = '1' if (numerator_list == []) else f"({' * '.join(numerator_list)})"
     denominator = '1' if (denominator_list == []) else f"({' * '.join(denominator_list)})"
 
+    prefactor_string = f"{numerator}/{denominator} * ".replace('factorial(2)', '2')
+
     if numerator == '1' and denominator == '1':
-        return ''
-    else:
-        return f"{numerator}/{denominator} * "
+        prefactor_string = ''
+
+    return prefactor_string, numerator_value, denominator_value
 
 
 def _multiple_perms_logic(term, print_indist_perms: bool = False):
@@ -565,19 +564,57 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
             prefactor = ''
 
         # if we have one or more t terms we need to figure out the permutations
+        # this part is quite tricky
         else:
-            # logic about multiple permutations
-            # generate lists of unique t terms
-            permutations, unique_dict = _multiple_perms_logic(term, print_indist_perms=False)
 
-            # print(f"{permutations = } \n\n {unique_dict = }\n\n")
-            # import pdb; pdb.set_trace()
+            print_indist_perms = False
 
-            prefactor = _build_eT_zhz_python_prefactor(t_list, h, z_right)
+            # the easy case where we just print EVERYTHING
+            if print_indist_perms is True:
 
-            max_t_rank = max(t.rank for t in t_list)
+                # logic about multiple permutations, generate lists of unique t terms
+                permutations, unique_dict = _multiple_perms_logic(term, print_indist_perms)
 
-            old_print_wrapper(omega, h, t_list, permutations, sep='\n')
+                prefactor, *_ = _build_eT_zhz_python_prefactor(t_list, h, z_right, unique_dict)
+
+                max_t_rank = max(t.rank for t in t_list)
+
+                old_print_wrapper(omega, h, t_list, permutations, sep='\n')
+
+            # the hard case where we have to fiddle with prefactors and permutations etc
+            elif print_indist_perms is False:
+
+                # first we need to calculate what the prefactors would be IF we counted all permutations
+                total_perms, total_unique_dict = _multiple_perms_logic(term, print_indist_perms=True)
+
+                # then we need to calculate the prefactors NOT counting indistinguishable permutations
+                permutations, unique_dict = _multiple_perms_logic(term, print_indist_perms=False)
+
+                # adjust the prefactor by the number of t permutations we didn't print because they were indistinguishable
+                prefactor_adjustment = len(total_perms) // len(permutations)
+
+                # we also do a prefactor adjustment based on the number of terms h and z share because we only want to permute them once
+                # even though `_build_eT_zhz_python_prefactor` counts them 'twice' in a sense
+                assert (h.m_r == z_right.n_h) and (h.n_r == z_right.m_h), f'f{h.m_r = }    {h.n_r}\n{z_right.n_h = }    {z_right.m_h}\n'
+                prefactor_adjustment2 = max(h.m_r + h.n_r, 1)
+
+                prefactor, n, d = _build_eT_zhz_python_prefactor(t_list, h, z_right, unique_dict)
+
+                adjusted_prefactor = Fraction(n*prefactor_adjustment*prefactor_adjustment2, d)
+                n, d = adjusted_prefactor.as_integer_ratio()
+
+                print(f"\n{len(total_perms) = } \n{len(permutations) = } \n{prefactor_adjustment = } \n{prefactor_adjustment2 = } \n{adjusted_prefactor = } \n{prefactor = }\n{n = }\n{d = }")
+
+                # adjust the prefactor if necessary
+                if n != d:
+                    prefactor = f'({n} / {d}) * '
+                    print(f"{prefactor = }")
+
+                # import pdb; pdb.set_trace()
+
+                max_t_rank = max(t.rank for t in t_list)
+
+                old_print_wrapper(omega, h, t_list, permutations, sep='\n')
 
         # we still need to account for output/omega permutations
 
