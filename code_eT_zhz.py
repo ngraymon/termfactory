@@ -907,13 +907,14 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
             _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=1)
 
         # processing
-        h_contribution_list.append(f"if {trunc_obj_name}.h_at_least_{hamiltonian_order_tag[i]}:")
         if temp_list == []:
             if suppress_empty_if_checks:
                 pass
             else:
+                h_contribution_list.append(f"if {trunc_obj_name}.h_at_least_{hamiltonian_order_tag[i]}:")
                 h_contribution_list.append(f"{tab}pass")
         else:
+            h_contribution_list.append(f"if {trunc_obj_name}.h_at_least_{hamiltonian_order_tag[i]}:")
             h_contribution_list.extend(temp_list)
 
         # loop over first order (and higher) Taylor series contributions
