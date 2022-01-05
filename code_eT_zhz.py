@@ -766,12 +766,74 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         for key, t_dict in hamiltonian_rank_list[i].items():
             print(f"{key = } {t_dict = }")
             for pref, e_list in t_dict.items():
-                print(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
-                print(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }")
-                hamiltonian_rank_list[i][key][pref] = list(set(e_list))
-                print(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
-                print(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }\n")
-                # import pdb; pdb.set_trace()
+
+                unique_list = sorted(list(set(e_list)))
+
+                # if there are no duplicates then simply move on
+                if len(e_list) == len(unique_list):
+                    pass
+
+                else:
+                    hamiltonian_rank_list[i][key][pref] = unique_list
+
+                    # temp_dict = {}
+                    # for s in e_list:
+                    #     temp_dict[s] = 1 + temp_dict.get(s, 0)
+                    # no_dupe_list = [s for s, count in temp_dict.items() if count == 1]
+                    # dupe_dict = dict([(s, count) for s, count in temp_dict.items() if s not in no_dupe_list])
+                    # print('')
+                    # old_prefactor = pref
+                    # for s, count in dupe_dict.items():
+                    #     print(f"{old_prefactor = } {count = } \n{s = }\n")
+
+                    # # import pdb; pdb.set_trace()
+
+                    # hamiltonian_rank_list[i][key][pref] = no_dupe_list
+
+                # # otherwise we remove the duplicates and re-assign them to different prefactors
+                # else:
+                #     print(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
+                #     print(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }")
+
+                #     # we first collect all the items into a dictionary
+                #     temp_dict = {}
+                #     for s in e_list:
+                #         temp_dict[s] = 1 + temp_dict.get(s, 0)
+
+                #     # create a list of the non duplicated summations
+                #     no_dupe_list = [s for s, count in temp_dict.items() if count == 1]
+
+                #     # put the non dupes back with their appropriate prefactor
+                #     hamiltonian_rank_list[i][key][pref] = no_dupe_list.copy()
+
+                #     # remove the non duplicate items
+                #     dupe_dict = dict([(s, count) for s, count in temp_dict.items() if s not in no_dupe_list])
+                #     for s in no_dupe_list:
+                #         del temp_dict[s]
+
+                #     # now on a case-by-case basis determine what the new prefactors should be
+                #     for s, count in dupe_dict.items():
+                #         # this is how much we need to change the prefactor by
+                #         adjustment_factor = count
+
+                #         n, rest = pref[1:].split('/')
+                #         d = rest.split(')')[0]
+                #         print(f"{n = } {d = }")
+
+                #         print(f"{adjustment_factor = } {pref = } {s = }")
+                #         import pdb; pdb.set_trace()
+
+                #     hamiltonian_rank_list[i][key][pref] = list(set(e_list))
+
+                #     print(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
+                #     print(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }\n")
+
+            # remove all empty prefactors
+            hamiltonian_rank_list[i][key] = dict([
+                (pref, e_list)
+                for pref, e_list in hamiltonian_rank_list[i][key].items()
+                if e_list != []
+            ])
 
     def compact_display_of_hamiltonian_rank_list(hamiltonian_rank_list):
         """ for debugging purposes """
