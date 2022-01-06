@@ -645,6 +645,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
                 # no remaining (external) indices/labels means we simply proceed as normal and glue everything together
                 if remaining_indices == '':
+
                     # create the initial indices
                     combined_electronic_vibrational = [f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))]
 
@@ -662,10 +663,22 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
                 # this means we need to permute over the remaining (external) indices/labels
                 elif len(remaining_indices) >= 1:
+
                     for perm in unique_permutations(remaining_indices):
-                        string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
-                        print(f"{string = }")
+
+                        # create the initial indices
+                        combined_electronic_vibrational = [f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))]
+
+                        # prune all empty contributions
+                        combined_electronic_vibrational = [s for s in combined_electronic_vibrational if s != '']
+
+                        # glue them together
+                        string = ", ".join(combined_electronic_vibrational)
+
+                        # stick the indices into the full einsum function call
                         string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
+
+                        # append that string to the current list
                         hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
                     # wait why are we passing instead of exiting?
