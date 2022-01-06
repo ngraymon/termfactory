@@ -710,7 +710,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
         # if there is multiple distinguishable t terms
         # eg: t1 * t2 * t1 ---> 2 distinguishable t terms (t1, t2)
-        elif len(unique_dict) > 1:
+        elif len(unique_dict.keys()) > 1:
 
             print(f"{unique_dict = }")
             print(f"{len(unique_dict) = } is > 1 ?{len(unique_dict) > 1}")
