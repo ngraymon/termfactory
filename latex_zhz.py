@@ -737,9 +737,9 @@ def _generate_explicit_z_connections(LHS, h, unique_s_permutations):
         # sanity checks
         if z_left is None:
             assert z_right_exists
-        elif z_right is None:
+        elif z_right is None:  # pragma: no cover
             assert z_left_exists
-        else:
+        else:  # pragma: no cover
             assert z_right_exists
             assert z_left_exists
 
@@ -899,7 +899,8 @@ def _filter_out_valid_z_terms(LHS, H, Z_left, Z_right, total_list):
 
 
 # --------------- assigning of upper/lower latex indices ------------------------- #
-def _build_left_z_term(z_left, h, color=True):
+def _build_left_z_term(z_left, h, color=True):  # pragma: no cover
+    # not in coverage for now, only used in unfinished excited state
     """ Builds latex code for labeling a `connected_z_left_operator_namedtuple`.
 
     The `condense_offset` is an optional argument which is needed when creating latex code
@@ -1044,7 +1045,7 @@ def _build_right_z_term(h, z_right, offset_dict, color=True):
 
 
 # -------------------------------------------------------------------------------- #
-def _build_z_latex_prefactor(h, t_list, simplify_flag=True):
+def _build_z_latex_prefactor(h, t_list, simplify_flag=True): # pragma: no cover
     """Attempt to return latex code representing appropriate prefactor term.
 
     All prefactors begin with 1/n! where n is the number of t amplitudes in given term.
@@ -1198,7 +1199,7 @@ def _prepare_second_z_latex(term_list, split_width=7, remove_f_terms=False, prin
             term_string += "\\bar{f}" if (nof_fbars == 1) else f"\\bar{{f}}^{{{nof_fbars}}}"
 
         # add any prefactors if they exist
-        if print_prefactors:
+        if print_prefactors:  # pragma: no cover
             raise Exception("prefactor code for z stuff is not done")
             term_string += _build_z_latex_prefactor(h, z_left)
 
@@ -1219,24 +1220,24 @@ def _prepare_second_z_latex(term_list, split_width=7, remove_f_terms=False, prin
         # store the result
         return_list.append(term_string)
 
-    # if the line is so short we don't need to split
+    # if the line is so short we don't need to split, so far never seems to have long lines
     if len(return_list) < split_width*2:
         return f"({' + '.join(return_list)})"
 
-    split_equation_list = []
-    for i in range(0, len(return_list) // split_width):
-        split_equation_list.append(' + '.join(return_list[i*split_width:(i+1)*split_width]))
+    split_equation_list = []  # pragma: no cover
+    for i in range(0, len(return_list) // split_width):  # pragma: no cover
+        split_equation_list.append(' + '.join(return_list[i*split_width:(i+1)*split_width]))  # pragma: no cover
 
     # make sure we pickup the last few terms
-    last_few_terms = (len(return_list) % split_width)-split_width+1
-    split_equation_list.append(' + '.join(return_list[last_few_terms:]))
+    last_few_terms = (len(return_list) % split_width)-split_width+1  # pragma: no cover
+    split_equation_list.append(' + '.join(return_list[last_few_terms:]))  # pragma: no cover
 
     # join the lists with the equation splitting string
-    splitting_string = r'\\  &+  % split long equation'
-    final_string = f"\n{tab}{splitting_string}\n".join(split_equation_list)
+    splitting_string = r'\\  &+  % split long equation'  # pragma: no cover
+    final_string = f"\n{tab}{splitting_string}\n".join(split_equation_list)  # pragma: no cover
 
     # and we're done!
-    return f"(\n{final_string}\n)"
+    return f"(\n{final_string}\n)"  # pragma: no cover
 
 
 def _prepare_third_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False):
@@ -1736,3 +1737,17 @@ def generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_t
         fp.write(header + latex_code + r'\end{document}')
 
     return
+
+# import itertools
+
+# lists=list(itertools.product(range(1,5),repeat=4))
+
+# for i in range(len(lists)):
+#     print(lists[i])
+#     generate_z_t_symmetric_latex(lists[i], only_ground_state=False, remove_f_terms=False, path="./generated_latex.tex")
+
+# generate_z_t_symmetric_latex([2,2,2,2], only_ground_state=False, remove_f_terms=False, path="./generated_latex.tex")
+
+# term_list = [[connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0), connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0), [disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0), None]], [connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0), connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=0), [connected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=0), None]], [connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0), connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=0), [connected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=0), None]]]
+# print(repr(_prepare_second_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False)))
+
