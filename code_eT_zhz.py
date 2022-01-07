@@ -407,32 +407,53 @@ def _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True):
     if len(t_list) == 1 and t_list[0] == disconnected_namedtuple(0, 0, 0, 0):
         return ''
 
+    # initialize
     numerator_value = 1
     denominator_value = 1
     numerator_list = []
     denominator_list = []
 
     # account for prefactor from Hamiltonian term `h`
-
     # connections = np.count_nonzero([h.m_t[i]+h.n_t[i] for i in range(len(h.m_t))])
-    connected_ts = [t for t in t_list if t.m_h > 0 or t.n_h > 0]
+    # connected_ts = [t for t in t_list if t.m_h > 0 or t.n_h > 0]
 
-    # x = len(set(connected_ts))
-
-    # if x > 1:
-    #     numerator_list.append(f'factorial({x})')
     if h.m > 1:
         denominator_value *= math.factorial(h.m)
         denominator_list.append(f'factorial({h.m})')
+
     if h.n > 1:
         denominator_value *= math.factorial(h.n)
         denominator_list.append(f'factorial({h.n})')
+
     if z_right.m > 1:
         denominator_value *= math.factorial(z_right.m)
         denominator_list.append(f'factorial({z_right.m})')
+
+        # to account for the permutations of internal labels
+        # if z_right.m_h > 1:
+        #     numerator_value *= math.factorial(z_right.m_h)
+        #     numerator_list.append(f'{z_right.m_h}!')
+
+        # to account for the permutations of external labels
+        number = math.comb(z_right.m, z_right.m_lhs)
+        if number > 1:
+            numerator_value *= number
+            numerator_list.append(f'{number}')
+
     if z_right.n > 1:
-        denominator_value *= math.factorial(z_right.m)
+        denominator_value *= math.factorial(z_right.n)
         denominator_list.append(f'factorial({z_right.n})')
+
+        # to account for the permutations of internal labels
+        # if z_right.n_h > 1:
+        #     numerator_value *= math.factorial(z_right.n_h)
+        #     numerator_list.append(f'{z_right.n_h}!')
+
+        # to account for the permutations of external labels
+        number = math.comb(z_right.n, z_right.n_lhs)
+        if number > 1:
+            numerator_value *= number
+            numerator_list.append(f'{number}')
 
     # account for the number of permutations of all t-amplitudes
     if len(t_list) > 1:
@@ -449,12 +470,12 @@ def _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True):
         numerator_list, denominator_list = _simplify_eT_zhz_python_prefactor(numerator_list, denominator_list)
 
     # glue the numerator and denominator together
-    numerator = '1' if (numerator_list == []) else f"({' * '.join(numerator_list)})"
-    denominator = '1' if (denominator_list == []) else f"({' * '.join(denominator_list)})"
+    numerator_string = '1' if (numerator_list == []) else f"({' * '.join(numerator_list)})"
+    denominator_string = '1' if (denominator_list == []) else f"({' * '.join(denominator_list)})"
 
-    prefactor_string = f"{numerator}/{denominator} * ".replace('factorial(2)', '2')
+    prefactor_string = f"{numerator_string}/{denominator_string} * ".replace('factorial(2)', '2')
 
-    if numerator == '1' and denominator == '1':
+    if numerator_string == '1' and denominator_string == '1':
         prefactor_string = ''
 
     return prefactor_string, numerator_value, denominator_value
@@ -567,6 +588,9 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         # this part is quite tricky
         else:
 
+            # note that to correctly do the full prefactors for all terms you need both
+            # `print_indist_perms = True` AND you need to have `simplify_flag = True`
+
             print_indist_perms = False
 
             # the easy case where we just print EVERYTHING
@@ -575,7 +599,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 # logic about multiple permutations, generate lists of unique t terms
                 permutations, unique_dict = _multiple_perms_logic(term, print_indist_perms)
 
-                prefactor, *_ = _build_eT_zhz_python_prefactor(t_list, h, z_right, unique_dict)
+                prefactor, *_ = _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=False)
 
                 max_t_rank = max(t.rank for t in t_list)
 
@@ -598,7 +622,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 assert (h.m_r == z_right.n_h) and (h.n_r == z_right.m_h), f'f{h.m_r = }    {h.n_r}\n{z_right.n_h = }    {z_right.m_h}\n'
                 prefactor_adjustment2 = max(h.m_r + h.n_r, 1)
 
-                prefactor, n, d = _build_eT_zhz_python_prefactor(t_list, h, z_right, unique_dict)
+                prefactor, n, d = _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True)
 
                 adjusted_prefactor = Fraction(n*prefactor_adjustment*prefactor_adjustment2, d)
                 n, d = adjusted_prefactor.as_integer_ratio()
@@ -1217,7 +1241,8 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
 
     # the ordering of the functions is linked to the output ordering from `_generate_eT_zhz_einsums`
     # they must be in the same order
-    for i, term_type in enumerate(['HZ', 'eT_HZ']):  # ['h', 'zh', 'hz', 'zhz']
+    # for i, term_type in enumerate(['HZ', 'eT_HZ']):  # ['h', 'zh', 'hz', 'zhz']
+    for i, term_type in enumerate(['HZ', ]):  # ['h', 'zh', 'hz', 'zhz']
 
         # the name of the function
         if not opt_einsum:
