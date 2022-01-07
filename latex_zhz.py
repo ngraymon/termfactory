@@ -1272,7 +1272,7 @@ def _prepare_third_z_latex(term_list, split_width=7, remove_f_terms=False, print
             term_string += "\\bar{f}" if (nof_fbars == 1) else f"\\bar{{f}}^{{{nof_fbars}}}"
 
         # add any prefactors if they exist
-        if print_prefactors:
+        if print_prefactors:  # pragma: no cover
             raise Exception("prefactor code for z stuff is not done")
             term_string += _build_z_latex_prefactor(h, z_right)
 
@@ -1305,20 +1305,20 @@ def _prepare_third_z_latex(term_list, split_width=7, remove_f_terms=False, print
     if len(return_list) < split_width*2:
         return f"({' + '.join(return_list)})"
 
-    split_equation_list = []
-    for i in range(0, len(return_list) // split_width):
-        split_equation_list.append(' + '.join(return_list[i*split_width:(i+1)*split_width]))
+    split_equation_list = []  # pragma: no cover
+    for i in range(0, len(return_list) // split_width):  # pragma: no cover
+        split_equation_list.append(' + '.join(return_list[i*split_width:(i+1)*split_width]))  # pragma: no cover
 
     # make sure we pickup the last few terms
-    last_few_terms = (len(return_list) % split_width)-split_width+1
-    split_equation_list.append(' + '.join(return_list[last_few_terms:]))
+    last_few_terms = (len(return_list) % split_width)-split_width+1  # pragma: no cover
+    split_equation_list.append(' + '.join(return_list[last_few_terms:]))  # pragma: no cover
 
     # join the lists with the equation splitting string
-    splitting_string = r'\\  &+  % split long equation'
-    final_string = f"\n{tab}{splitting_string}\n".join(split_equation_list)
+    splitting_string = r'\\  &+  % split long equation'  # pragma: no cover
+    final_string = f"\n{tab}{splitting_string}\n".join(split_equation_list)  # pragma: no cover
 
     # and we're done!
-    return f"(\n{final_string}\n"
+    return f"(\n{final_string}\n"  # pragma: no cover
 
 
 def _prepare_fourth_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False):
@@ -1360,7 +1360,7 @@ def _prepare_fourth_z_latex(term_list, split_width=7, remove_f_terms=False, prin
             term_string += "\\bar{f}" if (nof_fbars == 1) else f"\\bar{{f}}^{{{nof_fbars}}}"
 
         # add any prefactors if they exist
-        if print_prefactors:
+        if print_prefactors:  # pragma: no cover
             raise Exception("prefactor code for z stuff is not done")
             term_string += _build_z_latex_prefactor(h, z_left)
 
@@ -1458,7 +1458,7 @@ def _build_second_z_term(LHS, H, Z, remove_f_terms=False):
     # generate all valid combinations
     _filter_out_valid_z_terms(LHS, H, Z, None, valid_term_list)
 
-    if valid_term_list == []:
+    if valid_term_list == []:  # pragma: no cover
         return ""
 
     return _prepare_second_z_latex(valid_term_list, remove_f_terms=remove_f_terms)
@@ -1476,7 +1476,7 @@ def _build_third_z_term(LHS, H, Z, remove_f_terms=False):
     # generate all valid combinations
     _filter_out_valid_z_terms(LHS, H, None, Z, valid_term_list)
 
-    if valid_term_list == []:
+    if valid_term_list == []:  # pragma: no cover
         return ""
 
     return _prepare_third_z_latex(valid_term_list, remove_f_terms=remove_f_terms)
@@ -1494,7 +1494,7 @@ def _build_fourth_z_term(LHS, H, Z, remove_f_terms=False):
     # generate all valid combinations
     _filter_out_valid_z_terms(LHS, H, Z, Z, valid_term_list)
 
-    if valid_term_list == []:
+    if valid_term_list == []:  # pragma: no cover
         return ""
 
     return _prepare_fourth_z_latex(valid_term_list, remove_f_terms=remove_f_terms)
@@ -1651,7 +1651,7 @@ def generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_t
             """
             omega_string = ""
             for i, char in enumerate(omega.name):
-                if char == "d":
+                if char == "d":  # pragma: no cover
                     omega_string += f'\\up{{{summation_indices[i]}}}'
                 elif char == "b":
                     omega_string += f'\\down{{{summation_indices[i]}}}'
@@ -1726,7 +1726,7 @@ def generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_t
     if only_ground_state:
         # use the predefined header in `reference_latex_headers.py`
         header = headers.ground_state_z_t_symmetric_latex_header
-    else:
+    else:  # pragma: no cover
         # use the predefined header in `reference_latex_headers.py`
         header = headers.full_z_t_symmetric_latex_header
 
@@ -1737,17 +1737,3 @@ def generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_t
         fp.write(header + latex_code + r'\end{document}')
 
     return
-
-# import itertools
-
-# lists=list(itertools.product(range(1,5),repeat=4))
-
-# for i in range(len(lists)):
-#     print(lists[i])
-#     generate_z_t_symmetric_latex(lists[i], only_ground_state=False, remove_f_terms=False, path="./generated_latex.tex")
-
-# generate_z_t_symmetric_latex([2,2,2,2], only_ground_state=False, remove_f_terms=False, path="./generated_latex.tex")
-
-# term_list = [[connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0), connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0), [disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0), None]], [connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0), connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=0), [connected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=0), None]], [connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0), connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=0), [connected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=0), None]]]
-# print(repr(_prepare_second_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False)))
-

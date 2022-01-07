@@ -336,3 +336,485 @@ class Test_preparing_of_terms:
         function_output = zhz._prepare_second_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False)
         expected_result = '(\\bz_0\\bh_0 + f\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}} + \\bar{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{})'
         assert function_output == expected_result
+
+    def test_prepare_third_z_latex(self):
+        term_list = [
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    None,
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0)
+                ]
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=1),
+                [
+                    None,
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0)
+                ]
+            ]
+        ]
+        function_output = zhz._prepare_third_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False)
+        expected_result = '(\\bh_0\\bz_0 + \\bar{f}\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{})'
+        assert function_output == expected_result
+
+    def test_prepare_third_z_latex_if_case(self):
+        term_list = [
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    None,
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0)
+                ]
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=1),
+                [
+                    None,
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0)
+                ]
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=0),
+                [
+                    None,
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=0)
+                ]
+            ]
+        ]
+        function_output = zhz._prepare_third_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False)
+        expected_result = '(\\bh_0\\bz_0 + \\bar{f}\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{} + f\\bh^{\\blue{}\\blue{k}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{k}\\red{}})'
+        assert function_output == expected_result
+
+    def test_prepare_fourth_z_latex(self):
+        term_list = [
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0)
+                ]
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=1, n_l=0)
+                ]
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=1, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=1)
+                ]
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=1),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0)
+                ]
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0)
+                ]
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=0)
+                ]
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0)
+                ]
+            ]
+        ]
+        function_output = zhz._prepare_fourth_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False)
+        expected_result = '(\\disconnected{\\bz_0\\bh_0\\bz_0} + \\disconnected{\\bar{f}\\bz^{}_{\\blue{k}\\red{}}\\bh_0\\bz^{\\magenta{k}\\blue{}\\red{}}_{}} + \\disconnected{f\\bz^{\\blue{k}\\red{}}_{}\\bh_0\\bz^{}_{\\magenta{k}\\blue{}\\red{}}} + \\disconnected{\\bar{f}\\bz_0\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{}} + \\disconnected{f\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}}\\bz_0} + \\disconnected{f\\bz_0\\bh^{\\blue{}\\blue{k}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{k}\\red{}}} + \\disconnected{\\bar{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz_0})'
+        assert function_output == expected_result
+
+    def test_long(self):
+        term_list = [
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=1, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=2),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=2, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=1, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=1),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=1, n_r=1),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=1, n_l=1),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=2, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=2),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=1),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=1),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=1, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=1),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=1, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=1),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=1),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=1, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=1, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=1),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=2),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=2, n_h=0, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=1),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=1),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=1),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=1, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_l=0, n_l=2, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=2, n_h=0, m_r=0, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=1),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=1, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=1),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=1, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=1),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=1, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=1, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=1),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=1, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=1),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=1),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=1, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=1),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=1),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=1),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=1, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=1, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=1, n_l=1, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=1, m_r=0, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=1),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=1, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=1),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=1, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=1),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=1, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=1, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=1, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=1),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=2, n_r=0),
+                [
+                    zhz.disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=2, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=1, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_l=2, n_l=0, m_r=0, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=2, m_r=0, n_r=0),
+                    zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=1, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=1),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=1, n_l=0),
+                ],
+            ],
+            [
+                zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),
+                zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=1, n_r=0),
+                [
+                    zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=1, n_r=0),
+                    zhz.connected_z_right_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=1),
+                ],
+            ],
+        ]
+        function_output = zhz._prepare_fourth_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False)
+        expected_result = '(\n\\disconnected{\\bz_0\\bh_0\\bz_0} + \\disconnected{\\bar{f}\\bz^{}_{\\blue{k}\\red{}}\\bh_0\\bz^{\\magenta{k}\\blue{}\\red{}}_{}} + \\disconnected{\\bar{f}^{2}\\bz^{}_{\\blue{kl}\\red{}}\\bh_0\\bz^{\\magenta{kl}\\blue{}\\red{}}_{}} + \\disconnected{f\\bz^{\\blue{k}\\red{}}_{}\\bh_0\\bz^{}_{\\magenta{k}\\blue{}\\red{}}} + \\disconnected{f\\bar{f}\\bz^{\\blue{k}\\red{}}_{\\blue{l}\\red{}}\\bh_0\\bz^{\\magenta{l}\\blue{}\\red{}}_{\\magenta{k}\\blue{}\\red{}}} + \\disconnected{f^{2}\\bz^{\\blue{kl}\\red{}}_{}\\bh_0\\bz^{}_{\\magenta{kl}\\blue{}\\red{}}} + \\disconnected{\\bar{f}\\bz_0\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{}}\n    \\\\  &+  % split long equation\n\\disconnected{\\bar{f}^{2}\\bz^{}_{\\blue{k}\\red{}}\\bh^{}_{\\blue{}\\blue{l}\\red{}}\\bz^{\\magenta{k}\\blue{l}\\red{}}_{}} + \\disconnected{f\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}}\\bz_0} + \\disconnected{f\\bar{f}\\bz^{\\blue{k}\\red{}}_{}\\bh^{}_{\\blue{}\\blue{l}\\red{}}\\bz^{\\magenta{}\\blue{l}\\red{}}_{\\magenta{k}\\blue{}\\red{}}} + \\disconnected{f\\bar{f}\\bz^{k\\blue{}\\red{}}_{\\blue{l}\\red{}}\\bh^{}_{\\blue{k}\\blue{}\\red{}}\\bz^{\\magenta{l}\\blue{}\\red{}}_{}} + \\disconnected{f^{2}\\bz^{k\\blue{l}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}}\\bz^{}_{\\magenta{l}\\blue{}\\red{}}} + \\disconnected{\\bar{f}^{2}\\bz_0\\bh^{}_{\\blue{}\\blue{kl}\\red{}}\\bz^{\\magenta{}\\blue{kl}\\red{}}_{}} + f\\bar{f}\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{l}\\red{}}\\bz^{\\magenta{}\\blue{l}\\red{}}_{}\n    \\\\  &+  % split long equation\nf\\bar{f}^{2}\\bz^{k\\blue{}\\red{}}_{\\blue{l}\\red{}}\\bh^{}_{\\blue{k}\\blue{m}\\red{}}\\bz^{\\magenta{l}\\blue{m}\\red{}}_{} + \\disconnected{f^{2}\\bz^{kl\\blue{}\\red{}}_{}\\bh^{}_{\\blue{kl}\\blue{}\\red{}}\\bz_0} + f^{2}\\bar{f}\\bz^{k\\blue{l}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{m}\\red{}}\\bz^{\\magenta{}\\blue{m}\\red{}}_{\\magenta{l}\\blue{}\\red{}} + \\disconnected{f\\bz_0\\bh^{\\blue{}\\blue{k}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{k}\\red{}}} + \\disconnected{\\bar{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz_0} + \\disconnected{f\\bar{f}\\bz^{}_{\\blue{k}\\red{}}\\bh^{\\blue{}\\blue{l}\\red{}}_{}\\bz^{\\magenta{k}\\blue{}\\red{}}_{\\magenta{}\\blue{l}\\red{}}} + \\disconnected{\\bar{f}^{2}\\bz^{}_{k\\blue{l}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz^{\\magenta{l}\\blue{}\\red{}}_{}}\n    \\\\  &+  % split long equation\n\\disconnected{f^{2}\\bz^{\\blue{k}\\red{}}_{}\\bh^{\\blue{}\\blue{l}\\red{}}_{}\\bz^{}_{\\magenta{k}\\blue{l}\\red{}}} + \\disconnected{f\\bar{f}\\bz^{\\blue{k}\\red{}}_{l\\blue{}\\red{}}\\bh^{\\blue{l}\\blue{}\\red{}}_{}\\bz^{}_{\\magenta{k}\\blue{}\\red{}}} + \\disconnected{f\\bar{f}\\bz_0\\bh^{\\blue{}\\blue{l}\\red{}}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{\\magenta{}\\blue{l}\\red{}}} + \\bar{f}^{2}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{\\blue{}\\blue{l}\\red{}}\\bz^{\\magenta{}\\blue{l}\\red{}}_{} + \\bar{f}^{3}\\bz^{}_{k\\blue{l}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{\\blue{}\\blue{m}\\red{}}\\bz^{\\magenta{l}\\blue{m}\\red{}}_{} + f^{2}\\bz^{k\\blue{}\\red{}}_{}\\bh^{\\blue{}\\blue{l}\\red{}}_{\\blue{k}\\blue{}\\red{}}\\bz^{}_{\\magenta{}\\blue{l}\\red{}} + \\disconnected{f\\bar{f}\\bz^{k\\blue{}\\red{}}_{l\\blue{}\\red{}}\\bh^{\\blue{l}\\blue{}\\red{}}_{\\blue{k}\\blue{}\\red{}}\\bz_0}\n    \\\\  &+  % split long equation\nf\\bar{f}^{2}\\bz^{\\blue{k}\\red{}}_{l\\blue{}\\red{}}\\bh^{\\blue{l}\\blue{}\\red{}}_{\\blue{}\\blue{m}\\red{}}\\bz^{\\magenta{}\\blue{m}\\red{}}_{\\magenta{k}\\blue{}\\red{}} + f^{2}\\bar{f}\\bz^{k\\blue{}\\red{}}_{\\blue{l}\\red{}}\\bh^{\\blue{}\\blue{m}\\red{}}_{\\blue{k}\\blue{}\\red{}}\\bz^{\\magenta{l}\\blue{}\\red{}}_{\\magenta{}\\blue{m}\\red{}} + f^{3}\\bz^{k\\blue{l}\\red{}}_{}\\bh^{\\blue{}\\blue{m}\\red{}}_{\\blue{k}\\blue{}\\red{}}\\bz^{}_{\\magenta{l}\\blue{m}\\red{}} + \\disconnected{f^{2}\\bz_0\\bh^{\\blue{}\\blue{kl}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{kl}\\red{}}} + f\\bar{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{l}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{l}\\red{}} + \\disconnected{\\bar{f}^{2}\\bz^{}_{kl\\blue{}\\red{}}\\bh^{\\blue{kl}\\blue{}\\red{}}_{}\\bz_0} + f\\bar{f}^{2}\\bz^{}_{k\\blue{l}\\red{}}\\bh^{\\blue{k}\\blue{m}\\red{}}_{}\\bz^{\\magenta{l}\\blue{}\\red{}}_{\\magenta{}\\blue{m}\\red{}}\n    \\\\  &+  % split long equation\n\\disconnected{f^{2}\\bz_0\\bh^{\\blue{}\\blue{kl}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{kl}\\red{}}} + f\\bar{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{l}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{l}\\red{}} + \\disconnected{\\bar{f}^{2}\\bz^{}_{kl\\blue{}\\red{}}\\bh^{\\blue{kl}\\blue{}\\red{}}_{}\\bz_0} + f\\bar{f}^{2}\\bz^{}_{k\\blue{l}\\red{}}\\bh^{\\blue{k}\\blue{m}\\red{}}_{}\\bz^{\\magenta{l}\\blue{}\\red{}}_{\\magenta{}\\blue{m}\\red{}} + f^{2}\\bar{f}\\bz^{\\blue{k}\\red{}}_{l\\blue{}\\red{}}\\bh^{\\blue{l}\\blue{m}\\red{}}_{}\\bz^{}_{\\magenta{k}\\blue{m}\\red{}}\n)'
+        assert function_output == expected_result
+
+
+class Test_build_z_terms:
+
+    def test_build_first_z_term_rank_zero(self):
+        LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
+        function_output = zhz._build_first_z_term(LHS)
+        expected_result = '\\bh_{0,xb}(1-\\delta_{x\\gamma})'
+        assert function_output == expected_result
+
+    def test_build_first_z_term_nonzero(self):
+        LHS = nt.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
+        function_output = zhz._build_first_z_term(LHS)
+        expected_result = '\\bh^{i}_{}(1-\\delta_{x\\gamma})'
+        assert function_output == expected_result
+
+    def test_build_second_z_term(self):
+        LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
+        H = nt.hamiltonian_namedtuple(maximum_rank=1, operator_list=[zhz.h_operator_namedtuple(rank=0, m=0, n=0), zhz.h_operator_namedtuple(rank=1, m=0, n=1), zhz.h_operator_namedtuple(rank=1, m=1, n=0)])
+        Z = zhz.z_operator_namedtuple(maximum_rank=1, operator_list=[nt.general_operator_namedtuple(name='z', rank=0, m=0, n=0), nt.general_operator_namedtuple(name='z_1', rank=1, m=0, n=1), nt.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)])
+        function_output = zhz._build_second_z_term(LHS, H, Z, remove_f_terms=False)
+        expected_result = '(\\bz_0\\bh_0 + f\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}} + \\bar{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{})'
+        assert function_output == expected_result
+
+    def test_build_third_z_term(self):
+        LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
+        H = nt.hamiltonian_namedtuple(maximum_rank=1, operator_list=[zhz.h_operator_namedtuple(rank=0, m=0, n=0), zhz.h_operator_namedtuple(rank=1, m=0, n=1), zhz.h_operator_namedtuple(rank=1, m=1, n=0)])
+        Z = zhz.z_operator_namedtuple(maximum_rank=1, operator_list=[nt.general_operator_namedtuple(name='z', rank=0, m=0, n=0), nt.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)])
+        function_output = zhz._build_third_z_term(LHS, H, Z, remove_f_terms=False)
+        expected_result = '(\\bh_0\\bz_0 + \\bar{f}\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{})'
+        assert function_output == expected_result
+
+    def test_build_fourth_z_term(self):
+        LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
+        H = nt.hamiltonian_namedtuple(maximum_rank=1, operator_list=[zhz.h_operator_namedtuple(rank=0, m=0, n=0), zhz.h_operator_namedtuple(rank=1, m=0, n=1), zhz.h_operator_namedtuple(rank=1, m=1, n=0)])
+        Z = zhz.z_operator_namedtuple(maximum_rank=1, operator_list=[nt.general_operator_namedtuple(name='z', rank=0, m=0, n=0), nt.general_operator_namedtuple(name='z_1', rank=1, m=0, n=1), nt.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)])
+        function_output = zhz._build_fourth_z_term(LHS, H, Z, remove_f_terms=False)
+        expected_result = '(\\disconnected{\\bz_0\\bh_0\\bz_0} + \\disconnected{\\bar{f}\\bz^{}_{\\blue{k}\\red{}}\\bh_0\\bz^{\\magenta{k}\\blue{}\\red{}}_{}} + \\disconnected{f\\bz^{\\blue{k}\\red{}}_{}\\bh_0\\bz^{}_{\\magenta{k}\\blue{}\\red{}}} + \\disconnected{\\bar{f}\\bz_0\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{}} + \\disconnected{f\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}}\\bz_0} + \\disconnected{f\\bz_0\\bh^{\\blue{}\\blue{k}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{k}\\red{}}} + \\disconnected{\\bar{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz_0})'
+        assert function_output == expected_result
+
+    def test_build_fifth_z_term(self):
+        LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
+        Z = zhz.z_operator_namedtuple(maximum_rank=1, operator_list=[nt.general_operator_namedtuple(name='z', rank=0, m=0, n=0), nt.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)])
+        function_output = zhz._build_fifth_z_term(LHS, Z)
+        expected_result = '\\dv{\\hat{\\bt}_{0, \\gamma}}{\\tau}\\,\\hat{\\bz}_{0, \\gamma}'
+        assert function_output == expected_result
+
+    def test_build_fifth_z_term_else_cases(self):
+        LHS = nt.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
+        Z = zhz.z_operator_namedtuple(maximum_rank=1, operator_list=[nt.general_operator_namedtuple(name='z', rank=0, m=0, n=0), nt.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)])
+        function_output = zhz._build_fifth_z_term(LHS, Z)
+        expected_result = '\\dv{\\hat{\\bt}^{i}_{\\gamma}}{\\tau}\\,\\hat{\\bz}_{0, \\gamma} + \\dv{\\hat{\\bt}_{0, \\gamma}}{\\tau}\\,\\hat{\\bz}^{i}_{\\gamma}'
+        assert function_output == expected_result
+
+
+class Test_gen_latex_eqns:
+
+    def test_generate_z_symmetric_latex_equations(self):
+        LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
+        H = nt.hamiltonian_namedtuple(maximum_rank=1, operator_list=[zhz.h_operator_namedtuple(rank=0, m=0, n=0), zhz.h_operator_namedtuple(rank=1, m=0, n=1), zhz.h_operator_namedtuple(rank=1, m=1, n=0)])
+        Z = zhz.z_operator_namedtuple(maximum_rank=1, operator_list=[nt.general_operator_namedtuple(name='z', rank=0, m=0, n=0), nt.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)])
+        function_output = zhz._generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, remove_f_terms=False)
+        expected_result = '\\bh_{0,xb}(1-\\delta_{x\\gamma})\\\\&+\\sum\\Big((\\bh_0\\bz_0 + \\bar{f}\\bh_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}})\\Big)(1-\\delta_{cb})\\\\&-i\\sum\\Big(\\dv{\\hat{\\bt}_{0, \\gamma}}{\\tau}\\,\\hat{\\bz}_{0, \\gamma}\\Big)'
+        assert function_output == expected_result
+
+
+class Test_run_main_zhz_for_coverage:
+
+    def test_main_zhz(self):
+        zhz.generate_z_t_symmetric_latex([1,1,1,1], only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex")
