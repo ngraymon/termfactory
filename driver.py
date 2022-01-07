@@ -134,24 +134,24 @@ if (__name__ == '__main__'):
     # log.setLevel('CRITICAL')
 
     maximum_h_rank = 2
-    maximum_cc_rank = 3
+    maximum_cc_rank = 6
     s_taylor_max_order = 2  # this doesn't matter for the Z ansatz
-    omega_max_order = 3
+    omega_max_order = 4
 
     # for the 'z_t ansatz'
     truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
 
     # for the 'eT_z_t ansatz' only
-    maximum_h_rank = 3
-    maximum_cc_rank = 2
+    maximum_h_rank = 2
+    maximum_cc_rank = 4
     maximum_T_rank = 1
     eT_taylor_max_order = 4
-    omega_max_order = 2
+    omega_max_order = 5
 
     # need to have truncation of e^T
     eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order
 
-    switch = 4
+    switch = 2
 
     if switch == 1:
         generate_latex_files(
@@ -164,7 +164,7 @@ if (__name__ == '__main__'):
     if switch == 2:
         generate_latex_files(
             truncations,
-            only_ground_state=True,
+            only_ground_state=False,
             remove_f_terms=False,
             thermal=False,
             file='z_t ansatz'
