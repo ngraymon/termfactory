@@ -1249,6 +1249,29 @@ def _build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False):
         - h                contributes 1/m! 1/n!
         - the right z term contribute 1/m! 1/n!
         - multiply by (n choose n_k) where n_k are the number of internal labels of z right
+
+    By convention we account for internal permutations using z, not h.
+    What this means is that if we have h^2 z_2
+    - we consult Z
+        -> multiply by 2 because we have two permutations of labels
+
+    whereas if we ALSO multiplied by 2 considering the permutations on h then we would have overcounted the permutations
+    consider the following four situations
+    - h^{ij} z_{ij}
+    - h^{ij} z_{ji}
+    - h^{ji} z_{ij}
+    - h^{ji} z_{ji}
+    we have now permuted 2 for h and 2 for z, however the second term and the third term are identical and the fourth and first terms are identical
+
+    Therefore the *current* convention is that we ignore internal permutations on h.
+    Note that if we want to extend this to e^T * HZ then we must rejigger the logic when we add t2 terms back in.
+    Since if we had a term like
+    - t^{ij} h_{ijk} z^{k}
+    then we would NOT count the `ij` permutation correctly using the current logic.
+
+    Although i think a simple solution would be to subtract the magnitude of the contracts with z right from the combinatorial in h?
+    Might work?
+
     """
 
     assert z_left is None, 'Logic does not support ZH, or ZHZ terms at the moment'
@@ -1258,13 +1281,29 @@ def _build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False):
 
     numerator_list, denominator_list = [], []
     # ---------------------------------------------------------------------------------------------------------
+    # by definition
     if h.m > 1:
         denominator_list.append(f'{h.m}!')
         denominator *= math.factorial(h.m)
+
+        # to account for the permutations of internal labels around the external labels
+        number = math.comb(h.m, h.m_r)
+        if number > 1:
+            numerator *= number
+            numerator_list.append(f'{number}')
+
+    # by definition
     if h.n > 1:
         denominator_list.append(f'{h.n}!')
         denominator *= math.factorial(h.n)
 
+        # to account for the permutations of internal labels around the external labels
+        number = math.comb(h.n, h.n_r)
+        if number > 1:
+            numerator *= number
+            numerator_list.append(f'{number}')
+
+    # by definition
     if z_right.m > 1:
         denominator_list.append(f'{z_right.m}!')
         denominator *= math.factorial(z_right.m)
@@ -1280,6 +1319,7 @@ def _build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False):
             numerator *= number
             numerator_list.append(f'{number}')
 
+    # by definition
     if z_right.n > 1:
         denominator_list.append(f'{z_right.n}!')
         denominator *= math.factorial(z_right.n)
