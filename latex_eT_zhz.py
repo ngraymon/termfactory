@@ -1104,7 +1104,7 @@ def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
     return numerator_list, denominator_list
 
 
-def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefactor, simplify_flag=True):
+def _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefactor, simplify_flag=True):
     """Attempt to return latex code representing appropriate prefactor term.
 
     All prefactors begin with 1/n! where n is the number of t amplitudes in given term.
@@ -1130,8 +1130,8 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
     a = [0, ] * 11
     print('-'*100)
 
-    numerator = 1
-    denominator = 1
+    numerator_value = 1
+    denominator_value = 1
 
     numerator_list, denominator_list = [], []
     # ---------------------------------------------------------------------------------------------------------
@@ -1139,42 +1139,179 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
     # numerator_list.append(f'{numerator}')
 
     # ---------------------------------------------------------------------------------------------------------
+
     if h.m > 1:
+        # by definition
+        denominator_value *= math.factorial(h.m)
         denominator_list.append(f'{h.m}!')
-        denominator *= math.factorial(h.m)
+
+        # to account for the permutations of eT-H internal labels around
+        external_perms = math.comb(h.m, h.m_lhs)
+        if external_perms > 1:
+            numerator_value *= external_perms
+            numerator_list.append(f'({external_perms})')
+
+        # like drawing cards from a deck we remove the permutations of the LHS
+        new_max = h.m - h.m_lhs
+
+        # to account for the permutations of H-Z internal labels around the external labels
+        internal_perms = math.comb(new_max, h.m_r)
+        if internal_perms > 1:
+            numerator_value *= internal_perms
+            numerator_list.append(f'({internal_perms})')
+
+        # to account for the permutations of eT-Z internal labels
+        # with themselves
+        # as we should have accounted for all permutations by
+        # moving H-Z and external labels prior
+        count_t = sum(h.m_t)
+        if count_t > 1:
+            # account for permutations among the internal labels
+            numerator_value *= math.factorial(count_t)
+            numerator_list.append(f'{count_t}!')
+
     if h.n > 1:
+        # by definition
+        denominator_value *= math.factorial(h.n)
         denominator_list.append(f'{h.n}!')
-        denominator *= math.factorial(h.n)
+
+        # to account for the permutations of eT-H internal labels around
+        external_perms = math.comb(h.n, h.n_lhs)
+        if external_perms > 1:
+            numerator_value *= external_perms
+            numerator_list.append(f'({external_perms})')
+
+        # like drawing cards from a deck we remove the permutations of the LHS
+        new_max = h.n - h.n_lhs
+
+        # to account for the permutations of H-Z internal labels around the external labels
+        internal_perms = math.comb(new_max, h.n_r)
+        if internal_perms > 1:
+            numerator_value *= internal_perms
+            numerator_list.append(f'({internal_perms})')
+
+        # to account for the permutations of eT-Z internal labels
+        # with themselves
+        # as we should have accounted for all permutations by
+        # moving H-Z and external labels prior
+        count_t = sum(h.n_t)
+        if count_t > 1:
+            # account for permutations among the internal labels
+            numerator_value *= math.factorial(count_t)
+            numerator_list.append(f'{count_t}!')
+
+    # ---------------------------------------------------------------------------------------------------------
 
     if z_right.m > 1:
+        # by definition
+        denominator_value *= math.factorial(z_right.m)
         denominator_list.append(f'{z_right.m}!')
-        denominator *= math.factorial(z_right.m)
-    if z_right.n > 1:
-        denominator_list.append(f'{z_right.n}!')
-        denominator *= math.factorial(z_right.n)
 
-    # account for the taylor series prefactor
+        # to account for the permutations of external labels
+        # with other labels on z
+        # (we don't account for permuting with themselves as we will symmetrize them later)
+        external_perms = math.comb(z_right.m, z_right.m_lhs)
+        if external_perms > 1:
+            numerator_value *= external_perms
+            numerator_list.append(f'({external_perms})')
+
+        # like drawing cards from a deck we remove the permutations of the LHS
+        new_max = z_right.m - z_right.m_lhs
+
+        # to account for the permutations of H-Z internal labels
+        # with other labels on z
+        internal_perms = math.comb(new_max, z_right.m_h)
+        if internal_perms > 1:
+            numerator_value *= internal_perms
+            numerator_list.append(f'({internal_perms})')
+
+        # like drawing cards from a deck we remove the permutations of the H
+        new_max -= z_right.m_h
+
+        # to account for the permutations of H-Z internal labels
+        # with themselves
+        if z_right.m_h > 1:
+            numerator_value *= math.factorial(z_right.m_h)
+            numerator_list.append(f'{z_right.m_h}!')
+
+        # to account for the permutations of eT-Z internal labels
+        # with themselves
+        # as we should have accounted for all permutations by
+        # moving H-Z and external labels prior
+        count_t = sum(z_right.m_t)
+        if count_t > 1:
+            # account for permutations among the internal labels
+            numerator_value *= math.factorial(count_t)
+            numerator_list.append(f'{count_t}!')
+
+        # account for permutations with respect to other labels
+        # (this is just to prove that we already accounted for these permutations)
+        number = math.comb(new_max, count_t)
+        assert number == 1, 'you broke something!!!'
+        if number > 1:
+            numerator_value *= number
+            numerator_list.append(f'{number}')
+
+    if z_right.n > 1:
+        # by definition
+        denominator_value *= math.factorial(z_right.n)
+        denominator_list.append(f'{z_right.n}!')
+
+        # to account for the permutations of external labels
+        number = math.comb(z_right.n, z_right.n_lhs)
+        if number > 1:
+            numerator_value *= number
+            numerator_list.append(f'{number}')
+
+        # to account for the permutations of internal labels (with h)
+        if z_right.n_h > 1:
+            numerator_value *= math.factorial(z_right.n_h)
+            numerator_list.append(f'{z_right.n_h}!')
+
+        # to account for the permutations of internal labels (with t terms)
+        count_t = sum(z_right.n_t)
+        if count_t > 1:
+            # account for permutations among the internal labels
+            numerator_value *= math.factorial(count_t)
+            numerator_list.append(f'{count_t}!')
+
+            # account for permutations with respect to other labels
+            number = math.comb(z_right.n, count_t)
+            numerator_value *= number
+            numerator_list.append(f'{number}')
+
+    # ---------------------------------------------------------------------------------------------------------
+
+    # account for the Taylor series prefactor
     if len(t_list) > 1:
+        # by definition
+        denominator_value *= math.factorial(len(t_list))
         denominator_list.append(f'{len(t_list)}!')
 
     for t in t_list:
 
         if t.m > 1:
+            # by definition
+            denominator_value *= math.factorial(t.m)
             denominator_list.append(f'{t.m}!')
-            denominator *= math.factorial(t.m)
+
         if t.n > 1:
+            # by definition
+            denominator_value *= math.factorial(t.n)
             denominator_list.append(f'{t.n}!')
-            denominator *= math.factorial(t.n)
 
     # ---------------------------------------------------------------------------------------------------------
 
-    print(denominator)
-    print(numerator)
-    import pdb; pdb.set_trace()
+    if False:  # debug
+        print(numerator_list)
+        print(denominator_list)
+        print(numerator_value)
+        print(denominator_value)
+        import pdb; pdb.set_trace()
 
     # # simplify
-    if simplify_flag:
-        fraction = fractions.Fraction(numerator, denominator)
+    if False and simplify_flag:
+        fraction = fractions.Fraction(numerator_value, denominator_value)
         if fraction == 1:
             return ''
         else:
@@ -1183,13 +1320,13 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
         # numerator_list, denominator_list = _simplify_full_cc_python_prefactor(numerator_list, denominator_list)
 
     # glue the numerator and denominator together
-    numerator = '1' if (numerator_list == []) else f"{''.join(numerator_list)}"
-    denominator = '1' if (denominator_list == []) else f"{''.join(denominator_list)}"
+    numerator_string = '1' if (numerator_list == []) else f"{''.join(numerator_list)}"
+    denominator_string = '1' if (denominator_list == []) else f"{''.join(denominator_list)}"
 
-    if numerator == '1' and denominator == '1':
+    if numerator_string == '1' and denominator_string == '1':
         return ''
     else:
-        return f"\\frac{{{numerator}}}{{{denominator}}}"
+        return f"\\frac{{{numerator_string}}}{{{denominator_string}}}"
 
 
 def _f_t_h_contributions(t_list, h):
@@ -1503,7 +1640,7 @@ def _prepare_third_eTz_latex(
 
         # add any prefactors if they exist
         if print_prefactors:
-            term_string += _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefactor)
+            term_string += _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefactor)
 
         # prepare the z terms
         t_offset_dict = {

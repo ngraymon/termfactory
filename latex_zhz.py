@@ -1276,73 +1276,74 @@ def _build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False):
 
     assert z_left is None, 'Logic does not support ZH, or ZHZ terms at the moment'
 
-    numerator = 1
-    denominator = 1
+    numerator_value = 1
+    denominator_value = 1
 
     numerator_list, denominator_list = [], []
     # ---------------------------------------------------------------------------------------------------------
-    # by definition
+
     if h.m > 1:
+        # by definition
+        denominator_value *= math.factorial(h.m)
         denominator_list.append(f'{h.m}!')
-        denominator *= math.factorial(h.m)
 
         # to account for the permutations of internal labels around the external labels
         number = math.comb(h.m, h.m_r)
         if number > 1:
-            numerator *= number
+            numerator_value *= number
             numerator_list.append(f'{number}')
 
-    # by definition
     if h.n > 1:
+        # by definition
+        denominator_value *= math.factorial(h.n)
         denominator_list.append(f'{h.n}!')
-        denominator *= math.factorial(h.n)
 
         # to account for the permutations of internal labels around the external labels
         number = math.comb(h.n, h.n_r)
         if number > 1:
-            numerator *= number
+            numerator_value *= number
             numerator_list.append(f'{number}')
 
-    # by definition
     if z_right.m > 1:
+        # by definition
+        denominator_value *= math.factorial(z_right.m)
         denominator_list.append(f'{z_right.m}!')
-        denominator *= math.factorial(z_right.m)
-
-        # to account for the permutations of internal labels
-        if z_right.m_h > 1:
-            numerator *= math.factorial(z_right.m_h)
-            numerator_list.append(f'{z_right.m_h}!')
 
         # to account for the permutations of external labels
         number = math.comb(z_right.m, z_right.m_lhs)
         if number > 1:
-            numerator *= number
+            numerator_value *= number
             numerator_list.append(f'{number}')
 
-    # by definition
-    if z_right.n > 1:
-        denominator_list.append(f'{z_right.n}!')
-        denominator *= math.factorial(z_right.n)
-
         # to account for the permutations of internal labels
-        if z_right.n_h > 1:
-            numerator *= math.factorial(z_right.n_h)
-            numerator_list.append(f'{z_right.n_h}!')
+        if z_right.m_h > 1:
+            numerator_value *= math.factorial(z_right.m_h)
+            numerator_list.append(f'{z_right.m_h}!')
+
+    if z_right.n > 1:
+        # by definition
+        denominator_value *= math.factorial(z_right.n)
+        denominator_list.append(f'{z_right.n}!')
 
         # to account for the permutations of external labels
         number = math.comb(z_right.n, z_right.n_lhs)
         if number > 1:
-            numerator *= number
+            numerator_value *= number
             numerator_list.append(f'{number}')
+
+        # to account for the permutations of internal labels
+        if z_right.n_h > 1:
+            numerator_value *= math.factorial(z_right.n_h)
+            numerator_list.append(f'{z_right.n_h}!')
 
     # ---------------------------------------------------------------------------------------------------------
 
-    # print(numerator)
-    # print(denominator)
+    # print(numerator_value)
+    # print(denominator_value)
 
     # # simplify
     if simplify_flag:
-        fraction = Fraction(numerator, denominator)
+        fraction = Fraction(numerator_value, denominator_value)
         # print(f"{h = }")
         # print(f"{z_right = }")
         # print(f"{fraction.numerator = }")
@@ -1357,13 +1358,13 @@ def _build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False):
         # numerator_list, denominator_list = _simplify_full_cc_python_prefactor(numerator_list, denominator_list)
 
     # glue the numerator and denominator together
-    numerator = '1' if (numerator_list == []) else f"{'*'.join(numerator_list)}"
-    denominator = '1' if (denominator_list == []) else f"{''.join(denominator_list)}"
+    numerator_string = '1' if (numerator_list == []) else f"{'*'.join(numerator_list)}"
+    denominator_string = '1' if (denominator_list == []) else f"{''.join(denominator_list)}"
 
-    if numerator == '1' and denominator == '1':
+    if numerator_string == '1' and denominator_string == '1':
         return ''
     else:
-        return f"\\frac{{{numerator}}}{{{denominator}}}"
+        return f"\\frac{{{numerator_string}}}{{{denominator_string}}}"
 
 
 def _prepare_third_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=True):
