@@ -24,6 +24,7 @@ exclude_lines =
     raise e
     pass
     continue
+    if not letters:
     if debug_flag:
     def old_print_wrapper
     old_print_wrapper

@@ -413,8 +413,8 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
             for i, t in enumerate(t_list)
         ])
 
-        print(f"{each_eT_balanced=}")
-        print([(t.n, LHS.m, h.m, left_m_perm[1][i], right_m_perm[1][i]) for i, t in enumerate(t_list)])
+        old_print_wrapper(f"{each_eT_balanced=}")
+        old_print_wrapper([(t.n, LHS.m, h.m, left_m_perm[1][i], right_m_perm[1][i]) for i, t in enumerate(t_list)])
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
         dense_output = f"\n{tab}".join([
@@ -442,7 +442,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
             log.debug("  Valid upper perm" + dense_output)
             valid_upper_perm_combinations.append(m_perm)
 
-        elif log_invalid:
+        elif log_invalid:  # pragma: no cover
             log.debug("Invalid upper perm" + dense_output)
 
     # validate lower pairing
@@ -495,7 +495,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
             log.debug("  Valid lower perm" + dense_output)
             valid_lower_perm_combinations.append(n_perm)
 
-        elif log_invalid:
+        elif log_invalid:  # pragma: no cover
             log.debug("Invalid lower perm" + dense_output)
 
     return valid_upper_perm_combinations, valid_lower_perm_combinations
@@ -529,16 +529,15 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
     remaining_n -= sum(z_left.m_t)
     remaining_n -= sum(z_right.m_t)
 
-    print('\nKK', remaining_m, remaining_n, t_list)
+    old_print_wrapper('\nKK', remaining_m, remaining_n, t_list)
 
     if remaining_n == remaining_m == 0:
-
         temp_upper, temp_lower = [], []
-        print('VV1', z_left.n_t, z_right.n_t)
-        print('VV2', z_left.m_t, z_right.m_t)
-        # print(z_left)
-        # print(z_right)
-        # print(t_list)
+        old_print_wrapper('VV1', z_left.n_t, z_right.n_t)
+        old_print_wrapper('VV2', z_left.m_t, z_right.m_t)
+        # old_print_wrapper(z_left)
+        # old_print_wrapper(z_right)
+        # old_print_wrapper(t_list)
 
         for i, t in enumerate(t_list):
             temp_upper.append([0, z_left.n_t[i], 0, z_right.n_t[i]])
@@ -548,8 +547,8 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
         valid_lower_perm_combinations.append(temp_lower)
 
     elif remaining_m == 0:
-        print(f"\n{remaining_n=}")
-        print(t_list)
+        old_print_wrapper(f"\n{remaining_n=}")
+        old_print_wrapper(t_list)
 
         # ----------------------------------------------------------
         for i, t in enumerate(t_list):
@@ -557,7 +556,7 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
             N = t.n - z_left.m_t[i] - z_right.m_t[i]
 
             temp_list = []
-            print(f"{M=} {N=}")
+            old_print_wrapper(f"{M=} {N=}")
             for a in range(M+1):
                 temp_list.append((a, z_left.n_t[i], M-a, z_right.n_t[i]))
 
@@ -569,11 +568,11 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
 
             n_perms.append(temp_list)
 
-        print(f"original {n_perms=}")
+        old_print_wrapper(f"original {n_perms=}")
         # ----------------------------------------------------------
         combined_n_perms = list(it.product(*n_perms))
         for n_perm in combined_n_perms:
-            print(f"{n_perm=}")
+            old_print_wrapper(f"{n_perm=}")
 
             total_lhs_n = sum([t[0] for t in n_perm])
             total_h_n = sum([t[2] for t in n_perm])
@@ -597,11 +596,11 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
             elif log_invalid:
                 log.debug("Invalid lower perm" + dense_output)
 
-        print(f"original {m_perms=}")
+        old_print_wrapper(f"original {m_perms=}")
         # ----------------------------------------------------------
         combined_m_perms = list(it.product(*m_perms))
         for m_perm in combined_m_perms:
-            print(f"{m_perm=}")
+            old_print_wrapper(f"{m_perm=}")
 
             total_lhs_m = sum([t[0] for t in m_perm])
             total_h_m = sum([t[2] for t in m_perm])
@@ -622,13 +621,13 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
                 log.debug("  Valid upper perm" + dense_output)
                 valid_upper_perm_combinations.append(m_perm)
 
-            elif log_invalid:
+            elif log_invalid:  # pragma: no cover
                 log.debug("Invalid upper perm" + dense_output)
 
-    elif remaining_n == 0:
+    elif remaining_n == 0:  # pragma: no cover
         raise Exception("have not coded this yet")
 
-    else:
+    else:  # pragma: no cover
         raise Exception("have not coded this yet")
 
     return valid_upper_perm_combinations, valid_lower_perm_combinations
@@ -682,8 +681,8 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
 
                 left_z_upper, right_z_upper = upper
                 left_z_lower, right_z_lower = lower
-                print(f"right z   upper:{right_z_upper}   lower:{right_z_lower}")
-                print(f"left  z   upper:{left_z_upper}   lower:{left_z_lower}")
+                old_print_wrapper(f"right z   upper:{right_z_upper}   lower:{right_z_lower}")
+                old_print_wrapper(f"left  z   upper:{left_z_upper}   lower:{left_z_lower}")
                 z_left_kwargs, z_right_kwargs = {}, {}
                 z_pair_list = []
 
@@ -694,7 +693,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                     assert left_z_upper[0] == 0 and left_z_upper[2:] == (0, 0)
                     assert all([x == 0 for x in left_z_upper[1]])
                     z_pair_list.append(None)
-                else:
+                else:  # pragma: no cover, not sure how to reach this seems predetermined by above functions to always fill right_z
                     z_left_kwargs = {
                         'rank': left_z.rank,
                         'm': left_z.m,
@@ -715,14 +714,14 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                     else:
                         z_pair_list.append(connected_eT_z_left_operator_namedtuple(**z_left_kwargs))
 
-                if right_z.name is None:
+                if right_z.name is None:  # pragma: no cover
                     # make sure this permutation is okay for no z right
                     assert right_z_upper == right_z_lower
                     assert right_z_upper[0] == 0 and right_z_upper[2:] == (0, 0)
                     assert all([x == 0 for x in right_z_upper[1]])
                     z_pair_list.append(None)
                 else:
-                    print('should be (2,1)', right_z_upper)
+                    old_print_wrapper('should be (2,1)', right_z_upper)
                     z_right_kwargs = {
                         'rank': right_z.rank,
                         'm': right_z.m,
@@ -736,7 +735,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                         'n_h':   right_z_lower[2],
                         'n_l':   right_z_lower[-1],
                     }
-                    print('z pair list    ', z_pair_list)
+                    old_print_wrapper('z pair list    ', z_pair_list)
                     # if the Z operator is disconnected (meaning no connections to H)
                     if z_right_kwargs['m_h'] == z_right_kwargs['n_h'] == 0:
                         z_pair_list.append(disconnected_eT_z_right_operator_namedtuple(**z_right_kwargs))
@@ -744,10 +743,10 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                     else:
                         z_pair_list.append(connected_eT_z_right_operator_namedtuple(**z_right_kwargs))
 
-                    print('z pair list    ', z_pair_list[-1])
+                    old_print_wrapper('z pair list    ', z_pair_list[-1])
 
                 # if we have the ZHZ terms then we need to check that the Z <-> Z contractions are correct
-                if (z_left_kwargs != {}) and (z_right_kwargs != {}):
+                if (z_left_kwargs != {}) and (z_right_kwargs != {}):  # pragma: no cover, req excited I think
 
                     # if these contractions are not equal
                     if z_left_kwargs['m_r'] != z_right_kwargs['n_l']:
@@ -775,17 +774,17 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                 )
                 annotated_z_permutations.append(tuple(z_pair_list))
 
-        print("STATATATAT")
+        old_print_wrapper("STATATATAT")
         for z_pair in annotated_z_permutations:
-            print('should be (2,1)', z_pair[1])
+            old_print_wrapper('should be (2,1)', z_pair[1])
             upper_perms, lower_perms = _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair)
-            print(f"{upper_perms=}")
-            print(f"{lower_perms=}")
-            print('\n\n')
+            old_print_wrapper(f"{upper_perms=}")
+            old_print_wrapper(f"{lower_perms=}")
+            old_print_wrapper('\n\n')
 
         for z_pair in annotated_z_permutations:
-            print('t_list', t_list)
-            print('z_pair', z_pair)
+            old_print_wrapper('t_list', t_list)
+            old_print_wrapper('z_pair', z_pair)
 
             # now we have to compute all the permutations for t
             if len(t_list) == 1 and t_list[0].rank == 0:
@@ -804,19 +803,19 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                 for lower in lower_perms:
 
                     perm_list = []
-                    print('XX', upper, lower, t_list)
+                    old_print_wrapper('XX', upper, lower, t_list)
                     # for each t operator we make a `connected_namedtuple` or a `disconnected_namedtuple`
                     for i, t in enumerate(t_list):
                         t_upper = upper[i]
                         t_lower = lower[i]
-                        print(f"{i = }   {t}   upper:{t_upper}   lower:{t_lower}")
+                        old_print_wrapper(f"{i = }   {t}   upper:{t_upper}   lower:{t_lower}")
                         assert list(t_upper) == [0, 0, 0, 0]  # for now t's can't have upper components
 
-                        if t.m != sum(t_upper):
+                        if t.m != sum(t_upper):  # pragma: no cover
                             log.debug(f"Bad t perms + z perms: {t.m = } {t_upper = }")
                             raise Exception('''Code is not robust and I'm not sure what is wrong, To-Do!''')
 
-                        if t.n != sum(t_lower):
+                        if t.n != sum(t_lower):  # pragma: no cover
                             log.debug(f"Bad t perms + z perms: {t.n = } {t_lower = }")
                             raise Exception('''Code is not robust and I'm not sure what is wrong, To-Do!''')
 
@@ -834,16 +833,16 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
                             'n_r':   t_lower[-1],
                         }
 
-                        if z_pair[0] is not None and t_kwargs['n_l'] != z_pair[0].m_t[i]:
+                        if z_pair[0] is not None and t_kwargs['n_l'] != z_pair[0].m_t[i]:  # pragma: no cover
                             raise Exception('nope')
 
-                        if z_pair[0] is not None and t_kwargs['m_l'] != z_pair[0].n_t[i]:
+                        if z_pair[0] is not None and t_kwargs['m_l'] != z_pair[0].n_t[i]:  # pragma: no cover
                             raise Exception('nope')
 
-                        if t_kwargs['n_r'] != z_pair[1].m_t[i]:
+                        if t_kwargs['n_r'] != z_pair[1].m_t[i]:  # pragma: no cover
                             raise Exception('nope')
 
-                        if t_kwargs['m_r'] != z_pair[1].n_t[i]:
+                        if t_kwargs['m_r'] != z_pair[1].n_t[i]:  # pragma: no cover
                             raise Exception('nope')
 
                         # if the t operator is disconnected (meaning no connections to H)
@@ -858,7 +857,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
 
             annotated_permutations.append((tuple(perm_list), z_pair))
 
-        # print('A\n', annotated_permutations)
+        # old_print_wrapper('A\n', annotated_permutations)
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
         splitperm = lambda array: f'\n{tab}{tab}'.join(['']+[str(t) for t in array[0]])
@@ -878,19 +877,19 @@ def _remove_duplicate_eT_z_permutations(LHS, h, eT_connection_permutations):
     unique_list = []
     unique_set = set()
 
-    # print('\n\n', eT_connection_permutations)
+    # old_print_wrapper('\n\n', eT_connection_permutations)
     for i, perm in enumerate(eT_connection_permutations):
         t_tuple, z_pair = perm
         if t_tuple is not None:
-            print('\n', t_tuple)
+            old_print_wrapper('\n', t_tuple)
             t_tuple = list(t_tuple)
             t_tuple.sort()
-            print('\n', t_tuple)
-            print('\n', perm)
+            old_print_wrapper('\n', t_tuple)
+            old_print_wrapper('\n', perm)
             perm = (tuple(t_tuple), z_pair)
 
-        # print('\n', perm)
-        # print('\n', i, t_tuple, z_pair)
+        # old_print_wrapper('\n', perm)
+        # old_print_wrapper('\n', i, t_tuple, z_pair)
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
         # a.sort()
         # a = tuple(a)
@@ -931,9 +930,9 @@ def _generate_explicit_eT_z_connections(LHS, h, unique_permutations):
         # sanity checks
         if z_left is None:
             assert z_right_exists
-        elif z_right is None:
+        elif z_right is None:  # pragma: no cover, need excited
             assert z_left_exists
-        else:
+        else:  # pragma: no cover, need excited
             assert z_right_exists
             assert z_left_exists
 
@@ -1005,7 +1004,7 @@ def _generate_explicit_eT_z_connections(LHS, h, unique_permutations):
 
 
 # -------------------------------------------------------------------------------- #
-def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
+def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):  # pragma: no cover
     """ x """
 
     # if one of the lists is empty there is no easy simplification
@@ -1026,13 +1025,13 @@ def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
     for string in numerator_list:
         numerator_dict[string] += 1
 
-    print('nnnn', numerator_dict)
+    old_print_wrapper('nnnn', numerator_dict)
 
     denominator_dict = dict([(key, 0) for key in denominator_set])
     for string in denominator_list:
         denominator_dict[string] += 1
 
-    print('dddd', denominator_dict)
+    old_print_wrapper('dddd', denominator_dict)
 
     for key in intersection:
         a, b = numerator_dict[key], denominator_dict[key]
@@ -1055,8 +1054,8 @@ def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
         denominator_list.extend([k, ]*v)
 
     if len(numerator_list) > 2 or len(denominator_list) > 2:
-        print('xxxx', numerator_list)
-        print('yyyy', denominator_list)
+        old_print_wrapper('xxxx', numerator_list)
+        old_print_wrapper('yyyy', denominator_list)
 
     return numerator_list, denominator_list
 
@@ -1083,7 +1082,7 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
     A single h with no t list is a special case where the prefactor is always 1.
     """
     a = [0, ] * 11
-    print('-'*100)
+    old_print_wrapper('-'*100)
 
     numerator = 1
     denominator = 1
@@ -1116,9 +1115,9 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
     n_h = sum(h.m_t)
 
     choose_result = math.comb(n_t, n_h)
-    # print(f'{n_t = }')
-    # print(f'{n_h = }')
-    # print(f'n_t choose n_h: {choose_result}')
+    # old_print_wrapper(f'{n_t = }')
+    # old_print_wrapper(f'{n_h = }')
+    # old_print_wrapper(f'n_t choose n_h: {choose_result}')
     numerator_list.append(f'{choose_result}')
 
     if choose_result > 1:
@@ -1129,13 +1128,13 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
     # denominator_list.append(f'{n_h}!')
     # denominator_list.append(f'{1}!')
 
-    # print(f"{numerator_list = }")
+    # old_print_wrapper(f"{numerator_list = }")
     numerator_list = [n for n in numerator_list if n not in ['1', '1!']]
-    # print(f"{numerator_list = }")
+    # old_print_wrapper(f"{numerator_list = }")
 
-    # print(f"{denominator_list = }")
+    # old_print_wrapper(f"{denominator_list = }")
     denominator_list = [d for d in denominator_list if d not in ['1', '1!']]
-    # print(f"{denominator_list = }")
+    # old_print_wrapper(f"{denominator_list = }")
     # ---------------------------------------------------------------------------------------------------------
 
     # # simplify
@@ -1149,12 +1148,12 @@ def _build_eT_z_latex_prefactor(t_list, h, z_left, z_right, simplify_flag=True):
         # numerator_list, denominator_list = _simplify_full_cc_python_prefactor(numerator_list, denominator_list)
 
     # glue the numerator and denominator together
-    numerator = '1' if (numerator_list == []) else f"{''.join(numerator_list)}"
-    denominator = '1' if (denominator_list == []) else f"{''.join(denominator_list)}"
+    numerator = '1' if (numerator_list == []) else f"{''.join(numerator_list)}"  # pragma: no cover, code never seems to get here
+    denominator = '1' if (denominator_list == []) else f"{''.join(denominator_list)}"  # pragma: no cover
 
-    if numerator == '1' and denominator == '1':
+    if numerator == '1' and denominator == '1':  # pragma: no cover
         return ''
-    else:
+    else:  # pragma: no cover
         return f"\\frac{{{numerator}}}{{{denominator}}}"
 
 
@@ -1204,14 +1203,14 @@ def _fbar_t_zR_contributions(t_list, z_right):
     return_list = []
 
     for i, t in enumerate(t_list):
-        print(t, z_right)
+        old_print_wrapper(t, z_right)
         # assert t.n_r == z_right.m_t[i]
         return_list.append(t.n_r)
 
     return return_list
 
 
-def _f_t_zL_contributions(t_list, z_left):
+def _f_t_zL_contributions(t_list, z_left):  # pragma: no cover
     """ x """
     return_list = []
 
@@ -1222,7 +1221,7 @@ def _f_t_zL_contributions(t_list, z_left):
     return return_list
 
 
-def _fbar_t_zL_contributions(t_list, z_left):
+def _fbar_t_zL_contributions(t_list, z_left):  # pragma: no cover
     """ x """
     return_list = []
 
@@ -1238,7 +1237,7 @@ def _build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True):
 
     return_list = []
 
-    print("t_list\n", t_list, '\n')
+    old_print_wrapper("t_list\n", t_list, '\n')
     for t in t_list:
         if t.rank == 0:
             return f"\\mathds{1}"
@@ -1420,23 +1419,23 @@ def _prepare_third_eTz_latex(
 
     # for term in term_list:
     #     LHS, t_list, h, z_left, z_right = term[0], term[1], term[2], *term[3]
-    #     print(z_right)
-    # print('\n\n')
+    #     old_print_wrapper(z_right)
+    # old_print_wrapper('\n\n')
 
     # for term in term_list:
     #     LHS, t_list, h, z_left, z_right = term[0], term[1], term[2], *term[3]
-    #     print(h)
+    #     old_print_wrapper(h)
 
     # prepare all the latex strings
     if False:
         for term in term_list:
             # extract elements of list `term`
             LHS, t_list, h, z_left, z_right = term[0], term[1], term[2], *term[3]
-            print(LHS)
-            print(t_list)
-            print(h)
-            print(z_left)
-            print(z_right)
+            old_print_wrapper(LHS)
+            old_print_wrapper(t_list)
+            old_print_wrapper(h)
+            old_print_wrapper(z_left)
+            old_print_wrapper(z_right)
 
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
@@ -1452,7 +1451,7 @@ def _prepare_third_eTz_latex(
         nof_fs += sum(_f_t_h_contributions(t_list, h))
         nof_fs += sum(_f_t_zR_contributions(t_list, z_right))
 
-        if nof_fs > 0:
+        if nof_fs > 0:  # pragma: no cover, not reachable with current supported truncs
             if remove_f_terms:
                 continue
             term_string += "f" if (nof_fs == 1) else f"f^{{{nof_fs}}}"
@@ -1506,12 +1505,12 @@ def _prepare_third_eTz_latex(
 
         right_z = _build_eT_right_z_term(h, z_right, t_offset_dict)
 
-        # print('Check t terms:\n', t_terms)
+        # old_print_wrapper('Check t terms:\n', t_terms)
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
         # build the latex code representing this term in the sum
         term_string += t_terms + left_z + h_term + right_z
-        print(f"{term_string=}\n")
+        old_print_wrapper(f"{term_string=}\n")
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
         # store the result
@@ -1538,7 +1537,7 @@ def _prepare_third_eTz_latex(
     # numbers = list(range(0, len(return_list)))
     # number_list = []
     split_equation_list = []
-    # print('a', len(return_list) // split_width)
+    # old_print_wrapper('a', len(return_list) // split_width)
 
     for i in range(0, len(return_list) // split_width):
         split_equation_list.append(' + '.join(return_list[i*split_width:(i+1)*split_width]))
@@ -1546,7 +1545,7 @@ def _prepare_third_eTz_latex(
 
     # make sure we pickup the last few terms
     last_few_terms = len(return_list) % split_width
-    if last_few_terms != 0:
+    if last_few_terms != 0:  # pragma: no cover, TODO test for this later
         split_equation_list.append(' + '.join(return_list[-last_few_terms:]))
         # number_list.append(numbers[-last_few_terms:])
 
@@ -1571,7 +1570,7 @@ def _prepare_eTz_z_terms(Z_left, Z_right, zhz_debug=False):
         assert isinstance(z_right_terms, list) and isinstance(z_right_terms[0], general_operator_namedtuple)
 
     # Z*H terms, straightforward
-    elif Z_right is None:
+    elif Z_right is None:  # pragma: no cover
         header_log.info("Z is on the left")
         z_left_terms = Z_left.operator_list
         z_right_terms = [general_operator_namedtuple(None, 0, 0, 0), ]
@@ -1582,7 +1581,7 @@ def _prepare_eTz_z_terms(Z_left, Z_right, zhz_debug=False):
         # valid_lower_perms[valid_lower_perms.index([])] = [0]
 
     # Z*H*Z terms, most complicated
-    else:
+    else:  # pragma: no cover
         zhz_debug = True
         header_log.info("Z is on both sides")
         z_left_terms = Z_left.operator_list
@@ -1592,7 +1591,7 @@ def _prepare_eTz_z_terms(Z_left, Z_right, zhz_debug=False):
 
     all_z_permutations = [(z_left, z_right) for z_left, z_right in it.product(z_left_terms, z_right_terms)]
 
-    if zhz_debug or False:  # debug prints
+    if zhz_debug or False:  # debug prints  # pragma: no cover
         # print all possible pairings
         for a in all_z_permutations:
             old_print_wrapper('Z PAIRING', a)
@@ -1633,7 +1632,7 @@ def _prepare_eTz_T_terms(eT_series_term):
         # no wrapping necessary
 
     # this shouldn't happen
-    else:
+    else:  # pragma: no cover, can trip this in testing if we want TODO?
         raise Exception(
             'Check `generate_eT_taylor_expansion` '
             'and see if the return value '
@@ -1701,7 +1700,7 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
         if zhz_debug or True:  # debug prints
             for pair in valid_permutations:
                 old_print_wrapper('VALID TERM', LHS, pair[0], h, pair[1], pair[2])
-                print('VALID TERM', LHS, pair[0], h, pair[1], pair[2])
+                old_print_wrapper('VALID TERM', LHS, pair[0], h, pair[1], pair[2])
 
         log_conf.setLevelDebug(log)
         # we need to generate all possible combinations of
@@ -1711,7 +1710,7 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
         if zhz_debug or True:  # debug prints
             for p in eT_connection_permutations:
                 old_print_wrapper('CONNECTED TERMS', LHS, p[0], h, p[1])
-                print('CONNECTED TERMS', LHS, p[0], h, p[1])
+                old_print_wrapper('CONNECTED TERMS', LHS, p[0], h, p[1])
 
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
         # continue
@@ -1726,14 +1725,14 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
         if zhz_debug or True:  # debug prints
             for T, z in unique_eT_permutations:
                 old_print_wrapper('UNIQUE TERMS', LHS, eT, h, z)
-                print('UNIQUE TERMS', LHS, T, h, z)
+                old_print_wrapper('UNIQUE TERMS', LHS, T, h, z)
 
         # generate all the explicit connections
         # this also removes all invalid terms
         labeled_permutations = _generate_explicit_eT_z_connections(LHS, h, unique_eT_permutations)
 
         # for i, a in enumerate(labeled_permutations):
-        #     print(
+        #     old_print_wrapper(
         #         '-'*20 + f'labeled {i}' + '-'*20,
         #         a[0],
         #         a[1],
@@ -1748,14 +1747,14 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
             if term[2] != set():
                 # if it is not an empty set
                 total_list.append(term)
-            else:
+            else:  # pragma: no cover
                 old_print_wrapper('exit?')
                 sys.exit(0)
 
         # for i, a in enumerate(total_list):
         #     if i < len(total_list) - 1:
         #         continue
-        #     print(
+        #     old_print_wrapper(
         #         '-'*20 + f'total_list {i}' + '-'*20,
         #         a[0],
         #         a[1],
@@ -1795,12 +1794,12 @@ def _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False):
         log.setLevel('INFO')
 
     if False:
-        print('\n\n\n')
+        old_print_wrapper('\n\n\n')
         for i, a in enumerate(valid_term_list):
-            print(f"{i+1:>4d}", a)
+            old_print_wrapper(f"{i+1:>4d}", a)
         pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
-    if valid_term_list == []:
+    if valid_term_list == []:  # pragma: no cover
         return ""
 
     return _prepare_third_eTz_latex(valid_term_list, remove_f_terms=remove_f_terms)
@@ -1832,7 +1831,7 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
     return_string += _build_first_z_term(LHS)
 
     # the second (subtraction) term
-    if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist
+    if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist  # pragma: no cover
         raise Exception(
             "The excited state second eTZH terms are not implemented.\n"
             "To properly implement this Z term we need to write a new function `_build_second_eTz_term`"
@@ -1845,7 +1844,7 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
     return_string += r'\\&+\sum\Big(' + _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms) + r'\Big)(1-\delta_{cb})'
 
     # the fourth (subtraction) term
-    if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist
+    if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist  # pragma: no cover
         raise Exception(
             "The excited state second eTZHZ terms are not implemented.\n"
             "To properly implement this Z term we need to write a new function `_build_fourth_eTz_term`"
@@ -1927,7 +1926,7 @@ def generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, remove_
             """
             omega_string = ""
             for i, char in enumerate(omega.name):
-                if char == "d":
+                if char == "d":  # pragma: no cover, either excited term or cant be reached with current supported truncs
                     omega_string += f'\\up{{{summation_indices[i]}}}'
                 elif char == "b":
                     omega_string += f'\\down{{{summation_indices[i]}}}'
@@ -2004,7 +2003,7 @@ def generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, remove_
     if only_ground_state:
         # use the predefined header in `reference_latex_headers.py`
         header = headers.ground_state_z_t_symmetric_latex_header
-    else:
+    else:  # pragma: no cover, TODO once excited usable
         # use the predefined header in `reference_latex_headers.py`
         header = headers.full_z_t_symmetric_latex_header
 
