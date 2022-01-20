@@ -27,7 +27,7 @@ import code_import_statements_module
 # temp logging fix
 import log_conf
 
-log = log_conf.get_filebased_logger('output.txt')
+log = log_conf.get_filebased_logger('outdput.txt', submodule_name=__name__)
 header_log = log_conf.HeaderAdapter(log, {})
 subheader_log = log_conf.SubHeaderAdapter(log, {})
 

@@ -7,8 +7,10 @@ import logging
 # CRITICAL 50
 # ERROR    40
 # WARNING  30
-# logging.FLOW = 25
 # INFO     20
+# NEW?     19
+# NEW?     18
+# NEW?     17
 # DEBUG    10
 # NOTSET   0
 # -----------------------------------------------------------
@@ -47,35 +49,39 @@ class MyLogger(logging.Logger):
             self._log(logging.FLOW, message, args, **kwargs)
 
 
-def get_stdout_logger(*args, **kwargs):
+def get_stdout_logger(*args, submodule_name=None, **kwargs):
     logging.setLoggerClass(MyLogger)
 
-    if kwargs == {}:
-        kwargs['format'] = "[%(asctime)-13s] [%(name)s] [{levelname:^8}] [{module:^8}] (%(lineno)s): %(funcName)s(): %(message)s"
-        kwargs['datefmt'] = ["%m/%d/%Y %I:%M:%S %p ", "%d %I:%M:%S "][1]
-        kwargs['level'] = [logging.INFO, logging.DEBUG][0]
+    kwargs.setdefault('format', "[%(asctime)-13s] [%(name)s] [{levelname:^8}] [{module:^8}] (%(lineno)s): %(funcName)s(): %(message)s")
+    kwargs.setdefault('datefmt', ["%m/%d/%Y %I:%M:%S %p ", "%d %I:%M:%S "][1])
+    kwargs.setdefault('level', [logging.INFO, logging.DEBUG][0])
 
+    # apply the configuration parameters
     logging.basicConfig(**kwargs)
-    return logging.getLogger(__name__)
+
+    # create and return a logging instance
+    if submodule_name is not None:
+        return logging.getLogger(f"{__name__}.{submodule_name}")
+    else:
+        return logging.getLogger(__name__)
 
 
-def get_filebased_logger(filename, *args, **kwargs):
+def get_filebased_logger(filename, *args, submodule_name=None, **kwargs):
     logging.setLoggerClass(MyLogger)
 
-    if kwargs == {}:
+    # old % style
+    if False:
+        kwargs.setdefault('format', "[%(asctime)-13s] [%(name)s] [%(levelname)-8s] [%(module)-8s] (%(lineno)s): %(funcName)s(): %(message)s")
+        kwargs.setdefault('datefmt', ["%m/%d/%Y %I:%M:%S %p ", "%d %I:%M:%S ", "%I:%M:%S "][-1])
+        kwargs.setdefault('level', [logging.INFO, logging.DEBUG][0])
 
-        # old % style
-        if False:
-            kwargs['format'] = "[%(asctime)-13s] [%(name)s] [%(levelname)-8s] [%(module)-8s] (%(lineno)s): %(funcName)s(): %(message)s"
-            kwargs['datefmt'] = ["%m/%d/%Y %I:%M:%S %p ", "%d %I:%M:%S ", "%I:%M:%S "][-1]
-            kwargs['level'] = [logging.INFO, logging.DEBUG][0]
-        # trying out the f string log formatting
-        else:
-            # kwargs['format'] = "[{asctime:<13s}] [{name:s}] [{levelname:^10s}] [{module:^8}] ({lineno}): {funcName}():{message}"
-            kwargs['format'] = "{module:<12s}: {funcName:<30s}:({lineno:<4d}): {message:s}"
-            kwargs['datefmt'] = ["%m-%d-%Y %I:%M:%S %p", "%d %I:%M:%S", "%I:%M:%S"][-1]
-            kwargs['level'] = [logging.INFO, logging.DEBUG][0]
-            kwargs['style'] = '{'
+    # trying out the f string log formatting
+    else:
+        # kwargs['format'].setdefault("[{asctime:<13s}] [{name:s}] [{levelname:^10s}] [{module:^8}] ({lineno}): {funcName}():{message}"
+        kwargs.setdefault('format', "{module:<12s}: {funcName:<30s}:({lineno:<4d}): {message:s}")
+        kwargs.setdefault('datefmt', ["%m-%d-%Y %I:%M:%S %p", "%d %I:%M:%S", "%I:%M:%S"][-1])
+        kwargs.setdefault('level', [logging.INFO, logging.DEBUG][0])
+        kwargs.setdefault('style', '{')
 
     kwargs.update({
         'filename': filename,
@@ -86,7 +92,10 @@ def get_filebased_logger(filename, *args, **kwargs):
     logging.basicConfig(**kwargs)
 
     # create and return a logging instance
-    return logging.getLogger(__name__)
+    if submodule_name is not None:
+        return logging.getLogger(f"{__name__}.{submodule_name}")
+    else:
+        return logging.getLogger(__name__)
 
 
 def setLevelCritical(log):

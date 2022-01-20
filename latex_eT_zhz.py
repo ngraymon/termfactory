@@ -20,9 +20,10 @@ from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtup
 
 import log_conf
 
-log = log_conf.get_filebased_logger('output.txt')
+log = log_conf.get_filebased_logger(f'{__name__}.txt', submodule_name=__name__)
 header_log = log_conf.HeaderAdapter(log, {})
 subheader_log = log_conf.SubHeaderAdapter(log, {})
+
 # ----------------------------------------------------------------------------------------------- #
 # -------------------------  GENERATING FULL Omega e^T Z H Z symmetrized LATEX  ----------------------------- #
 # ----------------------------------------------------------------------------------------------- #
