@@ -45,7 +45,7 @@ cov_test:
     - python -m coverage run -m pytest >> printing_output.txt
     - python -m coverage html
     - python -m coverage report
-    - ls ./
+    - python driver.py
 
   artifacts:
     paths:
