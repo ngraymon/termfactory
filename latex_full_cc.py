@@ -16,11 +16,7 @@ from namedtuple_defines import (
 # temp
 
 # temp logging fix
-import log_conf
-
-log = log_conf.get_filebased_logger('output.txt')
-header_log = log_conf.HeaderAdapter(log, {})
-subheader_log = log_conf.SubHeaderAdapter(log, {})
+from log_conf import log, header_log, subheader_log
 
 
 # ----------------------------------------------------------------------------------------------- #

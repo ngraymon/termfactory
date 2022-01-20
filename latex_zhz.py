@@ -12,11 +12,9 @@ from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtup
 import reference_latex_headers as headers
 
 
-import log_conf
+from log_conf import log, header_log, subheader_log
 
-log = log_conf.get_filebased_logger('output.txt')
-header_log = log_conf.HeaderAdapter(log, {})
-subheader_log = log_conf.SubHeaderAdapter(log, {})
+
 # ----------------------------------------------------------------------------------------------- #
 # -------------------------  GENERATING FULL Z T symmetrized LATEX  ----------------------------- #
 # ----------------------------------------------------------------------------------------------- #

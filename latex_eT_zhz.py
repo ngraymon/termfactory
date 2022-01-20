@@ -17,12 +17,9 @@ from latex_full_cc import generate_omega_operator, generate_full_cc_hamiltonian_
 from common_imports import tab, z_summation_indices, z_unlinked_indices, summation_indices, old_print_wrapper
 from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
 
-
 import log_conf
+from log_conf import log, header_log, subheader_log
 
-log = log_conf.get_filebased_logger('output.txt')
-header_log = log_conf.HeaderAdapter(log, {})
-subheader_log = log_conf.SubHeaderAdapter(log, {})
 # ----------------------------------------------------------------------------------------------- #
 # -------------------------  GENERATING FULL Omega e^T Z H Z symmetrized LATEX  ----------------------------- #
 # ----------------------------------------------------------------------------------------------- #
