@@ -110,6 +110,6 @@ def setLevelDebug(log):
     log.setLevel(logging.DEBUG)
 
 
-log = get_filebased_logger('output.txt')
+log = get_filebased_logger('logging_output.txt')
 header_log = HeaderAdapter(log, {})
 subheader_log = SubHeaderAdapter(log, {})
