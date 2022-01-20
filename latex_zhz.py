@@ -11,7 +11,7 @@ from latex_full_cc import generate_omega_operator, generate_full_cc_hamiltonian_
 from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
 import reference_latex_headers as headers
 
-
+import log_conf
 from log_conf import log, header_log, subheader_log
 
 

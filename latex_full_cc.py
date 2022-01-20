@@ -16,6 +16,7 @@ from namedtuple_defines import (
 # temp
 
 # temp logging fix
+import log_conf
 from log_conf import log, header_log, subheader_log
 
 
