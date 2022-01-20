@@ -18,7 +18,10 @@ from common_imports import tab, z_summation_indices, z_unlinked_indices, summati
 from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
 
 import log_conf
-from log_conf import log, header_log, subheader_log
+
+log = log_conf.get_filebased_logger(f'{__name__}.txt', submodule_name=__name__)
+header_log = log_conf.HeaderAdapter(log, {})
+subheader_log = log_conf.SubHeaderAdapter(log, {})
 
 # ----------------------------------------------------------------------------------------------- #
 # -------------------------  GENERATING FULL Omega e^T Z H Z symmetrized LATEX  ----------------------------- #

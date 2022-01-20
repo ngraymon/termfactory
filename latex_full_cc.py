@@ -17,7 +17,10 @@ from namedtuple_defines import (
 
 # temp logging fix
 import log_conf
-from log_conf import log, header_log, subheader_log
+
+log = log_conf.get_filebased_logger(f'{__name__}.txt', submodule_name=__name__)
+header_log = log_conf.HeaderAdapter(log, {})
+subheader_log = log_conf.SubHeaderAdapter(log, {})
 
 
 # ----------------------------------------------------------------------------------------------- #

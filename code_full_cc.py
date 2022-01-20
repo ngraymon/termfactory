@@ -49,7 +49,7 @@ def generate_omega_operator(maximum_cc_rank=2, omega_max_order=3):
 # temp logging fix
 import log_conf
 
-log = log_conf.get_filebased_logger('output.txt')
+log = log_conf.get_filebased_logger(f'{__name__}.txt', submodule_name=__name__)
 header_log = log_conf.HeaderAdapter(log, {})
 subheader_log = log_conf.SubHeaderAdapter(log, {})
 
