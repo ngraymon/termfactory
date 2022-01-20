@@ -4,8 +4,9 @@
 # import pytest
 
 # local imports
+from . import context
 from typing import ValuesView
-from .context import code_residual_equations as cre
+import code_residual_equations as cre
 
 
 class Test_generate_hamiltonian_operator:

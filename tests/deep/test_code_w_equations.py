@@ -1,8 +1,10 @@
 # system imports
 # import re
 import pytest
+
 # local imports
-from .context import code_w_equations as cw
+from . import context
+import code_w_equations as cw
 
 
 class Test_gen_w_oper:

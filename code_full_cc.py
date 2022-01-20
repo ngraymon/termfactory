@@ -577,7 +577,7 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
         if not opt_einsum:
             docstring = f"Calculate the {omega_term} {term_type} terms."
         else:
-            docstring = f"Optimized calculation of the of the {omega_term} {term_type} terms."
+            docstring = f"Optimized calculation of the {omega_term} {term_type} terms."
 
         # glue all these strings together in a specific manner to form the function definition
         function_string = f'''

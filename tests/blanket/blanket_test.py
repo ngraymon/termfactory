@@ -4,17 +4,18 @@
 import re
 
 # local imports
-from .context import latex_zhz as zhz
-from .context import latex_full_cc as fcc
-from .context import latex_eT_zhz as eTzhz
-from .context import latex_w_equations as weqn
+from . import context
+import latex_zhz as zhz
+import latex_full_cc as fcc
+import latex_eT_zhz as eTzhz
+import latex_w_equations as weqn
 
-from .context import code_full_cc as code_fcc
-from .context import code_residual_equations as code_res
-from .context import code_w_equations as code_weqn
-from .context import code_dt_equations as code_dt_eqn
+import code_full_cc as code_fcc
+import code_residual_equations as code_res
+import code_w_equations as code_weqn
+import code_dt_equations as code_dt_eqn
 
-from .context import namedtuple_defines as nt
+import namedtuple_defines as nt
 
 # third party imports
 import pytest
@@ -123,7 +124,7 @@ class TestFullccLatex():
         fcc._simplify_full_cc_python_prefactor(['2!', '2!', '2!','2!', '2!', '2!'], ['2!', '2!'])
 
 class Test_latex_eT_z_t_ansatz():
-    
+
     @pytest.fixture(scope="class", params=[1, 2])
     def A(self, request):
         return request.param
@@ -205,7 +206,7 @@ class Test_latex_zhz():
             zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=False, remove_f_terms=False, path="./generated_latex.tex")
 
     # need to add more tests for niche cases
-    
+
 class Test_code_fcc():
 
     @pytest.fixture(scope="class", params=[1, 2, 3])
@@ -230,7 +231,7 @@ class Test_code_fcc():
 
     def test_fcc_code(self, truncations):
         code_fcc.generate_full_cc_python(truncations, only_ground_state=False, path="./full_cc_equations.py")
-    
+
 class Test_code_residuals():
 
     @pytest.fixture(scope="class", params=[4])
@@ -240,7 +241,7 @@ class Test_code_residuals():
     @pytest.fixture(scope="class", params=[2])
     def maximum_h_rank(self, request):
         return request.param
-    
+
     def test_residuals_code(self, max_residual_order,maximum_h_rank):
         code_res.generate_residual_equations_file(max_residual_order, maximum_h_rank, path="./residual_equations.py")
 
@@ -263,7 +264,7 @@ class Test_code_dt_equations():
 
     def test_code_dt_equations(self, max_w_order):
         code_dt_eqn.generate_dt_amplitude_equations_file(max_w_order, path="./dt_amplitude_equations.py")
-    
+
 class TestExcitedState():
 
     @pytest.fixture(params=[1, 2, 3])

@@ -42,7 +42,7 @@ cov_test:
   stage: code_analysis
   script:
     - python vulture_wrapper.py
-    - python -m coverage run -m pytest >> printing_output.txt
+    - python -m coverage run -m pytest tests/deep/ >> printing_output.txt # only run deep tests (1 ~ 3 seconds long)
     - python -m coverage html
     - python -m coverage report
     - python driver.py
