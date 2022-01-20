@@ -1,9 +1,9 @@
 # system imports
 # import pytest
 
-
 # local imports
-from .context import code_dt_equations as cdt
+from . import context
+import code_dt_equations as cdt
 
 
 class Test_generate_disconnected_einsum_operands_list:

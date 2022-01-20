@@ -1697,7 +1697,7 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
     )
 
     # the second (subtraction) term
-    if (not only_ground_state) and False:  # If we are acting on the vaccum state then these terms don't exist pragma: no cover
+    if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist pragma: no cover
         raise Exception(not_implemented_yet_message)
         return_string += r'\\&-\Big(' + _build_second_z_term(LHS, H, Z, remove_f_terms) + r'\Big)'
 
@@ -1705,7 +1705,7 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
     return_string += r'\\&+\sum\Big(' + _build_third_z_term(LHS, H, Z, remove_f_terms) + r'\Big)(1-\delta_{cb})'
 
     # the fourth (subtraction) term
-    if (not only_ground_state) and False:  # If we are acting on the vaccum state then these terms don't exist pragma: no cover
+    if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist pragma: no cover
         raise Exception(not_implemented_yet_message)
         return_string += r'\\&-\sum\Big(' + _build_fourth_z_term(LHS, H, Z, remove_f_terms) + r'\Big)(1-\delta_{db})'
 

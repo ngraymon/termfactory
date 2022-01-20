@@ -1,9 +1,11 @@
 # system imports
 # import re
 # import pytest
+
 # local imports
-from .context import latex_w_equations as lw
-# from .context import namedtuple_defines as nt
+from . import context
+import latex_w_equations as lw
+# import namedtuple_defines as nt
 
 
 class Test_Latex_of_W_operators:

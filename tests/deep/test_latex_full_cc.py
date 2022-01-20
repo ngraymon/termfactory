@@ -1,10 +1,11 @@
 # system imports
 # import re
 import pytest
-# local imports
-from .context import latex_full_cc as fcc
 
-from .context import namedtuple_defines as nt
+# local imports
+from . import context
+import latex_full_cc as fcc
+import namedtuple_defines as nt
 
 # TODO add functions where multiple tests are encased in one function for future debugging
 # TODO fix long lists

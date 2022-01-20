@@ -109,7 +109,7 @@ def main():
     maximum_cc_rank = 4
     maximum_T_rank = 1
     eT_taylor_max_order = 4
-    omega_max_order = 2
+    omega_max_order = 4
 
     # need to have truncation of e^T
     eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order

@@ -1,10 +1,11 @@
 # system imports
 # import re
 import pytest
-# local imports
-from .context import latex_zhz as zhz
 
-from .context import namedtuple_defines as nt
+# local imports
+from . import context
+import latex_zhz as zhz
+import namedtuple_defines as nt
 
 
 class Test_zhz_gen_ops:
@@ -89,7 +90,7 @@ class Test_forming_zhz_latex:
         LHS = nt.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
         h = zhz.h_operator_namedtuple(rank=2, m=1, n=1)
         unique_s_permutations = [
-            [None, zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0)], 
+            [None, zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0)],
             [None, zhz.disconnected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=1, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0)]
         ]
         function_output = zhz._generate_explicit_z_connections(LHS, h, unique_s_permutations)
@@ -107,7 +108,7 @@ class Test_forming_zhz_latex:
         LHS = nt.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
         h = zhz.h_operator_namedtuple(rank=2, m=1, n=1)
         unique_s_permutations = [
-            [None, zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0)], 
+            [None, zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0)],
             [None, zhz.disconnected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=1, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0)]
         ]
         function_output = zhz._generate_explicit_z_connections(LHS, h, unique_s_permutations)
