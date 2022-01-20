@@ -3,7 +3,10 @@
 # third party imports
 
 # local imports
-from namedtuple_defines import general_operator_namedtuple, namedtuple
+from namedtuple_defines import (
+    general_operator_namedtuple,
+    omega_namedtuple,
+)
 from helper_funcs import unique_permutations
 from common_imports import tab, tab_length, summation_indices, unlinked_indices, old_print_wrapper
 from latex_full_cc import (
@@ -16,9 +19,6 @@ from latex_full_cc import (
     _debug_print_different_types_of_terms
 )
 from code_w_equations import taylor_series_order_tag, hamiltonian_order_tag
-
-# temp
-omega_namedtuple = namedtuple('Omega', ['maximum_rank', 'operator_list'])
 
 
 def generate_omega_operator(maximum_cc_rank=2, omega_max_order=3):
@@ -49,18 +49,10 @@ def generate_omega_operator(maximum_cc_rank=2, omega_max_order=3):
 # temp logging fix
 import log_conf
 
-log = log_conf.get_filebased_logger('output.txt')
+log = log_conf.get_filebased_logger(f'{__name__}.txt', submodule_name=__name__)
 header_log = log_conf.HeaderAdapter(log, {})
 subheader_log = log_conf.SubHeaderAdapter(log, {})
 
-# temp truncations fix
-maximum_h_rank = 2
-maximum_cc_rank = 2
-s_taylor_max_order = 2  # this doesn't matter for the Z ansatz
-omega_max_order = 2
-
-# for the 'z_t ansatz'
-truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
 ##########################################################################################
 
 # ----------------------------------------------------------------------------------------------- #
@@ -179,7 +171,7 @@ def _full_cc_einsum_vibrational_components(h, t_list):
     return vibrational_components, ''.join(remaining_list)
 
 
-def _full_cc_einsum_subscript_generator(h, t_list):
+def _full_cc_einsum_subscript_generator(h, t_list):  # pragma: no cover
     """ x """
     return_string = ""
 
@@ -196,7 +188,7 @@ def _full_cc_einsum_subscript_generator(h, t_list):
     return return_string
 
 
-def _full_cc_einsum_prefactor(term):
+def _full_cc_einsum_prefactor(term):  # pragma: no cover
     """ x """
     string = ""
 
@@ -361,12 +353,11 @@ def _multiple_perms_logic(term):
     #     old_print_wrapper([unique_permutations(range(v)) for k, v in unique_dict.items()])
     #     return dict([(k, list(*unique_permutations(range(v)))) for k, v in unique_dict.items()]), unique_dict
 
-    raise Exception("Shouldn't get here")
+    raise Exception("Shouldn't get here")  # pragma: no cover
 
 
 def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_name='truncation'):
     """ x """
-
     maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
 
     if t_term_list == []:
@@ -454,7 +445,7 @@ def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
         else:
-            raise Exception('')
+            raise Exception('')  # pragma: no cover
 
     # -----------------------------------------------------------------------------------------
     # remove any duplicates
@@ -479,7 +470,7 @@ def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_
         return
 
     # order the terms as we return them
-    for prefactor, string_list in hamiltonian_rank_list[0][0].items():
+    for prefactor, string_list in hamiltonian_rank_list[0][0].items():  # pragma: no cover
         _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=0)
 
     for j in range(1, maximum_cc_rank+1):
@@ -491,7 +482,7 @@ def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_
     for i in range(1, maximum_h_rank+1):
         return_list.append('')
         return_list.append(f"if {trunc_obj_name}.at_least_{hamiltonian_order_tag[i]}:")
-        for prefactor, string_list in hamiltonian_rank_list[i][0].items():
+        for prefactor, string_list in hamiltonian_rank_list[i][0].items():  # pragma: no cover
             _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=1)
 
         for j in range(1, maximum_cc_rank+1):
@@ -559,7 +550,7 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
         # generate einsums if not ground state
         if not only_ground_state:
             einsums = _generate_full_cc_einsums(omega_term, truncations)
-        else:
+        else:  # pragma: no cover
             einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
             # old_print_wrapper(einsums)
             # sys.exit(0)
@@ -593,7 +584,7 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
         # generate einsums if not ground state
         if not only_ground_state:
             einsums = _generate_full_cc_einsums(omega_term, truncations, opt_einsum=True)
-        else:
+        else:  # pragma: no cover
             einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
 
         six_tab = "\n" + tab*6
@@ -669,7 +660,7 @@ def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
     return trimmed_string
 
 
-def _wrap_full_cc_generation(master_omega, s2, named_line, spaced_named_line, only_ground_state=False, opt_einsum=False):
+def _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state=False, opt_einsum=False):
     """ x """
     return_string = ""
 
@@ -720,7 +711,7 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # header
     string += '\n' + named_line("INDIVIDUAL TERMS", s4) + '\n\n'
     # generate
-    string += _wrap_full_cc_generation(master_omega, s2, named_line, spaced_named_line, only_ground_state)
+    string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state)
     # ----------------------------------------------------------------------- #
     # header
     string += '\n' + named_line("RESIDUAL FUNCTIONS", s4)
@@ -738,7 +729,7 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # header
     string += '\n' + named_line("INDIVIDUAL TERMS", s4) + '\n\n'
     # generate
-    string += _wrap_full_cc_generation(master_omega, s2, named_line, spaced_named_line, only_ground_state, opt_einsum=True)
+    string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state, opt_einsum=True)
     # ----------------------------------------------------------------------- #
     # generate
     string += '\n' + named_line("RESIDUAL FUNCTIONS", s4)

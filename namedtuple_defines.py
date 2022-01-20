@@ -19,6 +19,7 @@ general_operator_namedtuple = namedtuple('operator', ['name', 'rank', 'm', 'n'])
 # linked_namedtuple = namedtuple('linked', ['name', 'm', 'n'])
 # unlinked_namedtuple = namedtuple('unlinked', ['name', 'm', 'n'])
 
+omega_namedtuple = namedtuple('Omega', ['maximum_rank', 'operator_list'])
 hamiltonian_namedtuple = namedtuple('hamiltonian', ['maximum_rank', 'operator_list'])
 
 """rather than just lists and dictionaries using namedtuples makes the code much more concise

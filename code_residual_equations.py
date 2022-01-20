@@ -84,18 +84,17 @@ def extract_numerator_denominator_from_string(s):
 
 def simplified_prefactor(pre):
     """Creates the simplified form of the given prefactor f."""
-
     arr = extract_numerator_denominator_from_string(pre)
     numerator, denominator = arr[0], arr[1]
 
-    if pre == "*(1/2)":    # case when 1/2 is the only prefactor, delete * sign
+    if pre == "*(1/2)":    # case when 1/2 is the only prefactor, delete * sign  # pragma: no cover, looks like this can't happen
         pre = "1/2"
     elif denominator == numerator:
         # case when (1/1!) or (2/2!) is present, which will both be recognized as 1
         if "*(1/2)" in pre:
             if denominator == 1 or denominator == 2:
                 pre = "(1/2)"     # 1*(1/2) = (1/2)
-            else:
+            else:  # pragma: no cover, looks like this can't happen
                 pre = f"({numerator}/(2*{denominator}))"
         else:
             if denominator == 1 or denominator == 2:
@@ -103,7 +102,7 @@ def simplified_prefactor(pre):
 
     # case when 1/2 is multiplied to the prefactor
     elif "*(1/2)" in pre:
-        if numerator % 2 == 0:
+        if numerator % 2 == 0:  # pragma: no cover, looks like this can't happen
             pre[0] = str(numerator // 2)
             pre = pre[:-6]  # get rid of "*(1/2)"
         else:
@@ -231,7 +230,7 @@ def generate_p_term(str_fac):
     if str_fac == "":
         return "1.0"
 
-    if str_fac == "(1/2) * ":
+    if str_fac == "(1/2) * ":  # pragma: no cover
         return "0.5"
 
     arr = extract_numerator_denominator_from_string(str_fac)
@@ -257,7 +256,6 @@ def generate_w_term(str_w):
     if str_w == "":
         # if there is no w operator, return [0,0,0]
         return w_namedtuple(0, 0, 0)
-
     max_i = str_w.count("i")
     max_k = str_w.count("k")
     return w_namedtuple(max_i, max_k, max_i+max_k)
@@ -381,7 +379,7 @@ def _residual_terms_einsum(term, suppress_1_prefactor=True):
     """Returns a python code in `str` format which calculates the contribution to the residual from `term`."""
 
     # create the prefactor
-    if suppress_1_prefactor and (term.prefactor == 1.0):  # if we don't want to print prefactors that are 1
+    if suppress_1_prefactor and (term.prefactor == 1.0):  # if we don't want to print prefactors that are 1  #pragma: no cover
         prefactor = ""
     else:
         prefactor = str(term.prefactor) + ' * '
@@ -487,7 +485,7 @@ def write_residual_function_string(residual_terms_list, order):
                 already_printed_list.append(same_w_term)
                 string += f"{tab}{tab}" + _residual_terms_einsum(same_w_term)
 
-        else:
+        else:  # pragma: no cover
             raise Exception("We shouldn't reach this else!")
 
     string += (f"\n{tab}return R")

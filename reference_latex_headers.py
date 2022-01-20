@@ -293,6 +293,7 @@ full_z_t_symmetric_latex_header = r"""
 \usepackage{bm}
 \usepackage{physics}
 \usepackage{simplewick}
+\usepackage{dsfont}
 
 \usepackage{color}
 \NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
@@ -485,6 +486,7 @@ ground_state_z_t_symmetric_latex_header = r"""
 \usepackage{bm}
 \usepackage{physics}
 \usepackage{simplewick}
+\usepackage{dsfont}
 
 \usepackage{color}
 \NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}

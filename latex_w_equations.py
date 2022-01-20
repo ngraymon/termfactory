@@ -1,5 +1,6 @@
 # system imports
 import os
+import itertools as it
 from collections import namedtuple
 
 # third party imports
@@ -9,6 +10,7 @@ from latex_defines import *
 from common_imports import tab
 import reference_latex_headers as headers
 from namedtuple_defines import t_namedtuple_latex, w_namedtuple_latex
+from helper_funcs import generate_partitions_of_n
 
 
 # ----------------------------------------------------------------------------------------------- #
@@ -244,7 +246,7 @@ def excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex
     latex_code += "\\end{equation}\n"
 
     # if file already exists then update it
-    if os.path.isfile(path):
+    if os.path.isfile(path): # pragma: no cover
 
         # read the entire file contents
         with open(path, 'r') as fp:
@@ -258,7 +260,7 @@ def excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex
             fp.write(header + latex_code + r'\end{document}')
 
     # otherwise write a new file
-    else:
+    else: # pragma: no cover
         with open(path, 'w') as fp:
             fp.write(latex_code)
 
