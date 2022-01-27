@@ -935,10 +935,10 @@ def _remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations):
             unique_list.append(new_perm)
             unique_set.add(new_perm)
             unique_count[new_perm] = 1
-        elif new_perm in unique_set:
+        elif new_perm in unique_set:  # pragma: no cover, ask neil
             log.debug(f"\n{tab}Removed duplicate: {splitperm(new_perm)}\n{tab})\n{tab}{new_perm[1]}")
             unique_count[new_perm] += 1
-        else:
+        else:  # pragma: no cover
             raise Exception('')
 
     # print('a', unique_count)
@@ -1251,7 +1251,7 @@ def _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
             numerator_value *= number
             numerator_list.append(f'{number}')
 
-    if z_right.n > 1:
+    if z_right.n > 1:  # pragma: no cover, ignore for now
         # by definition
         denominator_value *= math.factorial(z_right.n)
         denominator_list.append(f'{z_right.n}!')
@@ -1302,14 +1302,10 @@ def _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
     # ---------------------------------------------------------------------------------------------------------
 
     if False:  # debug
-        print(numerator_list)
-        print(denominator_list)
-        print(numerator_value)
-        print(denominator_value)
         import pdb; pdb.set_trace()
 
     # # simplify
-    if False and simplify_flag:
+    if False and simplify_flag:  # pragma: no cover
         fraction = fractions.Fraction(numerator_value, denominator_value)
         if fraction == 1:
             return ''
