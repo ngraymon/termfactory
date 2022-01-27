@@ -415,7 +415,7 @@ class Test_generate_all_o_eT_h_z_connection_permutations:
         assert function_output == expected_result
 
 
-class Test_remove_duplicate_eT_z_permutations:
+class Test_remove_duplicate_t_tuple_permutations:
 
     def test_basic(self):
         LHS = et.general_operator_namedtuple(name='', rank=0, m=0, n=0)
@@ -424,11 +424,154 @@ class Test_remove_duplicate_eT_z_permutations:
             ((et.disconnected_t_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),),
                 (None, et.disconnected_eT_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_t=(0,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)))
         ]
-        function_output = et._remove_duplicate_eT_z_permutations(LHS, h, eT_connection_permutations)
-        expected_result = [
-            ((et.disconnected_t_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),),
-                (None, et.disconnected_eT_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_t=(0,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)))
+        function_output = et._remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations)
+        expected_result = (
+            [
+                (
+                    (et.disconnected_t_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),),
+                    (None, et.disconnected_eT_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_t=(0,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0))
+                )
+            ],
+            {
+                (
+                    (et.disconnected_t_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),),
+                    (None, et.disconnected_eT_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_t=(0,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0))
+                ): 1
+            }
+        )
+        assert function_output == expected_result
+
+    def test_long_tuple_case_1(self):
+        LHS = et.general_operator_namedtuple(name='bb', rank=2, m=0, n=2)
+        h = fcc.h_operator_namedtuple(rank=2, m=2, n=0)
+        eT_connection_permutations = [
+            (
+                (
+                    et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                    et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1)
+                ),
+                (   
+                    None,
+                    et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_t=(1, 1), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                )
+            ),
+            (
+                (
+                    et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                    et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1)
+                ),
+                (
+                    None,
+                    et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(0, 1), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                )
+            ),
+            (
+                (
+                    et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                    et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0)
+                ),
+                (
+                    None,
+                    et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(1, 0), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                )
+            ),
+            (
+                (
+                    et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                    et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0)
+                ),
+                (
+                    None,
+                    et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=2, n_lhs=0, m_t=(0, 0), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                )
+            )
         ]
+        function_output = et._remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations)
+        expected_result = (
+            [
+                (
+                    (
+                        et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                        et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1)
+                    ),
+                    (
+                        None,
+                        et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_t=(1, 1), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                    )
+                ),
+                (
+                    (
+                        et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                        et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0)
+                    ),
+                    (
+                        None,
+                        et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(0, 1), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                    )
+                ),
+                (
+                    (
+                        et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                        et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0)
+                    ),
+                    (
+                        None,
+                        et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(1, 0), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0))
+                ),
+                (
+                    (
+                        et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                        et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0)
+                    ),
+                    (
+                        None,
+                        et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=2, n_lhs=0, m_t=(0, 0), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                    )
+                )
+            ],
+            {
+                (
+                    (
+                        et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                        et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1)
+                    ),
+                    (
+                        None,
+                        et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_t=(1, 1), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                    )
+                ): 1,
+                (
+                    (
+                        et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                        et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0)
+                    ),
+                    (
+                        None,
+                        et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(0, 1), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                    )
+                ): 1,
+                (
+                    (
+                        et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                        et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0)
+                    ),
+                    (
+                        None,
+                        et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(1, 0), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                    )
+                ): 1,
+                (
+                    (
+                        et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                        et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0)
+                    ),
+                    (
+                        None,
+                        et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=2, n_lhs=0, m_t=(0, 0), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
+                    )
+                ): 1
+            }
+        )
         assert function_output == expected_result
 
 
@@ -535,7 +678,7 @@ class Test_build_eThz_latex_prefactor:
         z_right = et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_t=(1, 1), n_t=(0, 0), m_h=0, n_h=0, m_l=0, n_l=0)
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefactor, simplify_flag=True)
-        expected_result = '\\frac{1}{2}'
+        expected_result = '\\frac{2!}{2!2!}'
         assert function_output == expected_result
 
     def test_n_factor(self):
@@ -545,7 +688,7 @@ class Test_build_eThz_latex_prefactor:
         z_right = et.connected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_t=(0,), n_t=(0,), m_h=2, n_h=0, m_l=0, n_l=0)
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefactor, simplify_flag=True)
-        expected_result = '\\frac{1}{2}'
+        expected_result = '\\frac{2!}{2!2!}'
         assert function_output == expected_result
 
     def test_choose_result(self):
@@ -556,7 +699,7 @@ class Test_build_eThz_latex_prefactor:
         z_right = et.disconnected_eT_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_t=(1,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefactor, simplify_flag=True)
-        expected_result = '\\frac{2}{1}'
+        expected_result = '\\frac{1}{2!}'
         assert function_output == expected_result
 
         # TODO Test Glue cases later on / consider removing
@@ -808,7 +951,7 @@ class Test_prepare_third_eTz_latex:
         ]
 
         function_output = et._prepare_third_eTz_latex(term_list, split_width=5, remove_f_terms=False, print_prefactors=True, suppress_duplicates=True)
-        expected_result = '\n\\mathds1\\bh_0\\bz^{\\red{y}}_{} + \\bar{f}\\mathds1\\bh^{}_{\\blue{k}\\red{}}\\bz^{\\blue{k}\\red{y}}_{} + \\mathds1\\bh^{\\blue{}\\red{y}}_{}\\bz_0 + \\bar{f}\\mathds1\\bh^{\\blue{}\\red{y}}_{\\blue{k}\\red{}}\\bz^{\\blue{k}\\red{}}_{} + \\bar{f}\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}\\bh_0\\bz^{\\magenta{k}\\red{y}}_{}\n    \\\\  &+  % split long equation\n\\bar{f}\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}\\bh^{\\blue{}\\blue{}\\red{y}}_{}\\bz^{\\magenta{k}\\red{}}_{} + \\bar{f}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz^{\\magenta{}\\red{y}}_{} + \\bar{f}^{2}\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}\\bh^{\\blue{}\\blue{}\\red{y}}_{\\blue{l}\\red{}}\\bz^{\\magenta{k}\\blue{l}\\red{}}_{} + \\bar{f}^{2}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{\\blue{l}\\red{}}\\bz^{\\magenta{}\\blue{l}\\red{y}}_{} + \\bar{f}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{y}}_{}\\bz_0\n'
+        expected_result = '\n\\mathds1\\bh_0\\bz^{\\red{y}}_{} + \\bar{f}\\frac{(2)}{2!}\\mathds1\\bh^{}_{\\blue{k}\\red{}}\\bz^{\\blue{k}\\red{y}}_{} + \\mathds1\\bh^{\\blue{}\\red{y}}_{}\\bz_0 + \\bar{f}\\mathds1\\bh^{\\blue{}\\red{y}}_{\\blue{k}\\red{}}\\bz^{\\blue{k}\\red{}}_{} + \\bar{f}\\frac{(2)}{2!}\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}\\bh_0\\bz^{\\magenta{k}\\red{y}}_{}\n    \\\\  &+  % split long equation\n\\bar{f}\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}\\bh^{\\blue{}\\blue{}\\red{y}}_{}\\bz^{\\magenta{k}\\red{}}_{} + \\bar{f}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz^{\\magenta{}\\red{y}}_{} + \\bar{f}^{2}\\frac{(2)}{2!}\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}\\bh^{\\blue{}\\blue{}\\red{y}}_{\\blue{l}\\red{}}\\bz^{\\magenta{k}\\blue{l}\\red{}}_{} + \\bar{f}^{2}\\frac{(2)}{2!}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{\\blue{l}\\red{}}\\bz^{\\magenta{}\\blue{l}\\red{y}}_{} + \\bar{f}\\frac{(2)}{2!}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{y}}_{}\\bz_0\n'
         assert function_output == expected_result
 
 
