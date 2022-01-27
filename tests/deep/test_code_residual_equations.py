@@ -8,6 +8,9 @@ from . import context
 from typing import ValuesView
 import code_residual_equations as cre
 
+# global vars
+h_0_zeros = cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0)
+
 
 class Test_generate_hamiltonian_operator:
 
@@ -16,7 +19,7 @@ class Test_generate_hamiltonian_operator:
         expected_result = cre.hamiltonian_namedtuple(
             maximum_rank=2,
             operator_list=[
-                cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0),
+                h_0_zeros,
                 cre.general_operator_namedtuple(name='h_1', rank=1, m=0, n=1),
                 cre.general_operator_namedtuple(name='h_2', rank=2, m=0, n=2),
                 cre.general_operator_namedtuple(name='h^1', rank=1, m=1, n=0),
@@ -66,7 +69,7 @@ class Test_simplified_prefactor:
 class Test_construct_prefactor:
 
     def test_special_case_1(self):
-        h = cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0)
+        h = h_0_zeros
         p = 0
         function_output = cre.construct_prefactor(h, p, simplify_flag=False)
         expected_result = ''
@@ -133,7 +136,7 @@ class Test_construct_upper_w_label:
 
     def test_edge(self):
         """if (h.m == p and h.n == 0) or h.m > p:"""
-        h = cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0)
+        h = h_0_zeros
         p = 0
         function_output = cre.construct_upper_w_label(h, p)
         expected_result = ''
@@ -151,7 +154,7 @@ class Test_construct_upper_h_label:
 
     def test_edge(self):
         """if h.m == 0 or h.m > p:"""
-        h = cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0)
+        h = h_0_zeros
         p = 0
         function_output = cre.construct_upper_h_label(h, p)
         expected_result = ''
@@ -169,7 +172,7 @@ class Test_construct_lower_h_label:
 
     def test_edge_case_1(self):
         """if h.m == 0 and h.n == 0:"""
-        h = cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0)
+        h = h_0_zeros
         p = 0
         function_output = cre.construct_lower_h_label(h, p)
         expected_result = '_0'
@@ -244,7 +247,7 @@ class Test_generate_residual_string_list:
 
     def test_basic(self):
         hamiltonian = [
-            cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0),
+            h_0_zeros,
             cre.general_operator_namedtuple(name='h_1', rank=1, m=0, n=1),
             cre.general_operator_namedtuple(name='h_2', rank=2, m=0, n=2),
             cre.general_operator_namedtuple(name='h^1', rank=1, m=1, n=0),
@@ -254,11 +257,27 @@ class Test_generate_residual_string_list:
         order = 0
         function_output = cre.generate_residual_string_list(hamiltonian, order)
         expected_result = (
-            ['h_0', 'h_{k_1} * w^{k_1}', '(1/2!) * h_{k_1,k_2} * w^{k_1,k_2}'],
             [
-                cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=0), w=cre.w_namedtuple(max_i=0, max_k=0, order=0)),
-                cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=0, max_k=1, order=1)),
-                cre.residual_term(prefactor='(1/2)', h=cre.h_namedtuple(max_i=0, max_k=2), w=cre.w_namedtuple(max_i=0, max_k=2, order=2))
+                'h_0',
+                'h_{k_1} * w^{k_1}',
+                '(1/2!) * h_{k_1,k_2} * w^{k_1,k_2}'
+            ],
+            [
+                cre.residual_term(
+                    prefactor='1.0',
+                    h=cre.h_namedtuple(max_i=0, max_k=0),
+                    w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+                ),
+                cre.residual_term(
+                    prefactor='1.0',
+                    h=cre.h_namedtuple(max_i=0, max_k=1),
+                    w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
+                ),
+                cre.residual_term(
+                    prefactor='(1/2)',
+                    h=cre.h_namedtuple(max_i=0, max_k=2),
+                    w=cre.w_namedtuple(max_i=0, max_k=2, order=2)
+                )
             ]
         )
         assert function_output == expected_result
@@ -268,7 +287,7 @@ class Test_generate_residual_data:
 
     def test_basic(self):
         H = [
-            cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0),
+            h_0_zeros,
             cre.general_operator_namedtuple(name='h_1', rank=1, m=0, n=1),
             cre.general_operator_namedtuple(name='h^1', rank=1, m=1, n=0),
         ]
@@ -281,13 +300,33 @@ class Test_generate_residual_data:
             ],
             [
                 [
-                    cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=0), w=cre.w_namedtuple(max_i=0, max_k=0, order=0)),
-                    cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=0, max_k=1, order=1))
+                    cre.residual_term(
+                        prefactor='1.0',
+                        h=cre.h_namedtuple(max_i=0, max_k=0),
+                        w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+                    ),
+                    cre.residual_term(
+                        prefactor='1.0',
+                        h=cre.h_namedtuple(max_i=0, max_k=1), 
+                        w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
+                    )
                 ],
                 [
-                    cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=0), w=cre.w_namedtuple(max_i=1, max_k=0, order=1)),
-                    cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=1, max_k=1, order=2)),
-                    cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=1, max_k=0), w=cre.w_namedtuple(max_i=0, max_k=0, order=0))
+                    cre.residual_term(
+                        prefactor='1.0',
+                        h=cre.h_namedtuple(max_i=0, max_k=0),
+                        w=cre.w_namedtuple(max_i=1, max_k=0, order=1)
+                    ),
+                    cre.residual_term(
+                        prefactor='1.0',
+                        h=cre.h_namedtuple(max_i=0, max_k=1),
+                        w=cre.w_namedtuple(max_i=1, max_k=1, order=2)
+                    ),
+                    cre.residual_term(
+                        prefactor='1.0',
+                        h=cre.h_namedtuple(max_i=1, max_k=0),
+                        w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+                    )
                 ]
             ]
         )
@@ -297,7 +336,11 @@ class Test_generate_residual_data:
 class Test_generate_einsum_h_indices:
 
     def test_basic(self):
-        term = cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=0, max_k=1, order=1))
+        term = cre.residual_term(
+            prefactor='1.0',
+            h=cre.h_namedtuple(max_i=0, max_k=1),
+            w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
+        )
         function_output = cre._generate_einsum_h_indices(term)
         expected_result = 'acm'
         assert function_output == expected_result
@@ -306,7 +349,11 @@ class Test_generate_einsum_h_indices:
 class Test_generate_einsum_w_indices:
 
     def test_basic(self):
-        term = cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=0, max_k=1, order=1))
+        term = cre.residual_term(
+            prefactor='1.0',
+            h=cre.h_namedtuple(max_i=0, max_k=1),
+            w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
+        )
         function_output = cre._generate_einsum_w_indices(term)
         expected_result = 'cbm'
         assert function_output == expected_result
@@ -315,7 +362,11 @@ class Test_generate_einsum_w_indices:
 class Test_generate_einsum_ouput_indices:
 
     def test_basic(self):
-        term = cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=0, max_k=1, order=1))
+        term = cre.residual_term(
+            prefactor='1.0',
+            h=cre.h_namedtuple(max_i=0, max_k=1),
+            w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
+        )
         function_output = cre._generate_einsum_ouput_indices(term)
         expected_result = 'ab'
         assert function_output == expected_result
@@ -324,14 +375,22 @@ class Test_generate_einsum_ouput_indices:
 class Test_residual_terms_einsum:
 
     def test_basic(self):
-        term = cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=0, max_k=1, order=1))
+        term = cre.residual_term(
+            prefactor='1.0',
+            h=cre.h_namedtuple(max_i=0, max_k=1),
+            w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
+        )
         function_output = cre._residual_terms_einsum(term, suppress_1_prefactor=True)
         expected_result = "R += 1.0 * np.einsum('acm,cbm->ab', h_abI, w_i)\n"
         assert function_output == expected_result
 
     def test_w_zero(self):
         """if term.w.order == 0:"""
-        term = cre.residual_term(prefactor='(1/2)', h=cre.h_namedtuple(max_i=2, max_k=0), w=cre.w_namedtuple(max_i=0, max_k=0, order=0))
+        term = cre.residual_term(
+            prefactor='(1/2)',
+            h=cre.h_namedtuple(max_i=2, max_k=0),
+            w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+        )
         function_output = cre._residual_terms_einsum(term, suppress_1_prefactor=True)
         expected_result = 'R += (1/2) * h_abij\n'
         assert function_output == expected_result
@@ -340,14 +399,36 @@ class Test_residual_terms_einsum:
 class Test_same_w_order_term_list:
 
     def test_basic(self):
-        current_term = cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=1, max_k=1, order=2))
+        current_term = cre.residual_term(
+            prefactor='1.0',
+            h=cre.h_namedtuple(max_i=0, max_k=1),
+            w=cre.w_namedtuple(max_i=1, max_k=1, order=2)
+        )
         term_list = [
-            cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=0), w=cre.w_namedtuple(max_i=1, max_k=0, order=1)),
-            cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=1, max_k=1, order=2)),
-            cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=1, max_k=0), w=cre.w_namedtuple(max_i=0, max_k=0, order=0))
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=0, max_k=0),
+                w=cre.w_namedtuple(max_i=1, max_k=0, order=1)
+            ),
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=0, max_k=1),
+                w=cre.w_namedtuple(max_i=1, max_k=1, order=2)
+            ),
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=1, max_k=0),
+                w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+            )
         ]
         function_output = cre._same_w_order_term_list(current_term, term_list)
-        expected_result = [cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=1, max_k=1, order=2))]
+        expected_result = [
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=0, max_k=1),
+                w=cre.w_namedtuple(max_i=1, max_k=1, order=2)
+            )
+        ]
         assert function_output == expected_result
 
 
@@ -355,26 +436,103 @@ class Test_write_residual_function_string:
 
     def test_basic(self):
         residual_terms_list = [
-            cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=0), w=cre.w_namedtuple(max_i=0, max_k=0, order=0)),
-            cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=0, max_k=1, order=1))
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=0, max_k=0),
+                w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+            ),
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=0, max_k=1),
+                w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
+            )
         ]
         order = 0
         function_output = cre.write_residual_function_string(residual_terms_list, order)
-        expected_result = '\ndef calculate_order_0_residual(A, N, truncation, h_args, w_args):\n    """Calculate the 0 order residual as a function of the W operators."""\n    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n    w_i, w_ij, *unusedargs = w_args\n\n    R = np.zeros((A, A), dtype=complex)\n\n    assert truncation.singles, \\\n        f"Cannot calculate order 0 residual for {truncation.cc_truncation_order}"\n\n    R += 1.0 * h_ab\n\n    R += 1.0 * np.einsum(\'acm,cbm->ab\', h_abI, w_i)\n\n    return R'
+        expected_result = str(
+            '\n'+
+            'def calculate_order_0_residual(A, N, truncation, h_args, w_args):\n'+
+            '    """Calculate the 0 order residual as a function of the W operators."""\n'+
+            '    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n'+
+            '    w_i, w_ij, *unusedargs = w_args\n'+
+            '\n'+
+            '    R = np.zeros((A, A), dtype=complex)\n'+
+            '\n'+
+            '    assert truncation.singles, \\\n'+
+            '        f"Cannot calculate order 0 residual for {truncation.cc_truncation_order}"\n'+
+            '\n'+
+            '    R += 1.0 * h_ab\n'+
+            '\n'+
+            '    R += 1.0 * np.einsum(\'acm,cbm->ab\', h_abI, w_i)\n'+
+            '\n'+
+            '    return R'
+        )
         assert function_output == expected_result
 
     def test_high_order_h_and_w(self):
         residual_terms_list = [
-            cre.residual_term(prefactor='(1/2)', h=cre.h_namedtuple(max_i=0, max_k=0), w=cre.w_namedtuple(max_i=2, max_k=0, order=2)),
-            cre.residual_term(prefactor='(3/6)', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=2, max_k=1, order=3)),
-            cre.residual_term(prefactor='(6/24)', h=cre.h_namedtuple(max_i=0, max_k=2), w=cre.w_namedtuple(max_i=2, max_k=2, order=4)),
-            cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=1, max_k=0), w=cre.w_namedtuple(max_i=1, max_k=0, order=1)),
-            cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=1, max_k=1), w=cre.w_namedtuple(max_i=1, max_k=1, order=2)),
-            cre.residual_term(prefactor='(1/2)', h=cre.h_namedtuple(max_i=2, max_k=0), w=cre.w_namedtuple(max_i=0, max_k=0, order=0))
+            cre.residual_term(
+                prefactor='(1/2)',
+                h=cre.h_namedtuple(max_i=0, max_k=0),
+                w=cre.w_namedtuple(max_i=2, max_k=0, order=2)
+            ),
+            cre.residual_term(
+                prefactor='(3/6)',
+                h=cre.h_namedtuple(max_i=0, max_k=1),
+                w=cre.w_namedtuple(max_i=2, max_k=1, order=3)
+            ),
+            cre.residual_term(
+                prefactor='(6/24)',
+                h=cre.h_namedtuple(max_i=0, max_k=2),
+                w=cre.w_namedtuple(max_i=2, max_k=2, order=4)
+            ),
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=1, max_k=0),
+                w=cre.w_namedtuple(max_i=1, max_k=0, order=1)
+            ),
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=1, max_k=1),
+                w=cre.w_namedtuple(max_i=1, max_k=1, order=2)
+            ),
+            cre.residual_term(
+                prefactor='(1/2)',
+                h=cre.h_namedtuple(max_i=2, max_k=0),
+                w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+            )
         ]
         order = 2
         function_output = cre.write_residual_function_string(residual_terms_list, order)
-        expected_result = '\ndef calculate_order_2_residual(A, N, truncation, h_args, w_args):\n    """Calculate the 2 order residual as a function of the W operators."""\n    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n    w_i, w_ij, w_ijk, w_ijkl, *unusedargs = w_args\n\n    R = np.zeros((A, A, N, N), dtype=complex)\n\n    assert truncation.doubles, \\\n        f"Cannot calculate order 2 residual for {truncation.cc_truncation_order}"\n\n    if w_ij is not None:\n        R += (1/2) * np.einsum(\'ac,cbij->abij\', h_ab, w_ij)\n        R += 1.0 * np.einsum(\'acmi,cbmj->abij\', h_abIj, w_ij)\n\n    if w_ijk is not None:\n        R += (3/6) * np.einsum(\'acm,cbmij->abij\', h_abI, w_ijk)\n\n    if truncation.quadratic:\n        if w_ijkl is not None:\n            R += (6/24) * np.einsum(\'acmn,cbmnij->abij\', h_abIJ, w_ijkl)\n        else:\n            R += (1/2) * h_abij\n\n    R += 1.0 * np.einsum(\'aci,cbj->abij\', h_abi, w_i)\n\n    return R'
+        expected_result = str(
+            '\n'+
+            'def calculate_order_2_residual(A, N, truncation, h_args, w_args):\n'+
+            '    """Calculate the 2 order residual as a function of the W operators."""\n'+
+            '    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n'+
+            '    w_i, w_ij, w_ijk, w_ijkl, *unusedargs = w_args\n'+
+            '\n'+
+            '    R = np.zeros((A, A, N, N), dtype=complex)\n'+
+            '\n'+
+            '    assert truncation.doubles, \\\n'+
+            '        f"Cannot calculate order 2 residual for {truncation.cc_truncation_order}"\n'+
+            '\n'+
+            '    if w_ij is not None:\n'+
+            '        R += (1/2) * np.einsum(\'ac,cbij->abij\', h_ab, w_ij)\n'+
+            '        R += 1.0 * np.einsum(\'acmi,cbmj->abij\', h_abIj, w_ij)\n'+
+            '\n'+
+            '    if w_ijk is not None:\n'+
+            '        R += (3/6) * np.einsum(\'acm,cbmij->abij\', h_abI, w_ijk)\n'+
+            '\n'+
+            '    if truncation.quadratic:\n'+
+            '        if w_ijkl is not None:\n'+
+            '            R += (6/24) * np.einsum(\'acmn,cbmnij->abij\', h_abIJ, w_ijkl)\n'+
+            '        else:\n'+
+            '            R += (1/2) * h_abij\n'+
+            '\n'+
+            '    R += 1.0 * np.einsum(\'aci,cbj->abij\', h_abi, w_i)\n'+
+            '\n'+
+            '    return R'
+        )
         assert function_output == expected_result
 
 
@@ -383,18 +541,75 @@ class Test_generate_python_code_for_residual_functions:
     def test_basic(self):
         term_lists = [
             [
-                cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=0), w=cre.w_namedtuple(max_i=0, max_k=0, order=0)),
-                cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=0, max_k=1, order=1))
+                cre.residual_term(
+                    prefactor='1.0',
+                    h=cre.h_namedtuple(max_i=0, max_k=0),
+                    w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+                ),
+                cre.residual_term(
+                    prefactor='1.0',
+                    h=cre.h_namedtuple(max_i=0, max_k=1),
+                    w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
+                )
             ],
             [
-                cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=0), w=cre.w_namedtuple(max_i=1, max_k=0, order=1)),
-                cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=0, max_k=1), w=cre.w_namedtuple(max_i=1, max_k=1, order=2)),
-                cre.residual_term(prefactor='1.0', h=cre.h_namedtuple(max_i=1, max_k=0), w=cre.w_namedtuple(max_i=0, max_k=0, order=0))
+                cre.residual_term(
+                    prefactor='1.0',
+                    h=cre.h_namedtuple(max_i=0, max_k=0),
+                    w=cre.w_namedtuple(max_i=1, max_k=0, order=1)
+                ),
+                cre.residual_term(
+                    prefactor='1.0',
+                    h=cre.h_namedtuple(max_i=0, max_k=1),
+                    w=cre.w_namedtuple(max_i=1, max_k=1, order=2)
+                ),
+                cre.residual_term(
+                    prefactor='1.0',
+                    h=cre.h_namedtuple(max_i=1, max_k=0),
+                    w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+                )
             ]
         ]
         max_order = 1
         function_output = cre.generate_python_code_for_residual_functions(term_lists, max_order)
-        expected_result = '\ndef calculate_order_0_residual(A, N, truncation, h_args, w_args):\n    """Calculate the 0 order residual as a function of the W operators."""\n    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n    w_i, w_ij, *unusedargs = w_args\n\n    R = np.zeros((A, A), dtype=complex)\n\n    assert truncation.singles, \\\n        f"Cannot calculate order 0 residual for {truncation.cc_truncation_order}"\n\n    R += 1.0 * h_ab\n\n    R += 1.0 * np.einsum(\'acm,cbm->ab\', h_abI, w_i)\n\n    return R\n\n\ndef calculate_order_1_residual(A, N, truncation, h_args, w_args):\n    """Calculate the 1 order residual as a function of the W operators."""\n    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n    w_i, w_ij, w_ijk, *unusedargs = w_args\n\n    R = np.zeros((A, A, N), dtype=complex)\n\n    assert truncation.singles, \\\n        f"Cannot calculate order 1 residual for {truncation.cc_truncation_order}"\n\n    R += 1.0 * np.einsum(\'ac,cbi->abi\', h_ab, w_i)\n\n    if w_ij is not None:\n        R += 1.0 * np.einsum(\'acm,cbmi->abi\', h_abI, w_ij)\n\n    R += 1.0 * h_abi\n\n    return R'
+        expected_result = str(
+            '\n'+
+            'def calculate_order_0_residual(A, N, truncation, h_args, w_args):\n'+
+            '    """Calculate the 0 order residual as a function of the W operators."""\n'+
+            '    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n'+
+            '    w_i, w_ij, *unusedargs = w_args\n'+
+            '\n'+
+            '    R = np.zeros((A, A), dtype=complex)\n'+
+            '\n'+
+            '    assert truncation.singles, \\\n'+
+            '        f"Cannot calculate order 0 residual for {truncation.cc_truncation_order}"\n'+
+            '\n'+
+            '    R += 1.0 * h_ab\n'+
+            '\n'+
+            '    R += 1.0 * np.einsum(\'acm,cbm->ab\', h_abI, w_i)\n'+
+            '\n'+
+            '    return R\n'+
+            '\n'+
+            '\n'+
+            'def calculate_order_1_residual(A, N, truncation, h_args, w_args):\n'+
+            '    """Calculate the 1 order residual as a function of the W operators."""\n'+
+            '    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n'+
+            '    w_i, w_ij, w_ijk, *unusedargs = w_args\n'+
+            '\n'+
+            '    R = np.zeros((A, A, N), dtype=complex)\n'+
+            '\n'+
+            '    assert truncation.singles, \\\n'+
+            '        f"Cannot calculate order 1 residual for {truncation.cc_truncation_order}"\n'+
+            '\n'+
+            '    R += 1.0 * np.einsum(\'ac,cbi->abi\', h_ab, w_i)\n'+
+            '\n'+
+            '    if w_ij is not None:\n'+
+            '        R += 1.0 * np.einsum(\'acm,cbmi->abi\', h_abI, w_ij)\n'+
+            '\n'+
+            '    R += 1.0 * h_abi\n'+
+            '\n'+
+            '    return R'
+        )
         assert function_output == expected_result
 
 
