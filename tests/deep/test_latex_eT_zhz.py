@@ -1654,7 +1654,16 @@ class Test_build_eT_term_latex_labels:
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sub(self):
-        t_list = (et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),)
+        t_list = (
+            et.disconnected_t_operator_namedtuple(
+                rank=1,
+                m=0, n=1,
+                m_lhs=0, n_lhs=0,
+                m_l=0, n_l=0,
+                m_h=0, n_h=0,
+                m_r=0, n_r=1
+            ),
+        )
         offset_dict = {
             'lower_h': '',
             'upper_h': '',
