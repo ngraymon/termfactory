@@ -7,6 +7,7 @@
 from . import context
 from typing import ValuesView
 import code_residual_equations as cre
+import test_vars as vars
 
 # global vars
 h_0_zeros = cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0)
@@ -293,44 +294,7 @@ class Test_generate_residual_data:
         ]
         max_order = 1
         function_output = cre.generate_residual_data(H, max_order)
-        expected_result = (
-            [
-                ['h_0', 'h_{k_1} * w^{k_1}'],
-                ['h_0 * w^{i_1}', 'h_{k_1} * w^{i_1,k_1}', 'h^{i_1}']
-            ],
-            [
-                [
-                    cre.residual_term(
-                        prefactor='1.0',
-                        h=cre.h_namedtuple(max_i=0, max_k=0),
-                        w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
-                    ),
-                    cre.residual_term(
-                        prefactor='1.0',
-                        h=cre.h_namedtuple(max_i=0, max_k=1), 
-                        w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
-                    )
-                ],
-                [
-                    cre.residual_term(
-                        prefactor='1.0',
-                        h=cre.h_namedtuple(max_i=0, max_k=0),
-                        w=cre.w_namedtuple(max_i=1, max_k=0, order=1)
-                    ),
-                    cre.residual_term(
-                        prefactor='1.0',
-                        h=cre.h_namedtuple(max_i=0, max_k=1),
-                        w=cre.w_namedtuple(max_i=1, max_k=1, order=2)
-                    ),
-                    cre.residual_term(
-                        prefactor='1.0',
-                        h=cre.h_namedtuple(max_i=1, max_k=0),
-                        w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
-                    )
-                ]
-            ]
-        )
-        assert function_output == expected_result
+        assert function_output == vars.generate_residual_data.expected_result
 
 
 class Test_generate_einsum_h_indices:
@@ -449,92 +413,19 @@ class Test_write_residual_function_string:
         ]
         order = 0
         function_output = cre.write_residual_function_string(residual_terms_list, order)
-        expected_result = str(
-            '\n'+
-            'def calculate_order_0_residual(A, N, truncation, h_args, w_args):\n'+
-            '    """Calculate the 0 order residual as a function of the W operators."""\n'+
-            '    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n'+
-            '    w_i, w_ij, *unusedargs = w_args\n'+
-            '\n'+
-            '    R = np.zeros((A, A), dtype=complex)\n'+
-            '\n'+
-            '    assert truncation.singles, \\\n'+
-            '        f"Cannot calculate order 0 residual for {truncation.cc_truncation_order}"\n'+
-            '\n'+
-            '    R += 1.0 * h_ab\n'+
-            '\n'+
-            '    R += 1.0 * np.einsum(\'acm,cbm->ab\', h_abI, w_i)\n'+
-            '\n'+
-            '    return R'
+        expected_result = open(
+            "tests/deep/files/test_code_residual_equations/write_residual_function_string_basic/expected_result.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_high_order_h_and_w(self):
-        residual_terms_list = [
-            cre.residual_term(
-                prefactor='(1/2)',
-                h=cre.h_namedtuple(max_i=0, max_k=0),
-                w=cre.w_namedtuple(max_i=2, max_k=0, order=2)
-            ),
-            cre.residual_term(
-                prefactor='(3/6)',
-                h=cre.h_namedtuple(max_i=0, max_k=1),
-                w=cre.w_namedtuple(max_i=2, max_k=1, order=3)
-            ),
-            cre.residual_term(
-                prefactor='(6/24)',
-                h=cre.h_namedtuple(max_i=0, max_k=2),
-                w=cre.w_namedtuple(max_i=2, max_k=2, order=4)
-            ),
-            cre.residual_term(
-                prefactor='1.0',
-                h=cre.h_namedtuple(max_i=1, max_k=0),
-                w=cre.w_namedtuple(max_i=1, max_k=0, order=1)
-            ),
-            cre.residual_term(
-                prefactor='1.0',
-                h=cre.h_namedtuple(max_i=1, max_k=1),
-                w=cre.w_namedtuple(max_i=1, max_k=1, order=2)
-            ),
-            cre.residual_term(
-                prefactor='(1/2)',
-                h=cre.h_namedtuple(max_i=2, max_k=0),
-                w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
-            )
-        ]
+        residual_terms_list = vars.write_residual_function_string_high_order_h_and_w.res_list
         order = 2
         function_output = cre.write_residual_function_string(residual_terms_list, order)
-        expected_result = str(
-            '\n'+
-            'def calculate_order_2_residual(A, N, truncation, h_args, w_args):\n'+
-            '    """Calculate the 2 order residual as a function of the W operators."""\n'+
-            '    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n'+
-            '    w_i, w_ij, w_ijk, w_ijkl, *unusedargs = w_args\n'+
-            '\n'+
-            '    R = np.zeros((A, A, N, N), dtype=complex)\n'+
-            '\n'+
-            '    assert truncation.doubles, \\\n'+
-            '        f"Cannot calculate order 2 residual for {truncation.cc_truncation_order}"\n'+
-            '\n'+
-            '    if w_ij is not None:\n'+
-            '        R += (1/2) * np.einsum(\'ac,cbij->abij\', h_ab, w_ij)\n'+
-            '        R += 1.0 * np.einsum(\'acmi,cbmj->abij\', h_abIj, w_ij)\n'+
-            '\n'+
-            '    if w_ijk is not None:\n'+
-            '        R += (3/6) * np.einsum(\'acm,cbmij->abij\', h_abI, w_ijk)\n'+
-            '\n'+
-            '    if truncation.quadratic:\n'+
-            '        if w_ijkl is not None:\n'+
-            '            R += (6/24) * np.einsum(\'acmn,cbmnij->abij\', h_abIJ, w_ijkl)\n'+
-            '        else:\n'+
-            '            R += (1/2) * h_abij\n'+
-            '\n'+
-            '    R += 1.0 * np.einsum(\'aci,cbj->abij\', h_abi, w_i)\n'+
-            '\n'+
-            '    return R'
+        expected_result = open(
+            "tests/deep/files/test_code_residual_equations/write_residual_function_string_high_order_h_and_w/expected_result.py", "r"
         )
-        assert function_output == expected_result
-
+        assert function_output == expected_result.read()
 
 class Test_generate_python_code_for_residual_functions:
 
@@ -572,45 +463,10 @@ class Test_generate_python_code_for_residual_functions:
         ]
         max_order = 1
         function_output = cre.generate_python_code_for_residual_functions(term_lists, max_order)
-        expected_result = str(
-            '\n'+
-            'def calculate_order_0_residual(A, N, truncation, h_args, w_args):\n'+
-            '    """Calculate the 0 order residual as a function of the W operators."""\n'+
-            '    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n'+
-            '    w_i, w_ij, *unusedargs = w_args\n'+
-            '\n'+
-            '    R = np.zeros((A, A), dtype=complex)\n'+
-            '\n'+
-            '    assert truncation.singles, \\\n'+
-            '        f"Cannot calculate order 0 residual for {truncation.cc_truncation_order}"\n'+
-            '\n'+
-            '    R += 1.0 * h_ab\n'+
-            '\n'+
-            '    R += 1.0 * np.einsum(\'acm,cbm->ab\', h_abI, w_i)\n'+
-            '\n'+
-            '    return R\n'+
-            '\n'+
-            '\n'+
-            'def calculate_order_1_residual(A, N, truncation, h_args, w_args):\n'+
-            '    """Calculate the 1 order residual as a function of the W operators."""\n'+
-            '    h_ab, h_abI, h_abi, h_abIj, h_abIJ, h_abij = h_args\n'+
-            '    w_i, w_ij, w_ijk, *unusedargs = w_args\n'+
-            '\n'+
-            '    R = np.zeros((A, A, N), dtype=complex)\n'+
-            '\n'+
-            '    assert truncation.singles, \\\n'+
-            '        f"Cannot calculate order 1 residual for {truncation.cc_truncation_order}"\n'+
-            '\n'+
-            '    R += 1.0 * np.einsum(\'ac,cbi->abi\', h_ab, w_i)\n'+
-            '\n'+
-            '    if w_ij is not None:\n'+
-            '        R += 1.0 * np.einsum(\'acm,cbmi->abi\', h_abI, w_ij)\n'+
-            '\n'+
-            '    R += 1.0 * h_abi\n'+
-            '\n'+
-            '    return R'
+        expected_result = open(
+            "tests/deep/files/test_code_residual_equations/generate_python_code_for_residual_functions/expected_result.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_run_main_generate_files_eqs:

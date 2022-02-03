@@ -364,91 +364,19 @@ class Test_def_w_func:
         """basic test"""
         max_order = 2
         function_output = cw._write_master_w_compute_function(max_order, opt_einsum=False)
-        expected_result = str(
-            '\n'+
-            'def compute_w_operators(A, N, t_args, ansatz, truncation):\n'+
-            '    """Compute a number of W operators depending on the level of truncation."""\n'+
-            '\n'+
-            '    if not truncation.singles:\n'+
-            '        raise Exception(\n'+
-            '            "It appears that `singles` is not true, this cannot be.\\n"\n'+
-            '            "Something went terribly wrong!!!\\n\\n"\n'+
-            '            f"{truncation}\\n"\n'+
-            '        )\n'+
-            '\n'+
-            '    w_1 = _calculate_order_1_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '    w_2 = _calculate_order_2_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '    w_3 = _calculate_order_3_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '\n'+
-            '    if not truncation.doubles:\n'+
-            '        return w_1, w_2, w_3, None, None, None\n'+
-            '    else:\n'+
-            '        w_4 = _calculate_order_4_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '\n'+
-            '    if not truncation.triples:\n'+
-            '        return w_1, w_2, w_3, w_4, None, None\n'+
-            '    else:\n'+
-            '        w_5 = _calculate_order_5_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '\n'+
-            '    if not truncation.quadruples:\n'+
-            '        return w_1, w_2, w_3, w_4, w_5, None\n'+
-            '    else:\n'+
-            '        w_6 = _calculate_order_6_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '\n'+
-            '    if not truncation.quintuples:\n'+
-            '        return w_1, w_2, w_3, w_4, w_5, w_6\n'+
-            '    else:\n'+
-            '        raise Exception(\n'+
-            '            "Attempting to calculate W^7 operator (quintuples)\\n"\n'+
-            '            "This is currently not implemented!!\\n"\n'+
-            '        )\n'
+        expected_result = open(
+            "tests/deep/files/test_code_w_equations/write_master_w_compute_function_basic/expected_result.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_write_master_w_compute_function_einsum(self):
         """einsum test"""
         max_order = 2
         function_output = cw._write_master_w_compute_function(max_order, opt_einsum=True)
-        expected_result = str(
-            '\n'+
-            'def compute_w_operators_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths, vecc_optimized_paths):\n'+
-            '    """Compute a number of W operators depending on the level of truncation."""\n'+
-            '\n'+
-            '    if not truncation.singles:\n'+
-            '        raise Exception(\n'+
-            '            "It appears that `singles` is not true, this cannot be.\\n"\n'+
-            '            "Something went terribly wrong!!!\\n\\n"\n'+
-            '            f"{truncation}\\n"\n'+
-            '        )\n'+
-            '\n'+
-            '    w_1 = _calculate_order_1_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[0], vecc_optimized_paths[0])\n'+
-            '    w_2 = _calculate_order_2_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[1], vecc_optimized_paths[1])\n'+
-            '    w_3 = _calculate_order_3_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[2], vecc_optimized_paths[2])\n'+
-            '\n'+
-            '    if not truncation.doubles:\n'+
-            '        return w_1, w_2, w_3, None, None, None\n'+
-            '    else:\n'+
-            '        w_4 = _calculate_order_4_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[3], vecc_optimized_paths[3])\n'+
-            '\n'+
-            '    if not truncation.triples:\n'+
-            '        return w_1, w_2, w_3, w_4, None, None\n'+
-            '    else:\n'+
-            '        w_5 = _calculate_order_5_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[4], vecc_optimized_paths[4])\n'+
-            '\n'+
-            '    if not truncation.quadruples:\n'+
-            '        return w_1, w_2, w_3, w_4, w_5, None\n'+
-            '    else:\n'+
-            '        w_6 = _calculate_order_6_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[5], vecc_optimized_paths[5])\n'+
-            '\n'+
-            '    if not truncation.quintuples:\n'+
-            '        return w_1, w_2, w_3, w_4, w_5, w_6\n'+
-            '    else:\n'+
-            '        raise Exception(\n'+
-            '            "Attempting to calculate W^7 operator (quintuples)\\n"\n'+
-            '            "This is currently not implemented!!\\n"\n'+
-            '        )\n'
+        expected_result = open(
+            "tests/deep/files/test_code_w_equations/write_master_w_compute_function_einsum/expected_result.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_optimizers:
@@ -519,39 +447,10 @@ class Test_optimizers:
     def test_write_optimized_vecc_paths_function_high_order(self):
         max_order = 5
         function_output = cw._write_optimized_vecc_paths_function(max_order)
-        expected_result = str(
-            '\n'+
-            'def compute_optimized_vecc_paths(A, N, truncation):\n'+
-            '    """Calculate optimized paths for the VECC einsum calls up to `highest_order`."""\n'+
-            '\n'+
-            '    order_4_list, order_5_list, order_6_list = [], [], []\n'+
-            '\n'+
-            '    if not truncation.doubles:\n'+
-            '        log.warning(\'Did not calculate optimized VECC paths of the dt amplitudes\')\n'+
-            '        return [[], [], [], [], [], []]\n'+
-            '\n'+
-            '    if truncation.doubles:\n'+
-            '        order_4_list.extend([\n'+
-            '            oe.contract_expression(\'acij, cbkl->abijkl\', (A, A, N, N), (A, A, N, N)),\n'+
-            '        ])\n'+
-            '\n'+
-            '    if truncation.triples:\n'+
-            '        order_5_list.extend([\n'+
-            '            oe.contract_expression(\'acij, cbklm->abijklm\', (A, A, N, N), (A, A, N, N, N)),\n'+
-            '            oe.contract_expression(\'acijk, cblm->abijklm\', (A, A, N, N, N), (A, A, N, N)),\n'+
-            '        ])\n'+
-            '\n'+
-            '    if truncation.doubles:\n'+
-            '        order_5_list.extend([\n'+
-            '            oe.contract_expression(\'aci, cdjk, dblm->abijklm\', (A, A, N), (A, A, N, N), (A, A, N, N)),\n'+
-            '            oe.contract_expression(\'acij, cdk, dblm->abijklm\', (A, A, N, N), (A, A, N), (A, A, N, N)),\n'+
-            '            oe.contract_expression(\'acij, cdkl, dbm->abijklm\', (A, A, N, N), (A, A, N, N), (A, A, N)),\n'+
-            '        ])\n'+
-            '\n'+
-            '\n'+
-            '    return [[], [], [], order_4_list, order_5_list]\n'
+        expected_result = open(
+            "tests/deep/files/test_code_w_equations/write_optimized_vecc_paths_function_high_order/expected_result.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_main_w_eqn_code:
@@ -559,262 +458,10 @@ class Test_main_w_eqn_code:
     def test_generate_w_operators_string(self):
         max_order = 2
         function_output = cw.generate_w_operators_string(max_order, s1=75, s2=28)
-        expected_result = str(  # file flag
-            '# --------------------------------------------------------------------------- #\n'+
-            '# ---------------------------- DEFAULT FUNCTIONS ---------------------------- #\n'+
-            '# --------------------------------------------------------------------------- #\n'+
-            '\n'+
-            '# ---------------------------- VECI/CC CONTRIBUTIONS ---------------------------- #\n'+
-            '\n'+
-            'def _add_order_1_vemx_contributions(W_1, t_args, truncation):\n'+
-            '    """Exists for error checking."""\n'+
-            '    raise Exception(\n'+
-            '        "the first possible purely VECI/CC term is (1, 1) or (dt_i * t_i)"\n'+
-            '        "which requires a W operator of at least 2nd order"\n'+
-            '    )\n'+
-            '\n'+
-            'def _add_order_2_vemx_contributions(W_2, t_args, truncation):\n'+
-            '    """Calculate the order 2 VECI/CC (mixed) contributions to the W operator\n'+
-            '    for use in the calculation of the residuals.\n'+
-            '    """\n'+
-            '    # unpack the `t_args`\n'+
-            '    t_i, *unusedargs = t_args\n'+
-            '    # SINGLES contribution\n'+
-            '    W_2 += 1/factorial(2) * (np.einsum(\'aci, cbj->abij\', t_i, t_i))\n'+
-            '    return\n'+
-            '\n'+
-            '# ---------------------------- VECC CONTRIBUTIONS ---------------------------- #\n'+
-            '\n'+
-            'def _add_order_1_vecc_contributions(W_1, t_args, truncation):\n'+
-            '    """Exists for error checking."""\n'+
-            '    raise Exception(\n'+
-            '        "the first possible purely VECC term is (2, 2) or (dt_ij * t_ij)"\n'+
-            '        "which requires a W operator of at least 4th order"\n'+
-            '    )\n'+
-            '\n'+
-            'def _add_order_2_vecc_contributions(W_2, t_args, truncation):\n'+
-            '    """Exists for error checking."""\n'+
-            '    raise Exception(\n'+
-            '        "the first possible purely VECC term is (2, 2) or (dt_ij * t_ij)"\n'+
-            '        "which requires a W operator of at least 4th order"\n'+
-            '    )\n'+
-            '\n'+
-            '# ---------------------------- W OPERATOR FUNCTIONS ---------------------------- #\n'+
-            '\n'+
-            'def _calculate_order_1_w_operator(A, N, t_args, ansatz, truncation):\n'+
-            '    """Calculate the order 1 W operator for use in the calculation of the residuals."""\n'+
-            '    # unpack the `t_args`\n'+
-            '    t_i, *unusedargs = t_args\n'+
-            '    # Creating the 1st order W operator\n'+
-            '    W_1 = np.zeros((A, A, N), dtype=complex)\n'+
-            '    # Singles contribution\n'+
-            '    W_1 += t_i\n'+
-            '    return W_1\n'+
-            '\n'+
-            'def _calculate_order_2_w_operator(A, N, t_args, ansatz, truncation):\n'+
-            '    """Calculate the order 2 W operator for use in the calculation of the residuals."""\n'+
-            '    # unpack the `t_args`\n'+
-            '    t_i, t_ij, *unusedargs = t_args\n'+
-            '    # Creating the 2nd order W operator\n'+
-            '    W_2 = np.zeros((A, A, N, N), dtype=complex)\n'+
-            '\n'+
-            '    # add the VECI contribution\n'+
-            '    if truncation.doubles:\n'+
-            '        W_2 += 1/factorial(2) * t_ij\n'+
-            '    if ansatz.VE_MIXED:\n'+
-            '        _add_order_2_vemx_contributions(W_2, t_args, truncation)\n'+
-            '    elif ansatz.VECC:\n'+
-            '        _add_order_2_vemx_contributions(W_2, t_args, truncation)\n'+
-            '        pass  # no VECC contributions for order < 4\n'+
-            '\n'+
-            '    # Symmetrize the W operator\n'+
-            '    symmetric_w = symmetrize_tensor(N, W_2, order=2)\n'+
-            '    return symmetric_w\n'+
-            '\n'+
-            'def compute_w_operators(A, N, t_args, ansatz, truncation):\n'+
-            '    """Compute a number of W operators depending on the level of truncation."""\n'+
-            '\n'+
-            '    if not truncation.singles:\n'+
-            '        raise Exception(\n'+
-            '            "It appears that `singles` is not true, this cannot be.\\n"\n'+
-            '            "Something went terribly wrong!!!\\n\\n"\n'+
-            '            f"{truncation}\\n"\n'+
-            '        )\n'+
-            '\n'+
-            '    w_1 = _calculate_order_1_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '    w_2 = _calculate_order_2_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '    w_3 = _calculate_order_3_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '\n'+
-            '    if not truncation.doubles:\n'+
-            '        return w_1, w_2, w_3, None, None, None\n'+
-            '    else:\n'+
-            '        w_4 = _calculate_order_4_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '\n'+
-            '    if not truncation.triples:\n'+
-            '        return w_1, w_2, w_3, w_4, None, None\n'+
-            '    else:\n'+
-            '        w_5 = _calculate_order_5_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '\n'+
-            '    if not truncation.quadruples:\n'+
-            '        return w_1, w_2, w_3, w_4, w_5, None\n'+
-            '    else:\n'+
-            '        w_6 = _calculate_order_6_w_operator(A, N, t_args, ansatz, truncation)\n'+
-            '\n'+
-            '    if not truncation.quintuples:\n'+
-            '        return w_1, w_2, w_3, w_4, w_5, w_6\n'+
-            '    else:\n'+
-            '        raise Exception(\n'+
-            '            "Attempting to calculate W^7 operator (quintuples)\\n"\n'+
-            '            "This is currently not implemented!!\\n"\n'+
-            '        )\n'+
-            '\n'+
-            '# --------------------------------------------------------------------------- #\n'+
-            '# --------------------------- OPTIMIZED FUNCTIONS --------------------------- #\n'+
-            '# --------------------------------------------------------------------------- #\n'+
-            '\n'+
-            '# ---------------------------- VECI/CC CONTRIBUTIONS ---------------------------- #\n'+
-            '\n'+
-            'def _add_order_1_vemx_contributions_optimized(W_1, t_args, truncation, opt_path_list):\n'+
-            '    """Exists for error checking."""\n'+
-            '    raise Exception(\n'+
-            '        "the first possible purely VECI/CC term is (1, 1) or (dt_i * t_i)"\n'+
-            '        "which requires a W operator of at least 2nd order"\n'+
-            '    )\n'+
-            '\n'+
-            'def _add_order_2_vemx_contributions_optimized(W_2, t_args, truncation, opt_path_list):\n'+
-            '    """Calculate the order 2 VECI/CC (mixed) contributions to the W operator\n'+
-            '    for use in the calculation of the residuals.\n'+
-            '    Uses optimized summation paths generate using `contract_expression` from the `opt_einsum` library.\n'+
-            '    """\n'+
-            '    # unpack the `t_args`\n'+
-            '    t_i, *unusedargs = t_args\n'+
-            '    # make an iterable out of the `opt_path_list`\n'+
-            '    optimized_einsum = iter(opt_path_list)\n'+
-            '    # SINGLES contribution\n'+
-            '    W_2 += 1/factorial(2) * (next(optimized_einsum)(t_i, t_i))\n'+
-            '    return\n'+
-            '\n'+
-            '# ---------------------------- VECC CONTRIBUTIONS ---------------------------- #\n'+
-            '\n'+
-            'def _add_order_1_vecc_contributions_optimized(W_1, t_args, truncation, opt_path_list):\n'+
-            '    """Exists for error checking."""\n'+
-            '    raise Exception(\n'+
-            '        "the first possible purely VECC term is (2, 2) or (dt_ij * t_ij)"\n'+
-            '        "which requires a W operator of at least 4th order"\n'+
-            '    )\n'+
-            '\n'+
-            'def _add_order_2_vecc_contributions_optimized(W_2, t_args, truncation, opt_path_list):\n'+
-            '    """Exists for error checking."""\n'+
-            '    raise Exception(\n'+
-            '        "the first possible purely VECC term is (2, 2) or (dt_ij * t_ij)"\n'+
-            '        "which requires a W operator of at least 4th order"\n'+
-            '    )\n'+
-            '\n'+
-            '# ---------------------------- W OPERATOR FUNCTIONS ---------------------------- #\n'+
-            '\n'+
-            'def _calculate_order_1_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_opt_path_list, vecc_opt_path_list):\n'+
-            '    """Calculate the order 1 W operator for use in the calculation of the residuals.\n'+
-            '    Uses optimized summation paths generate using `contract_expression` from the `opt_einsum` library.\n'+
-            '    """\n'+
-            '    # unpack the `t_args`\n'+
-            '    t_i, *unusedargs = t_args\n'+
-            '    # Creating the 1st order W operator\n'+
-            '    W_1 = np.zeros((A, A, N), dtype=complex)\n'+
-            '    # Singles contribution\n'+
-            '    W_1 += t_i\n'+
-            '    return W_1\n'+
-            '\n'+
-            'def _calculate_order_2_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_opt_path_list, vecc_opt_path_list):\n'+
-            '    """Calculate the order 2 W operator for use in the calculation of the residuals.\n'+
-            '    Uses optimized summation paths generate using `contract_expression` from the `opt_einsum` library.\n'+
-            '    """\n'+
-            '    # unpack the `t_args`\n'+
-            '    t_i, t_ij, *unusedargs = t_args\n'+
-            '    # Creating the 2nd order W operator\n'+
-            '    W_2 = np.zeros((A, A, N, N), dtype=complex)\n'+
-            '\n'+
-            '    # add the VECI contribution\n'+
-            '    if truncation.doubles:\n'+
-            '        W_2 += 1/factorial(2) * t_ij\n'+
-            '    if ansatz.VE_MIXED:\n'+
-            '        _add_order_2_vemx_contributions_optimized(W_2, t_args, truncation, vemx_opt_path_list)\n'+
-            '    elif ansatz.VECC:\n'+
-            '        _add_order_2_vemx_contributions_optimized(W_2, t_args, truncation, vemx_opt_path_list)\n'+
-            '        pass  # no VECC contributions for order < 4\n'+
-            '\n'+
-            '    # Symmetrize the W operator\n'+
-            '    symmetric_w = symmetrize_tensor(N, W_2, order=2)\n'+
-            '    return symmetric_w\n'+
-            '\n'+
-            'def compute_w_operators_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths, vecc_optimized_paths):\n'+
-            '    """Compute a number of W operators depending on the level of truncation."""\n'+
-            '\n'+
-            '    if not truncation.singles:\n'+
-            '        raise Exception(\n'+
-            '            "It appears that `singles` is not true, this cannot be.\\n"\n'+
-            '            "Something went terribly wrong!!!\\n\\n"\n'+
-            '            f"{truncation}\\n"\n'+
-            '        )\n'+
-            '\n'+
-            '    w_1 = _calculate_order_1_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[0], vecc_optimized_paths[0])\n'+
-            '    w_2 = _calculate_order_2_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[1], vecc_optimized_paths[1])\n'+
-            '    w_3 = _calculate_order_3_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[2], vecc_optimized_paths[2])\n'+
-            '\n'+
-            '    if not truncation.doubles:\n'+
-            '        return w_1, w_2, w_3, None, None, None\n'+
-            '    else:\n'+
-            '        w_4 = _calculate_order_4_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[3], vecc_optimized_paths[3])\n'+
-            '\n'+
-            '    if not truncation.triples:\n'+
-            '        return w_1, w_2, w_3, w_4, None, None\n'+
-            '    else:\n'+
-            '        w_5 = _calculate_order_5_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[4], vecc_optimized_paths[4])\n'+
-            '\n'+
-            '    if not truncation.quadruples:\n'+
-            '        return w_1, w_2, w_3, w_4, w_5, None\n'+
-            '    else:\n'+
-            '        w_6 = _calculate_order_6_w_operator_optimized(A, N, t_args, ansatz, truncation, vemx_optimized_paths[5], vecc_optimized_paths[5])\n'+
-            '\n'+
-            '    if not truncation.quintuples:\n'+
-            '        return w_1, w_2, w_3, w_4, w_5, w_6\n'+
-            '    else:\n'+
-            '        raise Exception(\n'+
-            '            "Attempting to calculate W^7 operator (quintuples)\\n"\n'+
-            '            "This is currently not implemented!!\\n"\n'+
-            '        )\n'+
-            '\n'+
-            '\n'+
-            '# ---------------------------- OPTIMIZED PATHS FUNCTION ---------------------------- #\n'+
-            '\n'+
-            'def compute_optimized_vemx_paths(A, N, truncation):\n'+
-            '    """Calculate optimized paths for the VECI/CC (mixed) einsum calls up to `highest_order`."""\n'+
-            '\n'+
-            '    order_2_list, order_3_list = [], []\n'+
-            '    order_4_list, order_5_list, order_6_list = [], [], []\n'+
-            '\n'+
-            '    if truncation.singles:\n'+
-            '        order_2_list.extend([\n'+
-            '            oe.contract_expression(\'aci, cbj->abij\', (A, A, N), (A, A, N)),\n'+
-            '        ])\n'+
-            '\n'+
-            '\n'+
-            '    return [[], order_2_list]\n'+
-            '\n'+
-            '\n'+
-            'def compute_optimized_vecc_paths(A, N, truncation):\n'+
-            '    """Calculate optimized paths for the VECC einsum calls up to `highest_order`."""\n'+
-            '\n'+
-            '    order_4_list, order_5_list, order_6_list = [], [], []\n'+
-            '\n'+
-            '    if not truncation.doubles:\n'+
-            '        log.warning(\'Did not calculate optimized VECC paths of the dt amplitudes\')\n'+
-            '        return [[], [], [], [], [], []]\n'+
-            '\n'+
-            '\n'+
-            '    return [[], [], []]\n'+
-            '\n'
+        expected_result = open(
+            "tests/deep/files/test_code_w_equations/generate_w_operators_string/expected_result.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_run_main_w_eqn_func(self):
         # TODO file compare assert

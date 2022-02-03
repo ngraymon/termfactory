@@ -546,7 +546,7 @@ def _generate_explicit_connections(omega, h, unique_s_permutations):
             log.debug(f"Found an invalid term (h.m_o != o.n_h)\n{term_string}")
             continue
 
-        elif h_kwargs['n_o'] != o_kwargs['m_h']: # pragma: no cover
+        elif h_kwargs['n_o'] != o_kwargs['m_h']:  # pragma: no cover
             # TODO prebake something to trigger this
             term_string = f"{tab}{omega}, {h}, {s_list}\n{tab}{o_kwargs=}\n{tab}{h_kwargs=}\n"
             log.debug(f"Found an invalid term (h.n_o != o.m_h)\n{term_string}")
@@ -680,7 +680,7 @@ def _seperate_s_terms_by_connection(total_list):
                 # linked disconnected
                 else:
                     # this shouldn't happen, but we check just in case
-                    if omega.rank == 1: # pragma: no cover
+                    if omega.rank == 1:  # pragma: no cover
                         old_print_wrapper('??', s, term)
                         raise Exception("Linear terms should always be connected or disconnected")
 
