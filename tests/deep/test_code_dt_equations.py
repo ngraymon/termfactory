@@ -1,5 +1,9 @@
 # system imports
 # import pytest
+from pathlib import Path
+root_dir = str(Path(__file__).parent)+'\\files\\'
+classtest = 'test_code_dt_equations\\'
+
 
 # local imports
 from . import context
@@ -51,18 +55,10 @@ class Test_construct_linked_disconnected_definition:
             opt_einsum=False,
             iterator_name='optimized_einsum'
         )
-        expected_result = str(
-            '\n'
-            'def _order_2_linked_disconnected_terms(A, N, trunc, t_args, dt_args):\n'
-            '    """Calculate all uniquely linked disconnected terms generated from the wave operator ansatz.\n'
-            '    This means for order 5 we include terms such as (4, 1), (3, 1, 1), (2, 1, 1, 1), (1, 1, 1, 1, 1)\n'
-            '    But not terms (5), (3, 2), (2, 2, 1)\n'
-            '    """\n'
-            '    # unpack the `t_args` and \'dt_args\'\n'
-            '    t_i, *unusedargs = t_args\n'
-            '    dt_i, *unusedargs = dt_args\n'
+        expected_result = open(
+            root_dir+classtest+"construct_linked_disconnected_definition_basic_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_einsum(self):
         return_string = ''
@@ -73,21 +69,10 @@ class Test_construct_linked_disconnected_definition:
             opt_einsum=True,
             iterator_name='optimized_einsum'
         )
-        expected_result = str(
-            '\n'
-            'def _order_2_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list):\n'
-            '    """Calculate all uniquely linked disconnected terms generated from the wave operator ansatz.\n'
-            '    This means for order 5 we include terms such as (4, 1), (3, 1, 1), (2, 1, 1, 1)\n'
-            '    But not terms (5), (3, 2), (2, 2, 1), (1, 1, 1, 1, 1)\n'
-            '    Uses optimized summation paths generate using `contract_expression` from the `opt_einsum` library.\n'
-            '    """\n'
-            '    # unpack the `t_args` and \'dt_args\'\n'
-            '    t_i, *unusedargs = t_args\n'
-            '    dt_i, *unusedargs = dt_args\n'
-            '    # make an iterable out of the `opt_path_list`\n'
-            '    optimized_einsum = iter(opt_path_list)\n'
+        expected_result = open(
+            root_dir+classtest+"construct_linked_disconnected_definition_einsum_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_write_linked_disconnected_strings:
@@ -96,29 +81,23 @@ class Test_write_linked_disconnected_strings:
         order = 2
         function_output = cdt._write_linked_disconnected_strings(order, opt_einsum=False)
         expected_result = open(
-            "tests/deep/files/test_code_dt_equations/write_linked_disconnected_strings_basic/expected_result.py", "r"
+            root_dir+classtest+"write_linked_disconnected_strings_basic_out.py", "r"
         )
         assert function_output == expected_result.read()
 
     def test_low_order(self):
         order = 1
         function_output = cdt._write_linked_disconnected_strings(order, opt_einsum=False)
-        expected_result = str(
-            '\n'
-            'def _order_1_linked_disconnected_terms(A, N, trunc, t_args, dt_args):\n'
-            '    """Exists for error checking."""\n'
-            '    raise Exception(\n'
-            '        "the first possible purely VECI/CC term is (1, 1) or (dt_i * t_i)"\n'
-            '        "which requires a residual of at least 2nd order"\n'
-            '    )\n'
+        expected_result = open(
+            root_dir+classtest+"write_linked_disconnected_strings_low_order_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_einsum(self):
         order = 2
         function_output = cdt._write_linked_disconnected_strings(order, opt_einsum=True)
         expected_result = open(
-            "tests/deep/files/test_code_dt_equations/write_linked_disconnected_strings_einsum/expected_result.py", "r"
+            root_dir+classtest+"write_linked_disconnected_strings_einsum_out.py", "r"
         )
         assert function_output == expected_result.read()
 
@@ -134,18 +113,10 @@ class Test_construct_un_linked_disconnected_definition:
             opt_einsum=False,
             iterator_name='optimized_einsum'
         )
-        expected_result = str(
-            '\n'
-            'def _order_2_un_linked_disconnected_terms(A, N, trunc, t_args, dt_args):\n'
-            '    """Calculate all uniquely un-linked disconnected terms generated from the wave operator ansatz.\n'
-            '    This means for order 5 we include terms such as (3, 2), (2, 2, 1)\n'
-            '    But not terms (5), (4, 1), (3, 1, 1), (2, 1, 1, 1), (1, 1, 1, 1, 1)\n'
-            '    """\n'
-            '    # unpack the `t_args` and \'dt_args\'\n'
-            '    t_i, *unusedargs = t_args\n'
-            '    dt_i, *unusedargs = dt_args\n'
+        expected_result = open(
+            root_dir+classtest+"construct_un_linked_disconnected_definition_basic_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_einsum(self):
         return_string = ''
@@ -156,21 +127,10 @@ class Test_construct_un_linked_disconnected_definition:
             opt_einsum=True,
             iterator_name='optimized_einsum'
         )
-        expected_result = str(
-            '\n'
-            'def _order_2_un_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list):\n'
-            '    """Calculate all uniquely un-linked disconnected terms generated from the wave operator ansatz.\n'
-            '    This means for order 5 we include terms such as (3, 2), (2, 2, 1)\n'
-            '    But not terms (5), (4, 1), (3, 1, 1), (2, 1, 1, 1), (1, 1, 1, 1, 1)\n'
-            '    Uses optimized summation paths generate using `contract_expression` from the `opt_einsum` library.\n'
-            '    """\n'
-            '    # unpack the `t_args` and \'dt_args\'\n'
-            '    t_i, *unusedargs = t_args\n'
-            '    dt_i, *unusedargs = dt_args\n'
-            '    # make an iterable out of the `opt_path_list`\n'
-            '    optimized_einsum = iter(opt_path_list)\n'
+        expected_result = open(
+            root_dir+classtest+"construct_un_linked_disconnected_definition_einsum_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_write_un_linked_disconnected_strings:
@@ -179,7 +139,7 @@ class Test_write_un_linked_disconnected_strings:
         order = 5
         function_output = cdt._write_un_linked_disconnected_strings(order, opt_einsum=False)
         expected_result = open(
-            "tests/deep/files/test_code_dt_equations/write_un_linked_disconnected_strings_high_order/expected_result.py", "r"
+            root_dir+classtest+"write_un_linked_disconnected_strings_high_order_out.py", "r"
         )
         assert function_output == expected_result.read()
 
@@ -187,23 +147,17 @@ class Test_write_un_linked_disconnected_strings:
         order = 5
         function_output = cdt._write_un_linked_disconnected_strings(order, opt_einsum=True)
         expected_result = open(
-            "tests/deep/files/test_code_dt_equations/write_un_linked_disconnected_strings_high_order_einsum/expected_result.py", "r"
+            root_dir+classtest+"write_un_linked_disconnected_strings_high_order_einsum_out.py", "r"
         )
         assert function_output == expected_result.read()
 
     def test_low_order(self):
         order = 2
         function_output = cdt._write_un_linked_disconnected_strings(order, opt_einsum=False)
-        expected_result = str(
-            '\n'
-            'def _order_2_un_linked_disconnected_terms(A, N, trunc, t_args, dt_args):\n'
-            '    """Exists for error checking."""\n'
-            '    raise Exception(\n'
-            '        "the first possible purely VECC term is (2, 2) or (dt_ij * t_ij)"\n'
-            '        "which requires a residual of at least 4th order"\n'
-            '    )\n'
+        expected_result = open(
+            root_dir+classtest+"write_un_linked_disconnected_strings_low_order_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_construct_dt_amplitude_definition:
@@ -217,14 +171,10 @@ class Test_construct_dt_amplitude_definition:
             opt_einsum=False,
             iterator_name='optimized_einsum'
         )
-        expected_result = str(
-            '\n'
-            'def _calculate_order_2_dt_amplitude(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args):\n'
-            '    """Calculate the derivative of the 2 t-amplitude for use in the calculation of the residuals."""\n'
-            '    # unpack the `w_args`\n'
-            '    w_i, w_ij, *unusedargs = w_args\n'
+        expected_result = open(
+            root_dir+classtest+"construct_dt_amplitude_definition_basic_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_einsum(self):
         return_string = ''
@@ -235,16 +185,10 @@ class Test_construct_dt_amplitude_definition:
             opt_einsum=True,
             iterator_name='optimized_einsum'
         )
-        expected_result = str(
-            '\n'
-            'def _calculate_order_3_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_epsilon, opt_path_list):\n'
-            '    """Calculate the derivative of the 3 t-amplitude for use in the calculation of the residuals.\n'
-            '    Uses optimized summation paths generate using `contract_expression` from the `opt_einsum` library.\n'
-            '    """\n    # unpack the `w_args`\n    w_i, w_ij, w_ijk, *unusedargs = w_args\n'
-            '    # make an iterable out of the `opt_path_list`\n'
-            '    optimized_einsum = iter(opt_path_list)\n'
+        expected_result = open(
+            root_dir+classtest+"construct_dt_amplitude_definition_einsum_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_write_dt_amplitude_strings:
@@ -253,7 +197,7 @@ class Test_write_dt_amplitude_strings:
         order = 2
         function_output = cdt._write_dt_amplitude_strings(order, opt_einsum=False)
         expected_result = open(
-            "tests/deep/files/test_code_dt_equations/write_dt_amplitude_strings_basic/expected_result.py", "r"
+            root_dir+classtest+"write_dt_amplitude_strings_basic_out.py", "r"
         )
         assert function_output == expected_result.read()
 
@@ -261,7 +205,7 @@ class Test_write_dt_amplitude_strings:
         order = 5
         function_output = cdt._write_dt_amplitude_strings(order, opt_einsum=False)
         expected_result = open(
-            "tests/deep/files/test_code_dt_equations/write_dt_amplitude_strings_high_order/expected_result.py", "r"
+            root_dir+classtest+"write_dt_amplitude_strings_high_order_out.py", "r"
         )
         assert function_output == expected_result.read()
 
@@ -269,7 +213,7 @@ class Test_write_dt_amplitude_strings:
         order = 2
         function_output = cdt._write_dt_amplitude_strings(order, opt_einsum=True)
         expected_result = open(
-            "tests/deep/files/test_code_dt_equations/write_dt_amplitude_strings_einsum/expected_result.py", "r"
+            root_dir+classtest+"write_dt_amplitude_strings_einsum_out.py", "r"
         )
         assert function_output == expected_result.read()
 
@@ -277,7 +221,7 @@ class Test_write_dt_amplitude_strings:
         order = 5
         function_output = cdt._write_dt_amplitude_strings(order, opt_einsum=True)
         expected_result = open(
-            "tests/deep/files/test_code_dt_equations/write_dt_amplitude_strings_einsum_high_order/expected_result.py", "r"
+            root_dir+classtest+"write_dt_amplitude_strings_einsum_high_order_out.py", "r"
         )
         assert function_output == expected_result.read()
 
@@ -287,38 +231,18 @@ class Test_write_master_dt_amplitude_function:
     def test_basic(self):
         order = 2
         function_output = cdt._write_master_dt_amplitude_function(order, opt_einsum=False)
-        expected_result = str(
-            '\n'
-            'def solve_doubles_equations(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args):\n'
-            '    """Compute the change in the t_ij term (doubles)"""\n'
-            '\n'
-            '    if not trunc.doubles:\n'
-            '        raise Exception(\n'
-            '            "It appears that doubles is not true, this cannot be."\n'
-            '            "Something went terribly wrong!!!"\n'
-            '        )\n'
-            '    dt_ij = _calculate_order_2_dt_amplitude(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args)\n'
-            '    return dt_ij\n'
+        expected_result = open(
+            root_dir+classtest+"write_master_dt_amplitude_function_basic_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_einsum(self):
         order = 2
         function_output = cdt._write_master_dt_amplitude_function(order, opt_einsum=True)
-        expected_result = str(
-            '\n'
-            'def solve_doubles_equations_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_path_list):\n'
-            '    """Compute the change in the t_ij term (doubles)"""\n'
-            '\n'
-            '    if not trunc.doubles:\n'
-            '        raise Exception(\n'
-            '            "It appears that doubles is not true, this cannot be."\n'
-            '            "Something went terribly wrong!!!"\n'
-            '        )\n'
-            '    dt_ij = _calculate_order_2_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_path_list)\n'
-            '    return dt_ij\n'
+        expected_result = open(
+            root_dir+classtest+"write_master_dt_amplitude_function_einsum_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_write_optimized_dt_amplitude_paths_function:
@@ -326,17 +250,10 @@ class Test_write_optimized_dt_amplitude_paths_function:
     def test_basic(self):
         max_order = 2
         function_output = cdt._write_optimized_dt_amplitude_paths_function(max_order)
-        expected_result = str(
-            '\n'
-            'def compute_optimized_paths(A, N, truncation):\n'
-            '    """Calculate optimized paths for the einsum calls up to `highest_order`."""\n'
-            '\n'
-            '    order_1_list, order_2_list, order_3_list = [], [], []\n'
-            '    order_4_list, order_5_list, order_6_list = [], [], []\n'
-            '\n'
-            '    return [None]\n'
+        expected_result = open(
+            root_dir+classtest+"write_optimized_dt_amplitude_paths_function_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_generate_dt_amplitude_string:
@@ -345,7 +262,7 @@ class Test_generate_dt_amplitude_string:
         max_order = 2
         function_output = cdt.generate_dt_amplitude_string(max_order, s1=75, s2=28)
         expected_result = open(
-            "tests/deep/files/test_code_dt_equations/generate_dt_amplitude_string/expected_result.py", "r"
+            root_dir+classtest+"generate_dt_amplitude_string_out.py", "r"
         )
         assert function_output == expected_result.read()
 

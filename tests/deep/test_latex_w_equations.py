@@ -1,7 +1,9 @@
 # system imports
 # import re
 # import pytest
-
+from pathlib import Path
+root_dir = str(Path(__file__).parent)+'\\files\\'
+classtest = 'test_latex_w_equations\\'
 # local imports
 from . import context
 import latex_w_equations as lw
@@ -48,14 +50,10 @@ class Test_Latex_of_W_operators:
     def test_ground_state_w_equations_latex(self):
         max_w_order = 2
         function_output = lw.ground_state_w_equations_latex(max_w_order, path="./ground_state_w_equations.tex")
-        expected_result = str(
-            '\\begin{align}\n'+
-            '    \\bW^{0} &= 1\n\\\\\n'+
-            '    \\bW^{1} &= \\bt^{1}\n\\\\\n'+
-            '    \\bW^{2} &= \\hat{S}(\\frac{1}{2!}(\\bt^{1})^2 + \\bt^{2})\n'+
-            '\\end{align}\n'
+        expected_result = open(
+            root_dir+classtest+"ground_state_w_equations_latex_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_generate_t_terms_group(self):
         w_ntuple = lw.w_namedtuple_latex(m=2, n=0)

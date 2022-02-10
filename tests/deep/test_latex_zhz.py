@@ -1,7 +1,9 @@
 # system imports
 # import re
 import pytest
-
+from pathlib import Path
+root_dir = str(Path(__file__).parent)+'\\files\\'
+classtest = 'test_latex_zhz\\'
 # local imports
 from . import context
 import latex_zhz as zhz
@@ -638,11 +640,10 @@ class Test_preparing_of_terms:
             remove_f_terms=False,
             print_prefactors=False
         )
-        expected_result = str(
-            '(\\bz_0\\bh_0 + f\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}} + \\bar{f}\\bz^{}_{k\\blue{}'
-            '\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{})'
+        expected_result = open(
+            root_dir+classtest+"prepare_second_z_latex_basic_case_1_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_prepare_third_z_latex(self):
         term_list = [
@@ -681,10 +682,10 @@ class Test_preparing_of_terms:
             remove_f_terms=False,
             print_prefactors=False
         )
-        expected_result = str(
-            '(\\bh_0\\bz_0 + \\bar{f}\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{})'
+        expected_result = open(
+            root_dir+classtest+"prepare_third_z_latex_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_prepare_third_z_latex_if_case(self):
         term_list = [
@@ -743,11 +744,10 @@ class Test_preparing_of_terms:
             remove_f_terms=False,
             print_prefactors=False
         )
-        expected_result = str(
-            '(\\bh_0\\bz_0 + \\bar{f}\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{} + f\\bh^{'
-            '\\blue{}\\blue{k}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{k}\\red{}})'
+        expected_result = open(
+            root_dir+classtest+"prepare_third_z_latex_if_case_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_prepare_fourth_z_latex(self):
         term_list = [  # file flag
@@ -814,15 +814,11 @@ class Test_preparing_of_terms:
             remove_f_terms=False,
             print_prefactors=False
         )
-        expected_result = str(
-            '(\\disconnected{\\bz_0\\bh_0\\bz_0} + \\disconnected{\\bar{f}\\bz^{}_{\\blue{k}\\red{}}\\bh_0\\bz^{\\magen'
-            'ta{k}\\blue{}\\red{}}_{}} + \\disconnected{f\\bz^{\\blue{k}\\red{}}_{}\\bh_0\\bz^{}_{\\magenta{k}\\blue{}'
-            '\\red{}}} + \\disconnected{\\bar{f}\\bz_0\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red'
-            '{}}_{}} + \\disconnected{f\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}}\\bz_0} + \\disconne'
-            'cted{f\\bz_0\\bh^{\\blue{}\\blue{k}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{k}\\red{}}} + \\disconnected{\\ba'
-            'r{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz_0})'
+        expected_result = open(
+            root_dir+classtest+"prepare_fourth_z_latex_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
+
 
     def test_long(self):
         term_list = [  # file flag
@@ -1121,57 +1117,10 @@ class Test_preparing_of_terms:
             remove_f_terms=False,
             print_prefactors=False
         )
-        expected_result = str(  # file flag
-            '(\n\\disconnected{\\bz_0\\bh_0\\bz_0} + \\disconnected{\\bar{f}\\bz^{}_{\\blue{k}\\red{}}\\bh_0\\bz^{\\mag'
-            'enta{k}\\blue{}\\red{}}_{}} + \\disconnected{\\bar{f}^{2}\\bz^{}_{\\blue{kl}\\red{}}\\bh_0\\bz^{\\magenta{'
-            'kl}\\blue{}\\red{}}_{}} + \\disconnected{f\\bz^{\\blue{k}\\red{}}_{}\\bh_0\\bz^{}_{\\magenta{k}\\blue{}\\r'
-            'ed{}}} + \\disconnected{f\\bar{f}\\bz^{\\blue{k}\\red{}}_{\\blue{l}\\red{}}\\bh_0\\bz^{\\magenta{l}\\blue{'
-            '}\\red{}}_{\\magenta{k}\\blue{}\\red{}}} + \\disconnected{f^{2}\\bz^{\\blue{kl}\\red{}}_{}\\bh_0\\bz^{}_{'
-            '\\magenta{kl}\\blue{}\\red{}}} + \\disconnected{\\bar{f}\\bz_0\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\ma'
-            'genta{}\\blue{k}\\red{}}_{}}\n    \\\\  &+  % split long equation\n\\disconnected{\\bar{f}^{2}\\bz^{}_{\\b'
-            'lue{k}\\red{}}\\bh^{}_{\\blue{}\\blue{l}\\red{}}\\bz^{\\magenta{k}\\blue{l}\\red{}}_{}} + \\disconnected{f'
-            '\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}}\\bz_0} + \\disconnected{f\\bar{f}\\bz^{\\blue'
-            '{k}\\red{}}_{}\\bh^{}_{\\blue{}\\blue{l}\\red{}}\\bz^{\\magenta{}\\blue{l}\\red{}}_{\\magenta{k}\\blue{}\\'
-            'red{}}} + \\disconnected{f\\bar{f}\\bz^{k\\blue{}\\red{}}_{\\blue{l}\\red{}}\\bh^{}_{\\blue{k}\\blue{}\\re'
-            'd{}}\\bz^{\\magenta{l}\\blue{}\\red{}}_{}} + \\disconnected{f^{2}\\bz^{k\\blue{l}\\red{}}_{}\\bh^{}_{\\blu'
-            'e{k}\\blue{}\\red{}}\\bz^{}_{\\magenta{l}\\blue{}\\red{}}} + \\disconnected{\\bar{f}^{2}\\bz_0\\bh^{}_{\\b'
-            'lue{}\\blue{kl}\\red{}}\\bz^{\\magenta{}\\blue{kl}\\red{}}_{}} + f\\bar{f}\\bz^{k\\blue{}\\red{}}_{}\\bh^{'
-            '}_{\\blue{k}\\blue{l}\\red{}}\\bz^{\\magenta{}\\blue{l}\\red{}}_{}\n    \\\\  &+  % split long equation\nf'
-            '\\bar{f}^{2}\\bz^{k\\blue{}\\red{}}_{\\blue{l}\\red{}}\\bh^{}_{\\blue{k}\\blue{m}\\red{}}\\bz^{\\magenta{l'
-            '}\\blue{m}\\red{}}_{} + \\disconnected{f^{2}\\bz^{kl\\blue{}\\red{}}_{}\\bh^{}_{\\blue{kl}\\blue{}\\red{}}'
-            '\\bz_0} + f^{2}\\bar{f}\\bz^{k\\blue{l}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{m}\\red{}}\\bz^{\\magenta{}\\bl'
-            'ue{m}\\red{}}_{\\magenta{l}\\blue{}\\red{}} + \\disconnected{f\\bz_0\\bh^{\\blue{}\\blue{k}\\red{}}_{}\\bz'
-            '^{}_{\\magenta{}\\blue{k}\\red{}}} + \\disconnected{\\bar{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blu'
-            'e{}\\red{}}_{}\\bz_0} + \\disconnected{f\\bar{f}\\bz^{}_{\\blue{k}\\red{}}\\bh^{\\blue{}\\blue{l}\\red{}}_'
-            '{}\\bz^{\\magenta{k}\\blue{}\\red{}}_{\\magenta{}\\blue{l}\\red{}}} + \\disconnected{\\bar{f}^{2}\\bz^{}_{'
-            'k\\blue{l}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz^{\\magenta{l}\\blue{}\\red{}}_{}}\n    \\\\  &+  '
-            '% split long equation\n\\disconnected{f^{2}\\bz^{\\blue{k}\\red{}}_{}\\bh^{\\blue{}\\blue{l}\\red{}}_{}\\b'
-            'z^{}_{\\magenta{k}\\blue{l}\\red{}}} + \\disconnected{f\\bar{f}\\bz^{\\blue{k}\\red{}}_{l\\blue{}\\red{}}'
-            '\\bh^{\\blue{l}\\blue{}\\red{}}_{}\\bz^{}_{\\magenta{k}\\blue{}\\red{}}} + \\disconnected{f\\bar{f}\\bz_0'
-            '\\bh^{\\blue{}\\blue{l}\\red{}}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{\\magenta{}'
-            '\\blue{l}\\red{}}} + \\bar{f}^{2}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{\\blue{}\\blue'
-            '{l}\\red{}}\\bz^{\\magenta{}\\blue{l}\\red{}}_{} + \\bar{f}^{3}\\bz^{}_{k\\blue{l}\\red{}}\\bh^{\\blue{k}'
-            '\\blue{}\\red{}}_{\\blue{}\\blue{m}\\red{}}\\bz^{\\magenta{l}\\blue{m}\\red{}}_{} + f^{2}\\bz^{k\\blue{}\\'
-            'red{}}_{}\\bh^{\\blue{}\\blue{l}\\red{}}_{\\blue{k}\\blue{}\\red{}}\\bz^{}_{\\magenta{}\\blue{l}\\red{}} +'
-            ' \\disconnected{f\\bar{f}\\bz^{k\\blue{}\\red{}}_{l\\blue{}\\red{}}\\bh^{\\blue{l}\\blue{}\\red{}}_{\\blue'
-            '{k}\\blue{}\\red{}}\\bz_0}\n    \\\\  &+  % split long equation\nf\\bar{f}^{2}\\bz^{\\blue{k}\\red{}}_{l\\'
-            'blue{}\\red{}}\\bh^{\\blue{l}\\blue{}\\red{}}_{\\blue{}\\blue{m}\\red{}}\\bz^{\\magenta{}\\blue{m}\\red{}}'
-            '_{\\magenta{k}\\blue{}\\red{}} + f^{2}\\bar{f}\\bz^{k\\blue{}\\red{}}_{\\blue{l}\\red{}}\\bh^{\\blue{}\\bl'
-            'ue{m}\\red{}}_{\\blue{k}\\blue{}\\red{}}\\bz^{\\magenta{l}\\blue{}\\red{}}_{\\magenta{}\\blue{m}\\red{}} +'
-            ' f^{3}\\bz^{k\\blue{l}\\red{}}_{}\\bh^{\\blue{}\\blue{m}\\red{}}_{\\blue{k}\\blue{}\\red{}}\\bz^{}_{\\mage'
-            'nta{l}\\blue{m}\\red{}} + \\disconnected{f^{2}\\bz_0\\bh^{\\blue{}\\blue{kl}\\red{}}_{}\\bz^{}_{\\magenta{'
-            '}\\blue{kl}\\red{}}} + f\\bar{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{l}\\red{}}_{}\\bz^{}_{\\ma'
-            'genta{}\\blue{l}\\red{}} + \\disconnected{\\bar{f}^{2}\\bz^{}_{kl\\blue{}\\red{}}\\bh^{\\blue{kl}\\blue{}'
-            '\\red{}}_{}\\bz_0} + f\\bar{f}^{2}\\bz^{}_{k\\blue{l}\\red{}}\\bh^{\\blue{k}\\blue{m}\\red{}}_{}\\bz^{\\ma'
-            'genta{l}\\blue{}\\red{}}_{\\magenta{}\\blue{m}\\red{}}\n    \\\\  &+  % split long equation\n\\disconnecte'
-            'd{f^{2}\\bz_0\\bh^{\\blue{}\\blue{kl}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{kl}\\red{}}} + f\\bar{f}\\bz^{}'
-            '_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{l}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{l}\\red{}} + \\disconnect'
-            'ed{\\bar{f}^{2}\\bz^{}_{kl\\blue{}\\red{}}\\bh^{\\blue{kl}\\blue{}\\red{}}_{}\\bz_0} + f\\bar{f}^{2}\\bz^{'
-            '}_{k\\blue{l}\\red{}}\\bh^{\\blue{k}\\blue{m}\\red{}}_{}\\bz^{\\magenta{l}\\blue{}\\red{}}_{\\magenta{}\\b'
-            'lue{m}\\red{}} + f^{2}\\bar{f}\\bz^{\\blue{k}\\red{}}_{l\\blue{}\\red{}}\\bh^{\\blue{l}\\blue{m}\\red{}}_{'
-            '}\\bz^{}_{\\magenta{k}\\blue{m}\\red{}}\n)'
+        expected_result = open(
+            root_dir+classtest+"prepare_fourth_z_latex_long_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_build_z_terms:
@@ -1207,11 +1156,10 @@ class Test_build_z_terms:
             ]
         )
         function_output = zhz._build_second_z_term(LHS, H, Z, remove_f_terms=False)
-        expected_result = str(
-            '(\\bz_0\\bh_0 + f\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}} + \\bar{f}\\bz^{}_{k\\blue{}'
-            '\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{})'
+        expected_result = open(
+            root_dir+classtest+"build_second_z_term_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_build_third_z_term(self):
         LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
@@ -1231,10 +1179,10 @@ class Test_build_z_terms:
             ]
         )
         function_output = zhz._build_third_z_term(LHS, H, Z, remove_f_terms=False)
-        expected_result = str(
-            '(\\bh_0\\bz_0 + \\bar{f}\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red{}}_{})'
+        expected_result = open(
+            root_dir+classtest+"build_third_z_term_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_build_fourth_z_term(self):
         LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
@@ -1255,15 +1203,10 @@ class Test_build_z_terms:
             ]
         )
         function_output = zhz._build_fourth_z_term(LHS, H, Z, remove_f_terms=False)
-        expected_result = str(
-            '(\\disconnected{\\bz_0\\bh_0\\bz_0} + \\disconnected{\\bar{f}\\bz^{}_{\\blue{k}\\red{}}\\bh_0\\bz^{\\magen'
-            'ta{k}\\blue{}\\red{}}_{}} + \\disconnected{f\\bz^{\\blue{k}\\red{}}_{}\\bh_0\\bz^{}_{\\magenta{k}\\blue{}'
-            '\\red{}}} + \\disconnected{\\bar{f}\\bz_0\\bh^{}_{\\blue{}\\blue{k}\\red{}}\\bz^{\\magenta{}\\blue{k}\\red'
-            '{}}_{}} + \\disconnected{f\\bz^{k\\blue{}\\red{}}_{}\\bh^{}_{\\blue{k}\\blue{}\\red{}}\\bz_0} + \\disconne'
-            'cted{f\\bz_0\\bh^{\\blue{}\\blue{k}\\red{}}_{}\\bz^{}_{\\magenta{}\\blue{k}\\red{}}} + \\disconnected{\\ba'
-            'r{f}\\bz^{}_{k\\blue{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz_0})'
+        expected_result = open(
+            root_dir+classtest+"build_fourth_z_term_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_build_fifth_z_term(self):
         LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
@@ -1288,11 +1231,10 @@ class Test_build_z_terms:
             ]
         )
         function_output = zhz._build_fifth_z_term(LHS, Z)
-        expected_result = str(
-            '\\dv{\\hat{\\bt}^{i}_{\\gamma}}{\\tau}\\,\\hat{\\bz}_{0, \\gamma} + \\dv{\\hat{\\bt}_{0, \\gamma}}{\\tau}'
-            '\\,\\hat{\\bz}^{i}_{\\gamma}'
+        expected_result = open(
+            root_dir+classtest+"build_fifth_z_term_else_cases_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_gen_latex_eqns:
@@ -1321,12 +1263,10 @@ class Test_gen_latex_eqns:
             only_ground_state=True,
             remove_f_terms=False
         )
-        expected_result = str(
-            '\\bh_{0,xb}(1-\\delta_{x\\gamma})\\\\&+\\sum\\Big((\\bh_0\\bz_0 + \\bar{f}\\bh_{\\blue{}\\blue{k}\\red{}}'
-            '\\bz^{\\magenta{}\\blue{k}\\red{}})\\Big)(1-\\delta_{cb})\\\\&-i\\sum\\Big(\\dv{\\hat{\\bt}_{0, \\gamma}}{'
-            '\\tau}\\,\\hat{\\bz}_{0, \\gamma}\\Big)'
+        expected_result = open(
+            root_dir+classtest+"generate_z_symmetric_latex_equations_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
 
 class Test_run_main_zhz_for_coverage:

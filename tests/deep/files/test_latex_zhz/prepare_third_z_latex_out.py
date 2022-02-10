@@ -1,0 +1,1 @@
+(\bh_0\bz_0 + \bar{f}\bh^{}_{\blue{}\blue{k}\red{}}\bz^{\magenta{}\blue{k}\red{}}_{})

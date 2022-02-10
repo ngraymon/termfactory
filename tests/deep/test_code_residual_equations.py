@@ -1,13 +1,12 @@
 # system imports
-
-# import re
-# import pytest
-
+from pathlib import Path
+root_dir = str(Path(__file__).parent)+'\\files\\'
+classtest = 'test_code_residual_equations\\'
 # local imports
 from . import context
 from typing import ValuesView
 import code_residual_equations as cre
-import test_vars as vars
+from . import test_vars as vars
 
 # global vars
 h_0_zeros = cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0)
@@ -414,7 +413,7 @@ class Test_write_residual_function_string:
         order = 0
         function_output = cre.write_residual_function_string(residual_terms_list, order)
         expected_result = open(
-            "tests/deep/files/test_code_residual_equations/write_residual_function_string_basic/expected_result.py", "r"
+            root_dir+classtest+"write_residual_function_string_basic_out.py", "r"
         )
         assert function_output == expected_result.read()
 
@@ -423,7 +422,7 @@ class Test_write_residual_function_string:
         order = 2
         function_output = cre.write_residual_function_string(residual_terms_list, order)
         expected_result = open(
-            "tests/deep/files/test_code_residual_equations/write_residual_function_string_high_order_h_and_w/expected_result.py", "r"
+            root_dir+classtest+"write_residual_function_string_high_order_h_and_w_out.py", "r"
         )
         assert function_output == expected_result.read()
 
@@ -463,9 +462,7 @@ class Test_generate_python_code_for_residual_functions:
         ]
         max_order = 1
         function_output = cre.generate_python_code_for_residual_functions(term_lists, max_order)
-        expected_result = open(
-            "tests/deep/files/test_code_residual_equations/generate_python_code_for_residual_functions/expected_result.py", "r"
-        )
+        expected_result = open(root_dir+classtest+"generate_python_code_for_residual_functions_out.py", "r")
         assert function_output == expected_result.read()
 
 

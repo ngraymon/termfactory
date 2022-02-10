@@ -1,12 +1,14 @@
 # system imports
 # # import pytest
-
+from pathlib import Path
+root_dir = str(Path(__file__).parent)+'\\files\\'
+classtest = 'test_code_full_cc\\'
 
 # local imports
 from . import context
 import code_full_cc as cfcc
 import latex_full_cc as fcc
-import test_vars as vars
+from . import test_vars as vars
 
 # global vars
 zero_h_op_nt = fcc.connected_h_operator_namedtuple(rank=0, m=0, n=0, m_o=0, n_o=0, m_t=[0], n_t=[0])
@@ -339,7 +341,7 @@ class Test_gen_full_cc_py_eqns:
             opt_einsum=False
         )
         expected_result = open(
-            "tests/deep/files/test_code_full_cc/generate_full_cc_compute_function/expected_result.py", "r"
+            root_dir+classtest+"generate_full_cc_compute_function_out.py", "r"
         )
         assert function_output == expected_result.read()
 
@@ -353,55 +355,25 @@ class Test_gen_full_cc_py_eqns:
             opt_einsum=True
         )
         expected_result = open(
-            "tests/deep/files/test_code_full_cc/generate_full_cc_compute_function_opt_einsum/expected_result.py", "r"
+            root_dir+classtest+"generate_full_cc_compute_function_opt_einsum_out.py", "r"
         )
         assert function_output == expected_result.read()
-
 
     def test_write_master_full_cc_compute_function(self):
         omega_term = fcc.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
         function_output = cfcc._write_master_full_cc_compute_function(omega_term, opt_einsum=False)
-        expected_result = str(
-            '\n'
-            'def compute_m0_n1_amplitude(A, N, ansatz, truncation, h_args, t_args):\n'
-            '    """Compute the operator(name=\'b\', rank=1, m=0, n=1) amplitude."""\n'
-            '    truncation.confirm_at_least_singles()\n'
-            '\n'
-            '    # the residual tensor\n'
-            '    R = np.zeros(shape=(A, A, N), dtype=complex)\n'
-            '\n'
-            '    # add each of the terms\n'
-            '    add_m0_n1_fully_connected_terms(R, ansatz, truncation, h_args, t_args)\n'
-            '    add_m0_n1_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args)\n'
-            '    add_m0_n1_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)\n'
-            '    return R\n'
-            '\n'
+        expected_result = open(
+            root_dir+classtest+"write_master_full_cc_compute_function_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_write_master_full_cc_compute_function_opt_einsum(self):
         omega_term = fcc.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
         function_output = cfcc._write_master_full_cc_compute_function(omega_term, opt_einsum=True)
-        expected_result = str(
-            '\n'
-            'def compute_m0_n1_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_paths):\n'
-            '    """Compute the operator(name=\'b\', rank=1, m=0, n=1) amplitude."""\n'
-            '    truncation.confirm_at_least_singles()\n'
-            '\n'
-            '    # the residual tensor\n'
-            '    R = np.zeros(shape=(A, A, N), dtype=complex)\n'
-            '\n'
-            '    # unpack the optimized paths\n'
-            '    optimized_connected_paths, optimized_linked_paths, optimized_unlinked_paths = opt_paths\n'
-            '\n'
-            '    # add each of the terms\n'
-            '    add_m0_n1_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_connected_paths)\n'
-            '    add_m0_n1_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_linked_paths)\n'
-            '    add_m0_n1_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_unlinked_paths)\n'
-            '    return R\n'
-            '\n'
+        expected_result = open(
+            root_dir+classtest+"write_master_full_cc_compute_function_opt_einsum_out.py", "r"
         )
-        assert function_output == expected_result
+        assert function_output == expected_result.read()
 
     def test_wrap_full_cc_generation(self):
         s1, s2 = 75, 28
@@ -431,14 +403,14 @@ class Test_gen_full_cc_py_eqns:
             only_ground_state=False,
             opt_einsum=False
         )
-        expected_result = open("tests/deep/files/test_code_full_cc/wrap_full_cc_generation/expected_result.py", "r")
+        expected_result = open(root_dir+classtest+"wrap_full_cc_generation_out.py", "r")
         assert function_output == expected_result.read()
 
     def test_generate_full_cc_python_file_contents(self):
         truncations = [1, 1, 1, 1]
         function_output = cfcc._generate_full_cc_python_file_contents(truncations, only_ground_state=False)
-        expected_result = '# ------------------------------------------------------------------------------------------------------------- #\n# --------------------------------------------- DEFAULT FUNCTIONS --------------------------------------------- #\n# ------------------------------------------------------------------------------------------------------------- #\n\n# --------------------------------------------- INDIVIDUAL TERMS --------------------------------------------- #\n\n\n# -------------- operator(name=\'\', rank=0, m=0, n=0) TERMS -------------- #\ndef add_m0_n0_fully_connected_terms(R, ansatz, truncation, h_args, t_args):\n    """Calculate the operator(name=\'\', rank=0, m=0, n=0) fully_connected terms."""\n\n    if ansatz.ground_state:\n        R += h_args[(0, 0)]\n\n        if truncation.at_least_linear:\n            if truncation.singles:\n                R += np.einsum(\'aci, cbi -> ab\', h_args[(0, 1)], t_args[(1, 0)])\n    else:\n        R += h_args[(0, 0)]\n\n        if truncation.at_least_linear:\n            if truncation.singles:\n                R += np.einsum(\'aci, cbi -> ab\', h_args[(1, 0)], t_args[(0, 1)])\n    return\n\n\ndef add_m0_n0_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args):\n    """Calculate the operator(name=\'\', rank=0, m=0, n=0) linked_disconnected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        pass  # no valid terms here\n    return\n\n\ndef add_m0_n0_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args):\n    """Calculate the operator(name=\'\', rank=0, m=0, n=0) unlinked_disconnected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        pass  # no valid terms here\n    return\n\n# --------------------------------------------------------------------------- #\n# ---------------------------- RANK  1 FUNCTIONS ---------------------------- #\n# --------------------------------------------------------------------------- #\n\n\n# -------------- operator(name=\'b\', rank=1, m=0, n=1) TERMS -------------- #\ndef add_m0_n1_fully_connected_terms(R, ansatz, truncation, h_args, t_args):\n    """Calculate the operator(name=\'b\', rank=1, m=0, n=1) fully_connected terms."""\n\n    if ansatz.ground_state:\n        R += h_args[(1, 0)]\n\n        if truncation.at_least_linear:\n    else:\n        R += h_args[(1, 0)]\n\n        if truncation.at_least_linear:\n    return\n\n\ndef add_m0_n1_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args):\n    """Calculate the operator(name=\'b\', rank=1, m=0, n=1) linked_disconnected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        pass  # no valid terms here\n    return\n\n\ndef add_m0_n1_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args):\n    """Calculate the operator(name=\'b\', rank=1, m=0, n=1) unlinked_disconnected terms."""\n\n    if ansatz.ground_state:\n        if truncation.singles:\n            R += np.einsum(\'ac, cbz -> abz\', h_args[(0, 0)], t_args[(1, 0)])\n\n        if truncation.at_least_linear:\n    else:\n        if truncation.singles:\n            R += np.einsum(\'ac, cbz -> abz\', h_args[(0, 0)], t_args[(1, 0)])\n\n        if truncation.at_least_linear:\n    return\n\n\n# -------------- operator(name=\'d\', rank=1, m=1, n=0) TERMS -------------- #\ndef add_m1_n0_fully_connected_terms(R, ansatz, truncation, h_args, t_args):\n    """Calculate the operator(name=\'d\', rank=1, m=1, n=0) fully_connected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        pass  # no valid terms here\n    return\n\n\ndef add_m1_n0_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args):\n    """Calculate the operator(name=\'d\', rank=1, m=1, n=0) linked_disconnected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        pass  # no valid terms here\n    return\n\n\ndef add_m1_n0_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args):\n    """Calculate the operator(name=\'d\', rank=1, m=1, n=0) unlinked_disconnected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        if truncation.singles:\n            R += np.einsum(\'ac, cbz -> abz\', h_args[(0, 0)], t_args[(0, 1)])\n\n        if truncation.at_least_linear:\n    return\n\n\n# --------------------------------------------- RESIDUAL FUNCTIONS --------------------------------------------- #\ndef compute_m0_n0_amplitude(A, N, ansatz, truncation, h_args, t_args):\n    """Compute the operator(name=\'\', rank=0, m=0, n=0) amplitude."""\n    truncation.confirm_at_least_singles()\n\n    # the residual tensor\n    R = np.zeros(shape=(A, A), dtype=complex)\n\n    # add each of the terms\n    add_m0_n0_fully_connected_terms(R, ansatz, truncation, h_args, t_args)\n    add_m0_n0_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args)\n    add_m0_n0_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)\n    return R\n\n\ndef compute_m0_n1_amplitude(A, N, ansatz, truncation, h_args, t_args):\n    """Compute the operator(name=\'b\', rank=1, m=0, n=1) amplitude."""\n    truncation.confirm_at_least_singles()\n\n    # the residual tensor\n    R = np.zeros(shape=(A, A, N), dtype=complex)\n\n    # add each of the terms\n    add_m0_n1_fully_connected_terms(R, ansatz, truncation, h_args, t_args)\n    add_m0_n1_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args)\n    add_m0_n1_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)\n    return R\n\n\ndef compute_m1_n0_amplitude(A, N, ansatz, truncation, h_args, t_args):\n    """Compute the operator(name=\'d\', rank=1, m=1, n=0) amplitude."""\n    truncation.confirm_at_least_singles()\n\n    # the residual tensor\n    R = np.zeros(shape=(A, A, N), dtype=complex)\n\n    # add each of the terms\n    add_m1_n0_fully_connected_terms(R, ansatz, truncation, h_args, t_args)\n    add_m1_n0_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args)\n    add_m1_n0_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)\n    return R\n\n# ------------------------------------------------------------------------------------------------------------- #\n# -------------------------------------------- OPTIMIZED FUNCTIONS -------------------------------------------- #\n# ------------------------------------------------------------------------------------------------------------- #\n\n# --------------------------------------------- INDIVIDUAL TERMS --------------------------------------------- #\n\n\n# -------------- operator(name=\'\', rank=0, m=0, n=0) TERMS -------------- #\ndef add_m0_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):\n    """Optimized calculation of the operator(name=\'\', rank=0, m=0, n=0) fully_connected terms."""\n\n    if ansatz.ground_state:\n        R += h_args[(0, 0)]\n\n        if truncation.at_least_linear:\n            if truncation.singles:\n                R += np.einsum(\'aci, cbi -> ab\', h_args[(0, 1)], t_args[(1, 0)])\n    else:\n        R += h_args[(0, 0)]\n\n        if truncation.at_least_linear:\n            if truncation.singles:\n                R += np.einsum(\'aci, cbi -> ab\', h_args[(1, 0)], t_args[(0, 1)])\n    return\n\n\ndef add_m0_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):\n    """Optimized calculation of the operator(name=\'\', rank=0, m=0, n=0) linked_disconnected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        pass  # no valid terms here\n    return\n\n\ndef add_m0_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):\n    """Optimized calculation of the operator(name=\'\', rank=0, m=0, n=0) unlinked_disconnected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        pass  # no valid terms here\n    return\n\n# --------------------------------------------------------------------------- #\n# ---------------------------- RANK  1 FUNCTIONS ---------------------------- #\n# --------------------------------------------------------------------------- #\n\n\n# -------------- operator(name=\'b\', rank=1, m=0, n=1) TERMS -------------- #\ndef add_m0_n1_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):\n    """Optimized calculation of the operator(name=\'b\', rank=1, m=0, n=1) fully_connected terms."""\n\n    if ansatz.ground_state:\n        R += h_args[(1, 0)]\n\n        if truncation.at_least_linear:\n    else:\n        R += h_args[(1, 0)]\n\n        if truncation.at_least_linear:\n    return\n\n\ndef add_m0_n1_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):\n    """Optimized calculation of the operator(name=\'b\', rank=1, m=0, n=1) linked_disconnected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        pass  # no valid terms here\n    return\n\n\ndef add_m0_n1_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):\n    """Optimized calculation of the operator(name=\'b\', rank=1, m=0, n=1) unlinked_disconnected terms."""\n\n    if ansatz.ground_state:\n        if truncation.singles:\n            R += np.einsum(\'ac, cbz -> abz\', h_args[(0, 0)], t_args[(1, 0)])\n\n        if truncation.at_least_linear:\n    else:\n        if truncation.singles:\n            R += np.einsum(\'ac, cbz -> abz\', h_args[(0, 0)], t_args[(1, 0)])\n\n        if truncation.at_least_linear:\n    return\n\n\n# -------------- operator(name=\'d\', rank=1, m=1, n=0) TERMS -------------- #\ndef add_m1_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):\n    """Optimized calculation of the operator(name=\'d\', rank=1, m=1, n=0) fully_connected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        pass  # no valid terms here\n    return\n\n\ndef add_m1_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):\n    """Optimized calculation of the operator(name=\'d\', rank=1, m=1, n=0) linked_disconnected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        pass  # no valid terms here\n    return\n\n\ndef add_m1_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):\n    """Optimized calculation of the operator(name=\'d\', rank=1, m=1, n=0) unlinked_disconnected terms."""\n\n    if ansatz.ground_state:\n        pass  # no valid terms here\n    else:\n        if truncation.singles:\n            R += np.einsum(\'ac, cbz -> abz\', h_args[(0, 0)], t_args[(0, 1)])\n\n        if truncation.at_least_linear:\n    return\n\n\n# --------------------------------------------- RESIDUAL FUNCTIONS --------------------------------------------- #\ndef compute_m0_n0_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_paths):\n    """Compute the operator(name=\'\', rank=0, m=0, n=0) amplitude."""\n    truncation.confirm_at_least_singles()\n\n    # the residual tensor\n    R = np.zeros(shape=(A, A), dtype=complex)\n\n    # unpack the optimized paths\n    optimized_connected_paths, optimized_linked_paths, optimized_unlinked_paths = opt_paths\n\n    # add each of the terms\n    add_m0_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_connected_paths)\n    add_m0_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_linked_paths)\n    add_m0_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_unlinked_paths)\n    return R\n\n\ndef compute_m0_n1_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_paths):\n    """Compute the operator(name=\'b\', rank=1, m=0, n=1) amplitude."""\n    truncation.confirm_at_least_singles()\n\n    # the residual tensor\n    R = np.zeros(shape=(A, A, N), dtype=complex)\n\n    # unpack the optimized paths\n    optimized_connected_paths, optimized_linked_paths, optimized_unlinked_paths = opt_paths\n\n    # add each of the terms\n    add_m0_n1_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_connected_paths)\n    add_m0_n1_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_linked_paths)\n    add_m0_n1_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_unlinked_paths)\n    return R\n\n\ndef compute_m1_n0_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_paths):\n    """Compute the operator(name=\'d\', rank=1, m=1, n=0) amplitude."""\n    truncation.confirm_at_least_singles()\n\n    # the residual tensor\n    R = np.zeros(shape=(A, A, N), dtype=complex)\n\n    # unpack the optimized paths\n    optimized_connected_paths, optimized_linked_paths, optimized_unlinked_paths = opt_paths\n\n    # add each of the terms\n    add_m1_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_connected_paths)\n    add_m1_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_linked_paths)\n    add_m1_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_unlinked_paths)\n    return R\n\n\n# --------------------------------------------- OPTIMIZED PATHS FUNCTION --------------------------------------------- #'
-        assert function_output == expected_result
+        expected_result = open(root_dir+classtest+"generate_full_cc_python_file_contents_out.py", "r")
+        assert function_output == expected_result.read()
 
     def test_generate_full_cc_python(self):
         """run main func for coverage purposes"""
