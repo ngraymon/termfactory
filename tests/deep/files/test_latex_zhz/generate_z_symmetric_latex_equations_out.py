@@ -1,0 +1,1 @@
+\bh_{0,xb}(1-\delta_{x\gamma})\\&+\sum\Big((\bh_0\bz_0 + \bar{f}\bh_{\blue{}\blue{k}\red{}}\bz^{\magenta{}\blue{k}\red{}})\Big)(1-\delta_{cb})\\&-i\sum\Big(\dv{\hat{\bt}_{0, \gamma}}{\tau}\,\hat{\bz}_{0, \gamma}\Big)
