@@ -48,6 +48,7 @@ cov_test:
     - python driver.py
 
   artifacts:
+    when: always
     paths:
         - ./setup_output.txt
         - ./default_logging_file.txt
