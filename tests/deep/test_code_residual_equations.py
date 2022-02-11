@@ -1,7 +1,9 @@
 # system imports
-from pathlib import Path
-root_dir = str(Path(__file__).parent)+'\\files\\'
-classtest = 'test_code_residual_equations\\'
+from os.path import abspath, dirname, join
+deep_dir = dirname(abspath(__file__))
+root_dir = join(deep_dir, 'files')
+classtest = 'test_code_residual_equations'
+
 # local imports
 from . import context
 from typing import ValuesView
@@ -412,19 +414,21 @@ class Test_write_residual_function_string:
         ]
         order = 0
         function_output = cre.write_residual_function_string(residual_terms_list, order)
-        expected_result = open(
-            root_dir+classtest+"write_residual_function_string_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_residual_function_string_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_high_order_h_and_w(self):
         residual_terms_list = vars.write_residual_function_string_high_order_h_and_w.res_list
         order = 2
         function_output = cre.write_residual_function_string(residual_terms_list, order)
-        expected_result = open(
-            root_dir+classtest+"write_residual_function_string_high_order_h_and_w_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_residual_function_string_high_order_h_and_w_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 class Test_generate_python_code_for_residual_functions:
 
@@ -462,8 +466,11 @@ class Test_generate_python_code_for_residual_functions:
         ]
         max_order = 1
         function_output = cre.generate_python_code_for_residual_functions(term_lists, max_order)
-        expected_result = open(root_dir+classtest+"generate_python_code_for_residual_functions_out.py", "r")
-        assert function_output == expected_result.read()
+        func_name = "generate_python_code_for_residual_functions_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_run_main_generate_files_eqs:
