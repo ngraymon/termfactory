@@ -1,9 +1,10 @@
 # system imports
 # import re
 import pytest
-from pathlib import Path
-root_dir = str(Path(__file__).parent)+'\\files\\'
-classtest = 'test_code_w_equations\\'
+from os.path import abspath, dirname, join
+deep_dir = dirname(abspath(__file__))
+root_dir = join(deep_dir, 'files')
+classtest = 'test_code_w_equations'
 
 # local imports
 from . import context
@@ -77,10 +78,11 @@ class Test_contributions:
             opt_einsum=False,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_vemx_contributions_definition_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_vemx_contributions_definition_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_construct_vemx_contributions_definition_einsum(self):
         """test opt_einsum"""
@@ -92,28 +94,31 @@ class Test_contributions:
             opt_einsum=True,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_vemx_contributions_definition_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_vemx_contributions_definition_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_generate_vemx_contributions_basic(self):
         """basic test"""
         order = 3
         function_output = cw._generate_vemx_contributions(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"generate_vemx_contributions_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "generate_vemx_contributions_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_generate_vemx_contributions_small_order(self):
         """test on small order"""
         order = 1
         function_output = cw._generate_vemx_contributions(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"generate_vemx_contributions_small_order_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "generate_vemx_contributions_small_order_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_construct_vecc_contributions_definition_basic(self):
         """basic test"""
@@ -125,10 +130,11 @@ class Test_contributions:
             opt_einsum=False,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_vecc_contributions_definition_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_vecc_contributions_definition_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_construct_vecc_contributions_definition_einsum(self):
         """einsum test"""
@@ -140,28 +146,31 @@ class Test_contributions:
             opt_einsum=True,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_vecc_contributions_definition_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_vecc_contributions_definition_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_generate_vecc_contributions_basic(self):
         """basic test"""
         order = 2
         function_output = cw._generate_vecc_contributions(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"generate_vecc_contributions_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "generate_vecc_contributions_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_generate_vecc_contributions_basic_high_order(self):
         """high order test"""
         order = 5
         function_output = cw._generate_vecc_contributions(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"generate_vecc_contributions_basic_high_order_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "generate_vecc_contributions_basic_high_order_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_def_w_func:
@@ -176,10 +185,11 @@ class Test_def_w_func:
             opt_einsum=False,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_w_function_definition_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_w_function_definition_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_construct_w_function_definition_einsum(self):
         """einsum test"""
@@ -191,20 +201,21 @@ class Test_def_w_func:
             opt_einsum=True,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_w_function_definition_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_w_function_definition_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_write_w_function_strings_basic(self):
         """basic test"""
         order = 2
         function_output = cw._write_w_function_strings(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_w_function_strings_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
-
+        func_name = "write_w_function_strings_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_write_w_function_strings_zero_case(self):
         """zero test"""
@@ -216,37 +227,41 @@ class Test_def_w_func:
         """1st order test"""
         order = 1
         function_output = cw._write_w_function_strings(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_w_function_strings_1st_order_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_w_function_strings_1st_order_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_write_w_function_strings_high_order(self):
         """high order test"""
         order = 5
         function_output = cw._write_w_function_strings(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_w_function_strings_high_order_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_w_function_strings_high_order_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_write_master_w_compute_function_basic(self):
         """basic test"""
         max_order = 2
         function_output = cw._write_master_w_compute_function(max_order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_master_w_compute_function_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_master_w_compute_function_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_write_master_w_compute_function_einsum(self):
         """einsum test"""
         max_order = 2
         function_output = cw._write_master_w_compute_function(max_order, opt_einsum=True)
-        expected_result = open(
-            root_dir+classtest+"write_master_w_compute_function_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_master_w_compute_function_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_optimizers:
@@ -277,26 +292,29 @@ class Test_optimizers:
     def test_write_optimized_vemx_paths_function(self):
         max_order = 2
         function_output = cw._write_optimized_vemx_paths_function(max_order)
-        expected_result = open(
-            root_dir+classtest+"write_optimized_vemx_paths_function_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_optimized_vemx_paths_function_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_write_optimized_vecc_paths_function(self):
         max_order = 2
         function_output = cw._write_optimized_vecc_paths_function(max_order)
-        expected_result = open(
-            root_dir+classtest+"write_optimized_vecc_paths_function_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_optimized_vecc_paths_function_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_write_optimized_vecc_paths_function_high_order(self):
         max_order = 5
         function_output = cw._write_optimized_vecc_paths_function(max_order)
-        expected_result = open(
-            root_dir+classtest+"write_optimized_vecc_paths_function_high_order_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_optimized_vecc_paths_function_high_order_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_main_w_eqn_code:
@@ -304,10 +322,11 @@ class Test_main_w_eqn_code:
     def test_generate_w_operators_string(self):
         max_order = 2
         function_output = cw.generate_w_operators_string(max_order, s1=75, s2=28)
-        expected_result = open(
-            root_dir+classtest+"generate_w_operators_string_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "generate_w_operators_string_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_run_main_w_eqn_func(self):
         # TODO file compare assert

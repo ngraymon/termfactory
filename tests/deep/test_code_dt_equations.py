@@ -1,9 +1,9 @@
 # system imports
 # import pytest
-from pathlib import Path
-root_dir = str(Path(__file__).parent)+'\\files\\'
-classtest = 'test_code_dt_equations\\'
-
+from os.path import abspath, dirname, join
+deep_dir = dirname(abspath(__file__))
+root_dir = join(deep_dir, 'files')
+classtest = 'test_code_dt_equations'
 
 # local imports
 from . import context
@@ -55,10 +55,11 @@ class Test_construct_linked_disconnected_definition:
             opt_einsum=False,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_linked_disconnected_definition_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_linked_disconnected_definition_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_einsum(self):
         return_string = ''
@@ -69,10 +70,11 @@ class Test_construct_linked_disconnected_definition:
             opt_einsum=True,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_linked_disconnected_definition_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_linked_disconnected_definition_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_write_linked_disconnected_strings:
@@ -80,26 +82,29 @@ class Test_write_linked_disconnected_strings:
     def test_basic(self):
         order = 2
         function_output = cdt._write_linked_disconnected_strings(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_linked_disconnected_strings_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_linked_disconnected_strings_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_low_order(self):
         order = 1
         function_output = cdt._write_linked_disconnected_strings(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_linked_disconnected_strings_low_order_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_linked_disconnected_strings_low_order_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_einsum(self):
         order = 2
         function_output = cdt._write_linked_disconnected_strings(order, opt_einsum=True)
-        expected_result = open(
-            root_dir+classtest+"write_linked_disconnected_strings_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_linked_disconnected_strings_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_construct_un_linked_disconnected_definition:
@@ -113,10 +118,11 @@ class Test_construct_un_linked_disconnected_definition:
             opt_einsum=False,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_un_linked_disconnected_definition_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_un_linked_disconnected_definition_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_einsum(self):
         return_string = ''
@@ -127,10 +133,11 @@ class Test_construct_un_linked_disconnected_definition:
             opt_einsum=True,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_un_linked_disconnected_definition_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_un_linked_disconnected_definition_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_write_un_linked_disconnected_strings:
@@ -138,26 +145,29 @@ class Test_write_un_linked_disconnected_strings:
     def test_high_order(self):
         order = 5
         function_output = cdt._write_un_linked_disconnected_strings(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_un_linked_disconnected_strings_high_order_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_un_linked_disconnected_strings_high_order_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_high_order_einsum(self):
         order = 5
         function_output = cdt._write_un_linked_disconnected_strings(order, opt_einsum=True)
-        expected_result = open(
-            root_dir+classtest+"write_un_linked_disconnected_strings_high_order_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_un_linked_disconnected_strings_high_order_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_low_order(self):
         order = 2
         function_output = cdt._write_un_linked_disconnected_strings(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_un_linked_disconnected_strings_low_order_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_un_linked_disconnected_strings_low_order_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_construct_dt_amplitude_definition:
@@ -171,10 +181,11 @@ class Test_construct_dt_amplitude_definition:
             opt_einsum=False,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_dt_amplitude_definition_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_dt_amplitude_definition_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_einsum(self):
         return_string = ''
@@ -185,10 +196,11 @@ class Test_construct_dt_amplitude_definition:
             opt_einsum=True,
             iterator_name='optimized_einsum'
         )
-        expected_result = open(
-            root_dir+classtest+"construct_dt_amplitude_definition_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "construct_dt_amplitude_definition_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_write_dt_amplitude_strings:
@@ -196,34 +208,38 @@ class Test_write_dt_amplitude_strings:
     def test_basic(self):
         order = 2
         function_output = cdt._write_dt_amplitude_strings(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_dt_amplitude_strings_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_dt_amplitude_strings_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_high_order(self):
         order = 5
         function_output = cdt._write_dt_amplitude_strings(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_dt_amplitude_strings_high_order_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_dt_amplitude_strings_high_order_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_einsum(self):
         order = 2
         function_output = cdt._write_dt_amplitude_strings(order, opt_einsum=True)
-        expected_result = open(
-            root_dir+classtest+"write_dt_amplitude_strings_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_dt_amplitude_strings_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_einsum_high_order(self):
         order = 5
         function_output = cdt._write_dt_amplitude_strings(order, opt_einsum=True)
-        expected_result = open(
-            root_dir+classtest+"write_dt_amplitude_strings_einsum_high_order_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_dt_amplitude_strings_einsum_high_order_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_write_master_dt_amplitude_function:
@@ -231,18 +247,20 @@ class Test_write_master_dt_amplitude_function:
     def test_basic(self):
         order = 2
         function_output = cdt._write_master_dt_amplitude_function(order, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_master_dt_amplitude_function_basic_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_master_dt_amplitude_function_basic_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_einsum(self):
         order = 2
         function_output = cdt._write_master_dt_amplitude_function(order, opt_einsum=True)
-        expected_result = open(
-            root_dir+classtest+"write_master_dt_amplitude_function_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_master_dt_amplitude_function_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_write_optimized_dt_amplitude_paths_function:
@@ -250,10 +268,11 @@ class Test_write_optimized_dt_amplitude_paths_function:
     def test_basic(self):
         max_order = 2
         function_output = cdt._write_optimized_dt_amplitude_paths_function(max_order)
-        expected_result = open(
-            root_dir+classtest+"write_optimized_dt_amplitude_paths_function_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_optimized_dt_amplitude_paths_function_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_generate_dt_amplitude_string:
@@ -261,10 +280,11 @@ class Test_generate_dt_amplitude_string:
     def test_basic(self):
         max_order = 2
         function_output = cdt.generate_dt_amplitude_string(max_order, s1=75, s2=28)
-        expected_result = open(
-            root_dir+classtest+"generate_dt_amplitude_string_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "generate_dt_amplitude_string_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_generate_dt_amplitude_equations_file:

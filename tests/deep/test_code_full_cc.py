@@ -1,8 +1,9 @@
 # system imports
 # # import pytest
-from pathlib import Path
-root_dir = str(Path(__file__).parent)+'\\files\\'
-classtest = 'test_code_full_cc\\'
+from os.path import abspath, dirname, join
+deep_dir = dirname(abspath(__file__))
+root_dir = join(deep_dir, 'files')
+classtest = 'test_code_full_cc'
 
 # local imports
 from . import context
@@ -340,10 +341,11 @@ class Test_gen_full_cc_py_eqns:
             only_ground_state=False,
             opt_einsum=False
         )
-        expected_result = open(
-            root_dir+classtest+"generate_full_cc_compute_function_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "generate_full_cc_compute_function_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_generate_full_cc_compute_function_opt_einsum(self):
         omega_term = fcc.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
@@ -354,26 +356,29 @@ class Test_gen_full_cc_py_eqns:
             only_ground_state=False,
             opt_einsum=True
         )
-        expected_result = open(
-            root_dir+classtest+"generate_full_cc_compute_function_opt_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "generate_full_cc_compute_function_opt_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_write_master_full_cc_compute_function(self):
         omega_term = fcc.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
         function_output = cfcc._write_master_full_cc_compute_function(omega_term, opt_einsum=False)
-        expected_result = open(
-            root_dir+classtest+"write_master_full_cc_compute_function_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_master_full_cc_compute_function_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_write_master_full_cc_compute_function_opt_einsum(self):
         omega_term = fcc.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
         function_output = cfcc._write_master_full_cc_compute_function(omega_term, opt_einsum=True)
-        expected_result = open(
-            root_dir+classtest+"write_master_full_cc_compute_function_opt_einsum_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "write_master_full_cc_compute_function_opt_einsum_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_wrap_full_cc_generation(self):
         s1, s2 = 75, 28
@@ -403,14 +408,20 @@ class Test_gen_full_cc_py_eqns:
             only_ground_state=False,
             opt_einsum=False
         )
-        expected_result = open(root_dir+classtest+"wrap_full_cc_generation_out.py", "r")
-        assert function_output == expected_result.read()
+        func_name = "wrap_full_cc_generation_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_generate_full_cc_python_file_contents(self):
         truncations = [1, 1, 1, 1]
         function_output = cfcc._generate_full_cc_python_file_contents(truncations, only_ground_state=False)
-        expected_result = open(root_dir+classtest+"generate_full_cc_python_file_contents_out.py", "r")
-        assert function_output == expected_result.read()
+        func_name = "generate_full_cc_python_file_contents_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_generate_full_cc_python(self):
         """run main func for coverage purposes"""

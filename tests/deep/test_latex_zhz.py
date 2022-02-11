@@ -1,9 +1,10 @@
 # system imports
 # import re
 import pytest
-from pathlib import Path
-root_dir = str(Path(__file__).parent)+'\\files\\'
-classtest = 'test_latex_zhz\\'
+from os.path import abspath, dirname, join
+deep_dir = dirname(abspath(__file__))
+root_dir = join(deep_dir, 'files')
+classtest = 'test_latex_zhz'
 # local imports
 from . import context
 import latex_zhz as zhz
@@ -640,10 +641,11 @@ class Test_preparing_of_terms:
             remove_f_terms=False,
             print_prefactors=False
         )
-        expected_result = open(
-            root_dir+classtest+"prepare_second_z_latex_basic_case_1_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "prepare_second_z_latex_basic_case_1_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_prepare_third_z_latex(self):
         term_list = [
@@ -682,10 +684,11 @@ class Test_preparing_of_terms:
             remove_f_terms=False,
             print_prefactors=False
         )
-        expected_result = open(
-            root_dir+classtest+"prepare_third_z_latex_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "prepare_third_z_latex_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_prepare_third_z_latex_if_case(self):
         term_list = [
@@ -744,10 +747,11 @@ class Test_preparing_of_terms:
             remove_f_terms=False,
             print_prefactors=False
         )
-        expected_result = open(
-            root_dir+classtest+"prepare_third_z_latex_if_case_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "prepare_third_z_latex_if_case_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_prepare_fourth_z_latex(self):
         term_list = [  # file flag
@@ -814,10 +818,11 @@ class Test_preparing_of_terms:
             remove_f_terms=False,
             print_prefactors=False
         )
-        expected_result = open(
-            root_dir+classtest+"prepare_fourth_z_latex_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "prepare_fourth_z_latex_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
     def test_long(self):
@@ -1117,10 +1122,11 @@ class Test_preparing_of_terms:
             remove_f_terms=False,
             print_prefactors=False
         )
-        expected_result = open(
-            root_dir+classtest+"prepare_fourth_z_latex_long_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "prepare_fourth_z_latex_long_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_build_z_terms:
@@ -1156,10 +1162,11 @@ class Test_build_z_terms:
             ]
         )
         function_output = zhz._build_second_z_term(LHS, H, Z, remove_f_terms=False)
-        expected_result = open(
-            root_dir+classtest+"build_second_z_term_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "build_second_z_term_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_build_third_z_term(self):
         LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
@@ -1179,10 +1186,12 @@ class Test_build_z_terms:
             ]
         )
         function_output = zhz._build_third_z_term(LHS, H, Z, remove_f_terms=False)
-        expected_result = open(
-            root_dir+classtest+"build_third_z_term_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+
+        func_name = "build_third_z_term_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_build_fourth_z_term(self):
         LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
@@ -1203,10 +1212,11 @@ class Test_build_z_terms:
             ]
         )
         function_output = zhz._build_fourth_z_term(LHS, H, Z, remove_f_terms=False)
-        expected_result = open(
-            root_dir+classtest+"build_fourth_z_term_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "build_fourth_z_term_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
     def test_build_fifth_z_term(self):
         LHS = nt.general_operator_namedtuple(name='', rank=0, m=0, n=0)
@@ -1231,10 +1241,11 @@ class Test_build_z_terms:
             ]
         )
         function_output = zhz._build_fifth_z_term(LHS, Z)
-        expected_result = open(
-            root_dir+classtest+"build_fifth_z_term_else_cases_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "build_fifth_z_term_else_cases_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_gen_latex_eqns:
@@ -1263,10 +1274,11 @@ class Test_gen_latex_eqns:
             only_ground_state=True,
             remove_f_terms=False
         )
-        expected_result = open(
-            root_dir+classtest+"generate_z_symmetric_latex_equations_out.py", "r"
-        )
-        assert function_output == expected_result.read()
+        func_name = "generate_z_symmetric_latex_equations_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+        assert function_output == expected_result
 
 
 class Test_run_main_zhz_for_coverage:
