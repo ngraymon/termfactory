@@ -1194,8 +1194,8 @@ class Test_build_hz_latex_prefactor:
         h = zhz.connected_h_z_operator_namedtuple(rank=3, m=0, n=3, m_lhs=0, n_lhs=3, m_l=0, n_l=0, m_r=0, n_r=0)
         z_left = None
         z_right = zhz.disconnected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0)
-        function_output = zhz._build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=True)
-        expected_result = '\\frac{1}{6}'
+        function_output = zhz._build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False)
+        expected_result = '\\frac{2}{3!2!}'
         assert function_output == expected_result
 
 
@@ -1354,7 +1354,7 @@ class Test_gen_latex_eqns:
 class Test_run_main_zhz_for_coverage:
 
     def test_main_zhz(self):
-        truncations = [4, 4, 4, 4]
+        truncations = [1, 1, 1, 1]
         zhz.generate_z_t_symmetric_latex(
             truncations,
             only_ground_state=True,
