@@ -941,8 +941,8 @@ def _remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations):
         else:  # pragma: no cover
             raise Exception('')
 
-    # print('a', unique_count)
-    # print('b', unique_set)
+    # old_print_wrapper('a', unique_count)
+    # old_print_wrapper('b', unique_set)
     # import pdb; pdb.set_trace()
 
     return unique_list, unique_count
@@ -1598,12 +1598,12 @@ def _prepare_third_eTz_latex(
         for term in term_list:
             # extract elements of list `term`
             LHS, t_list, h, z_left, z_right, prefactor = term[0], term[1], term[2], *term[3], term[4]
-            print(LHS)
-            print(t_list)
-            print(h)
-            print(z_left)
-            print(z_right)
-            print(prefactor)
+            old_print_wrapper(LHS)
+            old_print_wrapper(t_list)
+            old_print_wrapper(h)
+            old_print_wrapper(z_left)
+            old_print_wrapper(z_right)
+            old_print_wrapper(prefactor)
             # import pdb; pdb.set_trace()
 
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
