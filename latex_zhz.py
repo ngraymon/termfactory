@@ -1335,16 +1335,16 @@ def _build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False):
 
     # ---------------------------------------------------------------------------------------------------------
 
-    # print(numerator_value)
-    # print(denominator_value)
+    # old_print_wrapper(numerator_value)
+    # old_print_wrapper(denominator_value)
 
     # # simplify
     if simplify_flag:
         fraction = Fraction(numerator_value, denominator_value)
-        # print(f"{h = }")
-        # print(f"{z_right = }")
-        # print(f"{fraction.numerator = }")
-        # print(f"{fraction.denominator = }")
+        # old_print_wrapper(f"{h = }")
+        # old_print_wrapper(f"{z_right = }")
+        # old_print_wrapper(f"{fraction.numerator = }")
+        # old_print_wrapper(f"{fraction.denominator = }")
 
         # import pdb; pdb.set_trace()
         if fraction == 1:

@@ -247,8 +247,8 @@ def _build_t_term_python_group(t_list, h, z_right):
         unlinked_list.append(unlinked_label)
 
     # log.info(offset_dict)
-    # print('\n\n\n\n\n')
-    # print(f"{offset_dict = }")
+    # old_print_wrapper('\n\n\n\n\n')
+    # old_print_wrapper(f"{offset_dict = }")
     # import pdb; pdb.set_trace()
 
     return sum_list, unlinked_list, offset_dict
@@ -517,7 +517,7 @@ def _multiple_perms_logic(term, print_indist_perms: bool = False):
     # if multiple distinguishable t terms are present
     if len(unique_dict.keys()) > 1:
 
-        # print(f"{unique_dict = }")
+        # old_print_wrapper(f"{unique_dict = }")
         # import pdb; pdb.set_trace()
 
         # how many copies of that t term are present
@@ -627,7 +627,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 adjusted_prefactor = Fraction(n*prefactor_adjustment*prefactor_adjustment2, d)
                 n, d = adjusted_prefactor.as_integer_ratio()
 
-                print(f"\n{len(total_perms) = } \n{len(permutations) = } \n{prefactor_adjustment = } \n{prefactor_adjustment2 = } \n{adjusted_prefactor = } \n{prefactor = }\n{n = }\n{d = }")
+                old_print_wrapper(f"\n{len(total_perms) = } \n{len(permutations) = } \n{prefactor_adjustment = } \n{prefactor_adjustment2 = } \n{adjusted_prefactor = } \n{prefactor = }\n{n = }\n{d = }")
 
                 # adjust the prefactor if necessary
                 if n != d:
@@ -651,9 +651,9 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         # build with permutations
         hamiltonian_rank_list[max(h.m, h.n)].setdefault(max_t_rank, {}).setdefault(prefactor, [])
 
-        # print(f"{t_list = }")
+        # old_print_wrapper(f"{t_list = }")
         e_a = _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag)
-        # print(f"{e_a = }")
+        # old_print_wrapper(f"{e_a = }")
         v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag)
 
         # if there is only a single distinguishable t term
@@ -721,8 +721,8 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 ])
 
                 for perm in permutations:
-                    print(f"{permutations = } {perm = }")
-                    print(t_list, unique_dict)
+                    old_print_wrapper(f"{permutations = } {perm = }")
+                    old_print_wrapper(t_list, unique_dict)
 
                     # create the t term indices
                     combined_electronic_vibrational = [f"{e_a[i]}{v_a[p]}" for i, p in enumerate(perm)]
@@ -749,8 +749,8 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         # eg: t1 * t2 * t1 ---> 2 distinguishable t terms (t1, t2)
         elif len(unique_dict.keys()) > 1:
 
-            print(f"{unique_dict = }")
-            print(f"{len(unique_dict) = } is > 1 ?{len(unique_dict) > 1}")
+            old_print_wrapper(f"{unique_dict = }")
+            old_print_wrapper(f"{len(unique_dict) = } is > 1 ?{len(unique_dict) > 1}")
 
             # import pdb; pdb.set_trace()
 
@@ -786,7 +786,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 # append that string to the current list
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
-            print(f"{string = }")
+            old_print_wrapper(f"{string = }")
 
             # import pdb; pdb.set_trace()
 
@@ -799,9 +799,9 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
     so we just loop over all elements/sub elements of the list and apply list(set(x)) on that respective element
     """
     for i, e in enumerate(hamiltonian_rank_list):
-        print(f"{type(e) = }")
+        old_print_wrapper(f"{type(e) = }")
         for key, t_dict in hamiltonian_rank_list[i].items():
-            print(f"{key = } {t_dict = }")
+            old_print_wrapper(f"{key = } {t_dict = }")
             for pref, e_list in t_dict.items():
 
                 unique_list = sorted(list(set(e_list)))
@@ -818,10 +818,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                     #     temp_dict[s] = 1 + temp_dict.get(s, 0)
                     # no_dupe_list = [s for s, count in temp_dict.items() if count == 1]
                     # dupe_dict = dict([(s, count) for s, count in temp_dict.items() if s not in no_dupe_list])
-                    # print('')
+                    # old_print_wrapper('')
                     # old_prefactor = pref
                     # for s, count in dupe_dict.items():
-                    #     print(f"{old_prefactor = } {count = } \n{s = }\n")
+                    #     old_print_wrapper(f"{old_prefactor = } {count = } \n{s = }\n")
 
                     # # import pdb; pdb.set_trace()
 
@@ -829,8 +829,8 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
                 # # otherwise we remove the duplicates and re-assign them to different prefactors
                 # else:
-                #     print(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
-                #     print(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }")
+                #     old_print_wrapper(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
+                #     old_print_wrapper(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }")
 
                 #     # we first collect all the items into a dictionary
                 #     temp_dict = {}
@@ -855,15 +855,15 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
                 #         n, rest = pref[1:].split('/')
                 #         d = rest.split(')')[0]
-                #         print(f"{n = } {d = }")
+                #         old_print_wrapper(f"{n = } {d = }")
 
-                #         print(f"{adjustment_factor = } {pref = } {s = }")
+                #         old_print_wrapper(f"{adjustment_factor = } {pref = } {s = }")
                 #         import pdb; pdb.set_trace()
 
                 #     hamiltonian_rank_list[i][key][pref] = list(set(e_list))
 
-                #     print(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
-                #     print(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }\n")
+                #     old_print_wrapper(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
+                #     old_print_wrapper(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }\n")
 
             # remove all empty prefactors
             hamiltonian_rank_list[i][key] = dict([
@@ -876,30 +876,30 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
         """ for debugging purposes """
 
         # clear the console
-        print('\n'*15)
-        print("Compact display of `hamiltonian_rank_list`:")
+        old_print_wrapper('\n'*15)
+        old_print_wrapper("Compact display of `hamiltonian_rank_list`:")
 
         for i, h_rank_dict in enumerate(hamiltonian_rank_list):
-            print('')
+            old_print_wrapper('')
 
             if h_rank_dict == {}:
-                print(f"{i = :<3d} {h_rank_dict = }")
+                old_print_wrapper(f"{i = :<3d} {h_rank_dict = }")
             else:
-                print(f"{i = :<3d} {len(h_rank_dict) = }")
+                old_print_wrapper(f"{i = :<3d} {len(h_rank_dict) = }")
 
             for key, t_rank_dict in h_rank_dict.items():
 
                 if t_rank_dict == {}:
-                    print(f"{tab}{key = :<3} {t_rank_dict = }")
+                    old_print_wrapper(f"{tab}{key = :<3} {t_rank_dict = }")
                 else:
-                    print(f"{tab}{key = :<3} {len(t_rank_dict) = }")
+                    old_print_wrapper(f"{tab}{key = :<3} {len(t_rank_dict) = }")
 
                 for key2, prefactor_list in t_rank_dict.items():
 
                     if prefactor_list == []:
-                        print(f"{tab}{tab}{key2 = :<20s} {tab}{prefactor_list = }")
+                        old_print_wrapper(f"{tab}{tab}{key2 = :<20s} {tab}{prefactor_list = }")
                     else:
-                        print(f"{tab}{tab}{key2 = :<20s} {tab}{len(prefactor_list) = }")
+                        old_print_wrapper(f"{tab}{tab}{key2 = :<20s} {tab}{len(prefactor_list) = }")
 
     compact_display_of_hamiltonian_rank_list(hamiltonian_rank_list)
 
@@ -959,10 +959,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
     # h^0_0 with zero order Taylor series contributions
     for prefactor, string_list in hamiltonian_rank_list[0][0].items():
-        # print(f"{string_list = }")
+        # old_print_wrapper(f"{string_list = }")
         _handle_multiline_same_prefactor(h_contribution_list, prefactor, string_list, nof_tabs=0)
 
-    # print(f"\n{h_contribution_list = }")
+    # old_print_wrapper(f"\n{h_contribution_list = }")
     # import pdb; pdb.set_trace()
 
     # loop over first order (and higher) Taylor series contributions
@@ -978,7 +978,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
         # h^0_0 with first order (and higher) Taylor series contributions
         for prefactor, string_list in hamiltonian_rank_list[0][j].items():
-            # print(f"{j = } {string_list = }")
+            # old_print_wrapper(f"{j = } {string_list = }")
             _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=1)
 
         # processing
@@ -992,7 +992,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
             h_contribution_list.append(f"if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:")
             h_contribution_list.extend(temp_list)
 
-    # print(f"\n{h_contribution_list = }")
+    # old_print_wrapper(f"\n{h_contribution_list = }")
     # import pdb; pdb.set_trace()
 
     # loop over first order (and higher) h^i_j terms
@@ -1007,7 +1007,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
         # h^i_j with zero order Taylor series contributions
         for prefactor, string_list in hamiltonian_rank_list[i][0].items():
-            # print(f"{i = } {string_list = }")
+            # old_print_wrapper(f"{i = } {string_list = }")
             _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=1)
 
         # processing
@@ -1030,7 +1030,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
             # h^i_j with first order (and higher) Taylor series contributions
             for prefactor, string_list in hamiltonian_rank_list[i][j].items():
-                # print(f"{i = } {j = } {string_list = }")
+                # old_print_wrapper(f"{i = } {j = } {string_list = }")
                 _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=2)
 
             # processing
@@ -1058,7 +1058,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
     # add empty string -> creates empty line for better formatting
     # i loop
 
-    # print(f"\n{h_contribution_list = }")
+    # old_print_wrapper(f"\n{h_contribution_list = }")
     # compact_display_of_hamiltonian_rank_list(hamiltonian_rank_list)
     # import pdb; pdb.set_trace()
 
@@ -1174,7 +1174,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
         _filter_out_valid_eTz_terms(LHS, eT_series_term, H, None, Z, valid_term_list)
 
     if False:  # debug
-        print('\n\n\n')
+        old_print_wrapper('\n\n\n')
 
         # save in a human readable format to a file
         file_str = '\n]\n'.join([f'\n{tab}'.join(['['] + [str(y) for y in x]) for x in valid_term_list])
@@ -1182,7 +1182,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
             fp.write(file_str + '\n]')
 
         # for i, a in enumerate(valid_term_list):
-        #     print(f"{i+1:>4d}", a)
+        #     old_print_wrapper(f"{i+1:>4d}", a)
 
         pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
@@ -1190,8 +1190,8 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
         return ""
 
     for i, _ in enumerate(valid_term_list):
-        # print(i, valid_term_list[i])
-        print(i, valid_term_list[i][1])
+        # old_print_wrapper(i, valid_term_list[i])
+        old_print_wrapper(i, valid_term_list[i][1])
 
     # import pdb; pdb.set_trace()
 
@@ -1205,9 +1205,9 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     #     _write_third_eTz_einsum_python(LHS.rank, operators, valid_term_list, b_loop_flag=True),
     # ]
 
-    # print('\n\na', alst)
+    # old_print_wrapper('\n\na', alst)
     # import pdb; pdb.set_trace()
-    # print('\n\na', blst)
+    # old_print_wrapper('\n\na', blst)
     # import pdb; pdb.set_trace()
 
     return_list = [

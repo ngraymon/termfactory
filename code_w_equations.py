@@ -354,7 +354,7 @@ def _generate_vemx_contributions(order, opt_einsum=False):
             old_print_wrapper(partition, partition[0])
             # we have to space the line correct (how many tabs)
             if max(partition) >= 2:
-                print('reached')
+                old_print_wrapper('reached')
                 return_string += f"{tab}{tab}{W_array} += {prefactor} * {t_terms[partition[0]].string}\n"
             else:
                 return_string += f"{tab}{W_array} += {prefactor} * {t_terms[partition[0]].string}\n"
