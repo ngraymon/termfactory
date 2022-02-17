@@ -603,13 +603,14 @@ class Test_generate_all_o_eT_h_z_connection_permutations:
         )
         expected_result = [
             (
-                (et.disconnected_t_operator_namedtuple(
-                    rank=1,
-                    m=0, n=1,
-                    m_lhs=0, n_lhs=0,
-                    m_l=0, n_l=0,
-                    m_h=0, n_h=0,
-                    m_r=0, n_r=1),
+                (
+                    et.disconnected_t_operator_namedtuple(
+                        rank=1,
+                        m=0, n=1,
+                        m_lhs=0, n_lhs=0,
+                        m_l=0, n_l=0,
+                        m_h=0, n_h=0,
+                        m_r=0, n_r=1),
                 ),
                 (
                     None,
@@ -1435,7 +1436,7 @@ class Test_build_eThz_latex_prefactor:
                 m_l=0, n_l=0,
                 m_h=0, n_h=0,
                 m_r=0, n_r=1
-            ), 
+            ),
             et.disconnected_t_operator_namedtuple(
                 rank=1,
                 m=0, n=1,
@@ -1546,6 +1547,257 @@ class Test_build_eThz_latex_prefactor:
         expected_result = '\\frac{1}{2!}'
         assert function_output == expected_result
 
+    def test_internal_perms(self):
+        """if internal_perms > 1:"""
+        t_list = (et.connected_t_operator_namedtuple(
+            rank=2,
+            m=0, n=2,
+            m_lhs=0, n_lhs=0,
+            m_l=0, n_l=0,
+            m_h=0, n_h=2,
+            m_r=0, n_r=0),
+        )
+        h = et.connected_eT_h_z_operator_namedtuple(
+            rank=2,
+            m=3, n=0,
+            m_lhs=1, n_lhs=0,
+            m_t=[2], n_t=[0],
+            m_l=0, n_l=0,
+            m_r=1, n_r=0
+        )
+        z_left = None
+        z_right = et.disconnected_eT_z_right_operator_namedtuple(
+            rank=0,
+            m=0, n=0,
+            m_lhs=0, n_lhs=0,
+            m_t=(0,), n_t=(0,),
+            m_h=0, n_h=0,
+            m_l=0, n_l=0
+        )
+        overcounting_prefactor = 1
+        function_output = et._build_eThz_latex_prefactor(
+            t_list,
+            h,
+            z_left,
+            z_right,
+            overcounting_prefactor,
+            simplify_flag=True
+        )
+        expected_result = '\\frac{(3)(2)2!}{3!2!}'
+        assert function_output == expected_result
+
+    def test_h_m_t_count(self):
+        """count_t = sum(h.m_t) 
+           if count_t > 1:"""
+        t_list = (et.connected_t_operator_namedtuple(
+            rank=2,
+            m=0, n=2,
+            m_lhs=0, n_lhs=0,
+            m_l=0, n_l=0,
+            m_h=0, n_h=2,
+            m_r=0, n_r=0),
+        )
+        h = et.connected_eT_h_z_operator_namedtuple(
+            rank=2,
+            m=2, n=0,
+            m_lhs=0, n_lhs=0,
+            m_t=[2], n_t=[0],
+            m_l=0, n_l=0,
+            m_r=0, n_r=0
+        )
+        z_left = None
+        z_right = et.disconnected_eT_z_right_operator_namedtuple(
+            rank=0,
+            m=0, n=0,
+            m_lhs=0, n_lhs=0,
+            m_t=(0,), n_t=(0,),
+            m_h=0, n_h=0,
+            m_l=0, n_l=0
+        )
+        overcounting_prefactor = 1
+        function_output = et._build_eThz_latex_prefactor(
+            t_list,
+            h,
+            z_left,
+            z_right,
+            overcounting_prefactor,
+            simplify_flag=True
+        )
+        expected_result = '\\frac{2!}{2!2!}'
+        assert function_output == expected_result
+
+    def test_external_perms(self):
+        """
+        external_perms = math.comb(h.n, h.n_lhs)
+        if external_perms > 1:
+        """
+        t_list = (et.connected_t_operator_namedtuple(
+            rank=2,
+            m=0, n=2,
+            m_lhs=0, n_lhs=0,
+            m_l=0, n_l=0,
+            m_h=0, n_h=2,
+            m_r=0, n_r=0),
+        )
+        h = et.connected_eT_h_z_operator_namedtuple(
+            rank=2,
+            m=2, n=3,
+            m_lhs=0, n_lhs=2,
+            m_t=[2], n_t=[0],
+            m_l=0, n_l=0,
+            m_r=0, n_r=0
+        )
+        z_left = None
+        z_right = et.disconnected_eT_z_right_operator_namedtuple(
+            rank=0,
+            m=0, n=0,
+            m_lhs=0, n_lhs=0,
+            m_t=(0,), n_t=(0,),
+            m_h=0, n_h=0,
+            m_l=0, n_l=0
+        )
+        overcounting_prefactor = 1
+        function_output = et._build_eThz_latex_prefactor(
+            t_list,
+            h,
+            z_left,
+            z_right,
+            overcounting_prefactor,
+            simplify_flag=True
+        )
+        expected_result = '\\frac{2!(3)}{2!3!2!}'
+        assert function_output == expected_result
+
+    def test_h_n_internal_perms(self):
+        """
+        new_max = h.n - h.n_lhs
+        internal_perms = math.comb(new_max, h.n_r)
+        if internal_perms > 1:
+        """
+        t_list = (et.connected_t_operator_namedtuple(
+            rank=2,
+            m=0, n=2,
+            m_lhs=0, n_lhs=0,
+            m_l=0, n_l=0,
+            m_h=0, n_h=2,
+            m_r=0, n_r=0),
+        )
+        h = et.connected_eT_h_z_operator_namedtuple(
+            rank=2,
+            m=2, n=4,
+            m_lhs=0, n_lhs=1,
+            m_t=[2], n_t=[0],
+            m_l=0, n_l=0,
+            m_r=0, n_r=2
+        )
+        z_left = None
+        z_right = et.disconnected_eT_z_right_operator_namedtuple(
+            rank=0,
+            m=0, n=0,
+            m_lhs=0, n_lhs=0,
+            m_t=(0,), n_t=(0,),
+            m_h=0, n_h=0,
+            m_l=0, n_l=0
+        )
+        overcounting_prefactor = 1
+        function_output = et._build_eThz_latex_prefactor(
+            t_list,
+            h,
+            z_left,
+            z_right,
+            overcounting_prefactor,
+            simplify_flag=True
+        )
+        expected_result = '\\frac{2!(4)(3)}{2!4!2!}'
+        assert function_output == expected_result
+
+    def test_account_for_interal_perms(self):
+        """account for the permutations of eT-Z internal labels"""
+        t_list = (et.connected_t_operator_namedtuple(
+            rank=2,
+            m=0, n=2,
+            m_lhs=0, n_lhs=0,
+            m_l=0, n_l=0,
+            m_h=0, n_h=2,
+            m_r=0, n_r=0),
+        )
+        h = et.connected_eT_h_z_operator_namedtuple(
+            rank=2,
+            m=2, n=2,
+            m_lhs=0, n_lhs=1,
+            m_t=[2], n_t=[1, 2],
+            m_l=0, n_l=0,
+            m_r=0, n_r=0
+        )
+        z_left = None
+        z_right = et.disconnected_eT_z_right_operator_namedtuple(
+            rank=0,
+            m=0, n=0,
+            m_lhs=0, n_lhs=0,
+            m_t=(0,), n_t=(0,),
+            m_h=0, n_h=0,
+            m_l=0, n_l=0
+        )
+        overcounting_prefactor = 1
+        function_output = et._build_eThz_latex_prefactor(
+            t_list,
+            h,
+            z_left,
+            z_right,
+            overcounting_prefactor,
+            simplify_flag=True
+        )
+        expected_result = '\\frac{2!(2)3!}{2!2!2!}'
+        assert function_output == expected_result
+
+    def test_taylor_t_m(self):
+        """if t.m > 1:"""
+        t_list = (
+            et.disconnected_t_operator_namedtuple(
+                rank=1,
+                m=2, n=1,
+                m_lhs=0, n_lhs=0,
+                m_l=0, n_l=0,
+                m_h=0, n_h=0,
+                m_r=0, n_r=1
+            ),
+            et.disconnected_t_operator_namedtuple(
+                rank=1,
+                m=0, n=1,
+                m_lhs=0, n_lhs=0,
+                m_l=0, n_l=0,
+                m_h=0, n_h=0,
+                m_r=0, n_r=1
+            )
+        )
+        h = et.connected_eT_h_z_operator_namedtuple(
+            rank=0,
+            m=0, n=0,
+            m_lhs=0, n_lhs=0,
+            m_t=[0, 0], n_t=[0, 0],
+            m_l=0, n_l=0,
+            m_r=0, n_r=0
+        )
+        z_left = None
+        z_right = et.disconnected_eT_z_right_operator_namedtuple(
+            rank=2,
+            m=2, n=0,
+            m_lhs=0, n_lhs=0,
+            m_t=(1, 1), n_t=(0, 0),
+            m_h=0, n_h=0,
+            m_l=0, n_l=0
+        )
+        overcounting_prefactor = 1
+        function_output = et._build_eThz_latex_prefactor(
+            t_list,
+            h,
+            z_left,
+            z_right,
+            overcounting_prefactor,
+            simplify_flag=True
+        )
+        expected_result = '\\frac{2!}{2!2!2!}'
+        assert function_output == expected_result
         # TODO Test Glue cases later on / consider removing
 
 
