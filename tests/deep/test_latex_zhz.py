@@ -1129,6 +1129,82 @@ class Test_preparing_of_terms:
         assert function_output == expected_result
 
 
+class Test_build_hz_latex_prefactor:
+
+    def test_basic(self):
+        h = zero_connected_h_z_op_nt
+        z_left = None
+        z_right = zero_disconnected_z_r_nt
+        function_output = zhz._build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=True)
+        expected_result = ''
+        assert function_output == expected_result
+
+    def test_h_m_if(self):
+        h = zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=2, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=0)
+        z_left = None
+        z_right = zero_disconnected_z_r_nt
+        function_output = zhz._build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=True)
+        expected_result = ''
+        assert function_output == expected_result
+
+    def test_h_n_if(self):
+        h = zhz.connected_h_z_operator_namedtuple(rank=4, m=0, n=4, m_lhs=0, n_lhs=3, m_l=0, n_l=0, m_r=1, n_r=1)
+        z_left = None
+        z_right = zhz.connected_z_right_operator_namedtuple(
+            rank=1,
+            m=1, n=0,
+            m_lhs=0, n_lhs=0,
+            m_h=1, n_h=0,
+            m_l=0, n_l=0
+        )
+        function_output = zhz._build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=True)
+        expected_result = '\\frac{1}{6}'
+        assert function_output == expected_result
+
+    def test_z_r_m_if(self):
+        h = zhz.connected_h_z_operator_namedtuple(rank=4, m=0, n=4, m_lhs=0, n_lhs=2, m_l=0, n_l=0, m_r=0, n_r=2)
+        z_left = None
+        z_right = zhz.connected_z_right_operator_namedtuple(
+            rank=3,
+            m=3, n=0,
+            m_lhs=1, n_lhs=0,
+            m_h=2, n_h=0,
+            m_l=0, n_l=0
+        )
+        function_output = zhz._build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=True)
+        expected_result = '\\frac{1}{4}'
+        assert function_output == expected_result
+
+    def test_z_r_n_if(self):
+        h = zhz.connected_h_z_operator_namedtuple(rank=4, m=0, n=4, m_lhs=0, n_lhs=2, m_l=0, n_l=0, m_r=0, n_r=2)
+        z_left = None
+        z_right = zhz.connected_z_right_operator_namedtuple(
+            rank=3,
+            m=3, n=2,
+            m_lhs=1, n_lhs=1,
+            m_h=2, n_h=2,
+            m_l=0, n_l=0
+        )
+        function_output = zhz._build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=True)
+        expected_result = '\\frac{1}{2}'
+        assert function_output == expected_result
+
+    def test_num_denom_not_one(self):
+        """not(if numerator_string == '1' and denominator_string == '1')"""
+        h = zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=2, m_l=0, n_l=0, m_r=0, n_r=0)
+        z_left = None
+        z_right = zhz.connected_z_right_operator_namedtuple(
+            rank=2,
+            m=2, n=0,
+            m_lhs=2, n_lhs=0,
+            m_h=0, n_h=0,
+            m_l=0, n_l=0
+        )
+        function_output = zhz._build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=True)
+        expected_result = '\\frac{1}{4}'
+        assert function_output == expected_result
+
+
 class Test_build_z_terms:
 
     def test_build_first_z_term_rank_zero(self):

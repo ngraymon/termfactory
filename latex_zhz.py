@@ -1285,7 +1285,6 @@ def _build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False):
         # by definition
         denominator_value *= math.factorial(h.m)
         denominator_list.append(f'{h.m}!')
-
         # to account for the permutations of internal labels around the external labels
         number = math.comb(h.m, h.m_r)
         if number > 1:
@@ -1296,7 +1295,6 @@ def _build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False):
         # by definition
         denominator_value *= math.factorial(h.n)
         denominator_list.append(f'{h.n}!')
-
         # to account for the permutations of internal labels around the external labels
         number = math.comb(h.n, h.n_r)
         if number > 1:

@@ -903,23 +903,23 @@ def _remove_duplicate_t_tuple_permutations(LHS, h, eT_connection_permutations):
     for i, perm in enumerate(eT_connection_permutations):
         t_tuple, z_pair = perm
         if t_tuple is not None:
-            print('\n', f"{t_tuple = }")
+            old_print_wrapper('\n', f"{t_tuple = }")
             t_tuple = list(t_tuple)
             t_tuple.sort()
             if len(t_tuple) == 2:
-                print('\n', f"{t_tuple = }")
+                old_print_wrapper('\n', f"{t_tuple = }")
                 zstorage.append(z_pair)
                 for i, a in enumerate(tstorage):
                     if t_tuple == a:
-                        print('t1\n', t_tuple, '\nt2\n', a)
-                        print('z1\n', zstorage[-1], '\nz2\n', zstorage[i])
+                        old_print_wrapper('t1\n', t_tuple, '\nt2\n', a)
+                        old_print_wrapper('z1\n', zstorage[-1], '\nz2\n', zstorage[i])
                         # import pdb; pdb.set_trace()
                 else:
                     tstorage.append(t_tuple)
-                print('\ns\n', tstorage)
-                print('\n\n')
+                old_print_wrapper('\ns\n', tstorage)
+                old_print_wrapper('\n\n')
                 # import pdb; pdb.set_trace()
-            print('\n', perm)
+            old_print_wrapper('\n', perm)
             new_perm = (tuple(t_tuple), z_pair)
 
         # old_print_wrapper('\n', perm)
@@ -1247,7 +1247,7 @@ def _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
         # (this is just to prove that we already accounted for these permutations)
         number = math.comb(new_max, count_t)
         assert number == 1, 'you broke something!!!'
-        if number > 1:
+        if number > 1:  # pragma: no cover, ask neil (prob don't have to worry about this rn)
             numerator_value *= number
             numerator_list.append(f'{number}')
 
