@@ -399,7 +399,7 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
         # -----------------------------------------------------------------------------------------
         # build with permutations
         hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor] = []
-        print(hamiltonian_rank_list)
+        old_print_wrapper(hamiltonian_rank_list)
 
         if permutations is None:
             t_operands = ', '.join([f"t_args[({t.m_h + t.m_o}, {t.n_h + t.n_o})]" for t in t_list])
