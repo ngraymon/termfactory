@@ -1191,11 +1191,11 @@ class Test_build_hz_latex_prefactor:
 
     def test_num_denom_not_one(self):
         """not(if numerator_string == '1' and denominator_string == '1')"""
-        h = zhz.connected_h_z_operator_namedtuple(rank=4, m=0, n=4, m_lhs=0, n_lhs=4, m_l=0, n_l=0, m_r=0, n_r=0)
+        h = zhz.connected_h_z_operator_namedtuple(rank=3, m=0, n=3, m_lhs=0, n_lhs=3, m_l=0, n_l=0, m_r=0, n_r=0)
         z_left = None
-        z_right = zero_disconnected_z_r_nt
+        z_right = zhz.disconnected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0)
         function_output = zhz._build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=True)
-        expected_result = '\\frac{1}{24}'
+        expected_result = '\\frac{1}{6}'
         assert function_output == expected_result
 
 
@@ -1354,7 +1354,7 @@ class Test_gen_latex_eqns:
 class Test_run_main_zhz_for_coverage:
 
     def test_main_zhz(self):
-        truncations = [1, 1, 1, 1]
+        truncations = [4, 4, 4, 4]
         zhz.generate_z_t_symmetric_latex(
             truncations,
             only_ground_state=True,
