@@ -58,9 +58,6 @@ blank_offset_dict = {
     'summation_index': 0
 }
 
-# Builder Functions
-
-
 # ----------------------------------------------------------------------------------------------- #
 # -----------------------------------  BUILDER FUNCTIONS  --------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
@@ -94,6 +91,18 @@ zL_default_dict = _make_zL_default_dict()
 zR_default_dict = _make_zR_default_dict()
 
 # -------------------------  verify FUNCTIONS  ------------------------------ #
+
+def _verify_connected(d):
+    """ x """
+    assert dictionary['m_h'] > 0 or dictionary['n_h'] > 0, (
+        f"{dictionary = }\n is disconnected, but was indicated as connected!?"
+    )
+
+def _verify_disconnected(d):
+    """ x """
+    assert dictionary['m_h'] == dictionary['n_h'] == 0, (
+        f"{dictionary = }\n is connected, but was indicated as disconnected!?"
+    )
 
 def _verify_keys(kwargs, verification_dictionary):
     """ Returns `False` if any keys in `kwargs` are not in `verification_dictionary`."""
@@ -198,6 +207,7 @@ def _basic_zR_consistency(d):
 
 # --------------------  operator construction FUNCTIONS  ------------------------- #
 
+
 def build_t_operator(status, **kwargs):
     """ Return a namedtuple specified by a dictionary.
     Input argument `kwargs` takes precedence over `default_dict`.
@@ -208,8 +218,11 @@ def build_t_operator(status, **kwargs):
 
     # build the operator
     if status == "connected":
+        _verify_connected(dictionary)
         built_tuple = et.connected_t_operator_namedtuple(**dictionary)
+
     elif status == "disconnected":
+        _verify_disconnected(dictionary)
         built_tuple = et.disconnected_t_operator_namedtuple(**dictionary)
     else:
         raise Exception(
@@ -228,8 +241,11 @@ def build_zL_operator_namedtuple(status, **kwargs):
 
     # build the operator
     if status == "connected":
+        _verify_connected(dictionary)
         built_tuple = et.connected_eT_z_right_operator_namedtuple(**dictionary)
+
     elif status == "disconnected":
+        _verify_disconnected(dictionary)
         built_tuple = et.disconnected_eT_z_right_operator_namedtuple(**dictionary)
     else:
         raise Exception("status not connected/disconnected, typo?")
@@ -247,8 +263,11 @@ def build_zR_operator_namedtuple(status, **kwargs):
 
     # build the operator
     if status == "connected":
+        _verify_connected(dictionary)
         built_tuple = et.connected_eT_z_right_operator_namedtuple(**dictionary)
+
     elif status == "disconnected":
+        _verify_disconnected(dictionary)
         built_tuple = et.disconnected_eT_z_right_operator_namedtuple(**dictionary)
     else:
         raise Exception("status not connected/disconnected, typo?")
@@ -265,8 +284,6 @@ def build_z_operator_namedtuple(side, status, **kwargs):
         build_zR_operator_namedtuple(status, kwargs)
     else:
         raise Exception(f"Incorrect {side = }, should be either 'left' or 'right'.")
-
-# -------------------------  Z FUNCTIONS  ------------------------------ #
 
 # ----------------------------------------------------------------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
@@ -1554,7 +1571,11 @@ class Test_build_eThz_latex_prefactor:
         assert function_output == expected_result
 
     def test_f_factor(self):
+        t_list = ()
         t_list = (
+            build_t_operator(),
+            build_t_operator()
+        )
             et.disconnected_t_operator_namedtuple(
                 rank=1,
                 m=0, n=1,
@@ -1732,7 +1753,7 @@ class Test_build_eThz_latex_prefactor:
             m_r=0, n_r=0
         )
         z_left = None
-        z_right = build_eT_z_operator_namedtuple('disconnected', 'right')
+        z_right = build_z_operator_namedtuple('right', 'disconnected')
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(
             t_list,
@@ -1898,7 +1919,7 @@ class Test_build_eThz_latex_prefactor:
             m_r=0, n_r=0
         )
         z_left = None
-        z_right = build_eT_z_operator_namedtuple('disconnected', 'right', rank=2, m=2, m_t=(1, 1), n_t=(0, 0))
+        z_right = build_z_operator_namedtuple('right', 'disconnected', rank=2, m=2, m_t=(1, 1), n_t=(0, 0))
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(
             t_list,
