@@ -92,13 +92,13 @@ zR_default_dict = _make_zR_default_dict()
 
 # -------------------------  verify FUNCTIONS  ------------------------------ #
 
-def _verify_connected(d):
+def _verify_connected(dictionary):
     """ x """
     assert dictionary['m_h'] > 0 or dictionary['n_h'] > 0, (
         f"{dictionary = }\n is disconnected, but was indicated as connected!?"
     )
 
-def _verify_disconnected(d):
+def _verify_disconnected(dictionary):
     """ x """
     assert dictionary['m_h'] == dictionary['n_h'] == 0, (
         f"{dictionary = }\n is connected, but was indicated as disconnected!?"
@@ -113,19 +113,20 @@ def _verify_keys(kwargs, verification_dictionary):
     else:
         return True
 
-def _verify_t_keys(**kwargs):
+def _verify_t_keys(kwargs):
     """ Returns `False` if any keys in `kwargs` are not present in `t_default_dict`.
     It is fine if not ALL of the keys are present.
     """
+    print(f"{kwargs = }")
     return _verify_keys(kwargs, t_default_dict)
 
-def _verify_zL_keys(**kwargs):
+def _verify_zL_keys(kwargs):
     """ Returns `False` if any keys in `kwargs` are not present in `zL_default_dict`.
     It is fine if not ALL of the keys are present.
     """
     return _verify_keys(kwargs, zL_default_dict)
 
-def _verify_zR_keys(**kwargs):
+def _verify_zR_keys(kwargs):
     """ Returns `False` if any keys in `kwargs` are not present in `zR_default_dict`.
     It is fine if not ALL of the keys are present.
     """
@@ -213,75 +214,80 @@ def build_t_operator(status, **kwargs):
     Input argument `kwargs` takes precedence over `default_dict`.
     """
     assert _verify_t_keys(kwargs), f'invalid kwargs: {kwargs}'
-    dictionary = _make_t_default_dict().update(**kwargs)
+    dictionary = _make_t_default_dict()
+    dictionary.update(**kwargs)
     assert _basic_t_consistency(dictionary), f'invalid operator {dictionary}'
 
     # build the operator
     if status == "connected":
         _verify_connected(dictionary)
-        built_tuple = et.connected_t_operator_namedtuple(**dictionary)
+        new_namedtuple = et.connected_t_operator_namedtuple(**dictionary)
 
     elif status == "disconnected":
         _verify_disconnected(dictionary)
-        built_tuple = et.disconnected_t_operator_namedtuple(**dictionary)
+        new_namedtuple = et.disconnected_t_operator_namedtuple(**dictionary)
     else:
         raise Exception(
             f"Status {status} is not valid, should be 'connected' or 'disconnected'\n"
             f"Input dictionary:\n{kwargs}"
         )
 
-    return built_tuple
+    return new_namedtuple
 
 def build_zL_operator_namedtuple(status, **kwargs):
     """ Wrapper function for `_build_eT_z_op`
     """
     assert _verify_zL_keys(kwargs), f'invalid kwargs: {kwargs}'
-    dictionary = _make_zL_default_dict().update(**kwargs)
+    dictionary = _make_zL_default_dict()
+    dictionary.update(**kwargs)
     assert _basic_zL_consistency(dictionary), f'invalid operator {dictionary}'
 
     # build the operator
     if status == "connected":
         _verify_connected(dictionary)
-        built_tuple = et.connected_eT_z_right_operator_namedtuple(**dictionary)
+        new_namedtuple = et.connected_eT_z_right_operator_namedtuple(**dictionary)
 
     elif status == "disconnected":
         _verify_disconnected(dictionary)
-        built_tuple = et.disconnected_eT_z_right_operator_namedtuple(**dictionary)
+        new_namedtuple = et.disconnected_eT_z_right_operator_namedtuple(**dictionary)
     else:
         raise Exception("status not connected/disconnected, typo?")
 
-    return built_tuple
+    return new_namedtuple
 
 def build_zR_operator_namedtuple(status, **kwargs):
     """ Wrapper function for `_build_eT_z_op`
     """
     assert _verify_zR_keys(kwargs), f'invalid kwargs: {kwargs}'
-    dictionary = _make_zR_default_dict().update(**kwargs)
+    dictionary = _make_zR_default_dict()
+    dictionary.update(**kwargs)
     assert _basic_zR_consistency(dictionary), f'invalid operator {dictionary}'
 
     # build the operator
     if status == "connected":
         _verify_connected(dictionary)
-        built_tuple = et.connected_eT_z_right_operator_namedtuple(**dictionary)
+        new_namedtuple = et.connected_eT_z_right_operator_namedtuple(**dictionary)
 
     elif status == "disconnected":
         _verify_disconnected(dictionary)
-        built_tuple = et.disconnected_eT_z_right_operator_namedtuple(**dictionary)
+        new_namedtuple = et.disconnected_eT_z_right_operator_namedtuple(**dictionary)
     else:
         raise Exception("status not connected/disconnected, typo?")
 
-    return built_tuple
+    return new_namedtuple
 
 def build_z_operator_namedtuple(side, status, **kwargs):
     """Wrapper for `build_zL_operator_namedtuple` and
     `build_zR_operator_namedtuple`.
     """
     if side == 'left':
-        build_zL_operator_namedtuple(status, kwargs)
+        new_namedtuple = build_zL_operator_namedtuple(status, **kwargs)
     elif side == 'right':
-        build_zR_operator_namedtuple(status, kwargs)
+        new_namedtuple = build_zR_operator_namedtuple(status, **kwargs)
     else:
         raise Exception(f"Incorrect {side = }, should be either 'left' or 'right'.")
+
+    return new_namedtuple
 
 # ----------------------------------------------------------------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
