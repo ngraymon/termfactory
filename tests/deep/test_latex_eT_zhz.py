@@ -252,8 +252,6 @@ def build_zL_operator_namedtuple(status, **kwargs):
 
     return built_tuple
 
-    return
-
 def build_zR_operator_namedtuple(status, **kwargs):
     """ Wrapper function for `_build_eT_z_op`
     """
