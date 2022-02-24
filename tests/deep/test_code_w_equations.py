@@ -276,7 +276,7 @@ class Test_optimizers:
         partition_list = [(2, 1), (1, 1, 1)]
         order = 3
         function_output = cw._contracted_expressions(partition_list, order)
-        expected_result = [  # file flag
+        expected_result = [
             [
                 2,
                 "oe.contract_expression('aci, cbjk->abijk', (A, A, N), (A, A, N, N)),\n",
