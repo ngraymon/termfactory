@@ -1571,25 +1571,8 @@ class Test_build_eThz_latex_prefactor:
     def test_f_factor(self):
         t_list = ()
         t_list = (
-            build_t_operator(),
-            build_t_operator()
-        )
-            et.disconnected_t_operator_namedtuple(
-                rank=1,
-                m=0, n=1,
-                m_lhs=0, n_lhs=0,
-                m_l=0, n_l=0,
-                m_h=0, n_h=0,
-                m_r=0, n_r=1
-            ),
-            et.disconnected_t_operator_namedtuple(
-                rank=1,
-                m=0, n=1,
-                m_lhs=0, n_lhs=0,
-                m_l=0, n_l=0,
-                m_h=0, n_h=0,
-                m_r=0, n_r=1
-            )
+            build_t_operator('disconnected', rank=1, n=1, n_r=1),
+            build_t_operator('disconnected', rank=1, n=1, n_r=1),
         )
         h = et.connected_eT_h_z_operator_namedtuple(
             rank=0,
