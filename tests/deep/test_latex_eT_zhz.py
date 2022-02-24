@@ -61,75 +61,215 @@ blank_offset_dict = {
 # Builder Functions
 
 
-def build_t_operator(status, **kwargs):
-    default_dict = {
-        'rank': 0,
-        'm': 0, 'n': 0,
-        'm_lhs': 0, 'n_lhs': 0,
-        'm_l': 0, 'n_l': 0,
-        'm_h': 0, 'n_h': 0,
-        'm_r': 0, 'n_r': 0
-    }
-    default_dict.update(**kwargs)
-    params = default_dict.values()
-    if status == "connected":
-        built_tuple = et.connected_t_operator_namedtuple(*params)
-    elif status == "disconnected":
-        built_tuple = et.disconnected_t_operator_namedtuple(*params)
+# ----------------------------------------------------------------------------------------------- #
+# -----------------------------------  BUILDER FUNCTIONS  --------------------------------------- #
+# ----------------------------------------------------------------------------------------------- #
+
+# all operators can contract with the LeftHandSide(lhs) and Hamiltonian(h)
+_key_list = ['rank', 'm', 'n', 'm_lhs', 'n_lhs', 'm_h', 'n_h', ]
+
+# t operators also contract with the left and right Z operators
+t_key_list = _key_list + ['m_l', 'n_l', 'm_r', 'n_r']
+
+# Z operators also contract with t operators and each other
+zL_key_list = _key_list + ['m_t', 'n_t', 'm_r', 'n_r']
+zR_key_list = _key_list + ['m_t', 'n_t', 'm_l', 'n_l']
+
+
+def _make_t_default_dict():
+    return dict.fromkeys(t_key_list, 0)
+
+def _make_zL_default_dict():
+    d = dict.fromkeys(zL_key_list, 0)
+    d['m_t'] = d['n_t'] = (0, )  # the t contractions are tuples of zeros
+    return d
+
+def _make_zR_default_dict():
+    d = dict.fromkeys(zR_key_list, 0)
+    d['m_t'] = d['n_t'] = (0, )  # the t contractions are tuples of zeros
+    return d
+
+t_default_dict = _make_t_default_dict()
+zL_default_dict = _make_zL_default_dict()
+zR_default_dict = _make_zR_default_dict()
+
+# -------------------------  verify FUNCTIONS  ------------------------------ #
+
+def _verify_keys(kwargs, verification_dictionary):
+    """ Returns `False` if any keys in `kwargs` are not in `verification_dictionary`."""
+    for key, value in kwargs.items():
+        if key not in verification_dictionary:
+            # print(f"Key {key} not present in {verification_dictionary}")
+            return False
     else:
-        raise Exception("status not connected/disconnected, typo?")
+        return True
+
+def _verify_t_keys(**kwargs):
+    """ Returns `False` if any keys in `kwargs` are not present in `t_default_dict`.
+    It is fine if not ALL of the keys are present.
+    """
+    return _verify_keys(kwargs, t_default_dict)
+
+def _verify_zL_keys(**kwargs):
+    """ Returns `False` if any keys in `kwargs` are not present in `zL_default_dict`.
+    It is fine if not ALL of the keys are present.
+    """
+    return _verify_keys(kwargs, zL_default_dict)
+
+def _verify_zR_keys(**kwargs):
+    """ Returns `False` if any keys in `kwargs` are not present in `zR_default_dict`.
+    It is fine if not ALL of the keys are present.
+    """
+    return _verify_keys(kwargs, zR_default_dict)
+
+# -------------------------  consistency FUNCTIONS  ------------------------------ #
+
+def _basic_t_consistency(d):
+    """ Just make sure the most basic rules are followed.
+    1: `rank` = `m` + `n`
+    2: `m` = sum(all `m_` terms)
+    2: `n` = sum(all `n_` terms)
+    """
+    m_terms = ['m_lhs', 'm_l', 'm_h', 'm_r', ]
+    n_terms = ['n_lhs', 'n_l', 'n_h', 'n_r', ]
+
+    b1 = bool(d['rank'] == d['m'] + d['n'])
+    b2 = bool(d['m'] == sum([d[s] for s in m_terms]))
+    b3 = bool(d['n'] == sum([d[s] for s in n_terms]))
+
+    if b1 and b2 and b3:
+        return True
+
+    string = (
+        'Invalid operator\n'
+        f"{b1} {d['rank'] = } == {d['m'] = } + {d['n'] = }\n"
+        f"{b2} {d['m'] = } == {d['m_lhs'] = } + {d['m_l'] = } + {d['m_h'] = } + {d['m_r'] = }\n"
+        f"{b3} {d['n'] = } == {d['n_lhs'] = } + {d['n_l'] = } + {d['n_h'] = } + {d['n_r'] = }\n"
+    )
+    raise Exception(string)
+
+def _basic_zL_consistency(d):
+    """ Just make sure the most basic rules are followed.
+    1: `rank` = `m` + `n`
+    2: `m` = sum(all `m_` terms)
+    2: `n` = sum(all `n_` terms)
+    """
+    m_terms = ['m_lhs', 'm_h', 'm_r', ]
+    n_terms = ['n_lhs', 'n_h', 'n_r', ]
+
+    b1 = bool(d['rank'] == d['m'] + d['n'])
+    b2 = bool(d['m'] == sum([d[s] for s in m_terms]) + sum(d['m_t']))
+    b3 = bool(d['n'] == sum([d[s] for s in n_terms]) + sum(d['n_t']))
+
+    if b1 and b2 and b3:
+        return True
+
+    string = (
+        'Invalid operator\n'
+        f"{b1} {d['rank'] = } == {d['m'] = } + {d['n'] = }\n"
+        f"{b2} {d['m'] = } == {d['m_lhs'] = } + sum({d['m_t'] = }) + {d['m_h'] = } + {d['m_r'] = }\n"
+        f"{b3} {d['n'] = } == {d['n_lhs'] = } + sum({d['n_t'] = }) + {d['n_h'] = } + {d['n_r'] = }\n"
+    )
+    raise Exception(string)
+
+def _basic_zR_consistency(d):
+    """ Just make sure the most basic rules are followed.
+    1: `rank` = `m` + `n`
+    2: `m` = sum(all `m_` terms)
+    2: `n` = sum(all `n_` terms)
+    """
+    m_terms = ['m_lhs', 'm_h', 'm_l', ]
+    n_terms = ['n_lhs', 'n_h', 'n_l', ]
+
+    b1 = bool(d['rank'] == d['m'] + d['n'])
+    b2 = bool(d['m'] == sum([d[s] for s in m_terms]) + sum(d['m_t']))
+    b3 = bool(d['n'] == sum([d[s] for s in n_terms]) + sum(d['n_t']))
+
+    if b1 and b2 and b3:
+        return True
+
+    string = (
+        'Invalid operator\n'
+        f"{b1} {d['rank'] = } == {d['m'] = } + {d['n'] = }\n"
+        f"{b2} {d['m'] = } == {d['m_lhs'] = } + sum({d['m_t'] = }) + {d['m_h'] = } + {d['m_l'] = }\n"
+        f"{b3} {d['n'] = } == {d['n_lhs'] = } + sum({d['n_t'] = }) + {d['n_h'] = } + {d['n_l'] = }\n"
+    )
+    raise Exception(string)
+
+# --------------------  operator construction FUNCTIONS  ------------------------- #
+
+def build_t_operator(status, **kwargs):
+    """ Return a namedtuple specified by a dictionary.
+    Input argument `kwargs` takes precedence over `default_dict`.
+    """
+    assert _verify_t_keys(kwargs), f'invalid kwargs: {kwargs}'
+    dictionary = _make_t_default_dict().update(**kwargs)
+    assert _basic_t_consistency(dictionary), f'invalid operator {dictionary}'
+
+    # build the operator
+    if status == "connected":
+        built_tuple = et.connected_t_operator_namedtuple(**dictionary)
+    elif status == "disconnected":
+        built_tuple = et.disconnected_t_operator_namedtuple(**dictionary)
+    else:
+        raise Exception(
+            f"Status {status} is not valid, should be 'connected' or 'disconnected'\n"
+            f"Input dictionary:\n{kwargs}"
+        )
+
     return built_tuple
 
+def build_zL_operator_namedtuple(status, **kwargs):
+    """ Wrapper function for `_build_eT_z_op`
+    """
+    assert _verify_zL_keys(kwargs), f'invalid kwargs: {kwargs}'
+    dictionary = _make_zL_default_dict().update(**kwargs)
+    assert _basic_zL_consistency(dictionary), f'invalid operator {dictionary}'
 
-def build_eT_z_operator_namedtuple(status, side, **kwargs):  # good idea? or make 2 func?
-    right_dict = {
-        'rank': 0,
-        'm': 0, 'n': 0,
-        'm_lhs': 0, 'n_lhs': 0,
-        'm_t': (0,), 'n_t': (0,),
-        'm_h': 0, 'n_h': 0,
-        'm_l': 0, 'n_l': 0
-    }
-    left_dict = {
-        'rank': 0,
-        'm': 0, 'n': 0,
-        'm_lhs': 0, 'n_lhs': 0,
-        'm_t': (0,), 'n_t': (0,),
-        'm_h': 0, 'n_h': 0,
-        'm_r': 0, 'n_r': 0
-    }
-
-    if side == 'right':
-        default_dict = right_dict
-        default_dict.update(**kwargs)
-        params = default_dict.values()
-
-        if status == "connected":
-            built_tuple = et.connected_eT_z_right_operator_namedtuple(*params)
-        elif status == "disconnected":
-            built_tuple = et.disconnected_eT_z_right_operator_namedtuple(*params)
-        else:
-            raise Exception("status not connected/disconnected, typo?")
-
-        return built_tuple
-
-    elif side == 'left':
-        default_dict = left_dict
-        default_dict.update(**kwargs)
-        params = default_dict.values()
-
-        if status == "connected":
-            built_tuple = et.connected_t_operator_namedtuple(*params)
-        elif status == "disconnected":
-            built_tuple = et.disconnected_t_operator_namedtuple(*params)
-        else:
-            raise Exception("status not connected/disconnected, typo?")
-
-        return built_tuple
-
+    # build the operator
+    if status == "connected":
+        built_tuple = et.connected_eT_z_right_operator_namedtuple(**dictionary)
+    elif status == "disconnected":
+        built_tuple = et.disconnected_eT_z_right_operator_namedtuple(**dictionary)
     else:
-        raise Exception("side must be left or right")
+        raise Exception("status not connected/disconnected, typo?")
 
+    return built_tuple
+
+    return
+
+def build_zR_operator_namedtuple(status, **kwargs):
+    """ Wrapper function for `_build_eT_z_op`
+    """
+    assert _verify_zR_keys(kwargs), f'invalid kwargs: {kwargs}'
+    dictionary = _make_zR_default_dict().update(**kwargs)
+    assert _basic_zR_consistency(dictionary), f'invalid operator {dictionary}'
+
+    # build the operator
+    if status == "connected":
+        built_tuple = et.connected_eT_z_right_operator_namedtuple(**dictionary)
+    elif status == "disconnected":
+        built_tuple = et.disconnected_eT_z_right_operator_namedtuple(**dictionary)
+    else:
+        raise Exception("status not connected/disconnected, typo?")
+
+    return built_tuple
+
+def build_z_operator_namedtuple(side, status, **kwargs):
+    """Wrapper for `build_zL_operator_namedtuple` and
+    `build_zR_operator_namedtuple`.
+    """
+    if side == 'left':
+        build_zL_operator_namedtuple(status, kwargs)
+    elif side == 'right':
+        build_zR_operator_namedtuple(status, kwargs)
+    else:
+        raise Exception(f"Incorrect {side = }, should be either 'left' or 'right'.")
+
+# -------------------------  Z FUNCTIONS  ------------------------------ #
+
+# ----------------------------------------------------------------------------------------------- #
+# ----------------------------------------------------------------------------------------------- #
 
 class Test_generate_eT_operator:
 
@@ -437,7 +577,7 @@ class Test_generate_valid_eT_z_n_operator_permutations:
                     et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
                     et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)
                 ),
-                none_gen_op_nt, 
+                none_gen_op_nt,
                 et.general_operator_namedtuple(name='z^2', rank=2, m=2, n=0)
             )
         ]
@@ -1573,7 +1713,7 @@ class Test_build_eThz_latex_prefactor:
         assert function_output == expected_result
 
     def test_h_m_t_count(self):
-        """count_t = sum(h.m_t) 
+        """count_t = sum(h.m_t)
            if count_t > 1:"""
         t_list = (et.connected_t_operator_namedtuple(
             rank=2,
