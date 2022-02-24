@@ -117,7 +117,6 @@ def _verify_t_keys(kwargs):
     """ Returns `False` if any keys in `kwargs` are not present in `t_default_dict`.
     It is fine if not ALL of the keys are present.
     """
-    print(f"{kwargs = }")
     return _verify_keys(kwargs, t_default_dict)
 
 def _verify_zL_keys(kwargs):
@@ -161,48 +160,54 @@ def _basic_t_consistency(d):
 def _basic_zL_consistency(d):
     """ Just make sure the most basic rules are followed.
     1: `rank` = `m` + `n`
-    2: `m` = sum(all `m_` terms)
-    2: `n` = sum(all `n_` terms)
+    2:  length of `m_t` and `n_t` are the same
+    3: `m` = sum(all `m_` terms)
+    4: `n` = sum(all `n_` terms)
     """
     m_terms = ['m_lhs', 'm_h', 'm_r', ]
     n_terms = ['n_lhs', 'n_h', 'n_r', ]
 
     b1 = bool(d['rank'] == d['m'] + d['n'])
-    b2 = bool(d['m'] == sum([d[s] for s in m_terms]) + sum(d['m_t']))
-    b3 = bool(d['n'] == sum([d[s] for s in n_terms]) + sum(d['n_t']))
+    b2 = bool(len(d['m_t']) == len(d['n_t']))
+    b3 = bool(d['m'] == sum([d[s] for s in m_terms]) + sum(d['m_t']))
+    b4 = bool(d['n'] == sum([d[s] for s in n_terms]) + sum(d['n_t']))
 
-    if b1 and b2 and b3:
+    if b1 and b2 and b3 and b4:
         return True
 
     string = (
         'Invalid operator\n'
         f"{b1} {d['rank'] = } == {d['m'] = } + {d['n'] = }\n"
-        f"{b2} {d['m'] = } == {d['m_lhs'] = } + sum({d['m_t'] = }) + {d['m_h'] = } + {d['m_r'] = }\n"
-        f"{b3} {d['n'] = } == {d['n_lhs'] = } + sum({d['n_t'] = }) + {d['n_h'] = } + {d['n_r'] = }\n"
+        f"{b2} {len(d['m_t']) = } == {len(d['n_t']) = }\n"
+        f"{b3} {d['m'] = } == {d['m_lhs'] = } + sum({d['m_t'] = }) + {d['m_h'] = } + {d['m_r'] = }\n"
+        f"{b4} {d['n'] = } == {d['n_lhs'] = } + sum({d['n_t'] = }) + {d['n_h'] = } + {d['n_r'] = }\n"
     )
     raise Exception(string)
 
 def _basic_zR_consistency(d):
     """ Just make sure the most basic rules are followed.
     1: `rank` = `m` + `n`
-    2: `m` = sum(all `m_` terms)
-    2: `n` = sum(all `n_` terms)
+    2:  length of `m_t` and `n_t` are the same
+    3: `m` = sum(all `m_` terms)
+    4: `n` = sum(all `n_` terms)
     """
     m_terms = ['m_lhs', 'm_h', 'm_l', ]
     n_terms = ['n_lhs', 'n_h', 'n_l', ]
 
     b1 = bool(d['rank'] == d['m'] + d['n'])
-    b2 = bool(d['m'] == sum([d[s] for s in m_terms]) + sum(d['m_t']))
-    b3 = bool(d['n'] == sum([d[s] for s in n_terms]) + sum(d['n_t']))
+    b2 = bool(len(d['m_t']) == len(d['n_t']))
+    b3 = bool(d['m'] == sum([d[s] for s in m_terms]) + sum(d['m_t']))
+    b4 = bool(d['n'] == sum([d[s] for s in n_terms]) + sum(d['n_t']))
 
-    if b1 and b2 and b3:
+    if b1 and b2 and b3 and b4:
         return True
 
     string = (
         'Invalid operator\n'
         f"{b1} {d['rank'] = } == {d['m'] = } + {d['n'] = }\n"
-        f"{b2} {d['m'] = } == {d['m_lhs'] = } + sum({d['m_t'] = }) + {d['m_h'] = } + {d['m_l'] = }\n"
-        f"{b3} {d['n'] = } == {d['n_lhs'] = } + sum({d['n_t'] = }) + {d['n_h'] = } + {d['n_l'] = }\n"
+        f"{b2} {len(d['m_t']) = } == {len(d['n_t']) = }\n"
+        f"{b3} {d['m'] = } == {d['m_lhs'] = } + sum({d['m_t'] = }) + {d['m_h'] = } + {d['m_l'] = }\n"
+        f"{b4} {d['n'] = } == {d['n_lhs'] = } + sum({d['n_t'] = }) + {d['n_h'] = } + {d['n_l'] = }\n"
     )
     raise Exception(string)
 
