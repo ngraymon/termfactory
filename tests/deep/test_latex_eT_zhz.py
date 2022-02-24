@@ -15,38 +15,6 @@ import namedtuple_defines as nt
 none_gen_op_nt = et.general_operator_namedtuple(name=None, rank=0, m=0, n=0)
 zero_gen_op_nt = et.general_operator_namedtuple(name='', rank=0, m=0, n=0)
 zero_h_op_nt = fcc.h_operator_namedtuple(rank=0, m=0, n=0)
-zero_disconnected_z_right = et.disconnected_eT_z_right_operator_namedtuple(
-    rank=0,
-    m=0, n=0,
-    m_lhs=0, n_lhs=0,
-    m_t=(0,), n_t=(0,),
-    m_h=0, n_h=0,
-    m_l=0, n_l=0
-)
-zero_disconnected_t_op_nt = et.disconnected_t_operator_namedtuple(
-    rank=0,
-    m=0, n=0,
-    m_lhs=0, n_lhs=0,
-    m_l=0, n_l=0,
-    m_h=0, n_h=0,
-    m_r=0, n_r=0
-)
-zero_con_lhs_op_nt = et.connected_eT_lhs_operator_namedtuple(
-    rank=0,
-    m=0, n=0,
-    m_l=0, n_l=0,
-    m_t=[0], n_t=[0],
-    m_h=0, n_h=0,
-    m_r=0, n_r=0
-)
-zero_con_h_op_nt = et.connected_eT_h_z_operator_namedtuple(
-    rank=0,
-    m=0, n=0,
-    m_lhs=0, n_lhs=0,
-    m_t=[0], n_t=[0],
-    m_l=0, n_l=0,
-    m_r=0, n_r=0
-)
 blank_offset_dict = {
     'lower_h': '',
     'upper_h': '',
@@ -294,8 +262,31 @@ def build_z_operator_namedtuple(side, status, **kwargs):
 
     return new_namedtuple
 
+# --------------------  predefined super common operators  ------------------------- #
+zero_disconnected_z_right = build_z_operator_namedtuple('right', 'disconnected')
+zero_disconnected_t_op_nt = build_t_operator('disconnected')
+
+# lucas will make LHS and H functions and replace these after that
+zero_con_lhs_op_nt = et.connected_eT_lhs_operator_namedtuple(
+    rank=0,
+    m=0, n=0,
+    m_l=0, n_l=0,
+    m_t=[0], n_t=[0],
+    m_h=0, n_h=0,
+    m_r=0, n_r=0
+)
+zero_con_h_op_nt = et.connected_eT_h_z_operator_namedtuple(
+    rank=0,
+    m=0, n=0,
+    m_lhs=0, n_lhs=0,
+    m_t=[0], n_t=[0],
+    m_l=0, n_l=0,
+    m_r=0, n_r=0
+)
+
 # ----------------------------------------------------------------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
+
 
 class Test_generate_eT_operator:
 
