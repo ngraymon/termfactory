@@ -430,40 +430,11 @@ class Test_write_residual_function_string:
             expected_result = fp.read()
         assert function_output == expected_result
 
+
 class Test_generate_python_code_for_residual_functions:
 
     def test_basic(self):
-        term_lists = [
-            [
-                cre.residual_term(
-                    prefactor='1.0',
-                    h=cre.h_namedtuple(max_i=0, max_k=0),
-                    w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
-                ),
-                cre.residual_term(
-                    prefactor='1.0',
-                    h=cre.h_namedtuple(max_i=0, max_k=1),
-                    w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
-                )
-            ],
-            [
-                cre.residual_term(
-                    prefactor='1.0',
-                    h=cre.h_namedtuple(max_i=0, max_k=0),
-                    w=cre.w_namedtuple(max_i=1, max_k=0, order=1)
-                ),
-                cre.residual_term(
-                    prefactor='1.0',
-                    h=cre.h_namedtuple(max_i=0, max_k=1),
-                    w=cre.w_namedtuple(max_i=1, max_k=1, order=2)
-                ),
-                cre.residual_term(
-                    prefactor='1.0',
-                    h=cre.h_namedtuple(max_i=1, max_k=0),
-                    w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
-                )
-            ]
-        ]
+        term_lists = vars.generate_python_code_for_residual_functions.t_list
         max_order = 1
         function_output = cre.generate_python_code_for_residual_functions(term_lists, max_order)
         func_name = "generate_python_code_for_residual_functions_out.py"

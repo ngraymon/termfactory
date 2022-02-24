@@ -1,0 +1,15 @@
+(f^{2}\bh^{\blue{}\red{}}_{\blue{}\red{zy}} + f\frac{1}{2!}\bh^{\blue{}\red{}}_{\blue{i}\red{z}}\bt^{\blue{i}\red{}}_{\blue{}\red{y}} + f\bh^{\blue{i}\red{}}_{\blue{}\red{z}}\bt_{\blue{i}\red{y}} + \frac{1}{2!2!}\bh^{\blue{}\red{}}_{\blue{ij}\red{}}\bt^{\blue{i}\red{}}_{\blue{}\red{z}}\bt^{\blue{j}\red{}}_{\blue{}\red{y}} + \bh^{\blue{i}\red{}}_{\blue{j}\red{}}\bt_{\blue{i}\red{z}}\bt^{\blue{j}\red{}}_{\blue{}\red{y}} + \frac{1}{2!2!}\bh^{\blue{ij}\red{}}_{\blue{}\red{}}\bt_{\blue{i}\red{z}}\bt_{\blue{j}\red{y}})
+%
+%
+\\  &+
+%
+%
+(\frac{1}{2!}\bh_0)\bt_{\blue{}\red{z}}\bt_{\blue{}\red{y}}
+    \\  &+  % split long equation
+(f\bh^{\blue{}\red{}}_{\blue{}\red{y}} + \frac{1}{2!}\bh^{\blue{}\red{}}_{\blue{i}\red{}}\bt^{\blue{i}\red{}}_{\blue{}\red{y}} + f\frac{1}{2!2!}\bh^{\blue{}\red{}}_{\blue{i}\red{y}}\bt^{\blue{i}\red{}} + \frac{1}{2!}\bh^{\blue{i}\red{}}_{\blue{}\red{}}\bt_{\blue{i}\red{y}} + f\frac{1}{2!}\bh^{\blue{i}\red{}}_{\blue{}\red{y}}\bt_{\blue{i}\red{}})\bt_{\blue{}\red{z}}
+%
+%
+\\  &+
+%
+%
+(\bh_0 + \frac{1}{2!}\bh^{\blue{}\red{}}_{\blue{i}\red{}}\bt^{\blue{i}\red{}} + \frac{1}{2!2!}\bh^{\blue{}\red{}}_{\blue{ij}\red{}}\bt^{\blue{ij}\red{}} + \frac{1}{2!}\bh^{\blue{i}\red{}}_{\blue{}\red{}}\bt_{\blue{i}\red{}} + \frac{1}{2!}\bh^{\blue{i}\red{}}_{\blue{j}\red{}}\bt^{\blue{j}\red{}}_{\blue{i}\red{}} + \frac{1}{2!2!}\bh^{\blue{ij}\red{}}_{\blue{}\red{}}\bt_{\blue{ij}\red{}})\bt_{\blue{}\red{zy}}

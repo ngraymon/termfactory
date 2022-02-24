@@ -2,6 +2,8 @@ from logging import root
 from . import context
 import latex_full_cc as fcc
 import code_residual_equations as cre
+import latex_eT_zhz as et
+
 
 
 class write_cc_einsum_python_from_list_single_unique_key:
@@ -139,4 +141,544 @@ class write_residual_function_string_high_order_h_and_w:
             h=cre.h_namedtuple(max_i=2, max_k=0),
             w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
         )
+    ]
+
+
+class generate_python_code_for_residual_functions:
+
+    t_list = [
+        [
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=0, max_k=0),
+                w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+            ),
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=0, max_k=1),
+                w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
+            )
+        ],
+        [
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=0, max_k=0),
+                w=cre.w_namedtuple(max_i=1, max_k=0, order=1)
+            ),
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=0, max_k=1),
+                w=cre.w_namedtuple(max_i=1, max_k=1, order=2)
+            ),
+            cre.residual_term(
+                prefactor='1.0',
+                h=cre.h_namedtuple(max_i=1, max_k=0),
+                w=cre.w_namedtuple(max_i=0, max_k=0, order=0)
+            )
+        ]
+    ]
+
+
+class generate_eT_taylor_expansion:
+
+    expansion = [
+        et.general_operator_namedtuple(name='1', rank=0, m=0, n=0),
+        [
+            et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+            et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2)
+        ],
+        [
+            [
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)
+            ],
+            [
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2)
+            ],
+            [
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2),
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)
+            ],
+            [
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2),
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2)
+            ]
+        ],
+        [
+            [
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)
+            ],
+            [
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2)
+            ],
+            [
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2),
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)
+            ],
+            [
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2),
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2)
+            ],
+            [
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2),
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)
+            ],
+            [
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2),
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1),
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2)
+            ],
+            [
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2),
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2),
+                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)
+            ],
+            [
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2),
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2),
+                et.general_operator_namedtuple(name='s_2', rank=2, m=0, n=2)
+            ]
+        ]
+    ]
+
+
+class prepare_condensed_terms:
+
+    large_term_list = [
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1], n_t=[2]),
+            fcc.connected_h_operator_namedtuple(rank=0, m=0, n=0, m_o=0, n_o=0, m_t=[0], n_t=[0]),
+            (fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1), ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0], n_t=[2, 0]),
+            fcc.connected_h_operator_namedtuple(rank=1, m=0, n=1, m_o=0, n_o=0, m_t=[0, 0], n_t=[0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0], n_t=[2, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=0, n=2, m_o=0, n_o=0, m_t=[0, 0], n_t=[0, 2]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=2, n_h=0, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0], n_t=[2, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=0, n=3, m_o=0, n_o=0, m_t=[0, 0], n_t=[0, 3]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=3, n_h=0, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0], n_t=[2, 0]),
+            fcc.connected_h_operator_namedtuple(rank=1, m=1, n=0, m_o=0, n_o=0, m_t=[0, 1], n_t=[0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0], n_t=[2, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=0, n_o=0, m_t=[0, 1], n_t=[0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=1, n_h=1, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0], n_t=[2, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=1, n=2, m_o=0, n_o=0, m_t=[0, 1], n_t=[0, 2]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=2, n_h=1, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0], n_t=[2, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=2, n=0, m_o=0, n_o=0, m_t=[0, 2], n_t=[0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=2, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0], n_t=[2, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=2, n=1, m_o=0, n_o=0, m_t=[0, 2], n_t=[0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=1, n_h=2, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0], n_t=[2, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=3, n=0, m_o=0, n_o=0, m_t=[0, 3], n_t=[0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=3, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0, 0], n_t=[2, 0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=0, n=2, m_o=0, n_o=0, m_t=[0, 0, 0], n_t=[0, 1, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0, 0], n_t=[2, 0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=0, n=3, m_o=0, n_o=0, m_t=[0, 0, 0], n_t=[0, 1, 2]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0),
+                fcc.connected_namedtuple(m_h=2, n_h=0, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0, 0], n_t=[2, 0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=0, n_o=0, m_t=[0, 1, 0], n_t=[0, 0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0, 0], n_t=[2, 0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=1, n=2, m_o=0, n_o=0, m_t=[0, 0, 1], n_t=[0, 1, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0),
+                fcc.connected_namedtuple(m_h=1, n_h=1, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0, 0], n_t=[2, 0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=1, n=2, m_o=0, n_o=0, m_t=[0, 1, 0], n_t=[0, 0, 2]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0),
+                fcc.connected_namedtuple(m_h=2, n_h=0, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0, 0], n_t=[2, 0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=2, n=0, m_o=0, n_o=0, m_t=[0, 1, 1], n_t=[0, 0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0, 0], n_t=[2, 0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=2, n=1, m_o=0, n_o=0, m_t=[0, 1, 1], n_t=[0, 0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0),
+                fcc.connected_namedtuple(m_h=1, n_h=1, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0, 0], n_t=[2, 0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=2, n=1, m_o=0, n_o=0, m_t=[0, 2, 0], n_t=[0, 0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=2, m_o=0, n_o=0),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0),
+            ),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=3, m=1, n=2, m_h=0, n_h=0, m_t=[1, 0, 0], n_t=[2, 0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=3, n=0, m_o=0, n_o=0, m_t=[0, 1, 2], n_t=[0, 0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0),
+                fcc.connected_namedtuple(m_h=0, n_h=2, m_o=0, n_o=0),
+            ),
+        ],
+    ]
+
+
+class make_latex:
+
+    long_catch_term_list = [  # file flag
+        [
+            fcc.connected_omega_operator_namedtuple(
+                rank=2, m=1, n=1, m_h=1, n_h=1, m_t=[0], n_t=[0]
+            ),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=1, n_o=1, m_t=[0], n_t=[0]),
+            (fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=0),),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(
+                rank=2, m=1, n=1, m_h=1, n_h=0, m_t=[0], n_t=[1]
+            ),
+            fcc.connected_h_operator_namedtuple(rank=2, m=0, n=2, m_o=0, n_o=1, m_t=[0], n_t=[1]),
+            (fcc.connected_namedtuple(m_h=1, n_h=0, m_o=1, n_o=0),),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(
+                rank=2, m=1, n=1, m_h=0, n_h=1, m_t=[1], n_t=[0]
+            ),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=1, n_o=0, m_t=[0], n_t=[1]),
+            (fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=1),),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(
+                rank=2, m=1, n=1, m_h=1, n_h=0, m_t=[0], n_t=[1]
+            ),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=0, n_o=1, m_t=[1], n_t=[0]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=1, n_o=0),),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(
+                rank=2, m=1, n=1, m_h=1, n_h=1, m_t=[0], n_t=[0]
+            ),
+            fcc.connected_h_operator_namedtuple(rank=3, m=1, n=2, m_o=1, n_o=1, m_t=[0], n_t=[1]),
+            (fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0),),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(
+                rank=2, m=1, n=1, m_h=0, n_h=1, m_t=[1], n_t=[0]
+            ),
+            fcc.connected_h_operator_namedtuple(rank=2, m=2, n=0, m_o=1, n_o=0, m_t=[1], n_t=[0]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=1),),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=1, n=1, m_h=1, n_h=1, m_t=[0], n_t=[0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=2, n=1, m_o=1, n_o=1, m_t=[1], n_t=[0]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0),),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(
+                rank=2, m=1, n=1, m_h=0, n_h=0, m_t=[1, 0], n_t=[0, 1]
+            ),
+            fcc.connected_h_operator_namedtuple(rank=2, m=0, n=2, m_o=0, n_o=0, m_t=[0, 0], n_t=[1, 1]),
+            (fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=1), fcc.connected_namedtuple(m_h=1, n_h=0, m_o=1, n_o=0)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(
+                rank=2, m=1, n=1, m_h=1, n_h=0, m_t=[0, 0], n_t=[0, 1]
+            ),
+            fcc.connected_h_operator_namedtuple(rank=3, m=0, n=3, m_o=0, n_o=1, m_t=[0, 0], n_t=[1, 1]),
+            (fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0), fcc.connected_namedtuple(m_h=1, n_h=0, m_o=1, n_o=0)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(
+                rank=2, m=1, n=1, m_h=0, n_h=0, m_t=[1, 0], n_t=[0, 1]
+            ),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=0, n_o=0, m_t=[1, 0], n_t=[0, 1]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=1), fcc.connected_namedtuple(m_h=1, n_h=0, m_o=1, n_o=0)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=1, n=1, m_h=0, n_h=0, m_t=[0, 1], n_t=[1, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=0, n_o=0, m_t=[1, 0], n_t=[0, 1]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=1, n_o=0), fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=1)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=1, n=1, m_h=1, n_h=0, m_t=[0, 0], n_t=[1, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=1, n=2, m_o=0, n_o=1, m_t=[1, 0], n_t=[0, 1]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=1, n_o=0), fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=1, n=1, m_h=0, n_h=1, m_t=[0, 1], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=1, n=2, m_o=1, n_o=0, m_t=[0, 0], n_t=[1, 1]),
+            (fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0), fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=1)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=1, n=1, m_h=1, n_h=0, m_t=[0, 0], n_t=[0, 1]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=1, n=2, m_o=0, n_o=1, m_t=[1, 0], n_t=[0, 1]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0), fcc.connected_namedtuple(m_h=1, n_h=0, m_o=1, n_o=0)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=1, n=1, m_h=0, n_h=0, m_t=[1, 0], n_t=[0, 1]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=2, n=0, m_o=0, n_o=0, m_t=[1, 1], n_t=[0, 0]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=1), fcc.connected_namedtuple(m_h=0, n_h=1, m_o=1, n_o=0)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=1, n=1, m_h=0, n_h=1, m_t=[1, 0], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=2, n=1, m_o=1, n_o=0, m_t=[1, 0], n_t=[0, 1]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=1), fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=1, n=1, m_h=0, n_h=1, m_t=[0, 1], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=2, n=1, m_o=1, n_o=0, m_t=[1, 0], n_t=[0, 1]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0), fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=1)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=1, n=1, m_h=1, n_h=0, m_t=[0, 0], n_t=[0, 1]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=2, n=1, m_o=0, n_o=1, m_t=[1, 1], n_t=[0, 0]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0), fcc.connected_namedtuple(m_h=0, n_h=1, m_o=1, n_o=0)),
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=1, n=1, m_h=0, n_h=1, m_t=[0, 1], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=3, m=3, n=0, m_o=1, n_o=0, m_t=[1, 1], n_t=[0, 0]),
+            (fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0), fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=1)),
+        ],
+    ]
+
+
+class write_cc_latex_from_lists_high_rank_case:
+
+    fully = [
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=2, n_h=0, m_t=[0], n_t=[0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=0, n=2, m_o=0, n_o=2, m_t=[0], n_t=[0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=0),
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=1, n_h=0, m_t=[1], n_t=[0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=0, n=2, m_o=0, n_o=1, m_t=[0], n_t=[1]),
+            (
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=1),
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=1, n_h=0, m_t=[1], n_t=[0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=0, n_o=1, m_t=[1], n_t=[0]),
+            (
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=1),
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[1, 1], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=0, n=2, m_o=0, n_o=0, m_t=[0, 0], n_t=[1, 1]),
+            (
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=1),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=1)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[1, 1], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=0, n_o=0, m_t=[1, 0], n_t=[0, 1]),
+            (
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=1),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=1)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[1, 1], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=2, n=0, m_o=0, n_o=0, m_t=[1, 1], n_t=[0, 0]),
+            (
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=1)
+            )
+        ]
+    ]
+
+    linked = [
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=1, n_h=0, m_t=[1], n_t=[0]),
+            fcc.connected_h_operator_namedtuple(rank=1, m=0, n=1, m_o=0, n_o=1, m_t=[0], n_t=[0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=1),
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[1, 1], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=0, m=0, n=0, m_o=0, n_o=0, m_t=[0, 0], n_t=[0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=1),
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=1)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[1, 1], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=1, m=0, n=1, m_o=0, n_o=0, m_t=[0, 0], n_t=[0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=1),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=1)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=1, n_h=0, m_t=[1, 0], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=0, n=2, m_o=0, n_o=1, m_t=[0, 0], n_t=[0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=1),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[1, 1], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=1, m=1, n=0, m_o=0, n_o=0, m_t=[0, 1], n_t=[0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=1)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=1, n_h=0, m_t=[1, 0], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=0, n_o=1, m_t=[0, 1], n_t=[0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=1),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0)
+            )
+        ]
+    ]
+
+    unlinked = [
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[2], n_t=[0]),
+            fcc.connected_h_operator_namedtuple(rank=0, m=0, n=0, m_o=0, n_o=0, m_t=[0], n_t=[0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=2),
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[2, 0], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=1, m=0, n=1, m_o=0, n_o=0, m_t=[0, 0], n_t=[0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=2),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[2, 0], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=0, n=2, m_o=0, n_o=0, m_t=[0, 0], n_t=[0, 2]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=2),
+                fcc.connected_namedtuple(m_h=2, n_h=0, m_o=0, n_o=0)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[2, 0], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=1, m=1, n=0, m_o=0, n_o=0, m_t=[0, 1], n_t=[0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=2),
+                fcc.connected_namedtuple(m_h=0, n_h=1, m_o=0, n_o=0)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[2, 0], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=0, n_o=0, m_t=[0, 1], n_t=[0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=2),
+                fcc.connected_namedtuple(m_h=1, n_h=1, m_o=0, n_o=0)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=2, n=0, m_h=0, n_h=0, m_t=[2, 0], n_t=[0, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=2, n=0, m_o=0, n_o=0, m_t=[0, 2], n_t=[0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=2),
+                fcc.connected_namedtuple(m_h=0, n_h=2, m_o=0, n_o=0)
+            )
+        ]
     ]
