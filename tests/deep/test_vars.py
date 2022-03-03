@@ -3,8 +3,7 @@ from . import context
 import latex_full_cc as fcc
 import code_residual_equations as cre
 import latex_eT_zhz as et
-
-
+import latex_zhz as zhz
 
 class write_cc_einsum_python_from_list_single_unique_key:
 
@@ -681,4 +680,435 @@ class write_cc_latex_from_lists_high_rank_case:
                 fcc.connected_namedtuple(m_h=0, n_h=2, m_o=0, n_o=0)
             )
         ]
+    ]
+
+
+class test_long_line_splitting:
+
+    terms = [
+        [
+            et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=0, m_r=0, n_r=1),
+            (et.disconnected_t_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),),
+            et.connected_eT_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=0),
+            (None, et.disconnected_eT_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=1, n_lhs=0, m_t=(0,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)),
+            1
+        ],
+        [
+            et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=0, m_r=0, n_r=1),
+            (et.disconnected_t_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),),
+            et.connected_eT_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=1),
+            (None, et.connected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(0,), n_t=(0,), m_h=1, n_h=0, m_l=0, n_l=0)),
+            1
+        ],
+        [
+            et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=1, m_r=0, n_r=0),
+            (et.disconnected_t_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),),
+            et.connected_eT_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=1, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=0),
+            (None, et.disconnected_eT_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_t=(0,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)),
+            1
+        ],
+        [
+            et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=1, m_r=0, n_r=0),
+            (et.disconnected_t_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0),),
+            et.connected_eT_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=1, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=1),
+            (None, et.connected_eT_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_t=(0,), n_t=(0,), m_h=1, n_h=0, m_l=0, n_l=0)),
+            1
+        ],
+        [
+            et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=0, m_r=0, n_r=1),
+            (et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),),
+            et.connected_eT_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=0),
+            (None, et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(1,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)),
+            1
+        ],
+        [
+            et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=1, m_r=0, n_r=0),
+            (et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),),
+            et.connected_eT_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=1, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=0),
+            (None, et.disconnected_eT_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_t=(1,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)),
+            1
+        ],
+        [
+            et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=0, m_r=0, n_r=1),
+            (et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0),),
+            et.connected_eT_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_t=[1], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=0),
+            (None, et.disconnected_eT_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=1, n_lhs=0, m_t=(0,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)),
+            1
+        ],
+        [
+            et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=1, m_r=0, n_r=0),
+            (et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),),
+            et.connected_eT_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=1, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=1),
+            (None, et.connected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_t=(1,), n_t=(0,), m_h=1, n_h=0, m_l=0, n_l=0)),
+            1
+        ],
+        [
+            et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=0, m_r=0, n_r=1),
+            (et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0),),
+            et.connected_eT_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_t=[1], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=1),
+            (None, et.connected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(0,), n_t=(0,), m_h=1, n_h=0, m_l=0, n_l=0)),
+            1
+        ],
+        [
+            et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=1, m_r=0, n_r=0),
+            (et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0),),
+            et.connected_eT_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=[1], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=0),
+            (None, et.disconnected_eT_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_t=(0,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)),
+            1
+        ]
+    ]
+
+
+class _prepare_fourth_z_latex:
+    zero_lhs_op_nt= zhz.connected_lhs_operator_namedtuple(rank=0, m=0, n=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=0)
+    zero_connected_h_z_op_nt = zhz.connected_h_z_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=0)
+    zero_disconnected_z_r_nt = zhz.disconnected_z_right_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=0)
+    zero_disconnected_z_l_nt = zhz.disconnected_z_left_operator_namedtuple(rank=0, m=0, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=0)
+    term_list_short = [
+        [
+            zero_lhs_op_nt,
+            zero_connected_h_z_op_nt,
+            [
+                zero_disconnected_z_l_nt,
+                zero_disconnected_z_r_nt
+            ]
+        ],
+        [
+            zero_lhs_op_nt,
+            zero_connected_h_z_op_nt,
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                zhz.disconnected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=1, n_l=0)
+            ]
+        ],
+        [
+            zero_lhs_op_nt,
+            zero_connected_h_z_op_nt,
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=1, n_r=0),
+                zhz.disconnected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=1)
+            ]
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=1),
+            [
+                zero_disconnected_z_l_nt,
+                zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0)
+            ]
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=0),
+                zero_disconnected_z_r_nt
+            ]
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=0),
+            [
+                zero_disconnected_z_l_nt,
+                zhz.connected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=0)
+            ]
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                zero_disconnected_z_r_nt
+            ]
+        ]
+    ]
+    term_list_long = [
+        [
+            zero_lhs_op_nt,
+            zero_connected_h_z_op_nt,
+            [
+                zero_disconnected_z_l_nt,
+                zero_disconnected_z_r_nt,
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zero_connected_h_z_op_nt,
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                zhz.disconnected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=1, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zero_connected_h_z_op_nt,
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=2),
+                zhz.disconnected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=2, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zero_connected_h_z_op_nt,
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=1, n_r=0),
+                zhz.disconnected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=1),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zero_connected_h_z_op_nt,
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=1, n_r=1),
+                zhz.disconnected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=1, n_l=1),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zero_connected_h_z_op_nt,
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=2, n_r=0),
+                zhz.disconnected_z_right_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=2),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=1),
+            [
+                zero_disconnected_z_l_nt,
+                zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=1),
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=1, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=0),
+                zero_disconnected_z_r_nt,
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=1),
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=1, n_r=0),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=1),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=1),
+                zhz.disconnected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=1, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=1, n_r=0),
+                zhz.disconnected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=1),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=0, n_r=2),
+            [
+                zero_disconnected_z_l_nt,
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=2, n_h=0, m_l=0, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=1),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=0),
+                zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=1),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=1),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=1, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_l=0, n_l=2, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=2, n_h=0, m_r=0, n_r=0),
+                zero_disconnected_z_r_nt,
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=0, n_r=1),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=1, n_r=0),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=1),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=0),
+            [
+                zero_disconnected_z_l_nt,
+                zhz.connected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                zero_disconnected_z_r_nt,
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=0),
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=0, n_r=1),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=1, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=1),
+                zhz.disconnected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=1, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=0),
+            [
+                zhz.disconnected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_r=1, n_r=0),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=1),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=1, n_r=0),
+                zhz.disconnected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=0, m_l=0, n_l=1),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=1, n_r=1),
+            [
+                zero_disconnected_z_l_nt,
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=1, m_l=0, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=1),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                zhz.connected_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=1),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=1),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=1, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=1, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=0),
+                zhz.connected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=1, n_l=1, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=1, m_r=0, n_r=0),
+                zero_disconnected_z_r_nt,
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=0, n_r=1),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=1, n_r=0),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_l=0, n_l=1),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=1, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=0, n_r=1),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=1, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=1, m_r=1, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_h=1, n_h=0, m_r=1, n_r=0),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=1),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_r=2, n_r=0),
+            [
+                zero_disconnected_z_l_nt,
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=2, m_l=0, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=1, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=0),
+                zhz.connected_z_right_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_l=2, n_l=0, m_r=0, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=2, m_r=0, n_r=0),
+                zero_disconnected_z_r_nt,
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=1, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=0, n_r=1),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=1, n_l=0),
+            ],
+        ],
+        [
+            zero_lhs_op_nt,
+            zhz.connected_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_l=1, n_l=0, m_r=1, n_r=0),
+            [
+                zhz.connected_z_left_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_r=1, n_r=0),
+                zhz.connected_z_right_operator_namedtuple(rank=2, m=0, n=2, m_lhs=0, n_lhs=0, m_h=0, n_h=1, m_l=0, n_l=1),
+            ],
+        ],
     ]

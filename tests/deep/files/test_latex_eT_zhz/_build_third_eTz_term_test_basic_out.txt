@@ -1,0 +1,1 @@
+(\mathds1\bh_0\bz^{\red{y}}_{} + \mathds1\bh^{\blue{}\red{y}}_{}\bz_0 + \bar{f}\bt^{}_{\magenta{}\blue{}\magenta{k}\red{}}\bh^{\blue{}\blue{}\red{y}}_{}\bz^{\magenta{k}\red{}}_{} + \bar{f}\bt^{}_{\magenta{}\blue{k}\magenta{}\red{}}\bh^{\blue{k}\blue{}\red{}}_{}\bz^{\magenta{}\red{y}}_{})

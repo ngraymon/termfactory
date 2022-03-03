@@ -1,7 +1,10 @@
 # system imports
 # import re
 # import pytest
-
+from os.path import abspath, dirname, join
+deep_dir = dirname(abspath(__file__))
+root_dir = join(deep_dir, 'files')
+classtest = 'test_latex_eT_zhz'
 # local imports
 from . import context
 from . import test_vars as vars
@@ -53,6 +56,7 @@ def _make_zR_default_dict():
     d = dict.fromkeys(zR_key_list, 0)
     d['m_t'] = d['n_t'] = (0, )  # the t contractions are tuples of zeros
     return d
+
 
 t_default_dict = _make_t_default_dict()
 zL_default_dict = _make_zL_default_dict()
@@ -655,14 +659,7 @@ class Test_generate_all_valid_eT_connection_permutations:
         h = fcc.h_operator_namedtuple(rank=1, m=1, n=0)
         z_pair = (
             None,
-            et.disconnected_eT_z_right_operator_namedtuple(
-                rank=0,
-                m=0, n=0,
-                m_lhs=0, n_lhs=0,
-                m_t=(0,), n_t=(0,),
-                m_h=0, n_h=0,
-                m_l=0, n_l=0
-            )
+            build_zR_operator_namedtuple("disconnected"),
         )
         function_output = et._generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_invalid=True)
         expected_result = ([((0, 0, 0, 0),)], [((0, 0, 1, 0),)])
@@ -721,14 +718,7 @@ class Test_generate_all_o_eT_h_z_connection_permutations:
                 ),
                 (
                     None,
-                    et.connected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(0,), n_t=(0,),
-                        m_h=1, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1),
                 )
             )
         ]
@@ -757,37 +747,16 @@ class Test_generate_all_o_eT_h_z_connection_permutations:
                 ),
                 (
                     None,
-                    et.disconnected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(1,), n_t=(0,),
-                        m_h=0, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,)),
                 )
             ),
             (
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=0
-                    ),
+                    build_t_operator("connected", rank=1, n=1, n_h=1),
                 ),
                 (
                     None,
-                    et.disconnected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=1, n_lhs=0,
-                        m_t=(0,), n_t=(0,),
-                        m_h=0, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_lhs=1),
                 )
             )
         ]
@@ -828,129 +797,45 @@ class Test_remove_duplicate_t_tuple_permutations:
     def test_long_tuple_case_1(self):
         LHS = et.general_operator_namedtuple(name='bb', rank=2, m=0, n=2)
         h = fcc.h_operator_namedtuple(rank=2, m=2, n=0)
-        eT_connection_permutations = [  # file flag
+        eT_connection_permutations = [
             (
                 (
-                    et.disconnected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=0,
-                        m_r=0, n_r=1
-                    ),
-                    et.disconnected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=0,
-                        m_r=0, n_r=1
-                    )
+                    build_t_operator("disconnected", rank=1, n=1, n_r=1),
+                    build_t_operator("disconnected", rank=1, n=1, n_r=1)
                 ),
                 (
                     None,
-                    et.disconnected_eT_z_right_operator_namedtuple(
-                        rank=2,
-                        m=2, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(1, 1), n_t=(0, 0),
-                        m_h=0, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_t=(1, 1), n_t=(0, 0)),
                 )
             ),
             (
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=0
-                    ),
-                    et.disconnected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=0,
-                        m_r=0, n_r=1
-                    )
+                    build_t_operator("connected", rank=1, n=1, n_h=1),
+                    build_t_operator("disconnected", rank=1, n=1, n_r=1)
                 ),
                 (
                     None,
-                    et.disconnected_eT_z_right_operator_namedtuple(
-                        rank=2,
-                        m=2, n=0,
-                        m_lhs=1, n_lhs=0,
-                        m_t=(0, 1), n_t=(0, 0),
-                        m_h=0, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_lhs=1, m_t=(0, 1), n_t=(0, 0)),
                 )
             ),
             (
                 (
-                    et.disconnected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=0,
-                        m_r=0, n_r=1
-                    ),
-                    et.connected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=0
-                    )
+                    build_t_operator("disconnected", rank=1, n=1, n_r=1),
+                    build_t_operator("connected", rank=1, n=1, n_h=1)
                 ),
                 (
                     None,
-                    et.disconnected_eT_z_right_operator_namedtuple(
-                        rank=2,
-                        m=2, n=0,
-                        m_lhs=1, n_lhs=0,
-                        m_t=(1, 0), n_t=(0, 0),
-                        m_h=0, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_lhs=1, m_t=(1, 0), n_t=(0, 0)),
                 )
             ),
             (
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=0
-                    ),
-                    et.connected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=0
-                    )
+                    build_t_operator("connected", rank=1, n=1, n_h=1),
+                    build_t_operator("connected", rank=1, n=1, n_h=1)
                 ),
                 (
                     None,
-                    et.disconnected_eT_z_right_operator_namedtuple(
-                        rank=2,
-                        m=2, n=0,
-                        m_lhs=2, n_lhs=0,
-                        m_t=(0, 0), n_t=(0, 0),
-                        m_h=0, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_lhs=2, m_t=(0, 0), n_t=(0, 0)),
                 )
             )
         ]
@@ -959,252 +844,84 @@ class Test_remove_duplicate_t_tuple_permutations:
             [
                 (
                     (
-                        et.disconnected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=0,
-                            m_r=0, n_r=1
-                        ),
-                        et.disconnected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=0,
-                            m_r=0, n_r=1
-                        )
+                        build_t_operator("disconnected", rank=1, n=1, n_r=1),
+                        build_t_operator("disconnected", rank=1, n=1, n_r=1)
                     ),
                     (
                         None,
-                        et.disconnected_eT_z_right_operator_namedtuple(
-                            rank=2,
-                            m=2, n=0,
-                            m_lhs=0, n_lhs=0,
-                            m_t=(1, 1), n_t=(0, 0),
-                            m_h=0, n_h=0,
-                            m_l=0, n_l=0
-                        )
+                        build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_t=(1, 1), n_t=(0, 0)),
                     )
                 ),
                 (
                     (
-                        et.disconnected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=0,
-                            m_r=0, n_r=1
-                        ),
-                        et.connected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=1,
-                            m_r=0, n_r=0
-                        )
+                        build_t_operator("disconnected", rank=1, n=1, n_r=1),
+                        build_t_operator("connected", rank=1, n=1, n_h=1)
                     ),
                     (
                         None,
-                        et.disconnected_eT_z_right_operator_namedtuple(
-                            rank=2,
-                            m=2, n=0,
-                            m_lhs=1, n_lhs=0,
-                            m_t=(0, 1), n_t=(0, 0),
-                            m_h=0, n_h=0,
-                            m_l=0, n_l=0
-                        )
+                        build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_lhs=1, m_t=(0, 1), n_t=(0, 0)),
                     )
                 ),
                 (
                     (
-                        et.disconnected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=0,
-                            m_r=0, n_r=1
-                        ),
-                        et.connected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=1,
-                            m_r=0, n_r=0
-                        )
+                        build_t_operator("disconnected", rank=1, n=1, n_r=1),
+                        build_t_operator("connected", rank=1, n=1, n_h=1)
                     ),
                     (
                         None,
-                        et.disconnected_eT_z_right_operator_namedtuple(
-                            rank=2,
-                            m=2, n=0,
-                            m_lhs=1, n_lhs=0,
-                            m_t=(1, 0), n_t=(0, 0),
-                            m_h=0, n_h=0,
-                            m_l=0, n_l=0
-                        )
+                        build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_lhs=1, m_t=(1, 0), n_t=(0, 0)),
                     )
                 ),
                 (
                     (
-                        et.connected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=1,
-                            m_r=0, n_r=0
-                        ),
-                        et.connected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=1,
-                            m_r=0, n_r=0
-                        )
+                        build_t_operator("connected", rank=1, n=1, n_h=1),
+                        build_t_operator("connected", rank=1, n=1, n_h=1)
                     ),
                     (
                         None,
-                        et.disconnected_eT_z_right_operator_namedtuple(
-                            rank=2,
-                            m=2, n=0,
-                            m_lhs=2, n_lhs=0,
-                            m_t=(0, 0), n_t=(0, 0),
-                            m_h=0, n_h=0,
-                            m_l=0, n_l=0
-                        )
+                        build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_lhs=2, m_t=(0, 0), n_t=(0, 0)),
                     )
                 )
             ],
             {
                 (
                     (
-                        et.disconnected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=0,
-                            m_r=0, n_r=1
-                        ),
-                        et.disconnected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=0,
-                            m_r=0, n_r=1
-                        )
+                        build_t_operator("disconnected", rank=1, n=1, n_r=1),
+                        build_t_operator("disconnected", rank=1, n=1, n_r=1)
                     ),
                     (
                         None,
-                        et.disconnected_eT_z_right_operator_namedtuple(
-                            rank=2,
-                            m=2, n=0,
-                            m_lhs=0, n_lhs=0,
-                            m_t=(1, 1), n_t=(0, 0),
-                            m_h=0, n_h=0,
-                            m_l=0, n_l=0
-                        )
+                        build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_t=(1, 1), n_t=(0, 0)),
                     )
                 ): 1,
                 (
                     (
-                        et.disconnected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=0,
-                            m_r=0, n_r=1
-                        ),
-                        et.connected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=1,
-                            m_r=0, n_r=0
-                        )
+                        build_t_operator("disconnected", rank=1, n=1, n_r=1),
+                        build_t_operator("connected", rank=1, n=1, n_h=1)
                     ),
                     (
                         None,
-                        et.disconnected_eT_z_right_operator_namedtuple(
-                            rank=2,
-                            m=2, n=0,
-                            m_lhs=1, n_lhs=0,
-                            m_t=(0, 1), n_t=(0, 0),
-                            m_h=0, n_h=0,
-                            m_l=0, n_l=0
-                        )
+                        build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_lhs=1, m_t=(0, 1), n_t=(0, 0)),
                     )
                 ): 1,
                 (
                     (
-                        et.disconnected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=0,
-                            m_r=0, n_r=1
-                        ),
-                        et.connected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=1,
-                            m_r=0, n_r=0
-                        )
+                        build_t_operator("disconnected", rank=1, n=1, n_r=1),
+                        build_t_operator("connected", rank=1, n=1, n_h=1)
                     ),
                     (
                         None,
-                        et.disconnected_eT_z_right_operator_namedtuple(
-                            rank=2,
-                            m=2, n=0,
-                            m_lhs=1, n_lhs=0,
-                            m_t=(1, 0), n_t=(0, 0),
-                            m_h=0, n_h=0,
-                            m_l=0, n_l=0
-                        )
+                        build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_lhs=1, m_t=(1, 0), n_t=(0, 0)),
                     )
                 ): 1,
                 (
                     (
-                        et.connected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=1,
-                            m_r=0, n_r=0
-                        ),
-                        et.connected_t_operator_namedtuple(
-                            rank=1,
-                            m=0, n=1,
-                            m_lhs=0, n_lhs=0,
-                            m_l=0, n_l=0,
-                            m_h=0, n_h=1,
-                            m_r=0, n_r=0
-                        )
+                        build_t_operator("connected", rank=1, n=1, n_h=1),
+                        build_t_operator("connected", rank=1, n=1, n_h=1)
                     ),
                     (
                         None,
-                        et.disconnected_eT_z_right_operator_namedtuple(
-                            rank=2,
-                            m=2, n=0,
-                            m_lhs=2, n_lhs=0,
-                            m_t=(0, 0), n_t=(0, 0),
-                            m_h=0, n_h=0,
-                            m_l=0, n_l=0
-                        )
+                        build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_lhs=2, m_t=(0, 0), n_t=(0, 0)),
                     )
                 ): 1
             }
@@ -1251,48 +968,20 @@ class Test_generate_explicit_eT_z_connections:
         unique_permutations = [
             (
                 (
-                    et.disconnected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=0,
-                        m_r=0, n_r=1
-                    ),
+                    build_t_operator("disconnected", rank=1, n=1, n_r=1),
                 ),
                 (
                     None,
-                    et.disconnected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(1,), n_t=(0,),
-                        m_h=0, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,)),
                 )
             ),
             (
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=0
-                    ),
+                    build_t_operator("connected", rank=1, n=1, n_h=1),
                 ),
                 (
                     None,
-                    et.connected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(0,), n_t=(0,),
-                        m_h=1, n_h=0, m_l=0,
-                        n_l=0
-                    )
+                    build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1),
                 )
             )
         ]
@@ -1302,14 +991,7 @@ class Test_generate_explicit_eT_z_connections:
             [
                 zero_con_lhs_op_nt,
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=0
-                    ),
+                    build_t_operator("connected", rank=1, n=1, n_h=1),
                 ),
                 et.connected_eT_h_z_operator_namedtuple(
                     rank=2,
@@ -1321,14 +1003,7 @@ class Test_generate_explicit_eT_z_connections:
                 ),
                 (
                     None,
-                    et.connected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(0,), n_t=(0,),
-                        m_h=1, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1),
                 ),
                 1
             ]
@@ -1342,140 +1017,56 @@ class Test_generate_explicit_eT_z_connections:
         unique_permutations = [  # file flag
             (
                 (
-                    et.disconnected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=0,
-                        m_r=0, n_r=1
-                    ),
+                    build_t_operator("disconnected", rank=1, n=1, n_r=1),
                 ),
                 (
                     None,
-                    et.disconnected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(1,), n_t=(0,),
-                        m_h=0, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,)),
                 )
             ),
             (
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=0
-                    ),
+                    build_t_operator("connected", rank=1, n=1, n_h=1),
                 ),
                 (
                     None,
-                    et.connected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(0,), n_t=(0,),
-                        m_h=1, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1)
                 )
             ),
             (
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=2,
-                        m=0, n=2,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=1
-                    ),
+                    build_t_operator("connected", rank=2, n=2, n_h=1, n_r=1),
                 ),
                 (
                     None,
-                    et.disconnected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(1,), n_t=(0,),
-                        m_h=0, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,)),
                 )
             ),
             (
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=2,
-                        m=0, n=2,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=1
-                    ),
+                    build_t_operator("connected", rank=2, n=2, n_h=1, n_r=1),
                 ),
                 (
                     None,
-                    et.connected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(0,), n_t=(0,),
-                        m_h=1, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1)
                 )
             ),
             (
                 (
-                    et.disconnected_t_operator_namedtuple(
-                        rank=2,
-                        m=0, n=2,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=0,
-                        m_r=0, n_r=2
-                    ),
+                    build_t_operator("disconnected", rank=2, n=2, n_r=2),
                 ),
                 (
                     None,
-                    et.disconnected_eT_z_right_operator_namedtuple(
-                        rank=2,
-                        m=2, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(2,), n_t=(0,),
-                        m_h=0, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_t=(2,), n_t=(0,)),
                 )
             ),
             (
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=2,
-                        m=0, n=2,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=1
-                    ),
+                    build_t_operator("connected", rank=2, n=2, n_h=1, n_r=1),
                 ),
                 (
                     None,
-                    et.connected_eT_z_right_operator_namedtuple(
-                        rank=2,
-                        m=2, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(1,), n_t=(0,),
-                        m_h=1, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("connected", rank=2, m=2, m_h=1, m_t=(1,))
                 )
             )
         ]
@@ -1485,14 +1076,7 @@ class Test_generate_explicit_eT_z_connections:
             [
                 zero_con_lhs_op_nt,
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=1,
-                        m=0, n=1,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=0
-                    ),
+                    build_t_operator("connected", rank=1, n=1, n_h=1),
                 ),
                 et.connected_eT_h_z_operator_namedtuple(
                     rank=2,
@@ -1504,27 +1088,13 @@ class Test_generate_explicit_eT_z_connections:
                 ),
                 (
                     None,
-                    et.connected_eT_z_right_operator_namedtuple(
-                        rank=1,
-                        m=1, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(0,), n_t=(0,),
-                        m_h=1, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1),
                 ), 1
             ],
             [
                 zero_con_lhs_op_nt,
                 (
-                    et.connected_t_operator_namedtuple(
-                        rank=2,
-                        m=0, n=2,
-                        m_lhs=0, n_lhs=0,
-                        m_l=0, n_l=0,
-                        m_h=0, n_h=1,
-                        m_r=0, n_r=1
-                    ),
+                    build_t_operator("connected", rank=2, n=2, n_h=1, n_r=1),
                 ),
                 et.connected_eT_h_z_operator_namedtuple(
                     rank=2,
@@ -1536,14 +1106,7 @@ class Test_generate_explicit_eT_z_connections:
                 ),
                 (
                     None,
-                    et.connected_eT_z_right_operator_namedtuple(
-                        rank=2,
-                        m=2, n=0,
-                        m_lhs=0, n_lhs=0,
-                        m_t=(1,), n_t=(0,),
-                        m_h=1, n_h=0,
-                        m_l=0, n_l=0
-                    )
+                    build_zR_operator_namedtuple("connected", rank=2, m=2, m_t=(1,), m_h=1),
                 ),
                 1
             ]
@@ -1585,14 +1148,7 @@ class Test_build_eThz_latex_prefactor:
             m_r=0, n_r=0
         )
         z_left = None
-        z_right = et.disconnected_eT_z_right_operator_namedtuple(
-            rank=2,
-            m=2, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=(1, 1), n_t=(0, 0),
-            m_h=0, n_h=0,
-            m_l=0, n_l=0
-        )
+        z_right = build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_t=(1, 1), n_t=(0, 0))
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(
             t_list,
@@ -1616,14 +1172,7 @@ class Test_build_eThz_latex_prefactor:
             m_r=0, n_r=2
         )
         z_left = None
-        z_right = et.connected_eT_z_right_operator_namedtuple(
-            rank=2,
-            m=2, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=(0,), n_t=(0,),
-            m_h=2, n_h=0,
-            m_l=0, n_l=0
-        )
+        z_right = build_zR_operator_namedtuple("connected", rank=2, m=2, m_h=2)
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(
             t_list,
@@ -1639,14 +1188,7 @@ class Test_build_eThz_latex_prefactor:
     def test_choose_result(self):
         """if choose_result > 1:"""
         t_list = (
-            et.connected_t_operator_namedtuple(
-                rank=2,
-                m=0, n=2,
-                m_lhs=0, n_lhs=0,
-                m_l=0, n_l=0,
-                m_h=0, n_h=1,
-                m_r=0, n_r=1
-            ),
+            build_t_operator("connected", rank=2, n=2, n_h=1, n_r=1),
         )
         h = et.connected_eT_h_z_operator_namedtuple(
             rank=1,
@@ -1657,14 +1199,7 @@ class Test_build_eThz_latex_prefactor:
             m_r=0, n_r=0
         )
         z_left = None
-        z_right = et.disconnected_eT_z_right_operator_namedtuple(
-            rank=1,
-            m=1, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=(1,), n_t=(0,),
-            m_h=0, n_h=0,
-            m_l=0, n_l=0
-        )
+        z_right = build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,))
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(
             t_list,
@@ -1679,14 +1214,7 @@ class Test_build_eThz_latex_prefactor:
 
     def test_internal_perms(self):
         """if internal_perms > 1:"""
-        t_list = (et.connected_t_operator_namedtuple(
-            rank=2,
-            m=0, n=2,
-            m_lhs=0, n_lhs=0,
-            m_l=0, n_l=0,
-            m_h=0, n_h=2,
-            m_r=0, n_r=0),
-        )
+        t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
         h = et.connected_eT_h_z_operator_namedtuple(
             rank=2,
             m=3, n=0,
@@ -1696,14 +1224,7 @@ class Test_build_eThz_latex_prefactor:
             m_r=1, n_r=0
         )
         z_left = None
-        z_right = et.disconnected_eT_z_right_operator_namedtuple(
-            rank=0,
-            m=0, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=(0,), n_t=(0,),
-            m_h=0, n_h=0,
-            m_l=0, n_l=0
-        )
+        z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(
             t_list,
@@ -1719,14 +1240,7 @@ class Test_build_eThz_latex_prefactor:
     def test_h_m_t_count(self):
         """count_t = sum(h.m_t)
            if count_t > 1:"""
-        t_list = (et.connected_t_operator_namedtuple(
-            rank=2,
-            m=0, n=2,
-            m_lhs=0, n_lhs=0,
-            m_l=0, n_l=0,
-            m_h=0, n_h=2,
-            m_r=0, n_r=0),
-        )
+        t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
         h = et.connected_eT_h_z_operator_namedtuple(
             rank=2,
             m=2, n=0,
@@ -1754,14 +1268,7 @@ class Test_build_eThz_latex_prefactor:
         external_perms = math.comb(h.n, h.n_lhs)
         if external_perms > 1:
         """
-        t_list = (et.connected_t_operator_namedtuple(
-            rank=2,
-            m=0, n=2,
-            m_lhs=0, n_lhs=0,
-            m_l=0, n_l=0,
-            m_h=0, n_h=2,
-            m_r=0, n_r=0),
-        )
+        t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
         h = et.connected_eT_h_z_operator_namedtuple(
             rank=2,
             m=2, n=3,
@@ -1771,14 +1278,7 @@ class Test_build_eThz_latex_prefactor:
             m_r=0, n_r=0
         )
         z_left = None
-        z_right = et.disconnected_eT_z_right_operator_namedtuple(
-            rank=0,
-            m=0, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=(0,), n_t=(0,),
-            m_h=0, n_h=0,
-            m_l=0, n_l=0
-        )
+        z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(
             t_list,
@@ -1797,14 +1297,7 @@ class Test_build_eThz_latex_prefactor:
         internal_perms = math.comb(new_max, h.n_r)
         if internal_perms > 1:
         """
-        t_list = (et.connected_t_operator_namedtuple(
-            rank=2,
-            m=0, n=2,
-            m_lhs=0, n_lhs=0,
-            m_l=0, n_l=0,
-            m_h=0, n_h=2,
-            m_r=0, n_r=0),
-        )
+        t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
         h = et.connected_eT_h_z_operator_namedtuple(
             rank=2,
             m=2, n=4,
@@ -1814,14 +1307,7 @@ class Test_build_eThz_latex_prefactor:
             m_r=0, n_r=2
         )
         z_left = None
-        z_right = et.disconnected_eT_z_right_operator_namedtuple(
-            rank=0,
-            m=0, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=(0,), n_t=(0,),
-            m_h=0, n_h=0,
-            m_l=0, n_l=0
-        )
+        z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(
             t_list,
@@ -1836,14 +1322,7 @@ class Test_build_eThz_latex_prefactor:
 
     def test_account_for_interal_perms(self):
         """account for the permutations of eT-Z internal labels"""
-        t_list = (et.connected_t_operator_namedtuple(
-            rank=2,
-            m=0, n=2,
-            m_lhs=0, n_lhs=0,
-            m_l=0, n_l=0,
-            m_h=0, n_h=2,
-            m_r=0, n_r=0),
-        )
+        t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
         h = et.connected_eT_h_z_operator_namedtuple(
             rank=2,
             m=2, n=2,
@@ -1853,14 +1332,7 @@ class Test_build_eThz_latex_prefactor:
             m_r=0, n_r=0
         )
         z_left = None
-        z_right = et.disconnected_eT_z_right_operator_namedtuple(
-            rank=0,
-            m=0, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=(0,), n_t=(0,),
-            m_h=0, n_h=0,
-            m_l=0, n_l=0
-        )
+        z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
         function_output = et._build_eThz_latex_prefactor(
             t_list,
@@ -1876,22 +1348,8 @@ class Test_build_eThz_latex_prefactor:
     def test_taylor_t_m(self):
         """if t.m > 1:"""
         t_list = (
-            et.disconnected_t_operator_namedtuple(
-                rank=1,
-                m=2, n=1,
-                m_lhs=0, n_lhs=0,
-                m_l=0, n_l=0,
-                m_h=0, n_h=0,
-                m_r=0, n_r=1
-            ),
-            et.disconnected_t_operator_namedtuple(
-                rank=1,
-                m=0, n=1,
-                m_lhs=0, n_lhs=0,
-                m_l=0, n_l=0,
-                m_h=0, n_h=0,
-                m_r=0, n_r=1
-            )
+            build_t_operator("disconnected", rank=4, m=2, n=2, n_r=2, m_l=2),
+            build_t_operator("disconnected", rank=1, n=1, n_r=1),
         )
         h = et.connected_eT_h_z_operator_namedtuple(
             rank=0,
@@ -1912,7 +1370,7 @@ class Test_build_eThz_latex_prefactor:
             overcounting_prefactor,
             simplify_flag=True
         )
-        expected_result = '\\frac{2!}{2!2!2!}'
+        expected_result = '\\frac{2!}{2!2!2!2!}'
         assert function_output == expected_result
         # TODO Test Glue cases later on / consider removing
 
@@ -1928,14 +1386,7 @@ class Test_f_t_h_contributions:
 
     def test_else_case(self):
         t_list = (
-            et.connected_t_operator_namedtuple(
-                rank=1,
-                m=0, n=1,
-                m_lhs=0, n_lhs=0,
-                m_l=0, n_l=0,
-                m_h=0, n_h=1,
-                m_r=0, n_r=0
-            ),
+            build_t_operator("connected", rank=1, n=1, n_h=1),
         )
         h = et.connected_eT_h_z_operator_namedtuple(
             rank=1,
@@ -1961,14 +1412,7 @@ class Test_fbar_t_h_contributions:
 
     def test_else_case(self):
         t_list = (
-            et.connected_t_operator_namedtuple(
-                rank=1,
-                m=0, n=1,
-                m_lhs=0, n_lhs=0,
-                m_l=0, n_l=0,
-                m_h=0, n_h=1,
-                m_r=0, n_r=0
-            ),
+            build_t_operator("connected", rank=1, n=1, n_h=1),
         )
         h = et.connected_eT_h_z_operator_namedtuple(
             rank=1,
@@ -2014,14 +1458,7 @@ class Test_build_eT_term_latex_labels:
 
     def test_rank_non_zero_with_sub(self):
         t_list = (
-            et.disconnected_t_operator_namedtuple(
-                rank=1,
-                m=0, n=1,
-                m_lhs=0, n_lhs=0,
-                m_l=0, n_l=0,
-                m_h=0, n_h=0,
-                m_r=0, n_r=1
-            ),
+            build_t_operator("disconnected", rank=1, n=1, n_r=1),
         )
         offset_dict = blank_offset_dict
         function_output = et._build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True)
@@ -2030,18 +1467,11 @@ class Test_build_eT_term_latex_labels:
 
     def test_rank_non_zero_with_sup(self):
         t_list = (
-            et.disconnected_t_operator_namedtuple(  # maybe bad term
-                rank=1,
-                m=1, n=0,
-                m_lhs=0, n_lhs=0,
-                m_l=0, n_l=0,
-                m_h=0, n_h=0,
-                m_r=0, n_r=1
-            ),
+            build_t_operator("disconnected", rank=1, m=1, m_r=1),
         )
         offset_dict = blank_offset_dict
         function_output = et._build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True)
-        expected_result = '\\bt^{\\magenta{}\\blue{}\\magenta{}\\red{}}_{}'
+        expected_result = '\\bt^{\\magenta{}\\blue{}\\magenta{l}\\red{}}_{}'
         assert function_output == expected_result
 
 
@@ -2065,7 +1495,7 @@ class Test_build_eT_hz_term_latex_labels:
         )
         offset_dict = blank_offset_dict
         function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True)
-        expected_result = '\\bh^{}_{\\blue{}\\blue{l}\\red{}}'
+        expected_result = '\\bh^{}_{\\blue{}\\blue{m}\\red{}}'
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sup(self):
@@ -2111,13 +1541,7 @@ class Test_build_eT_right_z_term:
             m_l=0, n_l=0,
             m_r=0, n_r=1
         )
-        z_right = et.connected_eT_z_right_operator_namedtuple(  # maybe bad z, just changed num to fid needs
-            rank=1,
-            m=0, n=1,
-            m_lhs=0, n_lhs=0,
-            m_t=(0,), n_t=(0,),
-            m_h=1, n_h=0,
-            m_l=0, n_l=0)
+        z_right = build_zR_operator_namedtuple("connected", rank=1, n=1, n_h=1)
         offset_dict = {
             'lower_h': '',
             'upper_h': '',
@@ -2141,14 +1565,7 @@ class Test_build_eT_right_z_term:
             m_l=0, n_l=0,
             m_r=0, n_r=1
         )
-        z_right = et.connected_eT_z_right_operator_namedtuple(
-            rank=1,
-            m=1, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=(0,), n_t=(0,),
-            m_h=1, n_h=0,
-            m_l=0, n_l=0
-        )
+        z_right = build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1)
         offset_dict = {
             'lower_h': '',
             'upper_h': '',
@@ -2188,14 +1605,7 @@ class Test_prepare_third_eTz_latex:
                 m_r=0, n_r=0
             ),
             (
-                et.disconnected_t_operator_namedtuple(
-                    rank=0,
-                    m=0, n=0,
-                    m_lhs=0, n_lhs=0,
-                    m_l=0, n_l=0,
-                    m_h=0, n_h=0,
-                    m_r=0, n_r=0
-                ),
+                build_t_operator("disconnected"),
             ),
             et.connected_eT_h_z_operator_namedtuple(
                 rank=1,
@@ -2207,14 +1617,7 @@ class Test_prepare_third_eTz_latex:
             ),
             (
                 None,
-                et.connected_eT_z_right_operator_namedtuple(
-                    rank=1,
-                    m=1, n=0,
-                    m_lhs=0, n_lhs=0,
-                    m_t=(0,), n_t=(0,),
-                    m_h=1, n_h=0,
-                    m_l=0, n_l=0
-                )
+                build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1)
             ),
             1
         ],
@@ -2228,14 +1631,7 @@ class Test_prepare_third_eTz_latex:
                 m_r=0, n_r=0
             ),
             (
-                et.disconnected_t_operator_namedtuple(
-                    rank=1,
-                    m=0, n=1,
-                    m_lhs=0, n_lhs=0,
-                    m_l=0, n_l=0,
-                    m_h=0, n_h=0,
-                    m_r=0, n_r=1
-                ),
+                build_t_operator("disconnected", rank=1, n=1, n_r=1),
             ),
             et.connected_eT_h_z_operator_namedtuple(
                 rank=0,
@@ -2247,14 +1643,7 @@ class Test_prepare_third_eTz_latex:
             ),
             (
                 None,
-                et.disconnected_eT_z_right_operator_namedtuple(
-                    rank=1,
-                    m=1, n=0,
-                    m_lhs=0, n_lhs=0,
-                    m_t=(1,), n_t=(0,),
-                    m_h=0, n_h=0,
-                    m_l=0, n_l=0
-                )
+                build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,)),
             ),
             1
         ],
@@ -2268,14 +1657,7 @@ class Test_prepare_third_eTz_latex:
                 m_r=0, n_r=0
             ),
             (
-                et.connected_t_operator_namedtuple(
-                    rank=1,
-                    m=0, n=1,
-                    m_lhs=0, n_lhs=0,
-                    m_l=0, n_l=0,
-                    m_h=0, n_h=1,
-                    m_r=0, n_r=0
-                ),
+                build_t_operator("connected", rank=1, n=1, n_h=1),
             ),
             et.connected_eT_h_z_operator_namedtuple(
                 rank=1,
@@ -2287,14 +1669,7 @@ class Test_prepare_third_eTz_latex:
             ),
             (
                 None,
-                et.disconnected_eT_z_right_operator_namedtuple(
-                    rank=0,
-                    m=0, n=0,
-                    m_lhs=0, n_lhs=0,
-                    m_t=(0,), n_t=(0,),
-                    m_h=0, n_h=0,
-                    m_l=0, n_l=0
-                )
+                build_zR_operator_namedtuple("disconnected")
             ),
             1
         ]
@@ -2308,14 +1683,13 @@ class Test_prepare_third_eTz_latex:
             print_prefactors=True,
             suppress_duplicates=True
         )
-        expected_result = str(
-            '(\\mathds1\\bh_0\\bz_0 + \\bar{f}\\mathds1\\bh^{}_{\\blue{k}\\red{}}\\bz^{\\blue{k}\\red{}}_{} +' +
-            ' \\bar{f}\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}\\bh_0\\bz^{\\magenta{k}\\red{}}_{} + ' +
-            '\\bar{f}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz_0)'
-        )
+        func_name = "_prepare_third_eTz_latex_test_basic_out.txt"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
         assert function_output == expected_result
 
-    def test_f_terms_and_dupes(self):  # file flag
+    def test_f_terms_and_dupes(self):
         function_output = et._prepare_third_eTz_latex(
             Test_prepare_third_eTz_latex.term_list,
             split_width=5,
@@ -2323,86 +1697,14 @@ class Test_prepare_third_eTz_latex:
             print_prefactors=True,
             suppress_duplicates=False
         )
-        expected_result = str(
-            '(\\mathds1\\bh_0\\bz_0 + \\bar{f}\\mathds1\\bh^{}_{\\blue{k}\\red{}}\\bz^{\\blue{k}\\red{}}_{} +' +
-            ' \\bar{f}\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}\\bh_0\\bz^{\\magenta{k}\\red{}}_{} + \\bar' +
-            '{f}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz_0)'
-        )
+        func_name = "_prepare_third_eTz_latex_test_f_terms_and_dupes_out.txt"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
         assert function_output == expected_result
 
     def test_long_line_splitting(self):
-        term_list = [  # file flag
-            [
-                et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=0, m_r=0, n_r=1),
-                (zero_disconnected_t_op_nt,),
-                zero_con_h_op_nt,
-                (None, et.disconnected_eT_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=1, n_lhs=0, m_t=(0,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)),
-                1
-            ],
-            [
-                et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=0, m_r=0, n_r=1),
-                (zero_disconnected_t_op_nt,),
-                et.connected_eT_h_z_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=1),
-                (None, et.connected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(0,), n_t=(0,), m_h=1, n_h=0, m_l=0, n_l=0)),
-                1
-            ],
-            [
-                et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=1, m_r=0, n_r=0),
-                (zero_disconnected_t_op_nt,),
-                et.connected_eT_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=1, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=0),
-                (None, zero_disconnected_z_right),
-                1
-            ],
-            [
-                et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=1, m_r=0, n_r=0),
-                (zero_disconnected_t_op_nt,),
-                et.connected_eT_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=1, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=1),
-                (None, et.connected_eT_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_t=(0,), n_t=(0,), m_h=1, n_h=0, m_l=0, n_l=0)),
-                1
-            ],
-            [
-                et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=0, m_r=0, n_r=1),
-                (et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),),
-                zero_con_h_op_nt,
-                (None, et.disconnected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(1,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)),
-                1
-            ],
-            [
-                et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=1, m_r=0, n_r=0),
-                (et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),),
-                et.connected_eT_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=1, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=0),
-                (None, et.disconnected_eT_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_t=(1,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)),
-                1
-            ],
-            [
-                et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=0, m_r=0, n_r=1),
-                (et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0),),
-                et.connected_eT_h_z_operator_namedtuple(rank=1, m=1, n=0, m_lhs=0, n_lhs=0, m_t=[1], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=0),
-                (None, et.disconnected_eT_z_right_operator_namedtuple(rank=1, m=1, n=0, m_lhs=1, n_lhs=0, m_t=(0,), n_t=(0,), m_h=0, n_h=0, m_l=0, n_l=0)),
-                1
-            ],
-            [
-                et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=1, m_r=0, n_r=0),
-                (et.disconnected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=0, m_r=0, n_r=1),),
-                et.connected_eT_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=1, n_lhs=0, m_t=[0], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=1),
-                (None, et.connected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=0, n_lhs=0, m_t=(1,), n_t=(0,), m_h=1, n_h=0, m_l=0, n_l=0)),
-                1
-            ],
-            [
-                et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=0, m_r=0, n_r=1),
-                (et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0),),
-                et.connected_eT_h_z_operator_namedtuple(rank=2, m=1, n=1, m_lhs=0, n_lhs=0, m_t=[1], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=1),
-                (None, et.connected_eT_z_right_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=(0,), n_t=(0,), m_h=1, n_h=0, m_l=0, n_l=0)),
-                1
-            ],
-            [
-                et.connected_eT_lhs_operator_namedtuple(rank=1, m=0, n=1, m_l=0, n_l=0, m_t=[0], n_t=[0], m_h=0, n_h=1, m_r=0, n_r=0),
-                (et.connected_t_operator_namedtuple(rank=1, m=0, n=1, m_lhs=0, n_lhs=0, m_l=0, n_l=0, m_h=0, n_h=1, m_r=0, n_r=0),),
-                et.connected_eT_h_z_operator_namedtuple(rank=2, m=2, n=0, m_lhs=1, n_lhs=0, m_t=[1], n_t=[0], m_l=0, n_l=0, m_r=0, n_r=0),
-                (None, zero_disconnected_z_right),
-                1
-            ]
-        ]
+        term_list = vars.test_long_line_splitting.terms
 
         function_output = et._prepare_third_eTz_latex(
             term_list,
@@ -2411,19 +1713,10 @@ class Test_prepare_third_eTz_latex:
             print_prefactors=True,
             suppress_duplicates=True
         )
-        expected_result = str(
-            '\n\\mathds1\\bh_0\\bz^{\\red{y}}_{} + \\bar{f}\\frac{(2)}{2!}\\mathds1\\bh^{}_{\\blue{k}\\red{}}\\bz^{\\b' +
-            'lue{k}\\red{y}}_{} + \\mathds1\\bh^{\\blue{}\\red{y}}_{}\\bz_0 + \\bar{f}\\mathds1\\bh^{\\blue{}\\red{y}}_'+
-            '{\\blue{k}\\red{}}\\bz^{\\blue{k}\\red{}}_{} + \\bar{f}\\frac{(2)}{2!}\\bt^{}_{\\magenta{}\\blue{}\\magent'+
-            'a{k}\\red{}}\\bh_0\\bz^{\\magenta{k}\\red{y}}_{}\n    \\\\  &+  % split long equation\n\\bar{f}\\bt^{}_{\\'+
-            'magenta{}\\blue{}\\magenta{k}\\red{}}\\bh^{\\blue{}\\blue{}\\red{y}}_{}\\bz^{\\magenta{k}\\red{}}_{} + \\b'+
-            'ar{f}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz^{\\magenta{}\\'+
-            'red{y}}_{} + \\bar{f}^{2}\\frac{(2)}{2!}\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}\\bh^{\\blue{}\\bl'+
-            'ue{}\\red{y}}_{\\blue{l}\\red{}}\\bz^{\\magenta{k}\\blue{l}\\red{}}_{} + \\bar{f}^{2}\\frac{(2)}{2!}\\bt^{'+
-            '}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{\\blue{l}\\red{}}\\bz^{\\magent'+
-            'a{}\\blue{l}\\red{y}}_{} + \\bar{f}\\frac{(2)}{2!}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\'+
-            'blue{k}\\blue{}\\red{y}}_{}\\bz_0\n'
-        )
+        func_name = "_prepare_third_eTz_latex_test_long_line_splitting_out.txt"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
         assert function_output == expected_result
 
 
@@ -2522,12 +1815,10 @@ class Test_build_third_eTz_term:
             ]
         )
         function_output = et._build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False)
-        expected_result = str(
-            '(\\mathds1\\bh_0\\bz^{\\red{y}}_{} + \\mathds1\\bh^{\\blue{}\\red{y}}_{}\\bz_0 + \\bar{f}\\bt^{}_{\\magen'+
-            'ta{}\\blue{}\\magenta{k}\\red{}}\\bh^{\\blue{}\\blue{}\\red{y}}_{}\\bz^{\\magenta{k}\\red{}}_{} + \\bar{f'+
-            '}\\bt^{}_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}\\red{}}_{}\\bz^{\\magenta{}\\red'+
-            '{y}}_{})'
-        )
+        func_name = "_build_third_eTz_term_test_basic_out.txt"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
         assert function_output == expected_result
 
 
@@ -2564,14 +1855,10 @@ class Test_generate_eT_z_symmetric_latex_equations:
             only_ground_state=True,
             remove_f_terms=False
         )
-        expected_result = str(
-            '\\bh^{i}(1-\\delta_{x\\gamma})\\\\&+\\sum\\Big((\\mathds1\\bh_0\\bz^{\\red{y}} + \\mathds1\\bh^{\\blue{}'+
-            '\\red{y}}\\bz_0 + \\bar{f}\\bt_{\\magenta{}\\blue{}\\magenta{k}\\red{}}\\bh^{\\blue{}\\blue{}\\red{y}}\\'+
-            'bz^{\\magenta{k}\\red{}} + \\bar{f}\\bt_{\\magenta{}\\blue{k}\\magenta{}\\red{}}\\bh^{\\blue{k}\\blue{}'+
-            '\\red{}}\\bz^{\\magenta{}\\red{y}})\\Big)(1-\\delta_{cb})\\\\&-i\\sum\\Big(\\dv{\\hat{\\bt}^{i}_{\\gamma'+
-            '}}{\\tau}\\,\\hat{\\bz}_{0, \\gamma} + \\dv{\\hat{\\bt}_{0, \\gamma}}{\\tau}\\,\\hat{\\bz}^{i}_{\\gamma}'+
-            '\\Big)'
-        )
+        func_name = "_generate_eT_z_symmetric_latex_equations_test_basic_out.txt"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
         assert function_output == expected_result
 
 
