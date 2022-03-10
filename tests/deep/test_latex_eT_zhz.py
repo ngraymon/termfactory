@@ -35,6 +35,8 @@ blank_offset_dict = {
 
 # all operators can contract with the LeftHandSide(lhs) and Hamiltonian(h)
 _key_list = ['rank', 'm', 'n', 'm_lhs', 'n_lhs', 'm_h', 'n_h', ]
+_lhs_key_list = ['rank', 'm', 'n', 'm_l', 'n_l', 'm_t', 'n_t', 'm_h', 'n_h', 'm_r', 'n_r', ]
+_h_z_key_list = ['rank', 'm', 'n', 'm_lhs', 'n_lhs', 'm_t', 'n_t', 'm_l', 'n_l', 'm_r', 'n_r', ]
 
 # t operators also contract with the left and right Z operators
 t_key_list = _key_list + ['m_l', 'n_l', 'm_r', 'n_r']
@@ -57,10 +59,22 @@ def _make_zR_default_dict():
     d['m_t'] = d['n_t'] = (0, )  # the t contractions are tuples of zeros
     return d
 
+def _make_lhs_default_dict():
+    d = dict.fromkeys(_lhs_key_list, 0)
+    d['m_t'] = d['n_t'] = [0]  # the t contractions are lists of zeros
+    return d
+
+def _make_h_z_default_dict():
+    d = dict.fromkeys(_h_z_key_list, 0)
+    d['m_t'] = d['n_t'] = [0]  # the t contractions are lists of zeros
+    return d
+
 
 t_default_dict = _make_t_default_dict()
 zL_default_dict = _make_zL_default_dict()
 zR_default_dict = _make_zR_default_dict()
+lhs_default_dict = _make_lhs_default_dict()
+h_z_default_dict = _make_h_z_default_dict()
 
 # -------------------------  verify FUNCTIONS  ------------------------------ #
 
@@ -102,6 +116,18 @@ def _verify_zR_keys(kwargs):
     It is fine if not ALL of the keys are present.
     """
     return _verify_keys(kwargs, zR_default_dict)
+
+def _verify_lhs_keys(kwargs):
+    """ Returns `False` if any keys in `kwargs` are not present in `lhs_default_dict`.
+    It is fine if not ALL of the keys are present.
+    """
+    return _verify_keys(kwargs, lhs_default_dict)
+
+def _verify_h_z_keys(kwargs):
+    """ Returns `False` if any keys in `kwargs` are not present in `lhs_default_dict`.
+    It is fine if not ALL of the keys are present.
+    """
+    return _verify_keys(kwargs, h_z_default_dict)
 
 # -------------------------  consistency FUNCTIONS  ------------------------------ #
 
@@ -180,6 +206,62 @@ def _basic_zR_consistency(d):
         f"{b2} {len(d['m_t']) = } == {len(d['n_t']) = }\n"
         f"{b3} {d['m'] = } == {d['m_lhs'] = } + sum({d['m_t'] = }) + {d['m_h'] = } + {d['m_l'] = }\n"
         f"{b4} {d['n'] = } == {d['n_lhs'] = } + sum({d['n_t'] = }) + {d['n_h'] = } + {d['n_l'] = }\n"
+    )
+    raise Exception(string)
+
+def _basic_lhs_consistency(d):
+    """ Just make sure the most basic rules are followed.
+    1: `rank` = `m` + `n`
+    2:  length of `m_t` and `n_t` are the same
+    3: `m` = sum(all `m_` terms)
+    4: `n` = sum(all `n_` terms)
+    """
+    # ask neil, do m_r and n_r need to be in sum
+    m_terms = ['m_h', 'm_l', 'm_r']
+    n_terms = ['n_h', 'n_l', 'n_r']
+
+    b1 = bool(d['rank'] == d['m'] + d['n'])
+    b2 = bool(len(d['m_t']) == len(d['n_t']))
+    b3 = bool(d['m'] == sum([d[s] for s in m_terms]) + sum(d['m_t']))
+    b4 = bool(d['n'] == sum([d[s] for s in n_terms]) + sum(d['n_t']))
+
+    if b1 and b2 and b3 and b4:
+        return True
+
+    string = (
+        'Invalid operator\n'
+        f"{b1} {d['rank'] = } == {d['m'] = } + {d['n'] = }\n"
+        f"{b2} {len(d['m_t']) = } == {len(d['n_t']) = }\n"
+        f"{b3} {d['m'] = } == {d['m_r'] = } + sum({d['m_t'] = }) + {d['m_h'] = } + {d['m_l'] = }\n"
+        f"{b4} {d['n'] = } == {d['n_r'] = } + sum({d['n_t'] = }) + {d['n_h'] = } + {d['n_l'] = }\n"
+    )
+    raise Exception(string)
+
+def _basic_h_z_consistency(d):
+    """ Just make sure the most basic rules are followed.
+    1: `rank` = `m` + `n`
+    2:  length of `m_t` and `n_t` are the same
+    3: `m` = sum(all `m_` terms)
+    4: `n` = sum(all `n_` terms)
+    """
+    # ask neil, do m_r and n_r need to be in sum
+    m_terms = ['m_lhs', 'm_l', 'm_r', ]
+    n_terms = ['n_lhs', 'n_l', 'n_r', ]
+
+    b1 = bool(d['rank'] == d['m'] + d['n'])
+    b2 = bool(len(d['m_t']) == len(d['n_t']))
+    b3 = bool(d['m'] == sum([d[s] for s in m_terms]) + sum(d['m_t']))
+    b4 = bool(d['n'] == sum([d[s] for s in n_terms]) + sum(d['n_t']))
+
+    if b1 and b2 and b3 and b4:
+        return True
+
+    string = (
+        'Invalid operator\n'
+        f"{b1} {d['rank'] = } == {d['m'] = } + {d['n'] = }\n"
+        f"{b2} {len(d['m_t']) = } == {len(d['n_t']) = }\n"
+        f"{b3} {d['m'] = } == {d['m_lhs'] = } + sum({d['m_t'] = }) + {d['m_r'] = } + {d['m_l'] = }\n"
+        f"{b4} {d['n'] = } == {d['n_lhs'] = } + sum({d['n_t'] = }) + {d['n_r'] = } + {d['n_l'] = }\n"
     )
     raise Exception(string)
 
@@ -266,27 +348,52 @@ def build_z_operator_namedtuple(side, status, **kwargs):
 
     return new_namedtuple
 
+def build_lhs_operator_namedtuple(status, **kwargs):
+    assert _verify_lhs_keys(kwargs), f'invalid kwargs: {kwargs}'
+    dictionary = _make_lhs_default_dict()
+    dictionary.update(**kwargs)
+    assert _basic_lhs_consistency(dictionary), f'invalid operator {dictionary}'
+
+    # build the operator
+    if status == "connected":
+        # _verify_connected(dictionary) rules different?
+        new_namedtuple = et.connected_eT_lhs_operator_namedtuple(**dictionary)
+
+    # elif status == "disconnected":
+    #     _verify_disconnected(dictionary)
+    #     new_namedtuple =
+
+    else:
+        raise Exception("status not connected, disconnected does not exist, typo?")
+
+    return new_namedtuple
+
+def build_h_z_operator_namedtuple(status, **kwargs):
+    assert _verify_h_z_keys(kwargs), f'invalid kwargs: {kwargs}'
+    dictionary = _make_h_z_default_dict()
+    dictionary.update(**kwargs)
+    assert _basic_h_z_consistency(dictionary), f'invalid operator {dictionary}'
+
+    # build the operator
+    if status == "connected":
+        # _verify_connected(dictionary) rules different?
+        new_namedtuple = et.connected_eT_h_z_operator_namedtuple(**dictionary)
+
+    # elif status == "disconnected":
+    #     _verify_disconnected(dictionary)
+    #     new_namedtuple =
+
+    else:
+        raise Exception("status not connected, disconnected does not exist, typo?")
+
+    return new_namedtuple
+
+
 # --------------------  predefined super common operators  ------------------------- #
 zero_disconnected_z_right = build_z_operator_namedtuple('right', 'disconnected')
 zero_disconnected_t_op_nt = build_t_operator('disconnected')
-
-# lucas will make LHS and H functions and replace these after that
-zero_con_lhs_op_nt = et.connected_eT_lhs_operator_namedtuple(
-    rank=0,
-    m=0, n=0,
-    m_l=0, n_l=0,
-    m_t=[0], n_t=[0],
-    m_h=0, n_h=0,
-    m_r=0, n_r=0
-)
-zero_con_h_op_nt = et.connected_eT_h_z_operator_namedtuple(
-    rank=0,
-    m=0, n=0,
-    m_lhs=0, n_lhs=0,
-    m_t=[0], n_t=[0],
-    m_l=0, n_l=0,
-    m_r=0, n_r=0
-)
+zero_connected_lhs_op_nt = build_lhs_operator_namedtuple("connected")
+zero_connected_h_z_op_nt = build_h_z_operator_namedtuple("connected")
 
 # ----------------------------------------------------------------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
@@ -614,7 +721,13 @@ class Test_generate_all_valid_eT_z_connection_permutations:
         left_z = none_gen_op_nt
         right_z = et.general_operator_namedtuple(name='z', rank=0, m=0, n=0)
         function_output = et._generate_all_valid_eT_z_connection_permutations(
-            LHS, t_list, h, left_z, right_z, log_invalid=True)
+            LHS,
+            t_list,
+            h,
+            left_z,
+            right_z,
+            log_invalid=True
+        )
         expected_result = ([((0, (0,), 0, 0), (0, (0,), 0, 0))], [((0, (0,), 0, 0), (0, (0,), 0, 0))])  # TODO expand?
         assert function_output == expected_result
 
@@ -681,7 +794,11 @@ class Test_generate_all_o_eT_h_z_connection_permutations:
             )
         ]
         function_output = et._generate_all_o_eT_h_z_connection_permutations(
-            LHS, h, valid_permutations, found_it_bool=False)
+            LHS,
+            h,
+            valid_permutations,
+            found_it_bool=False
+        )
         expected_result = [
             (
                 (
@@ -709,7 +826,10 @@ class Test_generate_all_o_eT_h_z_connection_permutations:
             )
         ]
         function_output = et._generate_all_o_eT_h_z_connection_permutations(
-            LHS, h, valid_permutations, found_it_bool=False
+            LHS,
+            h,
+            valid_permutations,
+            found_it_bool=False
         )
         expected_result = [
             (
@@ -738,7 +858,10 @@ class Test_generate_all_o_eT_h_z_connection_permutations:
             )
         ]
         function_output = et._generate_all_o_eT_h_z_connection_permutations(
-            LHS, h, valid_permutations, found_it_bool=False
+            LHS,
+            h,
+            valid_permutations,
+            found_it_bool=False
         )
         expected_result = [
             (
@@ -942,16 +1065,9 @@ class Test_generate_explicit_eT_z_connections:
         function_output = et._generate_explicit_eT_z_connections(LHS, h, unique_permutations, prefactor_count)
         expected_result = [
             [
-                zero_con_lhs_op_nt,
+                zero_connected_lhs_op_nt,
                 (zero_disconnected_t_op_nt,),
-                et.connected_eT_h_z_operator_namedtuple(
-                    rank=0,
-                    m=0, n=0,
-                    m_lhs=0, n_lhs=0,
-                    m_t=[0], n_t=[0],
-                    m_l=0, n_l=0,
-                    m_r=0, n_r=0
-                ),
+                zero_connected_h_z_op_nt,
                 (
                     None,
                     zero_disconnected_z_right
@@ -989,7 +1105,7 @@ class Test_generate_explicit_eT_z_connections:
         function_output = et._generate_explicit_eT_z_connections(LHS, h, unique_permutations, prefactor_count)
         expected_result = [
             [
-                zero_con_lhs_op_nt,
+                zero_connected_lhs_op_nt,
                 (
                     build_t_operator("connected", rank=1, n=1, n_h=1),
                 ),
@@ -1014,7 +1130,7 @@ class Test_generate_explicit_eT_z_connections:
         """elif h_kwargs['n_lhs'] != lhs_kwargs['m_h']:"""
         LHS = zero_gen_op_nt
         h = fcc.h_operator_namedtuple(rank=2, m=1, n=1)
-        unique_permutations = [  # file flag
+        unique_permutations = [
             (
                 (
                     build_t_operator("disconnected", rank=1, n=1, n_r=1),
@@ -1074,36 +1190,22 @@ class Test_generate_explicit_eT_z_connections:
         function_output = et._generate_explicit_eT_z_connections(LHS, h, unique_permutations, prefactor_count)
         expected_result = [
             [
-                zero_con_lhs_op_nt,
+                zero_connected_lhs_op_nt,
                 (
                     build_t_operator("connected", rank=1, n=1, n_h=1),
                 ),
-                et.connected_eT_h_z_operator_namedtuple(
-                    rank=2,
-                    m=1, n=1,
-                    m_lhs=0, n_lhs=0,
-                    m_t=[1], n_t=[0],
-                    m_l=0, n_l=0,
-                    m_r=0, n_r=1
-                ),
+                build_h_z_operator_namedtuple("connected", rank=2, m=1, n=1, m_t=[1], n_r=1),
                 (
                     None,
                     build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1),
                 ), 1
             ],
             [
-                zero_con_lhs_op_nt,
+                zero_connected_lhs_op_nt,
                 (
                     build_t_operator("connected", rank=2, n=2, n_h=1, n_r=1),
                 ),
-                et.connected_eT_h_z_operator_namedtuple(
-                    rank=2,
-                    m=1, n=1,
-                    m_lhs=0, n_lhs=0,
-                    m_t=[1], n_t=[0],
-                    m_l=0, n_l=0,
-                    m_r=0, n_r=1
-                ),
+                build_h_z_operator_namedtuple("connected", rank=2, m=1, n=1, m_t=[1], n_r=1),
                 (
                     None,
                     build_zR_operator_namedtuple("connected", rank=2, m=2, m_t=(1,), m_h=1),
@@ -1118,7 +1220,7 @@ class Test_build_eThz_latex_prefactor:
 
     def test_basic(self):
         t_list = (zero_disconnected_t_op_nt,)
-        h = zero_con_h_op_nt
+        h = zero_connected_h_z_op_nt
         z_left = None
         z_right = zero_disconnected_z_right
         overcounting_prefactor = 1
@@ -1139,14 +1241,7 @@ class Test_build_eThz_latex_prefactor:
             build_t_operator('disconnected', rank=1, n=1, n_r=1),
             build_t_operator('disconnected', rank=1, n=1, n_r=1),
         )
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=0,
-            m=0, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=[0, 0], n_t=[0, 0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=0
-        )
+        h = build_h_z_operator_namedtuple("connected", m_t=[0, 0], n_t=[0, 0])
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_t=(1, 1), n_t=(0, 0))
         overcounting_prefactor = 1
@@ -1163,14 +1258,7 @@ class Test_build_eThz_latex_prefactor:
 
     def test_n_factor(self):
         t_list = (zero_disconnected_t_op_nt,)
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=2,
-            m=0, n=2,
-            m_lhs=0, n_lhs=0,
-            m_t=[0], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=2
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=2, n=2, n_r=2)
         z_left = None
         z_right = build_zR_operator_namedtuple("connected", rank=2, m=2, m_h=2)
         overcounting_prefactor = 1
@@ -1190,14 +1278,7 @@ class Test_build_eThz_latex_prefactor:
         t_list = (
             build_t_operator("connected", rank=2, n=2, n_h=1, n_r=1),
         )
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=1,
-            m=1, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=[1], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=0
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=1, m=1, m_t=[1])
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,))
         overcounting_prefactor = 1
@@ -1215,14 +1296,7 @@ class Test_build_eThz_latex_prefactor:
     def test_internal_perms(self):
         """if internal_perms > 1:"""
         t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=2,
-            m=3, n=0,
-            m_lhs=1, n_lhs=0,
-            m_t=[2], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=1, n_r=0
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=4, m=4, m_lhs=1, m_t=[2], m_r=1)
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
@@ -1234,21 +1308,14 @@ class Test_build_eThz_latex_prefactor:
             overcounting_prefactor,
             simplify_flag=True
         )
-        expected_result = '\\frac{(3)(2)2!}{3!2!}'
+        expected_result = '\\frac{(4)(3)2!}{4!2!}'
         assert function_output == expected_result
 
     def test_h_m_t_count(self):
         """count_t = sum(h.m_t)
            if count_t > 1:"""
         t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=2,
-            m=2, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=[2], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=0
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=2, m=2, m_t=[2])
         z_left = None
         z_right = build_z_operator_namedtuple('right', 'disconnected')
         overcounting_prefactor = 1
@@ -1269,14 +1336,7 @@ class Test_build_eThz_latex_prefactor:
         if external_perms > 1:
         """
         t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=2,
-            m=2, n=3,
-            m_lhs=0, n_lhs=2,
-            m_t=[2], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=0
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=3, m=0, n=3, n_lhs=2, n_t=[1])
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
@@ -1288,7 +1348,7 @@ class Test_build_eThz_latex_prefactor:
             overcounting_prefactor,
             simplify_flag=True
         )
-        expected_result = '\\frac{2!(3)}{2!3!2!}'
+        expected_result = '\\frac{(3)}{3!2!}'
         assert function_output == expected_result
 
     def test_h_n_internal_perms(self):
@@ -1298,14 +1358,7 @@ class Test_build_eThz_latex_prefactor:
         if internal_perms > 1:
         """
         t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=2,
-            m=2, n=4,
-            m_lhs=0, n_lhs=1,
-            m_t=[2], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=2
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=6, m=2, n=4, n_lhs=1, m_t=[2], n_r=2, n_l=1)
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
@@ -1323,14 +1376,7 @@ class Test_build_eThz_latex_prefactor:
     def test_account_for_interal_perms(self):
         """account for the permutations of eT-Z internal labels"""
         t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=2,
-            m=2, n=2,
-            m_lhs=0, n_lhs=1,
-            m_t=[2], n_t=[1, 2],
-            m_l=0, n_l=0,
-            m_r=0, n_r=0
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=6, m=2, n=4, n_lhs=1, m_t=[2, 0], n_t=[1, 2])
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
@@ -1342,7 +1388,7 @@ class Test_build_eThz_latex_prefactor:
             overcounting_prefactor,
             simplify_flag=True
         )
-        expected_result = '\\frac{2!(2)3!}{2!2!2!}'
+        expected_result = '\\frac{2!(4)3!}{2!4!2!}'
         assert function_output == expected_result
 
     def test_taylor_t_m(self):
@@ -1351,14 +1397,7 @@ class Test_build_eThz_latex_prefactor:
             build_t_operator("disconnected", rank=4, m=2, n=2, n_r=2, m_l=2),
             build_t_operator("disconnected", rank=1, n=1, n_r=1),
         )
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=0,
-            m=0, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=[0, 0], n_t=[0, 0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=0
-        )
+        h = build_h_z_operator_namedtuple("connected", m_t=[0, 0], n_t=[0, 0])
         z_left = None
         z_right = build_z_operator_namedtuple('right', 'disconnected', rank=2, m=2, m_t=(1, 1), n_t=(0, 0))
         overcounting_prefactor = 1
@@ -1379,7 +1418,7 @@ class Test_f_t_h_contributions:
 
     def test_if_case(self):
         t_list = (zero_disconnected_t_op_nt,)
-        h = zero_con_h_op_nt
+        h = zero_connected_h_z_op_nt
         function_output = et._f_t_h_contributions(t_list, h)
         expected_result = [0]
         assert function_output == expected_result
@@ -1388,14 +1427,7 @@ class Test_f_t_h_contributions:
         t_list = (
             build_t_operator("connected", rank=1, n=1, n_h=1),
         )
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=1,
-            m=1, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=[1], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=0
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=1, m=1, m_t=[1])
         function_output = et._f_t_h_contributions(t_list, h)
         expected_result = [0]
         assert function_output == expected_result
@@ -1405,7 +1437,7 @@ class Test_fbar_t_h_contributions:
 
     def test_if_case(self):
         t_list = (zero_disconnected_t_op_nt,)
-        h = zero_con_h_op_nt
+        h = zero_connected_h_z_op_nt
         function_output = et._fbar_t_h_contributions(t_list, h)
         expected_result = [0]
         assert function_output == expected_result
@@ -1414,14 +1446,7 @@ class Test_fbar_t_h_contributions:
         t_list = (
             build_t_operator("connected", rank=1, n=1, n_h=1),
         )
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=1,
-            m=1, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=[1], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=0
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=1, m=1, m_t=[1])
         function_output = et._fbar_t_h_contributions(t_list, h)
         expected_result = [1]
         assert function_output == expected_result
@@ -1478,35 +1503,21 @@ class Test_build_eT_term_latex_labels:
 class Test_build_eT_hz_term_latex_labels:
 
     def test_rank_zero(self):
-        h = zero_con_h_op_nt
+        h = zero_connected_h_z_op_nt
         offset_dict = blank_offset_dict
         function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True)
         expected_result = '\\bh_0'
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sub(self):
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=1,
-            m=0, n=1,
-            m_lhs=0, n_lhs=0,
-            m_t=[0], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=1
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=1, n=1, n_r=1)
         offset_dict = blank_offset_dict
         function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True)
         expected_result = '\\bh^{}_{\\blue{}\\blue{m}\\red{}}'
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sup(self):
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=1,
-            m=1, n=0,
-            m_lhs=0, n_lhs=0,
-            m_t=[1], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=0
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=1, m=1, m_t=[1])
         offset_dict = {
             'lower_h': '',
             'upper_h': '\\blue{k}',
@@ -1525,7 +1536,7 @@ class Test_build_eT_hz_term_latex_labels:
 class Test_build_eT_right_z_term:
 
     def test_rank_zero(self):
-        h = zero_con_h_op_nt
+        h = zero_connected_h_z_op_nt
         z_right = zero_disconnected_z_right
         offset_dict = blank_offset_dict
         function_output = et._build_eT_right_z_term(h, z_right, offset_dict, color=True, letters=True)
@@ -1533,14 +1544,7 @@ class Test_build_eT_right_z_term:
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sub(self):
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=1,
-            m=0, n=1,
-            m_lhs=0, n_lhs=0,
-            m_t=[0], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=1
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=1, n=1, n_r=1)
         z_right = build_zR_operator_namedtuple("connected", rank=1, n=1, n_h=1)
         offset_dict = {
             'lower_h': '',
@@ -1557,14 +1561,7 @@ class Test_build_eT_right_z_term:
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sup(self):
-        h = et.connected_eT_h_z_operator_namedtuple(
-            rank=1,
-            m=0, n=1,
-            m_lhs=0, n_lhs=0,
-            m_t=[0], n_t=[0],
-            m_l=0, n_l=0,
-            m_r=0, n_r=1
-        )
+        h = build_h_z_operator_namedtuple("connected", rank=1, n=1, n_r=1)
         z_right = build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1)
         offset_dict = {
             'lower_h': '',
@@ -1584,11 +1581,11 @@ class Test_build_eT_right_z_term:
 class Test_prepare_third_eTz_latex:
     term_list = [  # file flag
         [
-            zero_con_lhs_op_nt,
+            zero_connected_lhs_op_nt,
             (
                 zero_disconnected_t_op_nt,
             ),
-            zero_con_h_op_nt,
+            zero_connected_h_z_op_nt,
             (
                 None,
                 zero_disconnected_z_right
@@ -1596,25 +1593,11 @@ class Test_prepare_third_eTz_latex:
             1
         ],
         [
-            et.connected_eT_lhs_operator_namedtuple(
-                rank=0,
-                m=0, n=0,
-                m_l=0, n_l=0,
-                m_t=[0], n_t=[0],
-                m_h=0, n_h=0,
-                m_r=0, n_r=0
-            ),
+            zero_connected_lhs_op_nt,
             (
                 build_t_operator("disconnected"),
             ),
-            et.connected_eT_h_z_operator_namedtuple(
-                rank=1,
-                m=0, n=1,
-                m_lhs=0, n_lhs=0,
-                m_t=[0], n_t=[0],
-                m_l=0, n_l=0,
-                m_r=0, n_r=1
-            ),
+            build_h_z_operator_namedtuple("connected", rank=1, n=1, n_r=1),
             (
                 None,
                 build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1)
@@ -1622,25 +1605,11 @@ class Test_prepare_third_eTz_latex:
             1
         ],
         [
-            et.connected_eT_lhs_operator_namedtuple(
-                rank=0,
-                m=0, n=0,
-                m_l=0, n_l=0,
-                m_t=[0], n_t=[0],
-                m_h=0, n_h=0,
-                m_r=0, n_r=0
-            ),
+            zero_connected_lhs_op_nt,
             (
                 build_t_operator("disconnected", rank=1, n=1, n_r=1),
             ),
-            et.connected_eT_h_z_operator_namedtuple(
-                rank=0,
-                m=0, n=0,
-                m_lhs=0, n_lhs=0,
-                m_t=[0], n_t=[0],
-                m_l=0, n_l=0,
-                m_r=0, n_r=0
-            ),
+            zero_connected_h_z_op_nt,
             (
                 None,
                 build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,)),
@@ -1648,25 +1617,11 @@ class Test_prepare_third_eTz_latex:
             1
         ],
         [
-            et.connected_eT_lhs_operator_namedtuple(
-                rank=0,
-                m=0, n=0,
-                m_l=0, n_l=0,
-                m_t=[0], n_t=[0],
-                m_h=0, n_h=0,
-                m_r=0, n_r=0
-            ),
+            zero_connected_lhs_op_nt,
             (
                 build_t_operator("connected", rank=1, n=1, n_h=1),
             ),
-            et.connected_eT_h_z_operator_namedtuple(
-                rank=1,
-                m=1, n=0,
-                m_lhs=0, n_lhs=0,
-                m_t=[1], n_t=[0],
-                m_l=0, n_l=0,
-                m_r=0, n_r=0
-            ),
+            build_h_z_operator_namedtuple("connected", rank=1, m=1, m_t=[1]),
             (
                 None,
                 build_zR_operator_namedtuple("disconnected")
