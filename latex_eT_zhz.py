@@ -1407,7 +1407,7 @@ def _build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True):
     old_print_wrapper("t_list\n", t_list, '\n')
     for t in t_list:
         if t.rank == 0:
-            return f"\\mathds{1}"
+            return f"\\mathds{{1}}"
 
         upper_indices, lower_indices = '', ''
 

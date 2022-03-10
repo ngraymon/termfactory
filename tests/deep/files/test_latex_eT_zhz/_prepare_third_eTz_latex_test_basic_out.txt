@@ -1,1 +1,1 @@
-(\mathds1\bh_0\bz_0 + \bar{f}\mathds1\bh^{}_{\blue{k}\red{}}\bz^{\blue{k}\red{}}_{} + \bar{f}\bt^{}_{\magenta{}\blue{}\magenta{k}\red{}}\bh_0\bz^{\magenta{k}\red{}}_{} + \bar{f}\bt^{}_{\magenta{}\blue{k}\magenta{}\red{}}\bh^{\blue{k}\blue{}\red{}}_{}\bz_0)
+(\mathds{1}\bh_0\bz_0 + \bar{f}\mathds{1}\bh^{}_{\blue{k}\red{}}\bz^{\blue{k}\red{}}_{} + \bar{f}\bt^{}_{\magenta{}\blue{}\magenta{k}\red{}}\bh_0\bz^{\magenta{k}\red{}}_{} + \bar{f}\bt^{}_{\magenta{}\blue{k}\magenta{}\red{}}\bh^{\blue{k}\blue{}\red{}}_{}\bz_0)
