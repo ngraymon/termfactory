@@ -1,10 +1,9 @@
 # system imports
-# import re
-# import pytest
 from os.path import abspath, dirname, join
 deep_dir = dirname(abspath(__file__))
 root_dir = join(deep_dir, 'files')
 classtest = 'test_latex_eT_zhz'
+
 # local imports
 from . import context
 from . import large_test_data
@@ -1852,9 +1851,14 @@ class Test_generate_eT_z_symmetric_latex_equations:
 class Test_run_main_et_zhz:
 
     def test_run_main(self, tmpdir):
-        output_path = join(tmpdir, "generated_latex.tex")
+        """ x """
+
+        output_path = join(tmpdir, "latex_Test_run_main_et_zhz.tex")
+
+        truncations = [1, 1, 1, 1, 1]
+
         et.generate_eT_z_t_symmetric_latex(
-            [1, 1, 1, 1, 1],
+            truncations,
             only_ground_state=True,
             remove_f_terms=False,
             path=output_path
