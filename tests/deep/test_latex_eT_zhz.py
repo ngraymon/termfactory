@@ -767,15 +767,8 @@ class Test_generate_all_valid_eT_connection_permutations:
         t_list = (et.general_operator_namedtuple(name='1', rank=0, m=0, n=0),)
         h = zero_h_op_nt
         z_pair = (
-            et.disconnected_eT_z_left_operator_namedtuple(
-                rank=0,
-                m=0, n=0,
-                m_lhs=0, n_lhs=0,
-                m_h=0, n_h=0,
-                m_r=0, n_r=0,
-                m_t=(0,), n_t=(0,)
-            ),
-            None
+            build_zL_operator_namedtuple('disconnected'),
+            None,
         )
         function_output = et._generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_invalid=True)
         expected_result = ([[[0, 0, 0, 0]]], [[[0, 0, 0, 0]]])
