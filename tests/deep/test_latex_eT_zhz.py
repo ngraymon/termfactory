@@ -28,22 +28,47 @@ blank_offset_dict = {
     'unlinked_index': 0,
     'summation_index': 0
 }
+# ----------------------------------------------------------------------------------------------- #
+# possibly alternate way to make builder function keys
+
+# def _key_gen(suffix):
+#     """ Return list of two strings 'm_*', 'n_*' for some string *. """
+#     return [f"m_{suffix}", f"n_{suffix}"]
+
+# def _key_factory(suffix_list):
+#     """ Concatenate lists returned from calling `_key_gen`on each element in `suffix_list` """
+#     ret = []
+#     for suffix in suffix_list:
+#         ret.append(_key_gen(suffix))
+#     return ret
+
+# # do this
+# _lhs_key_list = _op_key_list + _key_gen('h') + _key_factory(['t', 'l', 'r'])
+
+# # instead of
+# _lhs_key_list = _op_key_list + ['m_l', 'n_l', 'm_t', 'n_t', 'm_h', 'n_h', 'm_r', 'n_r', ]
 
 # ----------------------------------------------------------------------------------------------- #
 # -----------------------------------  BUILDER FUNCTIONS  --------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
 
-# all operators can contract with the LeftHandSide(lhs) and Hamiltonian(h)
-_key_list = ['rank', 'm', 'n', 'm_lhs', 'n_lhs', 'm_h', 'n_h', ]
-_lhs_key_list = ['rank', 'm', 'n', 'm_l', 'n_l', 'm_t', 'n_t', 'm_h', 'n_h', 'm_r', 'n_r', ]
-_h_z_key_list = ['rank', 'm', 'n', 'm_lhs', 'n_lhs', 'm_t', 'n_t', 'm_l', 'n_l', 'm_r', 'n_r', ]
+# all operators have: rank, m, n
+_op_key_list = ['rank', 'm', 'n', ]
+
+# define the projection operator and the Hamiltonian operator
+
+_h_z_key_list = _op_key_list + ['m_t', 'n_t', 'm_l', 'n_l', 'm_r', 'n_r', ] + ['m_h', 'n_h', ]
+_lhs_key_list = _op_key_list + ['m_t', 'n_t', 'm_l', 'n_l', 'm_r', 'n_r', ] + ['m_lhs', 'n_lhs', ]
+
+# all action operators can contract with the LeftHandSide(lhs) and Hamiltonian(h)
+_action_key_list = _op_key_list + ['m_lhs', 'n_lhs', 'm_h', 'n_h', ]
 
 # t operators also contract with the left and right Z operators
-t_key_list = _key_list + ['m_l', 'n_l', 'm_r', 'n_r']
+t_key_list = _action_key_list + ['m_l', 'n_l', 'm_r', 'n_r']
 
 # Z operators also contract with t operators and each other
-zL_key_list = _key_list + ['m_t', 'n_t', 'm_r', 'n_r']
-zR_key_list = _key_list + ['m_t', 'n_t', 'm_l', 'n_l']
+zL_key_list = _action_key_list + ['m_t', 'n_t', 'm_r', 'n_r']
+zR_key_list = _action_key_list + ['m_t', 'n_t', 'm_l', 'n_l']
 
 
 def _make_t_default_dict():
@@ -61,12 +86,12 @@ def _make_zR_default_dict():
 
 def _make_lhs_default_dict():
     d = dict.fromkeys(_lhs_key_list, 0)
-    d['m_t'] = d['n_t'] = [0]  # the t contractions are lists of zeros
+    d['m_t'] = d['n_t'] = [0, ]  # the t contractions are lists of zeros
     return d
 
 def _make_h_z_default_dict():
     d = dict.fromkeys(_h_z_key_list, 0)
-    d['m_t'] = d['n_t'] = [0]  # the t contractions are lists of zeros
+    d['m_t'] = d['n_t'] = [0, ]  # the t contractions are lists of zeros
     return d
 
 
@@ -216,7 +241,6 @@ def _basic_lhs_consistency(d):
     3: `m` = sum(all `m_` terms)
     4: `n` = sum(all `n_` terms)
     """
-    # ask neil, do m_r and n_r need to be in sum
     m_terms = ['m_h', 'm_l', 'm_r']
     n_terms = ['n_h', 'n_l', 'n_r']
 
@@ -232,8 +256,8 @@ def _basic_lhs_consistency(d):
         'Invalid operator\n'
         f"{b1} {d['rank'] = } == {d['m'] = } + {d['n'] = }\n"
         f"{b2} {len(d['m_t']) = } == {len(d['n_t']) = }\n"
-        f"{b3} {d['m'] = } == {d['m_r'] = } + sum({d['m_t'] = }) + {d['m_h'] = } + {d['m_l'] = }\n"
-        f"{b4} {d['n'] = } == {d['n_r'] = } + sum({d['n_t'] = }) + {d['n_h'] = } + {d['n_l'] = }\n"
+        f"{b3} {d['m'] = } == {d['m_h'] = } + sum({d['m_t'] = }) + {d['m_l'] = } + {d['m_r'] = }\n"
+        f"{b4} {d['n'] = } == {d['n_h'] = } + sum({d['n_t'] = }) + {d['n_l'] = } + {d['n_r'] = }\n"
     )
     raise Exception(string)
 
@@ -244,7 +268,6 @@ def _basic_h_z_consistency(d):
     3: `m` = sum(all `m_` terms)
     4: `n` = sum(all `n_` terms)
     """
-    # ask neil, do m_r and n_r need to be in sum
     m_terms = ['m_lhs', 'm_l', 'm_r', ]
     n_terms = ['n_lhs', 'n_l', 'n_r', ]
 
@@ -260,8 +283,8 @@ def _basic_h_z_consistency(d):
         'Invalid operator\n'
         f"{b1} {d['rank'] = } == {d['m'] = } + {d['n'] = }\n"
         f"{b2} {len(d['m_t']) = } == {len(d['n_t']) = }\n"
-        f"{b3} {d['m'] = } == {d['m_lhs'] = } + sum({d['m_t'] = }) + {d['m_r'] = } + {d['m_l'] = }\n"
-        f"{b4} {d['n'] = } == {d['n_lhs'] = } + sum({d['n_t'] = }) + {d['n_r'] = } + {d['n_l'] = }\n"
+        f"{b3} {d['m'] = } == {d['m_lhs'] = } + sum({d['m_t'] = }) + {d['m_l'] = } + {d['m_r'] = }\n"
+        f"{b4} {d['n'] = } == {d['n_lhs'] = } + sum({d['n_t'] = }) + {d['n_l'] = } + {d['n_r'] = }\n"
     )
     raise Exception(string)
 
