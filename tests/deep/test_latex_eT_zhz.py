@@ -1593,56 +1593,42 @@ class Test_build_eT_right_z_term:
 
 
 class Test_prepare_third_eTz_latex:
-    term_list = [  # file flag
-        [
-            zero_lhs_op_nt,
-            (
-                zero_disconnected_t_op_nt,
-            ),
-            zero_h_z_op_nt,
-            (
-                None,
-                zero_disconnected_z_right
-            ),
-            1
-        ],
-        [
-            zero_lhs_op_nt,
-            (
-                build_t_operator("disconnected"),
-            ),
-            build_h_z_operator_namedtuple(rank=1, n=1, n_r=1),
-            (
-                None,
-                build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1)
-            ),
-            1
-        ],
-        [
-            zero_lhs_op_nt,
-            (
-                build_t_operator("disconnected", rank=1, n=1, n_r=1),
-            ),
-            zero_h_z_op_nt,
-            (
-                None,
-                build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,)),
-            ),
-            1
-        ],
-        [
-            zero_lhs_op_nt,
-            (
-                build_t_operator("connected", rank=1, n=1, n_h=1),
-            ),
-            build_h_z_operator_namedtuple(rank=1, m=1, m_t=[1]),
-            (
-                None,
-                build_zR_operator_namedtuple("disconnected")
-            ),
-            1
-        ]
+
+    prefactor_count = 1  # specify what the variable is
+
+    term_1 = [
+        zero_lhs_op_nt,
+        (zero_disconnected_t_op_nt, ),
+        zero_h_z_op_nt,
+        (None, zero_disconnected_z_right),
+        prefactor_count,
     ]
+
+    term_2 = [
+        zero_lhs_op_nt,
+        (build_t_operator("disconnected"), ),
+        build_h_z_operator_namedtuple(rank=1, n=1, n_r=1),
+        (None, build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1)),
+        prefactor_count
+    ]
+
+    term_3 = [
+        zero_lhs_op_nt,
+        (build_t_operator("disconnected", rank=1, n=1, n_r=1), ),
+        zero_h_z_op_nt,
+        (None, build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,)),),
+        prefactor_count
+    ]
+
+    term_4 = [
+        zero_lhs_op_nt,
+        (build_t_operator("connected", rank=1, n=1, n_h=1), ),
+        build_h_z_operator_namedtuple(rank=1, m=1, m_t=[1]),
+        (None, build_zR_operator_namedtuple("disconnected")),
+        prefactor_count
+    ]
+
+    term_list = [term_1, term_2, term_3, term_4]
 
     def test_basic(self):
         function_output = et._prepare_third_eTz_latex(
