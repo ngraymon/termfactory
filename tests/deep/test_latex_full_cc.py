@@ -7,7 +7,7 @@ root_dir = join(deep_dir, 'files')
 classtest = 'test_latex_full_cc'
 # local imports
 from . import context
-from . import test_vars as vars
+from . import large_test_data
 import latex_full_cc as fcc
 import namedtuple_defines as nt
 
@@ -547,7 +547,7 @@ class Test_prepare_condensed_terms:
         # slap this whole bad boy into a file and just import term_list
         # omega rank 3
     def test_large_term_list(self):
-        term_list = vars.prepare_condensed_terms.large_term_list
+        term_list = large_test_data.prepare_condensed_terms.large_term_list
         function_output = fcc.prepare_condensed_terms(term_list, linked_condense=True, unlinked_condense=False)
         expected_result = [[fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=2, n_o=1)]]
         assert function_output == expected_result
@@ -874,7 +874,7 @@ class Test_make_latex:
     def test_long_catch(self):
         """long running line else catch"""
         rank = 2
-        term_list = vars.make_latex.long_catch_term_list
+        term_list = large_test_data.make_latex.long_catch_term_list
         function_output = fcc._make_latex(
             rank,
             term_list,
@@ -956,9 +956,9 @@ class Test_write_cc_latex_from_lists:
 
     def test_high_rank_case(self):
         rank = 2
-        fully = vars.write_cc_latex_from_lists_high_rank_case.fully
-        linked = vars.write_cc_latex_from_lists_high_rank_case.linked
-        unlinked = vars.write_cc_latex_from_lists_high_rank_case.unlinked
+        fully = large_test_data.write_cc_latex_from_lists_high_rank_case.fully
+        linked = large_test_data.write_cc_latex_from_lists_high_rank_case.linked
+        unlinked = large_test_data.write_cc_latex_from_lists_high_rank_case.unlinked
         function_output = fcc._write_cc_latex_from_lists(rank, fully, linked, unlinked)
         func_name = "write_cc_latex_from_lists_high_rank_case_out.txt"
         file_name = join(root_dir, classtest, func_name)

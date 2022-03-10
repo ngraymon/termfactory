@@ -8,7 +8,7 @@ classtest = 'test_code_residual_equations'
 from . import context
 from typing import ValuesView
 import code_residual_equations as cre
-from . import test_vars as vars
+from . import large_test_data
 
 # global vars
 h_0_zeros = cre.general_operator_namedtuple(name='h_0', rank=0, m=0, n=0)
@@ -295,7 +295,7 @@ class Test_generate_residual_data:
         ]
         max_order = 1
         function_output = cre.generate_residual_data(H, max_order)
-        assert function_output == vars.generate_residual_data.expected_result
+        assert function_output == large_test_data.generate_residual_data.expected_result
 
 
 class Test_generate_einsum_h_indices:
@@ -421,7 +421,7 @@ class Test_write_residual_function_string:
         assert function_output == expected_result
 
     def test_high_order_h_and_w(self):
-        residual_terms_list = vars.write_residual_function_string_high_order_h_and_w.res_list
+        residual_terms_list = large_test_data.write_residual_function_string_high_order_h_and_w.res_list
         order = 2
         function_output = cre.write_residual_function_string(residual_terms_list, order)
         func_name = "write_residual_function_string_high_order_h_and_w_out.py"
@@ -434,7 +434,7 @@ class Test_write_residual_function_string:
 class Test_generate_python_code_for_residual_functions:
 
     def test_basic(self):
-        term_lists = vars.generate_python_code_for_residual_functions.t_list
+        term_lists = large_test_data.generate_python_code_for_residual_functions.t_list
         max_order = 1
         function_output = cre.generate_python_code_for_residual_functions(term_lists, max_order)
         func_name = "generate_python_code_for_residual_functions_out.py"

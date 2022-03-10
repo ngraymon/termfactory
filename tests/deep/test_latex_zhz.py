@@ -9,7 +9,7 @@ classtest = 'test_latex_zhz'
 from . import context
 import latex_zhz as zhz
 import namedtuple_defines as nt
-from . import test_vars as vars
+from . import large_test_data
 
 # global vars
 
@@ -755,7 +755,7 @@ class Test_preparing_of_terms:
         assert function_output == expected_result
 
     def test_prepare_fourth_z_latex(self):
-        term_list = vars._prepare_fourth_z_latex.term_list_short
+        term_list = large_test_data._prepare_fourth_z_latex.term_list_short
         function_output = zhz._prepare_fourth_z_latex(
             term_list,
             split_width=7,
@@ -769,7 +769,7 @@ class Test_preparing_of_terms:
         assert function_output == expected_result
 
     def test_long(self):
-        term_list = vars._prepare_fourth_z_latex.term_list_long
+        term_list = large_test_data._prepare_fourth_z_latex.term_list_long
         function_output = zhz._prepare_fourth_z_latex(
             term_list,
             split_width=7,

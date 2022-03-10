@@ -9,7 +9,7 @@ classtest = 'test_code_full_cc'
 from . import context
 import code_full_cc as cfcc
 import latex_full_cc as fcc
-from . import test_vars as vars
+from . import large_test_data
 
 # global vars
 zero_h_op_nt = fcc.connected_h_operator_namedtuple(rank=0, m=0, n=0, m_o=0, n_o=0, m_t=[0], n_t=[0])
@@ -302,9 +302,9 @@ class Test_gen_full_cc_py_eqns:
         """x"""
         rank = 2
         truncations = [2, 2, 2, 2]
-        t_term_list = vars.write_cc_einsum_python_from_list_single_unique_key.t_term_list
+        t_term_list = large_test_data.write_cc_einsum_python_from_list_single_unique_key.t_term_list
         function_output = cfcc._write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='truncation')
-        assert function_output == vars.write_cc_einsum_python_from_list_single_unique_key.output
+        assert function_output == large_test_data.write_cc_einsum_python_from_list_single_unique_key.output
 
     def test_generate_full_cc_einsums(self):
         omega_term = fcc.general_operator_namedtuple(name='b', rank=1, m=0, n=1)

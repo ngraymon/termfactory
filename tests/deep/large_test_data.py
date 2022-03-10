@@ -1,9 +1,14 @@
+"""
+    should have some basic description of why this file exists
+"""
+
 from logging import root
 from . import context
 import latex_full_cc as fcc
 import code_residual_equations as cre
 import latex_eT_zhz as et
 import latex_zhz as zhz
+
 
 class write_cc_einsum_python_from_list_single_unique_key:
 
@@ -82,7 +87,7 @@ class generate_residual_data:
                 ),
                 cre.residual_term(
                     prefactor='1.0',
-                    h=cre.h_namedtuple(max_i=0, max_k=1), 
+                    h=cre.h_namedtuple(max_i=0, max_k=1),
                     w=cre.w_namedtuple(max_i=0, max_k=1, order=1)
                 )
             ],
