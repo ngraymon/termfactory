@@ -7,14 +7,14 @@ root_dir = join(deep_dir, 'files')
 classtest = 'test_latex_eT_zhz'
 # local imports
 from . import context
-from . import test_vars as vars
+from . import large_test_data
 import latex_eT_zhz as et
 import latex_full_cc as fcc
 import latex_zhz as zhz
 import namedtuple_defines as nt
 
 
-# global vars
+# global variables
 none_gen_op_nt = et.general_operator_namedtuple(name=None, rank=0, m=0, n=0)
 zero_gen_op_nt = et.general_operator_namedtuple(name='', rank=0, m=0, n=0)
 zero_h_op_nt = fcc.h_operator_namedtuple(rank=0, m=0, n=0)
@@ -433,7 +433,7 @@ class Test_generate_eT_taylor_expansion:
         maximum_eT_rank = 2
         eT_taylor_max_order = 3
         function_output = et.generate_eT_taylor_expansion(maximum_eT_rank, eT_taylor_max_order)
-        expected_result = vars.generate_eT_taylor_expansion.expansion
+        expected_result = large_test_data.generate_eT_taylor_expansion.expansion
         assert function_output == expected_result
 
 
@@ -1659,7 +1659,7 @@ class Test_prepare_third_eTz_latex:
         assert function_output == expected_result
 
     def test_long_line_splitting(self):
-        term_list = vars.test_long_line_splitting.terms
+        term_list = large_test_data.test_long_line_splitting.terms
 
         function_output = et._prepare_third_eTz_latex(
             term_list,
