@@ -1492,7 +1492,7 @@ class Test_build_eT_term_latex_labels:
         t_list = (zero_disconnected_t_op_nt,)
         offset_dict = blank_offset_dict
         function_output = et._build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True)
-        expected_result = '\\mathds1'
+        expected_result = '\\mathds{1}'
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sub(self):
