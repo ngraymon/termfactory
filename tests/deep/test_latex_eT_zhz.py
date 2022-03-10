@@ -327,11 +327,11 @@ def build_zL_operator_namedtuple(status, **kwargs):
     # build the operator
     if status == "connected":
         _verify_connected(dictionary)
-        new_namedtuple = et.connected_eT_z_right_operator_namedtuple(**dictionary)
+        new_namedtuple = et.connected_eT_z_left_operator_namedtuple(**dictionary)
 
     elif status == "disconnected":
         _verify_disconnected(dictionary)
-        new_namedtuple = et.disconnected_eT_z_right_operator_namedtuple(**dictionary)
+        new_namedtuple = et.disconnected_eT_z_left_operator_namedtuple(**dictionary)
     else:
         raise Exception("status not connected/disconnected, typo?")
 
