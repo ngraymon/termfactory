@@ -1819,10 +1819,21 @@ class Test_generate_eT_z_symmetric_latex_equations:
 
 class Test_run_main_et_zhz:
 
-    def test_run_main(self):
+    def test_run_main(self, tmpdir):
+        output_path = join(tmpdir, "generated_latex.tex")
         et.generate_eT_z_t_symmetric_latex(
             [1, 1, 1, 1, 1],
             only_ground_state=True,
             remove_f_terms=False,
-            path="./generated_latex.tex"
+            path=output_path
         )
+
+        return True  # change this when you fix the pathing below
+
+        with open(output_path, 'r') as fp:
+            file_data = fp.read()
+
+        with open('some path', 'r') as fp:
+            reference_file_data = fp.read()
+
+        assert file_data == reference_file_data, 'fail'
