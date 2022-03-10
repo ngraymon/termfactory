@@ -1638,10 +1638,13 @@ class Test_prepare_third_eTz_latex:
             print_prefactors=True,
             suppress_duplicates=True
         )
+
         func_name = "_prepare_third_eTz_latex_test_basic_out.txt"
         file_name = join(root_dir, classtest, func_name)
+
         with open(file_name, 'r') as fp:
             expected_result = fp.read()
+
         assert function_output == expected_result
 
     def test_f_terms_and_dupes(self):
@@ -1652,10 +1655,13 @@ class Test_prepare_third_eTz_latex:
             print_prefactors=True,
             suppress_duplicates=False
         )
+
         func_name = "_prepare_third_eTz_latex_test_f_terms_and_dupes_out.txt"
         file_name = join(root_dir, classtest, func_name)
+
         with open(file_name, 'r') as fp:
             expected_result = fp.read()
+
         assert function_output == expected_result
 
     def test_long_line_splitting(self):
@@ -1668,10 +1674,13 @@ class Test_prepare_third_eTz_latex:
             print_prefactors=True,
             suppress_duplicates=True
         )
+
         func_name = "_prepare_third_eTz_latex_test_long_line_splitting_out.txt"
         file_name = join(root_dir, classtest, func_name)
+
         with open(file_name, 'r') as fp:
             expected_result = fp.read()
+
         assert function_output == expected_result
 
 
@@ -1720,6 +1729,8 @@ class Test_prepare_eTz_T_terms:
 class Test_filter_out_valid_eTz_terms:
 
     def test_basic(self):
+
+        # input data
         LHS = zero_gen_op_nt
         eT = et.general_operator_namedtuple(name='1', rank=0, m=0, n=0)
         H = et.hamiltonian_namedtuple(
@@ -1739,14 +1750,20 @@ class Test_filter_out_valid_eTz_terms:
             ]
         )
         total_list = []
+
+        # run the function
         function_output = et._filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_debug=False)
+
         expected_result = None
+
         assert function_output == expected_result
 
 
 class Test_build_third_eTz_term:
 
     def test_basic(self):
+
+        # input data
         LHS = et.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
         eT_taylor_expansion = [
             et.general_operator_namedtuple(name='1', rank=0, m=0, n=0),
@@ -1769,17 +1786,26 @@ class Test_build_third_eTz_term:
                 et.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)
             ]
         )
+
+        # run the function
         function_output = et._build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False)
+
+        # read in testing data from specific file
+
         func_name = "_build_third_eTz_term_test_basic_out.txt"
         file_name = join(root_dir, classtest, func_name)
+
         with open(file_name, 'r') as fp:
             expected_result = fp.read()
+
         assert function_output == expected_result
 
 
 class Test_generate_eT_z_symmetric_latex_equations:
 
     def test_basic(self):
+
+        # input data
         LHS = et.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
         eT_taylor_expansion = [
             et.general_operator_namedtuple(name='1', rank=0, m=0, n=0),
@@ -1802,6 +1828,8 @@ class Test_generate_eT_z_symmetric_latex_equations:
                 et.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)
             ]
         )
+
+        # run the function
         function_output = et._generate_eT_z_symmetric_latex_equations(
             LHS,
             eT_taylor_expansion,
@@ -1810,10 +1838,14 @@ class Test_generate_eT_z_symmetric_latex_equations:
             only_ground_state=True,
             remove_f_terms=False
         )
+
+        # read in testing data from specific file
         func_name = "_generate_eT_z_symmetric_latex_equations_test_basic_out.txt"
         file_name = join(root_dir, classtest, func_name)
+
         with open(file_name, 'r') as fp:
             expected_result = fp.read()
+
         assert function_output == expected_result
 
 
