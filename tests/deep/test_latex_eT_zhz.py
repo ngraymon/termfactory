@@ -1632,7 +1632,7 @@ class Test_prepare_third_eTz_latex:
 
     def test_basic(self):
         function_output = et._prepare_third_eTz_latex(
-            Test_prepare_third_eTz_latex.term_list,
+            self.term_list,
             split_width=5,
             remove_f_terms=False,
             print_prefactors=True,
@@ -1646,7 +1646,7 @@ class Test_prepare_third_eTz_latex:
 
     def test_f_terms_and_dupes(self):
         function_output = et._prepare_third_eTz_latex(
-            Test_prepare_third_eTz_latex.term_list,
+            self.term_list,
             split_width=5,
             remove_f_terms=True,
             print_prefactors=True,
