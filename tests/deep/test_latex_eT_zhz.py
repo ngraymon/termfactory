@@ -733,7 +733,18 @@ class Test_generate_all_valid_eT_z_connection_permutations:
             right_z,
             log_invalid=True
         )
-        expected_result = ([((0, (0,), 0, 0), (0, (0,), 0, 0))], [((0, (0,), 0, 0), (0, (0,), 0, 0))])  # TODO expand?
+
+        # these are positional argument for a Z operator that is connected to nothing (rank = 0)
+        # the `*_args` look like (lhs, eT, h, other_z)
+        m_args = n_args = (0, (0,), 0, 0)
+
+        # both Z's are the same
+        left_z_list = [(m_args, n_args)]
+        right_z_list = [(m_args, n_args)]
+
+        # the result is a tuple of the two Z's
+        expected_result = (left_z_list, right_z_list)
+
         assert function_output == expected_result
 
 
@@ -1062,12 +1073,16 @@ class Test_generate_explicit_eT_z_connections:
     def test_basic(self):
         LHS = zero_gen_op_nt
         h = zero_h_op_nt
+        # only 1 permutation input
         unique_permutations = [
-            ((zero_disconnected_t_op_nt,),
-                (None, zero_disconnected_z_right))
+            (
+                (zero_disconnected_t_op_nt, ),
+                (None, zero_disconnected_z_right)
+            ),
         ]
         prefactor_count = dict([(perm, 1) for perm in unique_permutations])  # this might be sufficient for now
         function_output = et._generate_explicit_eT_z_connections(LHS, h, unique_permutations, prefactor_count)
+        # only 1 permutation output
         expected_result = [
             [
                 zero_lhs_op_nt,
@@ -1078,7 +1093,7 @@ class Test_generate_explicit_eT_z_connections:
                     zero_disconnected_z_right
                 ),
                 1
-            ]
+            ],
         ]
         assert function_output == expected_result
 
@@ -1114,14 +1129,7 @@ class Test_generate_explicit_eT_z_connections:
                 (
                     build_t_operator("connected", rank=1, n=1, n_h=1),
                 ),
-                et.connected_eT_h_z_operator_namedtuple(
-                    rank=2,
-                    m=1, n=1,
-                    m_lhs=0, n_lhs=0,
-                    m_t=[1], n_t=[0],
-                    m_l=0, n_l=0,
-                    m_r=0, n_r=1
-                ),
+                build_h_z_operator_namedtuple(rank=2, m=1, n=1, m_t=[1], n_r=1),
                 (
                     None,
                     build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1),
