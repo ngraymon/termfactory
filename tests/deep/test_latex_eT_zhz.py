@@ -317,7 +317,8 @@ def build_t_operator(status, **kwargs):
     return new_namedtuple
 
 def build_zL_operator_namedtuple(status, **kwargs):
-    """ Wrapper function for `_build_eT_z_op`
+    """ Return a namedtuple specified by a dictionary.
+    Input argument `kwargs` takes precedence over `default_dict`.
     """
     assert _verify_zL_keys(kwargs), f'invalid kwargs: {kwargs}'
     dictionary = _make_zL_default_dict()
@@ -338,7 +339,8 @@ def build_zL_operator_namedtuple(status, **kwargs):
     return new_namedtuple
 
 def build_zR_operator_namedtuple(status, **kwargs):
-    """ Wrapper function for `_build_eT_z_op`
+    """ Return a namedtuple specified by a dictionary.
+    Input argument `kwargs` takes precedence over `default_dict`.
     """
     assert _verify_zR_keys(kwargs), f'invalid kwargs: {kwargs}'
     dictionary = _make_zR_default_dict()
@@ -372,6 +374,9 @@ def build_z_operator_namedtuple(side, status, **kwargs):
     return new_namedtuple
 
 def build_lhs_operator_namedtuple(**kwargs):
+    """ Return a namedtuple specified by a dictionary.
+    Input argument `kwargs` takes precedence over `default_dict`.
+    """
     assert _verify_lhs_keys(kwargs), f'invalid kwargs: {kwargs}'
     dictionary = _make_lhs_default_dict()
     dictionary.update(**kwargs)
@@ -383,6 +388,9 @@ def build_lhs_operator_namedtuple(**kwargs):
     return new_namedtuple
 
 def build_h_z_operator_namedtuple(**kwargs):
+    """ Return a namedtuple specified by a dictionary.
+    Input argument `kwargs` takes precedence over `default_dict`.
+    """
     assert _verify_h_z_keys(kwargs), f'invalid kwargs: {kwargs}'
     dictionary = _make_h_z_default_dict()
     dictionary.update(**kwargs)
