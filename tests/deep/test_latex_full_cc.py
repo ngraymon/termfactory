@@ -1067,6 +1067,10 @@ class Test_wrap_align_environment:
 
 class Test_main_fcc_latex_func:
     # runs function for coverage
-    def test_generate_full_cc_latex(self):
-        fcc.generate_full_cc_latex([2, 2, 2, 2], only_ground_state=False, path="./generated_latex.txt")
-        fcc.generate_full_cc_latex([2, 2, 2, 2], only_ground_state=True, path="./generated_latex.txt")
+    def test_generate_full_cc_latex(self, tmpdir):
+        """ x """
+        output_path = join(tmpdir, "latex_excited_Test_main_fcc_latex_func.tex")
+        fcc.generate_full_cc_latex([2, 2, 2, 2], only_ground_state=False, path=output_path)
+
+        output_path = join(tmpdir, "latex_ground_Test_main_fcc_latex_func.tex")
+        fcc.generate_full_cc_latex([2, 2, 2, 2], only_ground_state=True, path=output_path)

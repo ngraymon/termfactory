@@ -2,6 +2,7 @@
 
 # system imports
 import re
+from os.path import join
 
 # local imports
 from . import context
@@ -149,11 +150,13 @@ class Test_latex_eT_z_t_ansatz():
     def truncations(self, A, B, C, D, E):
         return [A, B, C, D, E]
 
-    def test_ground_state(self, truncations):
-        eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, path="./generated_latex.tex")
+    def test_ground_state(self, truncations, tmpdir):
+        output_path = join(tmpdir, "latex_ground_Test_latex_eT_z_t_ansatz.tex")
+        eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, path=output_path)
 
-    # def test_excited_state(self, truncations):
-    #     eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=False, path="./generated_latex.tex")
+    # def test_excited_state(self, truncations, tmpdir):
+    #     output_path = join(tmpdir, "latex_excited_Test_latex_eT_z_t_ansatz.tex")
+    #     eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=False, path=output_path)
 
     # add a pytest.raise for Exception: The excited state second eTZH terms are not implemented.
 
@@ -193,17 +196,19 @@ class Test_latex_zhz():
     def truncations(self, A, B, C, D):
         return [A, B, C, D]
 
-    def test_ground_state(self, truncations):
-        zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex")
+    def test_ground_state(self, truncations, tmpdir):
+        output_path = join(tmpdir, "latex_ground_Test_latex_zhz.tex")
+        zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path=output_path)
 
-    def test_excited_state(self, truncations):
+    def test_excited_state(self, truncations, tmpdir):
         not_implemented_yet_message = (
         "The logic for the supporting functions (such as `_filter_out_valid_z_terms` and others)\n"
         "Has only been verified to work for the LHS * H * Z (`third_z`) case.\n"
         "The code may produce some output without halting, but the output is meaningless from a theory standpoint.\n"
         "Do not remove this Exception without consulting with someone else and implementing the requisite functions.")
+        output_path = join(tmpdir, "latex_excited_Test_latex_zhz.tex")
         with pytest.raises(Exception,  match=re.escape(not_implemented_yet_message)):
-            zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=False, remove_f_terms=False, path="./generated_latex.tex")
+            zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=False, remove_f_terms=False, path=output_path)
 
     # need to add more tests for niche cases
 
