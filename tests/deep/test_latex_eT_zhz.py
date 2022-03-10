@@ -57,8 +57,8 @@ _op_key_list = ['rank', 'm', 'n', ]
 
 # define the projection operator and the Hamiltonian operator
 
-_h_z_key_list = _op_key_list + ['m_t', 'n_t', 'm_l', 'n_l', 'm_r', 'n_r', ] + ['m_h', 'n_h', ]
-_lhs_key_list = _op_key_list + ['m_t', 'n_t', 'm_l', 'n_l', 'm_r', 'n_r', ] + ['m_lhs', 'n_lhs', ]
+_h_z_key_list = _op_key_list + ['m_t', 'n_t', 'm_l', 'n_l', 'm_r', 'n_r', ] + ['m_lhs', 'n_lhs', ]
+_lhs_key_list = _op_key_list + ['m_t', 'n_t', 'm_l', 'n_l', 'm_r', 'n_r', ] + ['m_h', 'n_h', ]
 
 # all action operators can contract with the LeftHandSide(lhs) and Hamiltonian(h)
 _action_key_list = _op_key_list + ['m_lhs', 'n_lhs', 'm_h', 'n_h', ]
