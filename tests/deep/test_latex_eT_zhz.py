@@ -371,43 +371,25 @@ def build_z_operator_namedtuple(side, status, **kwargs):
 
     return new_namedtuple
 
-def build_lhs_operator_namedtuple(status, **kwargs):
+def build_lhs_operator_namedtuple(**kwargs):
     assert _verify_lhs_keys(kwargs), f'invalid kwargs: {kwargs}'
     dictionary = _make_lhs_default_dict()
     dictionary.update(**kwargs)
     assert _basic_lhs_consistency(dictionary), f'invalid operator {dictionary}'
 
     # build the operator
-    if status == "connected":
-        # _verify_connected(dictionary) rules different?
-        new_namedtuple = et.connected_eT_lhs_operator_namedtuple(**dictionary)
-
-    # elif status == "disconnected":
-    #     _verify_disconnected(dictionary)
-    #     new_namedtuple =
-
-    else:
-        raise Exception("status not connected, disconnected does not exist, typo?")
+    new_namedtuple = et.connected_eT_lhs_operator_namedtuple(**dictionary)
 
     return new_namedtuple
 
-def build_h_z_operator_namedtuple(status, **kwargs):
+def build_h_z_operator_namedtuple(**kwargs):
     assert _verify_h_z_keys(kwargs), f'invalid kwargs: {kwargs}'
     dictionary = _make_h_z_default_dict()
     dictionary.update(**kwargs)
     assert _basic_h_z_consistency(dictionary), f'invalid operator {dictionary}'
 
     # build the operator
-    if status == "connected":
-        # _verify_connected(dictionary) rules different?
-        new_namedtuple = et.connected_eT_h_z_operator_namedtuple(**dictionary)
-
-    # elif status == "disconnected":
-    #     _verify_disconnected(dictionary)
-    #     new_namedtuple =
-
-    else:
-        raise Exception("status not connected, disconnected does not exist, typo?")
+    new_namedtuple = et.connected_eT_h_z_operator_namedtuple(**dictionary)
 
     return new_namedtuple
 
@@ -415,8 +397,8 @@ def build_h_z_operator_namedtuple(status, **kwargs):
 # --------------------  predefined super common operators  ------------------------- #
 zero_disconnected_z_right = build_z_operator_namedtuple('right', 'disconnected')
 zero_disconnected_t_op_nt = build_t_operator('disconnected')
-zero_connected_lhs_op_nt = build_lhs_operator_namedtuple("connected")
-zero_connected_h_z_op_nt = build_h_z_operator_namedtuple("connected")
+zero_lhs_op_nt = build_lhs_operator_namedtuple()
+zero_h_z_op_nt = build_h_z_operator_namedtuple()
 
 # ----------------------------------------------------------------------------------------------- #
 # ----------------------------------------------------------------------------------------------- #
@@ -1088,9 +1070,9 @@ class Test_generate_explicit_eT_z_connections:
         function_output = et._generate_explicit_eT_z_connections(LHS, h, unique_permutations, prefactor_count)
         expected_result = [
             [
-                zero_connected_lhs_op_nt,
+                zero_lhs_op_nt,
                 (zero_disconnected_t_op_nt,),
-                zero_connected_h_z_op_nt,
+                zero_h_z_op_nt,
                 (
                     None,
                     zero_disconnected_z_right
@@ -1128,7 +1110,7 @@ class Test_generate_explicit_eT_z_connections:
         function_output = et._generate_explicit_eT_z_connections(LHS, h, unique_permutations, prefactor_count)
         expected_result = [
             [
-                zero_connected_lhs_op_nt,
+                zero_lhs_op_nt,
                 (
                     build_t_operator("connected", rank=1, n=1, n_h=1),
                 ),
@@ -1213,7 +1195,7 @@ class Test_generate_explicit_eT_z_connections:
         function_output = et._generate_explicit_eT_z_connections(LHS, h, unique_permutations, prefactor_count)
         expected_result = [
             [
-                zero_connected_lhs_op_nt,
+                zero_lhs_op_nt,
                 (
                     build_t_operator("connected", rank=1, n=1, n_h=1),
                 ),
@@ -1224,7 +1206,7 @@ class Test_generate_explicit_eT_z_connections:
                 ), 1
             ],
             [
-                zero_connected_lhs_op_nt,
+                zero_lhs_op_nt,
                 (
                     build_t_operator("connected", rank=2, n=2, n_h=1, n_r=1),
                 ),
@@ -1243,7 +1225,7 @@ class Test_build_eThz_latex_prefactor:
 
     def test_basic(self):
         t_list = (zero_disconnected_t_op_nt,)
-        h = zero_connected_h_z_op_nt
+        h = zero_h_z_op_nt
         z_left = None
         z_right = zero_disconnected_z_right
         overcounting_prefactor = 1
@@ -1441,7 +1423,7 @@ class Test_f_t_h_contributions:
 
     def test_if_case(self):
         t_list = (zero_disconnected_t_op_nt,)
-        h = zero_connected_h_z_op_nt
+        h = zero_h_z_op_nt
         function_output = et._f_t_h_contributions(t_list, h)
         expected_result = [0]
         assert function_output == expected_result
@@ -1460,7 +1442,7 @@ class Test_fbar_t_h_contributions:
 
     def test_if_case(self):
         t_list = (zero_disconnected_t_op_nt,)
-        h = zero_connected_h_z_op_nt
+        h = zero_h_z_op_nt
         function_output = et._fbar_t_h_contributions(t_list, h)
         expected_result = [0]
         assert function_output == expected_result
@@ -1526,7 +1508,7 @@ class Test_build_eT_term_latex_labels:
 class Test_build_eT_hz_term_latex_labels:
 
     def test_rank_zero(self):
-        h = zero_connected_h_z_op_nt
+        h = zero_h_z_op_nt
         offset_dict = blank_offset_dict
         function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True)
         expected_result = '\\bh_0'
@@ -1559,7 +1541,7 @@ class Test_build_eT_hz_term_latex_labels:
 class Test_build_eT_right_z_term:
 
     def test_rank_zero(self):
-        h = zero_connected_h_z_op_nt
+        h = zero_h_z_op_nt
         z_right = zero_disconnected_z_right
         offset_dict = blank_offset_dict
         function_output = et._build_eT_right_z_term(h, z_right, offset_dict, color=True, letters=True)
@@ -1604,11 +1586,11 @@ class Test_build_eT_right_z_term:
 class Test_prepare_third_eTz_latex:
     term_list = [  # file flag
         [
-            zero_connected_lhs_op_nt,
+            zero_lhs_op_nt,
             (
                 zero_disconnected_t_op_nt,
             ),
-            zero_connected_h_z_op_nt,
+            zero_h_z_op_nt,
             (
                 None,
                 zero_disconnected_z_right
@@ -1616,7 +1598,7 @@ class Test_prepare_third_eTz_latex:
             1
         ],
         [
-            zero_connected_lhs_op_nt,
+            zero_lhs_op_nt,
             (
                 build_t_operator("disconnected"),
             ),
@@ -1628,11 +1610,11 @@ class Test_prepare_third_eTz_latex:
             1
         ],
         [
-            zero_connected_lhs_op_nt,
+            zero_lhs_op_nt,
             (
                 build_t_operator("disconnected", rank=1, n=1, n_r=1),
             ),
-            zero_connected_h_z_op_nt,
+            zero_h_z_op_nt,
             (
                 None,
                 build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,)),
@@ -1640,7 +1622,7 @@ class Test_prepare_third_eTz_latex:
             1
         ],
         [
-            zero_connected_lhs_op_nt,
+            zero_lhs_op_nt,
             (
                 build_t_operator("connected", rank=1, n=1, n_h=1),
             ),
