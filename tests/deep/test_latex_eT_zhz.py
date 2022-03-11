@@ -1101,26 +1101,18 @@ class Test_generate_explicit_eT_z_connections:
         """if h_kwargs['m_lhs'] != lhs_kwargs['n_h']: """
         LHS = zero_gen_op_nt
         h = fcc.h_operator_namedtuple(rank=2, m=1, n=1)
-        unique_permutations = [
-            (
-                (
-                    build_t_operator("disconnected", rank=1, n=1, n_r=1),
-                ),
-                (
-                    None,
-                    build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,)),
-                )
-            ),
-            (
-                (
-                    build_t_operator("connected", rank=1, n=1, n_h=1),
-                ),
-                (
-                    None,
-                    build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1),
-                )
-            )
-        ]
+
+        t_1 = build_t_operator("disconnected", rank=1, n=1, n_r=1)
+        left_z = None
+        right_z = build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,))
+        perm_1 = ((t_1, ), (left_z, right_z), )
+
+        t_1 = build_t_operator("connected", rank=1, n=1, n_h=1)
+        left_z = None
+        right_z = build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1)
+        perm_2 = ((t_1, ), (left_z, right_z), )
+
+        unique_permutations = [perm_1, perm_2, ]
         prefactor_count = dict([(perm, 1) for perm in unique_permutations])  # this might be sufficient for now
         function_output = et._generate_explicit_eT_z_connections(LHS, h, unique_permutations, prefactor_count)
         expected_result = [
@@ -1230,13 +1222,19 @@ class Test_generate_explicit_eT_z_connections:
 
 
 class Test_build_eThz_latex_prefactor:
+    """ x """
 
     def test_basic(self):
+        """ x """
+
+        # input data
         t_list = (zero_disconnected_t_op_nt,)
         h = zero_h_z_op_nt
         z_left = None
         z_right = zero_disconnected_z_right
         overcounting_prefactor = 1
+
+        # run function
         function_output = et._build_eThz_latex_prefactor(
             t_list,
             h,
@@ -1249,6 +1247,9 @@ class Test_build_eThz_latex_prefactor:
         assert function_output == expected_result
 
     def test_f_factor(self):
+        """ x """
+
+        # input data
         t_list = ()
         t_list = (
             build_t_operator('disconnected', rank=1, n=1, n_r=1),
@@ -1258,6 +1259,8 @@ class Test_build_eThz_latex_prefactor:
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected", rank=2, m=2, m_t=(1, 1), n_t=(0, 0))
         overcounting_prefactor = 1
+
+        # run function
         function_output = et._build_eThz_latex_prefactor(
             t_list,
             h,
@@ -1270,11 +1273,16 @@ class Test_build_eThz_latex_prefactor:
         assert function_output == expected_result
 
     def test_n_factor(self):
+        """ x """
+
+        # input data
         t_list = (zero_disconnected_t_op_nt,)
         h = build_h_z_operator_namedtuple(rank=2, n=2, n_r=2)
         z_left = None
         z_right = build_zR_operator_namedtuple("connected", rank=2, m=2, m_h=2)
         overcounting_prefactor = 1
+
+        # run function
         function_output = et._build_eThz_latex_prefactor(
             t_list,
             h,
@@ -1288,6 +1296,8 @@ class Test_build_eThz_latex_prefactor:
 
     def test_choose_result(self):
         """if choose_result > 1:"""
+
+        # input data
         t_list = (
             build_t_operator("connected", rank=2, n=2, n_h=1, n_r=1),
         )
@@ -1295,6 +1305,8 @@ class Test_build_eThz_latex_prefactor:
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected", rank=1, m=1, m_t=(1,), n_t=(0,))
         overcounting_prefactor = 1
+
+        # run function
         function_output = et._build_eThz_latex_prefactor(
             t_list,
             h,
@@ -1308,11 +1320,15 @@ class Test_build_eThz_latex_prefactor:
 
     def test_internal_perms(self):
         """if internal_perms > 1:"""
+
+        # input data
         t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
         h = build_h_z_operator_namedtuple(rank=4, m=4, m_lhs=1, m_t=[2], m_r=1)
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
+
+        # run function
         function_output = et._build_eThz_latex_prefactor(
             t_list,
             h,
@@ -1326,12 +1342,17 @@ class Test_build_eThz_latex_prefactor:
 
     def test_h_m_t_count(self):
         """count_t = sum(h.m_t)
-           if count_t > 1:"""
+           if count_t > 1:
+        """
+
+        # input data
         t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
         h = build_h_z_operator_namedtuple(rank=2, m=2, m_t=[2])
         z_left = None
         z_right = build_z_operator_namedtuple('right', 'disconnected')
         overcounting_prefactor = 1
+
+        # run function
         function_output = et._build_eThz_latex_prefactor(
             t_list,
             h,
@@ -1348,11 +1369,15 @@ class Test_build_eThz_latex_prefactor:
         external_perms = math.comb(h.n, h.n_lhs)
         if external_perms > 1:
         """
+
+        # input data
         t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
         h = build_h_z_operator_namedtuple(rank=3, m=0, n=3, n_lhs=2, n_t=[1])
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
+
+        # run function
         function_output = et._build_eThz_latex_prefactor(
             t_list,
             h,
@@ -1370,11 +1395,15 @@ class Test_build_eThz_latex_prefactor:
         internal_perms = math.comb(new_max, h.n_r)
         if internal_perms > 1:
         """
+
+        # input data
         t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
         h = build_h_z_operator_namedtuple(rank=6, m=2, n=4, n_lhs=1, m_t=[2], n_r=2, n_l=1)
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
+
+        # run function
         function_output = et._build_eThz_latex_prefactor(
             t_list,
             h,
@@ -1388,11 +1417,15 @@ class Test_build_eThz_latex_prefactor:
 
     def test_account_for_interal_perms(self):
         """account for the permutations of eT-Z internal labels"""
+
+        # input data
         t_list = (build_t_operator("connected", rank=2, n=2, n_h=2),)
         h = build_h_z_operator_namedtuple(rank=6, m=2, n=4, n_lhs=1, m_t=[2, 0], n_t=[1, 2])
         z_left = None
         z_right = build_zR_operator_namedtuple("disconnected")
         overcounting_prefactor = 1
+
+        # run function
         function_output = et._build_eThz_latex_prefactor(
             t_list,
             h,
@@ -1406,6 +1439,8 @@ class Test_build_eThz_latex_prefactor:
 
     def test_taylor_t_m(self):
         """if t.m > 1:"""
+
+        # input data
         t_list = (
             build_t_operator("disconnected", rank=4, m=2, n=2, n_r=2, m_l=2),
             build_t_operator("disconnected", rank=1, n=1, n_r=1),
@@ -1414,6 +1449,8 @@ class Test_build_eThz_latex_prefactor:
         z_left = None
         z_right = build_z_operator_namedtuple('right', 'disconnected', rank=2, m=2, m_t=(1, 1), n_t=(0, 0))
         overcounting_prefactor = 1
+
+        # run function
         function_output = et._build_eThz_latex_prefactor(
             t_list,
             h,
@@ -1428,8 +1465,10 @@ class Test_build_eThz_latex_prefactor:
 
 
 class Test_f_t_h_contributions:
+    """ x """
 
     def test_if_case(self):
+        """ x """
         t_list = (zero_disconnected_t_op_nt,)
         h = zero_h_z_op_nt
         function_output = et._f_t_h_contributions(t_list, h)
@@ -1437,6 +1476,7 @@ class Test_f_t_h_contributions:
         assert function_output == expected_result
 
     def test_else_case(self):
+        """ x """
         t_list = (
             build_t_operator("connected", rank=1, n=1, n_h=1),
         )
@@ -1447,8 +1487,10 @@ class Test_f_t_h_contributions:
 
 
 class Test_fbar_t_h_contributions:
+    """ x """
 
     def test_if_case(self):
+        """ x """
         t_list = (zero_disconnected_t_op_nt,)
         h = zero_h_z_op_nt
         function_output = et._fbar_t_h_contributions(t_list, h)
@@ -1456,6 +1498,7 @@ class Test_fbar_t_h_contributions:
         assert function_output == expected_result
 
     def test_else_case(self):
+        """ x """
         t_list = (
             build_t_operator("connected", rank=1, n=1, n_h=1),
         )
@@ -1466,8 +1509,10 @@ class Test_fbar_t_h_contributions:
 
 
 class Test_f_t_zR_contributions:
+    """ x """
 
     def test_basic_case(self):
+        """ x """
         t_list = (zero_disconnected_t_op_nt,)
         z_right = zero_disconnected_z_right
         function_output = et._f_t_zR_contributions(t_list, z_right)
@@ -1476,60 +1521,82 @@ class Test_f_t_zR_contributions:
 
 
 class Test_fbar_t_zR_contributions:
+    """ x """
 
     def test_basic_case(self):
+        """ x """
         t_list = (zero_disconnected_t_op_nt,)
         z_right = zero_disconnected_z_right
+
+        # run the function
         function_output = et._fbar_t_zR_contributions(t_list, z_right)
         expected_result = [0]
         assert function_output == expected_result
 
 
 class Test_build_eT_term_latex_labels:
+    """ x """
 
     def test_rank_zero(self):
+        """ x """
         t_list = (zero_disconnected_t_op_nt,)
         offset_dict = blank_offset_dict
+
+        # run the function
         function_output = et._build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True)
         expected_result = '\\mathds{1}'
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sub(self):
+        """ x """
         t_list = (
             build_t_operator("disconnected", rank=1, n=1, n_r=1),
         )
         offset_dict = blank_offset_dict
+
+        # run the function
         function_output = et._build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True)
         expected_result = '\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}'
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sup(self):
+        """ x """
         t_list = (
             build_t_operator("disconnected", rank=1, m=1, m_r=1),
         )
         offset_dict = blank_offset_dict
+
+        # run the function
         function_output = et._build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True)
         expected_result = '\\bt^{\\magenta{}\\blue{}\\magenta{l}\\red{}}_{}'
         assert function_output == expected_result
 
 
 class Test_build_eT_hz_term_latex_labels:
+    """ x """
 
     def test_rank_zero(self):
+        """ x """
         h = zero_h_z_op_nt
         offset_dict = blank_offset_dict
+
+        # run the function
         function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True)
         expected_result = '\\bh_0'
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sub(self):
+        """ x """
         h = build_h_z_operator_namedtuple(rank=1, n=1, n_r=1)
         offset_dict = blank_offset_dict
+
+        # run the function
         function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True)
         expected_result = '\\bh^{}_{\\blue{}\\blue{m}\\red{}}'
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sup(self):
+        """ x """
         h = build_h_z_operator_namedtuple(rank=1, m=1, m_t=[1])
         offset_dict = {
             'lower_h': '',
@@ -1541,22 +1608,29 @@ class Test_build_eT_hz_term_latex_labels:
             'unlinked_index': 0,
             'summation_index': 1
         }
+
+        # run the function
         function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True)
         expected_result = '\\bh^{\\blue{k}\\blue{}\\red{}}_{}'
         assert function_output == expected_result
 
 
 class Test_build_eT_right_z_term:
+    """ x """
 
     def test_rank_zero(self):
+        """ x """
         h = zero_h_z_op_nt
         z_right = zero_disconnected_z_right
         offset_dict = blank_offset_dict
+
+        # run the function
         function_output = et._build_eT_right_z_term(h, z_right, offset_dict, color=True, letters=True)
         expected_result = '\\bz_0'
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sub(self):
+        """ x """
         h = build_h_z_operator_namedtuple(rank=1, n=1, n_r=1)
         z_right = build_zR_operator_namedtuple("connected", rank=1, n=1, n_h=1)
         offset_dict = {
@@ -1569,11 +1643,14 @@ class Test_build_eT_right_z_term:
             'unlinked_index': 0,
             'summation_index': 1
         }
+
+        # run the function
         function_output = et._build_eT_right_z_term(h, z_right, offset_dict, color=True, letters=True)
         expected_result = '\\bz^{}_{\\red{}}'
         assert function_output == expected_result
 
     def test_rank_non_zero_with_sup(self):
+        """ x """
         h = build_h_z_operator_namedtuple(rank=1, n=1, n_r=1)
         z_right = build_zR_operator_namedtuple("connected", rank=1, m=1, m_h=1)
         offset_dict = {
@@ -1586,12 +1663,15 @@ class Test_build_eT_right_z_term:
             'unlinked_index': 0,
             'summation_index': 1
         }
+
+        # run the function
         function_output = et._build_eT_right_z_term(h, z_right, offset_dict, color=True, letters=True)
         expected_result = '\\bz^{\\blue{k}\\red{}}_{}'
         assert function_output == expected_result
 
 
 class Test_prepare_third_eTz_latex:
+    """ x """
 
     prefactor_count = 1  # specify what the variable is
 
@@ -1630,14 +1710,14 @@ class Test_prepare_third_eTz_latex:
     term_list = [term_1, term_2, term_3, term_4]
 
     def test_basic(self):
+        """ x """
+
+        # run the function
         function_output = et._prepare_third_eTz_latex(
-            self.term_list,
-            split_width=5,
-            remove_f_terms=False,
-            print_prefactors=True,
-            suppress_duplicates=True
+            self.term_list, split_width=5, remove_f_terms=False, print_prefactors=True, suppress_duplicates=True
         )
 
+        # read in the expected result
         func_name = "_prepare_third_eTz_latex_test_basic_out.txt"
         file_name = join(root_dir, classtest, func_name)
 
@@ -1647,14 +1727,14 @@ class Test_prepare_third_eTz_latex:
         assert function_output == expected_result
 
     def test_f_terms_and_dupes(self):
+        """ x """
+
+        # run the function
         function_output = et._prepare_third_eTz_latex(
-            self.term_list,
-            split_width=5,
-            remove_f_terms=True,
-            print_prefactors=True,
-            suppress_duplicates=False
+            self.term_list, split_width=5, remove_f_terms=True, print_prefactors=True, suppress_duplicates=False
         )
 
+        # read in the expected result
         func_name = "_prepare_third_eTz_latex_test_f_terms_and_dupes_out.txt"
         file_name = join(root_dir, classtest, func_name)
 
@@ -1664,16 +1744,15 @@ class Test_prepare_third_eTz_latex:
         assert function_output == expected_result
 
     def test_long_line_splitting(self):
-        term_list = large_test_data.test_long_line_splitting.terms
+        """ x """
 
+        # run the function
+        term_list = large_test_data.test_long_line_splitting.terms
         function_output = et._prepare_third_eTz_latex(
-            term_list,
-            split_width=5,
-            remove_f_terms=False,
-            print_prefactors=True,
-            suppress_duplicates=True
+            term_list, split_width=5, remove_f_terms=False, print_prefactors=True, suppress_duplicates=True
         )
 
+        # read in the expected result
         func_name = "_prepare_third_eTz_latex_test_long_line_splitting_out.txt"
         file_name = join(root_dir, classtest, func_name)
 
@@ -1684,8 +1763,12 @@ class Test_prepare_third_eTz_latex:
 
 
 class Test_prepare_eTz_z_terms:
+    """ x """
 
     def test_basic(self):
+        """ x """
+
+        # input data
         Z_left = None
         Z_right = zhz.z_operator_namedtuple(
             maximum_rank=1,
@@ -1694,40 +1777,60 @@ class Test_prepare_eTz_z_terms:
                 et.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)
             ]
         )
+
+        # run the function
         function_output = et._prepare_eTz_z_terms(Z_left, Z_right, zhz_debug=False)
-        expected_result = [
-            (
-                none_gen_op_nt,
-                et.general_operator_namedtuple(name='z', rank=0, m=0, n=0)
-            ),
-            (
-                none_gen_op_nt,
-                et.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)
-            )
-        ]
+
+        # expected output
+        z_zero_pair = (
+            none_gen_op_nt,
+            et.general_operator_namedtuple(name='z', rank=0, m=0, n=0)
+        )
+
+        z_one_pair = (
+            none_gen_op_nt,
+            et.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)
+        )
+        expected_result = [z_zero_pair, z_one_pair]
+
         assert function_output == expected_result
 
     # TODO add tests for ZH and ZHZ terms once supported
 
 
 class Test_prepare_eTz_T_terms:
+    """ x """
 
     def test_basic_op(self):
+        """ x """
+
+        # input data
         eT_series_term = et.general_operator_namedtuple(name='1', rank=0, m=0, n=0)
+
+        # run the function
         function_output = et._prepare_eTz_T_terms(eT_series_term)
-        expected_result = ([[et.general_operator_namedtuple(name='1', rank=0, m=0, n=0)]], 'n')
+
+        expected_result = ([[et.general_operator_namedtuple(name='1', rank=0, m=0, n=0), ], ], 'n')
         assert function_output == expected_result
 
     def test_T_sup_1_op(self):
-        eT_series_term = [et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)]
+        """ x """
+
+        # input data
+        eT_series_term = [et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1), ]
+
+        # run the function
         function_output = et._prepare_eTz_T_terms(eT_series_term)
-        expected_result = ([[et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)]], 1)
+
+        expected_result = ([[et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1), ], ], 1)
         assert function_output == expected_result
 
 
 class Test_filter_out_valid_eTz_terms:
+    """ x """
 
     def test_basic(self):
+        """ x """
 
         # input data
         LHS = zero_gen_op_nt
@@ -1759,16 +1862,16 @@ class Test_filter_out_valid_eTz_terms:
 
 
 class Test_build_third_eTz_term:
+    """ x """
 
     def test_basic(self):
+        """ x """
 
         # input data
         LHS = et.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
         eT_taylor_expansion = [
             et.general_operator_namedtuple(name='1', rank=0, m=0, n=0),
-            [
-                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)
-            ]
+            [et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1), ]
         ]
         H = nt.hamiltonian_namedtuple(
             maximum_rank=1,
@@ -1790,7 +1893,6 @@ class Test_build_third_eTz_term:
         function_output = et._build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False)
 
         # read in testing data from specific file
-
         func_name = "_build_third_eTz_term_test_basic_out.txt"
         file_name = join(root_dir, classtest, func_name)
 
@@ -1801,17 +1903,19 @@ class Test_build_third_eTz_term:
 
 
 class Test_generate_eT_z_symmetric_latex_equations:
+    """ x """
 
     def test_basic(self):
+        """ x """
 
         # input data
         LHS = et.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
+
         eT_taylor_expansion = [
             et.general_operator_namedtuple(name='1', rank=0, m=0, n=0),
-            [
-                et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1)
-            ]
+            [et.general_operator_namedtuple(name='s_1', rank=1, m=0, n=1), ]
         ]
+
         H = nt.hamiltonian_namedtuple(
             maximum_rank=1,
             operator_list=[
@@ -1820,6 +1924,7 @@ class Test_generate_eT_z_symmetric_latex_equations:
                 fcc.h_operator_namedtuple(rank=1, m=1, n=0)
             ]
         )
+
         Z = zhz.z_operator_namedtuple(
             maximum_rank=1,
             operator_list=[
@@ -1849,6 +1954,7 @@ class Test_generate_eT_z_symmetric_latex_equations:
 
 
 class Test_run_main_et_zhz:
+    """ x """
 
     def test_run_main(self, tmpdir):
         """ x """
