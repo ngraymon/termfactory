@@ -10,7 +10,7 @@ from . import context
 import latex_w_equations as lw
 # import namedtuple_defines as nt
 
-
+# TODO classname == function maybe in the future?
 class Test_Latex_of_W_operators:
 
     def test_remove_list_item(self):
