@@ -11,6 +11,7 @@ from latex_zhz import generate_z_t_symmetric_latex
 from latex_eT_zhz import generate_eT_z_t_symmetric_latex
 
 # -- python code generators
+from code_eT_zhz import generate_eT_zhz_python
 from code_full_cc import generate_full_cc_python
 from code_residual_equations import generate_residual_equations_file
 from code_w_equations import generate_w_operator_equations_file
@@ -108,12 +109,12 @@ def main():
     maximum_cc_rank = 4
     maximum_T_rank = 1
     eT_taylor_max_order = 4
-    omega_max_order = 2
+    omega_max_order = 4
 
     # need to have truncation of e^T
     eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order
 
-    switch = 1
+    switch = 4
 
     if switch == 1:
         generate_latex_files(
@@ -140,6 +141,7 @@ def main():
             file='full cc'
         )
     if switch == 4:
-        generate_full_cc_python(truncations, only_ground_state=True)
+        generate_eT_zhz_python(eT_z_t_truncations, only_ground_state=True)
+        # generate_full_cc_python(truncations, only_ground_state=True)
 
     print("We reached the end of main")

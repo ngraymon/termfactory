@@ -41,13 +41,14 @@ before_script:
 cov_test:
   stage: code_analysis
   script:
-    - python vulture_wrapper.py
-    - python -m coverage run -m pytest >> printing_output.txt
+    #- python vulture_wrapper.py
+    - python -m coverage run -m pytest -k 'deep' >> printing_output.txt # only run deep tests (1 ~ 3 seconds long)
     - python -m coverage html
     - python -m coverage report
     - python driver.py
 
   artifacts:
+    when: always
     paths:
         - ./setup_output.txt
         - ./default_logging_file.txt

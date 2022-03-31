@@ -1,0 +1,1 @@
+\dv{\hat{\bt}^{i}_{\gamma}}{\tau}\,\hat{\bz}_{0, \gamma} + \dv{\hat{\bt}_{0, \gamma}}{\tau}\,\hat{\bz}^{i}_{\gamma}

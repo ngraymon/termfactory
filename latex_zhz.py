@@ -1,4 +1,6 @@
 # system imports
+import math
+from fractions import Fraction
 import itertools as it
 from collections import namedtuple
 
@@ -1239,7 +1241,130 @@ def _prepare_second_z_latex(term_list, split_width=7, remove_f_terms=False, prin
     return f"(\n{final_string}\n)"  # pragma: no cover
 
 
-def _prepare_third_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=False):
+def _build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False):
+    """Attempt to return latex code representing appropriate prefactor term.
+
+    In general the rules are:
+        - h                contributes 1/m! 1/n!
+        - the right z term contribute 1/m! 1/n!
+        - multiply by (n choose n_k) where n_k are the number of internal labels of z right
+
+    By convention we account for internal permutations using z, not h.
+    What this means is that if we have h^2 z_2
+    - we consult Z
+        -> multiply by 2 because we have two permutations of labels
+
+    whereas if we ALSO multiplied by 2 considering the permutations on h then we would have overcounted the permutations
+    consider the following four situations
+    - h^{ij} z_{ij}
+    - h^{ij} z_{ji}
+    - h^{ji} z_{ij}
+    - h^{ji} z_{ji}
+    we have now permuted 2 for h and 2 for z, however the second term and the third term are identical and the fourth and first terms are identical
+
+    Therefore the *current* convention is that we ignore internal permutations on h.
+    Note that if we want to extend this to e^T * HZ then we must rejigger the logic when we add t2 terms back in.
+    Since if we had a term like
+    - t^{ij} h_{ijk} z^{k}
+    then we would NOT count the `ij` permutation correctly using the current logic.
+
+    Although i think a simple solution would be to subtract the magnitude of the contracts with z right from the combinatorial in h?
+    Might work?
+
+    """
+
+    assert z_left is None, 'Logic does not support ZH, or ZHZ terms at the moment'
+
+    numerator_value = 1
+    denominator_value = 1
+
+    numerator_list, denominator_list = [], []
+    # ---------------------------------------------------------------------------------------------------------
+
+    if h.m > 1:
+        # by definition
+        denominator_value *= math.factorial(h.m)
+        denominator_list.append(f'{h.m}!')
+        # to account for the permutations of internal labels around the external labels
+        number = math.comb(h.m, h.m_r)
+        if number > 1:
+            numerator_value *= number
+            numerator_list.append(f'{number}')
+
+    if h.n > 1:
+        # by definition
+        denominator_value *= math.factorial(h.n)
+        denominator_list.append(f'{h.n}!')
+        # to account for the permutations of internal labels around the external labels
+        number = math.comb(h.n, h.n_r)
+        if number > 1:
+            numerator_value *= number
+            numerator_list.append(f'{number}')
+
+    if z_right.m > 1:
+        # by definition
+        denominator_value *= math.factorial(z_right.m)
+        denominator_list.append(f'{z_right.m}!')
+
+        # to account for the permutations of external labels
+        number = math.comb(z_right.m, z_right.m_lhs)
+        if number > 1:
+            numerator_value *= number
+            numerator_list.append(f'{number}')
+
+        # to account for the permutations of internal labels
+        if z_right.m_h > 1:
+            numerator_value *= math.factorial(z_right.m_h)
+            numerator_list.append(f'{z_right.m_h}!')
+
+    if z_right.n > 1:
+        # by definition
+        denominator_value *= math.factorial(z_right.n)
+        denominator_list.append(f'{z_right.n}!')
+
+        # to account for the permutations of external labels
+        number = math.comb(z_right.n, z_right.n_lhs)
+        if number > 1:
+            numerator_value *= number
+            numerator_list.append(f'{number}')
+
+        # to account for the permutations of internal labels
+        if z_right.n_h > 1:
+            numerator_value *= math.factorial(z_right.n_h)
+            numerator_list.append(f'{z_right.n_h}!')
+
+    # ---------------------------------------------------------------------------------------------------------
+
+    # old_print_wrapper(numerator_value)
+    # old_print_wrapper(denominator_value)
+
+    # # simplify
+    if simplify_flag:
+        fraction = Fraction(numerator_value, denominator_value)
+        # old_print_wrapper(f"{h = }")
+        # old_print_wrapper(f"{z_right = }")
+        # old_print_wrapper(f"{fraction.numerator = }")
+        # old_print_wrapper(f"{fraction.denominator = }")
+
+        # import pdb; pdb.set_trace()
+        if fraction == 1:
+            return ''
+        else:
+            return f"\\frac{{{fraction.numerator}}}{{{fraction.denominator}}}"
+
+        # numerator_list, denominator_list = _simplify_full_cc_python_prefactor(numerator_list, denominator_list)
+
+    # glue the numerator and denominator together
+    numerator_string = '1' if (numerator_list == []) else f"{'*'.join(numerator_list)}"
+    denominator_string = '1' if (denominator_list == []) else f"{''.join(denominator_list)}"
+
+    if numerator_string == '1' and denominator_string == '1':
+        return ''
+    else:
+        return f"\\frac{{{numerator_string}}}{{{denominator_string}}}"
+
+
+def _prepare_third_z_latex(term_list, split_width=7, remove_f_terms=False, print_prefactors=True):
     """Return the latex commands to write the provided terms.
 
     The `split_width` is the maximum number of terms on 1 horizontal line (in latex) and should
@@ -1271,9 +1396,8 @@ def _prepare_third_z_latex(term_list, split_width=7, remove_f_terms=False, print
             term_string += "\\bar{f}" if (nof_fbars == 1) else f"\\bar{{f}}^{{{nof_fbars}}}"
 
         # add any prefactors if they exist
-        if print_prefactors:  # pragma: no cover
-            raise Exception("prefactor code for z stuff is not done")
-            term_string += _build_z_latex_prefactor(h, z_right)
+        if print_prefactors: # pragma: no cover
+            term_string += _build_hz_latex_prefactor(h, None, z_right)
 
         # prepare the z terms
         h_offset_dict = {
@@ -1619,9 +1743,7 @@ def generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_t
         if False and omega_term.rank not in [1, ]:
             continue
 
-        # for the new ansatz v5 we only print the annihilation operator projections
-        if omega_term.m > 0:
-            continue
+        # apparently marcel wants the annihilation operator projects added back in?
 
         rank_name = rank_name_list[omega_term.rank]
 

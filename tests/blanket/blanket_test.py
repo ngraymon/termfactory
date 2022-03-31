@@ -2,19 +2,21 @@
 
 # system imports
 import re
+from os.path import join
 
 # local imports
-from .context import latex_zhz as zhz
-from .context import latex_full_cc as fcc
-from .context import latex_eT_zhz as eTzhz
-from .context import latex_w_equations as weqn
+from . import context
+import latex_zhz as zhz
+import latex_full_cc as fcc
+import latex_eT_zhz as eTzhz
+import latex_w_equations as weqn
 
-from .context import code_full_cc as code_fcc
-from .context import code_residual_equations as code_res
-from .context import code_w_equations as code_weqn
-from .context import code_dt_equations as code_dt_eqn
+import code_full_cc as code_fcc
+import code_residual_equations as code_res
+import code_w_equations as code_weqn
+import code_dt_equations as code_dt_eqn
 
-from .context import namedtuple_defines as nt
+import namedtuple_defines as nt
 
 # third party imports
 import pytest
@@ -123,7 +125,7 @@ class TestFullccLatex():
         fcc._simplify_full_cc_python_prefactor(['2!', '2!', '2!','2!', '2!', '2!'], ['2!', '2!'])
 
 class Test_latex_eT_z_t_ansatz():
-    
+
     @pytest.fixture(scope="class", params=[1, 2])
     def A(self, request):
         return request.param
@@ -148,11 +150,13 @@ class Test_latex_eT_z_t_ansatz():
     def truncations(self, A, B, C, D, E):
         return [A, B, C, D, E]
 
-    def test_ground_state(self, truncations):
-        eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, path="./generated_latex.tex")
+    def test_ground_state(self, truncations, tmpdir):
+        output_path = join(tmpdir, "latex_ground_Test_latex_eT_z_t_ansatz.tex")
+        eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, path=output_path)
 
-    # def test_excited_state(self, truncations):
-    #     eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=False, path="./generated_latex.tex")
+    # def test_excited_state(self, truncations, tmpdir):
+    #     output_path = join(tmpdir, "latex_excited_Test_latex_eT_z_t_ansatz.tex")
+    #     eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=False, path=output_path)
 
     # add a pytest.raise for Exception: The excited state second eTZH terms are not implemented.
 
@@ -192,20 +196,22 @@ class Test_latex_zhz():
     def truncations(self, A, B, C, D):
         return [A, B, C, D]
 
-    def test_ground_state(self, truncations):
-        zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex")
+    def test_ground_state(self, truncations, tmpdir):
+        output_path = join(tmpdir, "latex_ground_Test_latex_zhz.tex")
+        zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path=output_path)
 
-    def test_excited_state(self, truncations):
+    def test_excited_state(self, truncations, tmpdir):
         not_implemented_yet_message = (
         "The logic for the supporting functions (such as `_filter_out_valid_z_terms` and others)\n"
         "Has only been verified to work for the LHS * H * Z (`third_z`) case.\n"
         "The code may produce some output without halting, but the output is meaningless from a theory standpoint.\n"
         "Do not remove this Exception without consulting with someone else and implementing the requisite functions.")
+        output_path = join(tmpdir, "latex_excited_Test_latex_zhz.tex")
         with pytest.raises(Exception,  match=re.escape(not_implemented_yet_message)):
-            zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=False, remove_f_terms=False, path="./generated_latex.tex")
+            zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=False, remove_f_terms=False, path=output_path)
 
     # need to add more tests for niche cases
-    
+
 class Test_code_fcc():
 
     @pytest.fixture(scope="class", params=[1, 2, 3])
@@ -230,7 +236,7 @@ class Test_code_fcc():
 
     def test_fcc_code(self, truncations):
         code_fcc.generate_full_cc_python(truncations, only_ground_state=False, path="./full_cc_equations.py")
-    
+
 class Test_code_residuals():
 
     @pytest.fixture(scope="class", params=[4])
@@ -240,7 +246,7 @@ class Test_code_residuals():
     @pytest.fixture(scope="class", params=[2])
     def maximum_h_rank(self, request):
         return request.param
-    
+
     def test_residuals_code(self, max_residual_order,maximum_h_rank):
         code_res.generate_residual_equations_file(max_residual_order, maximum_h_rank, path="./residual_equations.py")
 
@@ -263,7 +269,7 @@ class Test_code_dt_equations():
 
     def test_code_dt_equations(self, max_w_order):
         code_dt_eqn.generate_dt_amplitude_equations_file(max_w_order, path="./dt_amplitude_equations.py")
-    
+
 class TestExcitedState():
 
     @pytest.fixture(params=[1, 2, 3])
