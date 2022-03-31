@@ -32,37 +32,43 @@ eT_z_t type:
 maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order = truncations
 
 """
+fcc_key_list = [
+    'maximum_hamiltonian_rank',
+    'maximum_coupled_cluster_rank',
+    's_taylor_max_order',
+    'omega_max_order'
+]
 
-fcc_truncations_namedtuple = namedtuple(
-    'fcc_truncations',
-    [
-        'maximum_hamiltonian_rank',
-        'maximum_coupled_cluster_rank',
-        's_taylor_max_order',
-        'omega_max_order'
-    ]
-)
-eT_z_t_truncations_namedtuple = namedtuple(
-    'eT_z_t_truncations',
-    [
-        'maximum_hamiltonian_rank',
-        'maximum_coupled_cluster_rank',
-        'maximum_T_rank',
-        'eT_taylor_max_order',
-        'omega_max_order'
-    ]
-)
+
+fcc_truncations_namedtuple = namedtuple('fcc_truncations', fcc_key_list)
+
+eT_z_t_key_list = [
+    'maximum_hamiltonian_rank',
+    'maximum_coupled_cluster_rank',
+    'maximum_T_rank',
+    'eT_taylor_max_order',
+    'omega_max_order'
+]
+eT_z_t_truncations_namedtuple = namedtuple('eT_z_t_truncations', eT_z_t_key_list)
+
 ###################################################################
 """
 Verify concept
 """
 # below assumes truncations is type==dictionary
 
-def _verify_fcc_truncations(truncations):
-    for key in ["maximum_hamiltonian_rank", "maximum_coupled_cluster_rank", "s_taylor_max_order", "omega_max_order"]:
+
+def __verify_keys(truncations, key_list):
+    """ x """
+    for key in key_list:
         assert key in truncations, f"Missing key, {key = :s} not in provided dictionary {truncations=:}"
         assert truncations[key] >= 1, "Truncations need to be positive integers"
         assert truncations[key] <= truncation_maximums[key], f"Key {key} is over the maximum of {truncation_maximums[key]}"
+
+
+def _verify_fcc_truncations(truncations):
+    """ x """
+    __verify_keys(truncations, fcc_key_list)
 
     # add unpack function? like _unpack_fcc_truncations
     # unpack functions would call its respective _verify_x function
@@ -73,10 +79,8 @@ def _verify_fcc_truncations(truncations):
 
 
 def _verify_eT_z_t_truncations(truncations):
-    for key in ["maximum_hamiltonian_rank", "maximum_coupled_cluster_rank", "maximum_T_rank", "eT_taylor_max_order", "omega_max_order"]:
-        assert key in truncations, f"Missing key, {key = :s} not in provided dictionary {truncations=:}"
-        assert truncations[key] >= 1, "Truncations need to be positive integers"
-        assert truncations[key] <= truncation_maximums[key], f"Key {key} is over the maximum of {truncation_maximums[key]}"
+    """ x """
+    __verify_keys(truncations, eT_z_t_key_list)
 
     # add unpack function? like _unpack_eT_z_t_truncations
     maximum_hamiltonian_rank = truncations["maximum_hamiltonian_rank"]
