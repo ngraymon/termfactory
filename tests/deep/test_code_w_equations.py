@@ -541,6 +541,19 @@ class Test_run_main_w_eqn_code:
             expected_result = fp.read()
         assert function_output == expected_result
 
-    def test_run_main_w_eqn_func(self):
-        # TODO file compare assert
-        cw.generate_w_operator_equations_file(2, path="./w_operator_equations.py")
+    def test_run_main_w_eqn_func(self, tmpdir):
+        """runs main function and compares it to a reference file"""
+
+        output_path = join(tmpdir, "code_test_run_main_w_eqn_func.py")
+        max_w_order=2
+        cw.generate_w_operator_equations_file(max_w_order, path=output_path)
+
+        with open(output_path, 'r') as fp:
+            file_data = fp.read()
+
+        func_name = "main_output_w_operator_equations.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            reference_file_data = fp.read()
+
+        assert file_data == reference_file_data, 'Fail'
