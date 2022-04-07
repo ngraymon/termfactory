@@ -1010,7 +1010,7 @@ class Test_run_main_zhz_for_coverage:
     def test_main_zhz(self, tmpdir):
         """runs main function and compares it to a reference file"""
 
-        output_path = join(tmpdir, "latex_Test_run_main_zhz_for_coverage.txt")
+        output_path = join(tmpdir, "latex_Test_run_main_zhz_for_coverage.tex")
 
         truncations = [1, 1, 1, 1]
 
@@ -1024,7 +1024,7 @@ class Test_run_main_zhz_for_coverage:
         with open(output_path, 'r') as fp:
             file_data = fp.read()
 
-        func_name = "generated_latex.txt"
+        func_name = "generated_latex.tex"
         file_name = join(root_dir, classtest, func_name)
         with open(file_name, 'r') as fp:
             reference_file_data = fp.read()
