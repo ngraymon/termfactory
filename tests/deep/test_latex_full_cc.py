@@ -1418,7 +1418,7 @@ class Test_main_fcc_latex_func:
     def test_generate_full_cc_latex(self, tmpdir):
         """runs main function and compares it to a reference file"""
 
-        output_path = join(tmpdir, "latex_excited_Test_main_fcc_latex_func.tex")
+        output_path = join(tmpdir, "latex_excited_Test_main_fcc_latex_func.txt")
         fcc.generate_full_cc_latex([2, 2, 2, 2], only_ground_state=False, path=output_path)
 
         with open(output_path, 'r') as fp:
@@ -1431,7 +1431,7 @@ class Test_main_fcc_latex_func:
 
         assert file_data == reference_file_data, 'Fail'
 
-        output_path = join(tmpdir, "latex_ground_Test_main_fcc_latex_func.tex")
+        output_path = join(tmpdir, "latex_ground_Test_main_fcc_latex_func.txt")
         fcc.generate_full_cc_latex([2, 2, 2, 2], only_ground_state=True, path=output_path)
 
         with open(output_path, 'r') as fp:
