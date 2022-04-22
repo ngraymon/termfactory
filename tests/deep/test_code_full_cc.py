@@ -653,17 +653,20 @@ class Test_generate_full_cc_python_file_contents:
 
 class Test_generate_full_cc_python:
 
-    def test_run_main(self):  # TODO file compare below
-        """run main function for coverage purposes"""
+    def test_run_main(self, tmpdir):
+        """runs main function and compares it to a reference file"""
 
         # run function
-        cfcc.generate_full_cc_python([1, 1, 1, 1], only_ground_state=False, path="./full_cc_equations.py")
-        # function_output = cfcc.generate_full_cc_python([1, 1, 1, 1], only_ground_state=False, path="./full_cc_equations.py")
+        output_path = join(tmpdir, "full_cc_equations.py")
+        truncations = [1, 1, 1, 1]
+        cfcc.generate_full_cc_python(truncations, only_ground_state=False, path=output_path)
 
-        # open file
-        # func_name = "generate_full_cc_python_out.py"
-        # file_name = join(root_dir, classtest, func_name)
-        # with open(file_name, 'r') as fp:
-        #     expected_result = fp.read()
+        with open(output_path, 'r') as fp:
+            file_data = fp.read()
 
-        # assert function_output == expected_result
+        func_name = "code_output_full_cc_equations.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            reference_file_data = fp.read()
+
+        assert file_data == reference_file_data, 'Fail'
