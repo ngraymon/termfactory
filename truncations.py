@@ -118,50 +118,40 @@ def __verify_keys(truncations, key_list):
 
 def _verify_fcc_truncations(truncations):
     """ x """
-    __verify_keys(truncations, fcc_key_list)
-
-    # add unpack function? like _unpack_fcc_truncations
-    # unpack functions would call its respective _verify_x function
-    maximum_hamiltonian_rank = truncations["maximum_hamiltonian_rank"]
-    maximum_coupled_cluster_rank = truncations["maximum_coupled_cluster_rank"]
-    s_taylor_max_order = truncations["s_taylor_max_order"]
-    omega_max_order = truncations["omega_max_order"]
+    # fcc_nums=truncations.fcc_key_list
+    print(truncations)
+    
+    print(truncations.H)
+    # t_dict = repr(truncations.values.values)
+    
+    # maximum_hamiltonian_rank = truncations["maximum_hamiltonian_rank"]
+    # maximum_coupled_cluster_rank = truncations["maximum_coupled_cluster_rank"]
+    # s_taylor_max_order = truncations["s_taylor_max_order"]
+    # omega_max_order = truncations["omega_max_order"]
+    print(t_dict)
+    # print(truncations["max_h_rank"])
+    # __verify_keys(t_dict, fcc_key_list)
 
 
 def _verify_eT_z_t_truncations(truncations):
     """ x """
-    __verify_keys(truncations, eT_z_t_key_list)
-
+    
+    # eT_dct = {i.name: i.value for i in eT_trunc}
     # add unpack function? like _unpack_eT_z_t_truncations
     maximum_hamiltonian_rank = truncations["maximum_hamiltonian_rank"]
     maximum_coupled_cluster_rank = truncations["maximum_coupled_cluster_rank"]
     maximum_T_rank = truncations["maximum_T_rank"]
     eT_taylor_max_order = truncations["eT_taylor_max_order"]
-    omega_max_order = truncations["omega_max_order "]
+    omega_max_order = truncations["omega_max_order"]
 
-
-# test={
-#     'maximum_hamiltonian_rank': 1,  # maximum_h_rank
-#     'maximum_coupled_cluster_rank': 1,  # maximum_cc_rank
-#     's_taylor_max_order': 1,
-#     'omega_max_order': 1,
-# }
-
-# test2={
-#     'maximum_hamiltonian_rank': 1,  # maximum_h_rank
-#     'maximum_coupled_cluster_rank': 1,  # maximum_cc_rank
-#     's_taylor_max_order': 1,
-#     'omega_max_order': 1,
-# }
-# print(test[1])
-# _verify_fcc_truncations(test)
+    __verify_keys(truncations, eT_z_t_key_list)
 
 ################################################################################
 #                              Save / Load JSON                                #
 ################################################################################
 
 
-def _save_to_JSON(path, dictionary):
+def _save_to_JSON(path, dictionary):  # rename
     dict_copy = copy.deepcopy(dictionary)
     TruncationsKeys.change_dictionary_keys_from_enum_members_to_strings(dict_copy)
     with open(path, mode='w', encoding='UTF8') as target_file:
@@ -169,7 +159,7 @@ def _save_to_JSON(path, dictionary):
 
     return
 
-def save_model_to_JSON(path, dictionary):
+def save_model_to_JSON(path, dictionary):  # rename
     """ wrapper for _save_to_JSON
     calls verify_model_parameters() before calling _save_to_JSON()
     """
@@ -178,7 +168,7 @@ def save_model_to_JSON(path, dictionary):
     _save_to_JSON(path, dictionary)
     return
 
-def _load_from_JSON(path):
+def _load_from_JSON(path):  # rename
     """returns a dictionary filled with the values stored in the .json file located at path"""
 
     with open(path, mode='r', encoding='UTF8') as file:
@@ -190,3 +180,28 @@ def _load_from_JSON(path):
         input_dictionary[key] = value
     # add verify
     return input_dictionary
+
+def load_model_from_JSON(path, dictionary=None): # rename
+    """
+    if kwargs is not provided then returns a dictionary filled with the values stored in the .json file located at path
+
+    if kwargs is provided then all values are overwritten (in place) with the values stored in the .json file located at path
+    """
+
+    # no arrays were provided so return newly created arrays after filling them with the appropriate values
+    if not bool(dictionary):
+        new_model_dict = _load_from_JSON(path)
+
+        # TODO - we might want to make sure that none of the values in the dictionary have all zero values or are None
+
+        # verify_model_parameters(new_model_dict)
+        return new_model_dict
+
+    # arrays were provided so fill them with the appropriate values
+    # else:
+        # verify_model_parameters(dictionary)
+        # _load_inplace_from_JSON(path, dictionary)
+        # check twice? might as well be cautious for the moment until test cases are written
+        # verify_model_parameters(dictionary)
+
+    return
