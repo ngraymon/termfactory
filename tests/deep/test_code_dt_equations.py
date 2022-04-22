@@ -467,6 +467,19 @@ class Test_generate_dt_amplitude_string:
 
 class Test_generate_dt_amplitude_equations_file:
 
-    def test_run_main(self):
-        """test to run main gen"""  # TODO add file compare here
-        cdt.generate_dt_amplitude_equations_file(2, path="./dt_amplitude_equations.py")
+    def test_run_main(self, tmpdir):
+        """runs main function and compares it to a reference file"""
+
+        output_path = join(tmpdir, "dt_amplitude_equations.py")
+        max_w_order = 2
+        cdt.generate_dt_amplitude_equations_file(max_w_order, path=output_path)
+
+        with open(output_path, 'r') as fp:
+            file_data = fp.read()
+
+        func_name = "code_output_dt_amplitude_equations.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            reference_file_data = fp.read()
+
+        assert file_data == reference_file_data, 'Fail'

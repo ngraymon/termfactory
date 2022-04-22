@@ -1,0 +1,232 @@
+
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{bm}
+\usepackage{physics}
+\usepackage{simplewick}
+\usepackage{dsfont}
+
+\usepackage{color}
+\NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
+\NewDocumentCommand{\red}{G{}}{{\color{red}#1}}
+\NewDocumentCommand{\blue}{G{}}{{\color{blue}#1}}
+\NewDocumentCommand{\magenta}{G{}}{{\color{magenta}#1}}
+
+%\geometry{portrait, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
+\geometry{a4paper, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
+%\geometry{legalpaper, landscape, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
+
+\newcommand{\bh}{\textbf{h}}
+\newcommand{\bt}{\textbf{t}}
+\newcommand{\bw}{\textbf{w}}
+\newcommand{\bc}{\textbf{c}}
+\newcommand{\bd}{\textbf{d}}
+
+\newcommand{\bs}{\textbf{s}}
+\newcommand{\bz}{\textbf{z}}
+\newcommand{\bS}{\hat{\textbf{S}}_{\gamma}}
+\newcommand{\bZ}{\hat{\textbf{Z}}_{\gamma}}
+\newcommand{\ebS}{e^{\bS}}
+\newcommand{\ebZ}{e^{\bZ}}
+\newcommand{\g}{\hat{g}_{\gamma}}
+\newcommand{\bg}{\hat{\textbf{g}}_{\gamma}}
+\newcommand{\bG}{\textbf{G}}
+
+\newcommand{\up}[1]{\hat{#1}^{\dagger}}
+\newcommand{\down}[1]{\hat{#1}}
+
+\begin{document}
+
+
+%
+%
+%
+%
+\section{Automated equations}
+All equations are derived assuming a Hamiltonian, $\hat{S}$ and $\hat{Z}$ of the form:
+\begin{equation}
+    \hat{H} = \sum_{a,b} \ket{a}\bra{b}h^{a}_{b}(q)
+\qquad\qquad
+    \hat{S} = \sum_{c,d} \ket{c}\bra{d}s^{c}_{d}(q)
+\qquad\qquad
+    \hat{Z} = \sum_{e>f} \ket{e}\bra{f}z^{e}_{f}(q)
+\qquad\qquad
+    \hat{\Omega} = \down{i} + \up{i} + \down{i}\down{j} + \down{i}\up{j} + \up{i}\up{j} + \cdots
+\end{equation}
+when we limit ourselves to at most 2nd order terms (creation operator: $\down{b}$, annihilation operator: $\up{b}$)
+\begin{equation}
+    \bh(q) = \bh + \bh_{i}\down{i} + \bh^{i}\up{i} + \bh^{i}_{j}\up{i}\down{j} + \frac{1}{2}\bh_{ij}\down{i}\down{j} + \frac{1}{2}\bh^{ij}\up{i}\up{j}
+\end{equation}
+\begin{equation}
+    \bs(q) = \bs_{0} + \bs^{i}\up{i} + \frac{1}{2}\bs^{ij}\up{i}\up{j}
+\end{equation}
+\begin{equation}
+    \bz(q) = \bz_{0} + \bz^{i}\up{i} + \frac{1}{2}\bz^{ij}\up{i}\up{j}
+\end{equation}
+
+Define the following: (not correct but mechanically useful)
+\begin{equation}
+    f = \contraction[1ex]{}{\up{b}}{}{\down{b}}\up{b}\down{b}
+\qquad
+    \bar{f} = \contraction[1ex]{}{\down{b}}{}{\up{b}}\down{b}\up{b}
+\qquad
+    (
+    \contraction[1ex]{}{\down{b}}{}{\up{b}}\down{b}\up{b}
+    -
+    \contraction[1ex]{}{\up{b}}{}{\down{b}}\up{b}\down{b}
+    )
+    = (\bar{f} - f) = 1
+\qquad
+    \bar{f} = 1, f = 0
+\end{equation}
+and
+\begin{equation}
+    \bt_{i} \equiv f\bs_{i}
+\qquad
+    \bt^{i} \equiv \bar{f}\bs^{i}
+\qquad
+    \bt^{i}_{j} \equiv \bar{f}f\bs^{i}_{j}
+\qquad
+    \bt^{ij} \equiv \bar{f}^2\bs^{ij}
+\qquad
+    \bt_{ij} \equiv f^2\bs_{ij}
+\qquad
+    \text{and so forth ....}
+\end{equation}
+
+
+The ansatz equation
+\begin{equation}
+    \ket{\psi_{\gamma}(\tau)}
+    = e^{i\hat{H}\tau}\ket{\gamma,0}
+%
+    \approx e^{\hat{S}_{\gamma}}e^{\hat{Z}_{\gamma}}\ket{\gamma,0}
+%
+    = e^{\hat{S}_{\gamma}}(\hat{1}+\hat{Z})\ket{\gamma,0}
+\end{equation}
+\begin{equation}
+    \ket{\Psi(\tau)} = \sum_{\gamma}\bm{\chi}_\gamma\ket{\psi_{\gamma}(\tau)}
+    % \quad (\bm{\chi} \text{ is a vector which is A dimensionality})
+\end{equation}
+
+The new amplitude equation is
+\begin{align}
+    LHS &= RHS
+\\
+    (\hat{1} - \hat{Z}_{\gamma})\left(i\dv{\hat{S}_{\gamma}}{\tau}\right)(\hat{1} + \hat{Z}_{\gamma})
+    &= (\hat{1} - \hat{Z}_{\gamma})e^{-\hat{S}_{\gamma}}\hat{H}e^{\hat{S}_{\gamma}}(\hat{1} + \hat{Z}_{\gamma})
+%
+\\  &= (\hat{1} - \hat{Z}_{\gamma})\bar{H}_{\gamma}(\hat{1} + \hat{Z}_{\gamma})
+\\  &= \hat{G}
+\end{align}
+
+where
+\begin{align}
+    i\dv{\hat{S}_{\gamma}}{\tau} = \left(\bar{H} + \bar{H}\hat{Z}\right)_{\gamma\gamma} = \hat{G}_{\gamma\gamma}
+\end{align}
+
+and
+
+\begin{align}
+    i\dv{\hat{Z}_{x\gamma}}{\tau} = \left(\bar{H} + \bar{H}\hat{Z}\right)_{x\gamma} - i\dv{\hat{S}_{\gamma}}{\tau}\hat{Z}_{x\gamma}
+\end{align}
+
+\clearpage
+%
+%
+%
+%
+%
+%
+
+
+\vspace{2cm}%
+%
+%
+%
+%
+
+\begin{equation}
+    \hat{\Omega} = 1
+\qquad\qquad
+    i\dv{\hat{\bt}^{}_{\gamma}}{\tau} = \hat{G}^{}_{\gamma\gamma}
+\end{equation}
+
+%
+%
+%
+%
+%
+
+\begin{align}\begin{split}
+LHS &=
+    i\Big(\dv{\hat{\bz}^{}_{\gamma}}{\tau}\Big)
+\\ RHS &=
+%
+%
+\bh_{0,xb}(1-\delta_{x\gamma})\\&+\sum\Big((\bh_0\bz_0 + \bar{f}\bh_{\blue{}\blue{k}\red{}}\bz^{\magenta{}\blue{k}\red{}})\Big)(1-\delta_{cb})\\&-i\sum\Big(\dv{\hat{\bt}_{0, \gamma}}{\tau}\,\hat{\bz}_{0, \gamma}\Big)
+\end{split}\end{align}
+
+\paragraph{Linear Equations}
+
+%
+%
+%
+%
+%
+
+\begin{equation}
+    \hat{\Omega} = \down{i}
+\qquad\qquad
+    i\dv{\hat{\bt}^{i}_{\gamma}}{\tau} = \hat{G}^{i}_{\gamma\gamma}
+\end{equation}
+
+%
+%
+%
+%
+%
+
+\begin{align}\begin{split}
+LHS &=
+    i\Big(\dv{\hat{\bz}^{i}_{\gamma}}{\tau}\Big)
+\\ RHS &=
+%
+%
+\bh^{i}(1-\delta_{x\gamma})\\&+\sum\Big((\bh_0\bz^{\magenta{}\blue{}\red{y}} + \bh^{\blue{}\blue{}\red{y}}\bz_0)\Big)(1-\delta_{cb})\\&-i\sum\Big(\dv{\hat{\bt}^{i}_{\gamma}}{\tau}\,\hat{\bz}_{0, \gamma} + \dv{\hat{\bt}_{0, \gamma}}{\tau}\,\hat{\bz}^{i}_{\gamma}\Big)
+\end{split}\end{align}
+
+\vspace{2cm}%
+%
+%
+%
+%
+
+\begin{equation}
+    \hat{\Omega} = \up{i}
+\qquad\qquad
+    i\dv{\hat{\bt}^{}_{i,\gamma}}{\tau} = \hat{G}^{}_{i, \gamma\gamma}
+\end{equation}
+
+%
+%
+%
+%
+%
+
+\begin{align}\begin{split}
+LHS &=
+    i\Big(\dv{\hat{\bz}^{i}_{\gamma}}{\tau}\Big)
+\\ RHS &=
+%
+%
+\bh_{i}(1-\delta_{x\gamma})\\&+\sum\Big((\bh_{\blue{}\blue{}\red{y}}\bz_0)\Big)(1-\delta_{cb})\\&-i\sum\Big(\dv{\hat{\bt}_{i, \gamma}}{\tau}\,\hat{\bz}_{0, \gamma}\Big)
+\end{split}\end{align}
+
+\end{document}
