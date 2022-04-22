@@ -674,8 +674,21 @@ class Test_generate_python_code_for_residual_functions:
 
 class Test_run_main_generate_files_eqs:
 
-    def test_run_main(self):
-        """run main function"""  # TODO file compare here
+    def test_run_main(self, tmpdir):
+        """runs main function and compares it to a reference file"""
+
+        output_path = join(tmpdir, "code_residual_equations.py")
+
         max_residual_order = 2
         maximum_h_rank = 2
-        cre.generate_residual_equations_file(max_residual_order, maximum_h_rank, path="./residual_equations.py")
+        cre.generate_residual_equations_file(max_residual_order, maximum_h_rank, path=output_path)
+
+        with open(output_path, 'r') as fp:
+            file_data = fp.read()
+
+        func_name = "code_output_residual_equations.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            reference_file_data = fp.read()
+
+        assert file_data == reference_file_data, 'Fail'
