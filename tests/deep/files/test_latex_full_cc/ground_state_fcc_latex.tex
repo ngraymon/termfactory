@@ -1,0 +1,264 @@
+
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{physics}
+\usepackage{simplewick}
+
+\usepackage{color}
+\NewDocumentCommand{\disconnected}{G{}}{\colorbox{yellow}{$#1$}}
+\NewDocumentCommand{\red}{G{}}{{\color{red}#1}}
+\NewDocumentCommand{\blue}{G{}}{{\color{blue}#1}}
+\NewDocumentCommand{\magenta}{G{}}{{\color{magenta}#1}}
+
+\geometry{legalpaper, landscape, left=0.4in, right=0.4in, top=0.25in, bottom=0.5in}
+
+\newcommand{\bh}{\textbf{h}}
+\newcommand{\bs}{\textbf{s}}
+\newcommand{\bt}{\textbf{t}}
+\newcommand{\bw}{\textbf{w}}
+\newcommand{\bc}{\textbf{c}}
+\newcommand{\bd}{\textbf{d}}
+
+\newcommand{\up}[1]{\hat{#1}^{\dagger}}
+\newcommand{\down}[1]{\hat{#1}}
+
+\begin{document}
+
+%
+%
+%
+%
+\section{Automated equations}
+All equations are derived assuming a Hamiltonian and $\hat{S}$ of the form:
+\begin{equation}
+    \hat{H} = \sum_{a,b} \ket{a}\bra{b}h^{a}_{b}(q)
+\qquad\qquad
+    \hat{S} = \sum_{c,d} \ket{c}\bra{d}s^{c}_{d}(q)
+\qquad\qquad
+    \hat{\Omega} = \down{i} + \up{i} + \down{i}\down{j} + \down{i}\up{j} + \up{i}\up{j} + \cdots
+\end{equation}
+when we limit ourselves to at most 2nd order terms (creation operator: $\down{b}$, annihilation operator: $\up{b}$)
+\begin{equation}
+    \bh(q) = \bh + \bh_{i}\down{i} + \frac{1}{2}\bh_{ij}\down{i}\down{j}
+\end{equation}
+and
+\begin{equation}
+    \bs(q) = \bs^{i}\up{i} + \frac{1}{2}\bs^{ij}\up{i}\up{j}
+\end{equation}
+
+Define the following: (not correct but mechanically useful)
+\begin{equation}
+    f = \contraction[1ex]{}{\up{b}}{}{\down{b}}\up{b}\down{b}
+\qquad
+    \bar{f} = \contraction[1ex]{}{\down{b}}{}{\up{b}}\down{b}\up{b}
+\qquad
+    (
+    \contraction[1ex]{}{\down{b}}{}{\up{b}}\down{b}\up{b}
+    -
+    \contraction[1ex]{}{\up{b}}{}{\down{b}}\up{b}\down{b}
+    )
+    = (\bar{f} - f) = 1
+\qquad
+    \bar{f} = 1, f = 0
+\end{equation}
+and
+\begin{equation}
+    \bt_{i} \equiv f\bs_{i}
+\qquad
+    \bt^{i} \equiv \bar{f}\bs^{i}
+\qquad
+    \bt^{i}_{j} \equiv \bar{f}f\bs^{i}_{j}
+\qquad
+    \bt^{ij} \equiv \bar{f}^2\bs^{ij}
+\qquad
+    \bt_{ij} \equiv f^2\bs_{ij}
+\qquad
+    \text{and so forth ....}
+\end{equation}
+
+The amplitude equation is
+\begin{align}
+    LHS &= RHS
+\\
+    \mel{a}{\hat{\Omega}_{\lambda}\dv{\tau}e^{\hat{S}} + \hat{\Omega}_{\lambda}e^{\hat{S}}\varepsilon}{b}
+    &= \mel{a}{\hat{\Omega}_{\lambda}\hat{H}e^{\hat{S}}}{b}.
+\end{align}
+\clearpage
+
+%
+%
+%
+%
+%
+%
+
+
+%
+%
+%
+%
+%
+
+\begin{align}\begin{split}
+    \hat{\Omega} = 1
+\\ LHS &=
+    i\left(\varepsilon\right)
+\\ RHS &=
+%
+%
+(\bh_0 + \bh^{\blue{}\red{}}_{\blue{i}\red{}}\bt^{\blue{i}\red{}} + \frac{1}{2!}\bh^{\blue{}\red{}}_{\blue{ij}\red{}}\bt^{\blue{ij}\red{}} + \frac{1}{2!2!}\bh^{\blue{}\red{}}_{\blue{ij}\red{}}\bt^{\blue{i}\red{}}\bt^{\blue{j}\red{}}) + () + ()
+\end{split}\end{align}
+
+%
+%
+%
+%
+%
+
+\subsection{Linear Equations}
+
+\begin{align}\begin{split}
+    \hat{\Omega} = \down{i}
+\\ LHS &=
+    i\left(\dv{\bt^{i}_{}}{\tau} + \bt^{i}_{}\varepsilon\right)
+\\ RHS &=
+%
+%
+(\bar{f}\bh^{\blue{}\red{z}}_{\blue{}\red{}} + \bh^{\blue{}\red{}}_{\blue{i}\red{}}\bt^{\blue{i}\red{z}} + \bar{f}\bh^{\blue{}\red{z}}_{\blue{i}\red{}}\bt^{\blue{i}\red{}} + \frac{1}{2!}\bh^{\blue{}\red{}}_{\blue{ij}\red{}}\bt^{\blue{i}\red{}}\bt^{\blue{j}\red{z}})
+%
+%
+\\  &+
+%
+%
+    \textit{no linked disconnected terms}
+%
+%
+\\  &+
+%
+%
+(\bh_0 + \frac{1}{2!}\bh^{\blue{}\red{}}_{\blue{i}\red{}}\bt^{\blue{i}\red{}} + \frac{1}{2!2!}\bh^{\blue{}\red{}}_{\blue{ij}\red{}}\bt^{\blue{ij}\red{}})\bt^{\blue{}\red{z}}
+\end{split}\end{align}
+
+%
+%
+%
+%
+%
+
+\begin{align}\begin{split}
+    \hat{\Omega} = \up{i}
+\\ LHS &=
+    i\left(\dv{\bt^{}_{i}}{\tau} + \bt^{}_{i}\varepsilon\right)
+\\ RHS &=
+%
+%
+(f\bh^{\blue{}\red{}}_{\blue{}\red{z}} + f\frac{1}{2!}\bh^{\blue{}\red{}}_{\blue{i}\red{z}}\bt^{\blue{i}\red{}})
+%
+%
+\\  &+
+%
+%
+    \textit{no linked disconnected terms}
+%
+%
+\\  &+
+%
+%
+    \textit{no unlinked disconnected terms}
+\end{split}\end{align}
+
+%
+%
+%
+%
+%
+
+\newpage
+\subsection{Quadratic Equations}
+
+\begin{align}\begin{split}
+    \hat{\Omega} = \down{i}\down{j}
+\\ LHS &=
+    i\left(\dv{\bt^{ij}_{}}{\tau} + \dv{\bt^{i}_{}}{\tau}\bt^{j}_{} + \bt^{i}_{}\dv{\bt^{j}_{}}{\tau} + \bt^{ij}_{}\varepsilon + \bt^{i}_{}\bt^{j}_{}\varepsilon\right)
+\\ RHS &=
+%
+%
+(\bar{f}^{2}\bh^{\blue{}\red{zy}}_{\blue{}\red{}} + \bar{f}\bh^{\blue{}\red{z}}_{\blue{i}\red{}}\bt^{\blue{i}\red{y}} + \frac{1}{2!2!}\bh^{\blue{}\red{}}_{\blue{ij}\red{}}\bt^{\blue{i}\red{z}}\bt^{\blue{j}\red{y}})
+%
+%
+\\  &+
+%
+%
+(\frac{1}{2!}\bh_0)\bt^{\blue{}\red{z}}\bt^{\blue{}\red{y}}
+    \\  &+  % split long equation
+(\bar{f}\bh^{\blue{}\red{y}}_{\blue{}\red{}} + \frac{1}{2!}\bh^{\blue{}\red{}}_{\blue{i}\red{}}\bt^{\blue{i}\red{y}} + \bar{f}\frac{1}{2!}\bh^{\blue{}\red{y}}_{\blue{i}\red{}}\bt^{\blue{i}\red{}})\bt^{\blue{}\red{z}}
+%
+%
+\\  &+
+%
+%
+(\bh_0 + \frac{1}{2!}\bh^{\blue{}\red{}}_{\blue{i}\red{}}\bt^{\blue{i}\red{}} + \frac{1}{2!2!}\bh^{\blue{}\red{}}_{\blue{ij}\red{}}\bt^{\blue{ij}\red{}})\bt^{\blue{}\red{zy}}
+\end{split}\end{align}
+
+%
+%
+%
+%
+%
+
+\begin{align}\begin{split}
+    \hat{\Omega} = \up{i}\down{j}
+\\ LHS &=
+    i\left(\dv{\bt^{i}_{j}}{\tau} + \dv{\bt^{i}_{}}{\tau}\bt^{}_{j} + \bt^{i}_{}\dv{\bt^{}_{j}}{\tau} + \bt^{i}_{j}\varepsilon + \bt^{i}_{}\bt^{}_{j}\varepsilon\right)
+\\ RHS &=
+%
+%
+(f\bar{f}\bh^{\blue{}\red{z}}_{\blue{}\red{y}} + f\frac{1}{2!}\bh^{\blue{}\red{}}_{\blue{i}\red{z}}\bt^{\blue{i}\red{y}})
+%
+%
+\\  &+
+%
+%
+(f\bh^{\blue{}\red{}}_{\blue{}\red{y}} + f\frac{1}{2!2!}\bh^{\blue{}\red{}}_{\blue{i}\red{y}}\bt^{\blue{i}\red{}})\bt^{\blue{}\red{z}}
+%
+%
+\\  &+
+%
+%
+    \textit{no unlinked disconnected terms}
+\end{split}\end{align}
+
+%
+%
+%
+%
+%
+
+\begin{align}\begin{split}
+    \hat{\Omega} = \up{i}\up{j}
+\\ LHS &=
+    i\left(\dv{\bt^{}_{ij}}{\tau} + \dv{\bt^{}_{i}}{\tau}\bt^{}_{j} + \bt^{}_{i}\dv{\bt^{}_{j}}{\tau} + \bt^{}_{ij}\varepsilon + \bt^{}_{i}\bt^{}_{j}\varepsilon\right)
+\\ RHS &=
+%
+%
+(f^{2}\bh^{\blue{}\red{}}_{\blue{}\red{zy}})
+%
+%
+\\  &+
+%
+%
+    \textit{no linked disconnected terms}
+%
+%
+\\  &+
+%
+%
+    \textit{no unlinked disconnected terms}
+\end{split}\end{align}
+
+\end{document}

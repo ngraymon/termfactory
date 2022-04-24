@@ -69,7 +69,20 @@ class Test_Latex_of_W_operators:
         expected_result = 'i\\left(\\varepsilon\\right)'
         assert function_output == expected_result
 
-    def test_excited_state_w_equations_latex(self):
-        # TODO add file compare assert
+    def test_excited_state_w_equations_latex(self, tmpdir):
+        """runs main function and compares it to a reference file"""
+
+        output_path = join(tmpdir, "latex_test_excited_state_w_equations_latex.tex")
+
         max_w_order = 3
-        lw.excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex")
+        lw.excited_state_w_equations_latex(max_w_order, output_path)
+
+        with open(output_path, 'r') as fp:
+            file_data = fp.read()
+
+        func_name = "thermal_w_equations.tex"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            reference_file_data = fp.read()
+
+        assert file_data == reference_file_data, 'Fail'
