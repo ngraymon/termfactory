@@ -16,7 +16,8 @@ from latex_zhz import generate_z_operator, _build_first_z_term, _f_h_zR_contribu
 from latex_full_cc import generate_omega_operator, generate_full_cc_hamiltonian_operator
 from common_imports import tab, z_summation_indices, z_unlinked_indices, summation_indices, old_print_wrapper
 from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
-
+from truncations import _verify_eT_z_t_truncations
+from truncation_keys import TruncationsKeys as tkeys
 import log_conf
 
 log = log_conf.get_filebased_logger(f'{__name__}.txt', submodule_name=__name__)
@@ -2033,8 +2034,13 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
 def generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex"):
     """Generates and saves to a file the latex equations for full CC expansion."""
 
-    assert len(truncations) == 5, "truncations argument needs to be tuple of five integers!!"
-    maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order = truncations
+    # unpack truncations
+    _verify_eT_z_t_truncations(truncations)
+    maximum_h_rank = truncations[tkeys.H]
+    maximum_cc_rank = truncations[tkeys.CC]
+    maximum_T_rank = truncations[tkeys.T]
+    eT_taylor_max_order = truncations[tkeys.eT]
+    omega_max_order = truncations[tkeys.P]
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
     H = generate_pruned_H_operator(maximum_h_rank)

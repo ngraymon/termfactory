@@ -20,6 +20,8 @@ from latex_full_cc import (
 from namedtuple_defines import disconnected_namedtuple
 from code_w_equations import taylor_series_order_tag, hamiltonian_order_tag
 import code_import_statements_module
+from truncations import _verify_fcc_truncations
+from truncation_keys import TruncationsKeys as tkeys
 
 
 # temp logging fix
@@ -677,8 +679,11 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     """Return a string containing the python code to generate w operators up to (and including) `max_order`.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
     """
-    assert len(truncations) == 4, "truncations argument needs to be tuple of four integers!!"
-    maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
+    # unpack truncations
+    _verify_fcc_truncations(truncations)
+    maximum_cc_rank = truncations[tkeys.CC]
+    omega_max_order = truncations[tkeys.P]
+
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
 
     # ------------------------------------------------------------------------------------------- #

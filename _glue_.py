@@ -3,8 +3,9 @@
 # third party imports
 
 # local imports
-from truncations import TruncationsKeys as tkeys
 from truncations import _verify_eT_z_t_truncations, _verify_fcc_truncations
+from truncation_keys import TruncationsKeys as tkeys
+
 # -- latex code generators
 from latex_full_cc import generate_full_cc_latex
 from latex_w_equations import ground_state_w_equations_latex, excited_state_w_equations_latex
@@ -97,7 +98,7 @@ def generate_python_files(truncations, only_ground_state=True, thermal=False):
 def main():
     """ x """
 
-    fcc_trunc={
+    fcc_trunc = {
         tkeys.H: 2,
         tkeys.CC: 6,
         tkeys.S: 2,
@@ -106,39 +107,22 @@ def main():
 
     _verify_fcc_truncations(fcc_trunc)
 
-    # for the 'z_t ansatz'
-    maximum_h_rank = fcc_trunc[tkeys.H]
-    maximum_cc_rank = fcc_trunc[tkeys.CC]
-    s_taylor_max_order = fcc_trunc[tkeys.S]
-    omega_max_order = fcc_trunc[tkeys.P]
-
-    truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
-
     # for the 'eT_z_t ansatz' only
-    eT_trunc={
+    eT_trunc = {
         tkeys.H: 2,
         tkeys.CC: 4,
         tkeys.T: 1,
         tkeys.eT: 4,
         tkeys.P: 4
     }
-    # eT_dct = {i.name: i.value for i in eT_trunc}
-    # print(eT_dct)
-    # _verify_fcc_truncations(eT_dct)
-    maximum_h_rank = eT_trunc[tkeys.H]
-    maximum_cc_rank = eT_trunc[tkeys.CC]
-    maximum_T_rank = eT_trunc[tkeys.T]
-    eT_taylor_max_order = eT_trunc[tkeys.eT]
-    omega_max_order = eT_trunc[tkeys.P]
 
-    # need to have truncation of e^T
-    eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order
-    
+    _verify_eT_z_t_truncations(eT_trunc)
+
     switch = 1
 
     if switch == 1:
         generate_latex_files(
-            eT_z_t_truncations,
+            eT_trunc,
             only_ground_state=True,
             remove_f_terms=False,
             thermal=False,
@@ -146,7 +130,7 @@ def main():
         )
     if switch == 2:
         generate_latex_files(
-            truncations,
+            fcc_trunc,
             only_ground_state=False,
             remove_f_terms=False,
             thermal=False,
@@ -154,14 +138,14 @@ def main():
         )
     if switch == 3:
         generate_latex_files(
-            truncations,
+            fcc_trunc,
             only_ground_state=True,
             remove_f_terms=False,
             thermal=False,
             file='full cc'
         )
     if switch == 4:
-        generate_eT_zhz_python(eT_z_t_truncations, only_ground_state=True)
+        generate_eT_zhz_python(eT_trunc, only_ground_state=True)
         # generate_full_cc_python(truncations, only_ground_state=True)
 
     print("We reached the end of main")

@@ -4,10 +4,11 @@ import copy
 import json
 import itertools as it
 from collections import namedtuple
-from enum import Enum
+
 # third party imports
 
 # local imports
+from truncation_keys import TruncationsKeys as tkeys
 
 truncation_maximums = {
     'maximum_hamiltonian_rank': 6,  # maximum_h_rank
@@ -15,8 +16,10 @@ truncation_maximums = {
     's_taylor_max_order': 6,
     'omega_max_order': 6,
     'max_residual_order': 8,
-    'max_w_order': 8,
+    'max_w_order': 8,           # implement some connection here
     'dt_order': 8,
+    'maximum_T_rank': 1,        # ask neil
+    'eT_taylor_max_order': 4    # ask neil
 }
 
 ################################################################################
@@ -40,6 +43,7 @@ fcc_key_list = [
     's_taylor_max_order',
     'omega_max_order'
 ]
+
 eT_z_t_key_list = [
     'maximum_hamiltonian_rank',
     'maximum_coupled_cluster_rank',
@@ -47,6 +51,7 @@ eT_z_t_key_list = [
     'eT_taylor_max_order',
     'omega_max_order'
 ]
+
 fcc_truncations_namedtuple = namedtuple('fcc_truncations', fcc_key_list)
 eT_z_t_truncations_namedtuple = namedtuple('eT_z_t_truncations', eT_z_t_key_list)
 
@@ -58,7 +63,14 @@ eT_z_t_truncations_namedtuple = namedtuple('eT_z_t_truncations', eT_z_t_key_list
 
 
 def __verify_keys(truncations, key_list):
-    """ x """
+    """ Verifies three things about the input dictionary `truncations`.
+
+    First, that the set of keys present in `truncations` is the same set of keys
+        present in `key_list`.
+    Second that all values are >= 1.
+    Third that all values are <= their max values
+        as defined in the dictionary `truncation_maximums`.
+    """
     for key in key_list:
         assert key in truncations, f"Missing key, {key = :s} not in provided dictionary {truncations=:}"
         assert truncations[key] >= 1, "Truncations need to be positive integers"
@@ -67,48 +79,54 @@ def __verify_keys(truncations, key_list):
 
 def _verify_fcc_truncations(truncations):
     """ x """
-    # fcc_nums=truncations.fcc_key_list
-    print(truncations)
-    
-    print(truncations.H)
-    # t_dict = repr(truncations.values.values)
-    
-    # maximum_hamiltonian_rank = truncations["maximum_hamiltonian_rank"]
-    # maximum_coupled_cluster_rank = truncations["maximum_coupled_cluster_rank"]
-    # s_taylor_max_order = truncations["s_taylor_max_order"]
-    # omega_max_order = truncations["omega_max_order"]
-    print(t_dict)
-    # print(truncations["max_h_rank"])
-    # __verify_keys(t_dict, fcc_key_list)
+
+    # verify not empty
+    assert bool(truncations), 'Empty dictionary is not correct'
+
+    for key in truncations.keys():
+        if key not in tkeys:
+            raise Exception(
+                f"{key = } is not one of the valid keys for fcc.\n{tkeys.fcc_key_list()}"
+            )
+
+    # change in the future possibly? if we use enums for all lists?
+    string_copy = truncations.copy()  # this works because all values are immutable
+    tkeys.change_dictionary_keys_from_enum_members_to_strings(string_copy)
+    __verify_keys(string_copy, fcc_key_list)
 
 
 def _verify_eT_z_t_truncations(truncations):
     """ x """
-    
-    # eT_dct = {i.name: i.value for i in eT_trunc}
-    # add unpack function? like _unpack_eT_z_t_truncations
-    maximum_hamiltonian_rank = truncations["maximum_hamiltonian_rank"]
-    maximum_coupled_cluster_rank = truncations["maximum_coupled_cluster_rank"]
-    maximum_T_rank = truncations["maximum_T_rank"]
-    eT_taylor_max_order = truncations["eT_taylor_max_order"]
-    omega_max_order = truncations["omega_max_order"]
 
-    __verify_keys(truncations, eT_z_t_key_list)
+    # verify not empty
+    assert bool(truncations), 'Empty dictionary is not correct'
+
+    for key in truncations.keys():
+        if key not in tkeys:
+            raise Exception(
+                f"{key = } is not one of the valid keys for fcc.\n{tkeys.eT_key_list()}"
+            )
+
+    # change in the future possibly? if we use enums for all lists?
+    string_copy = truncations.copy()  # this works because all values are immutable
+    tkeys.change_dictionary_keys_from_enum_members_to_strings(string_copy)
+    __verify_keys(string_copy, eT_z_t_key_list)
 
 ################################################################################
 #                              Save / Load JSON                                #
 ################################################################################
 
 
-def _save_to_JSON(path, dictionary):  # rename
+def _save_to_JSON(path, dictionary):
+    """ x """
     dict_copy = copy.deepcopy(dictionary)
-    TruncationsKeys.change_dictionary_keys_from_enum_members_to_strings(dict_copy)
+    tkeys.change_dictionary_keys_from_enum_members_to_strings(dict_copy)
     with open(path, mode='w', encoding='UTF8') as target_file:
         target_file.write(json.dumps(dict_copy))
-
     return
 
-def save_model_to_JSON(path, dictionary):  # rename
+
+def save_trunc_to_JSON(path, dictionary):
     """ wrapper for _save_to_JSON
     calls verify_model_parameters() before calling _save_to_JSON()
     """
@@ -117,23 +135,39 @@ def save_model_to_JSON(path, dictionary):  # rename
     _save_to_JSON(path, dictionary)
     return
 
-def _load_from_JSON(path):  # rename
+
+def _load_from_JSON(path):
     """returns a dictionary filled with the values stored in the .json file located at path"""
 
     with open(path, mode='r', encoding='UTF8') as file:
         input_dictionary = json.loads(file.read())
 
-    TruncationsKeys.change_dictionary_keys_from_strings_to_enum_members(input_dictionary)
+    # check that all keys are actually valid
+    # before calling `change_dictionary_keys_from_strings_to_enum_members`
+    for key in input_dictionary:
+        try:
+            new_key = tkeys(key)
+            input_dictionary[new_key] = input_dictionary.pop(key)
+        except ValueError:
+            print(f'Invalid dictionary {key = }')
+            print(
+                'Only these keys allowed:' + ''.join(
+                    ['\n    ' + str(a) for a in list(tkeys)]
+                )
+            )
+            import sys; sys.exit(0)
+
+    tkeys.change_dictionary_keys_from_strings_to_enum_members(input_dictionary)
 
     for key, value in input_dictionary.items():
         input_dictionary[key] = value
-    # add verify
+
     return input_dictionary
 
-def load_model_from_JSON(path, dictionary=None): # rename
+
+def load_trunc_from_JSON(path, dictionary=None):
     """
     if kwargs is not provided then returns a dictionary filled with the values stored in the .json file located at path
-
     if kwargs is provided then all values are overwritten (in place) with the values stored in the .json file located at path
     """
 

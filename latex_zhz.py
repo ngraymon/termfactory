@@ -12,7 +12,8 @@ from common_imports import tab, z_summation_indices, z_unlinked_indices, summati
 from latex_full_cc import generate_omega_operator, generate_full_cc_hamiltonian_operator, _omega_joining_with_itself, _h_joining_with_itself, disconnected_namedtuple
 from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
 import reference_latex_headers as headers
-
+from truncations import _verify_fcc_truncations
+from truncation_keys import TruncationsKeys as tkeys
 import log_conf
 
 log = log_conf.get_filebased_logger(f'{__name__}.txt', submodule_name=__name__)
@@ -1719,8 +1720,11 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
 def generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex"):
     """Generates and saves to a file the latex equations for full CC expansion."""
 
-    assert len(truncations) == 4, "truncations argument needs to be tuple of four integers!!"
-    maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
+    # unpack truncations
+    maximum_h_rank = truncations[tkeys.H]
+    maximum_cc_rank = truncations[tkeys.CC]
+    s_taylor_max_order = truncations[tkeys.S]
+    omega_max_order = truncations[tkeys.P]
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
     raw_H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
