@@ -9,6 +9,7 @@ classtest = 'test_code_full_cc'
 from . import context
 import code_full_cc as cfcc
 import latex_full_cc as fcc
+from truncation_keys import TruncationsKeys as tkeys
 from . import large_test_data
 
 # global vars
@@ -637,10 +638,14 @@ class Test_generate_full_cc_python_file_contents:
         """run main gen"""
 
         # input data
-        truncations = [1, 1, 1, 1]
-
+        fcc_trunc = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }
         # run function
-        function_output = cfcc._generate_full_cc_python_file_contents(truncations, only_ground_state=False)
+        function_output = cfcc._generate_full_cc_python_file_contents(fcc_trunc, only_ground_state=False)
 
         # open file
         func_name = "generate_full_cc_python_file_contents_out.py"
@@ -658,8 +663,13 @@ class Test_generate_full_cc_python:
 
         # run function
         output_path = join(tmpdir, "full_cc_equations.py")
-        truncations = [1, 1, 1, 1]
-        cfcc.generate_full_cc_python(truncations, only_ground_state=False, path=output_path)
+        fcc_trunc = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }
+        cfcc.generate_full_cc_python(fcc_trunc, only_ground_state=False, path=output_path)
 
         with open(output_path, 'r') as fp:
             file_data = fp.read()

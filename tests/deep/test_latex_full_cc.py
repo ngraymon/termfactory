@@ -8,6 +8,7 @@ classtest = 'test_latex_full_cc'
 # local imports
 from . import context
 from . import large_test_data
+from truncation_keys import TruncationsKeys as tkeys
 import latex_full_cc as fcc
 import namedtuple_defines as nt
 
@@ -1418,8 +1419,15 @@ class Test_main_fcc_latex_func:
     def test_generate_full_cc_latex(self, tmpdir):
         """runs main function and compares it to a reference file"""
 
+        fcc_trunc = {
+            tkeys.H: 2,
+            tkeys.CC: 2,
+            tkeys.S: 2,
+            tkeys.P: 2
+        }
+
         output_path = join(tmpdir, "latex_excited_Test_main_fcc_latex_func.tex")
-        fcc.generate_full_cc_latex([2, 2, 2, 2], only_ground_state=False, path=output_path)
+        fcc.generate_full_cc_latex(fcc_trunc, only_ground_state=False, path=output_path)
 
         with open(output_path, 'r') as fp:
             file_data = fp.read()
@@ -1432,7 +1440,7 @@ class Test_main_fcc_latex_func:
         assert file_data == reference_file_data, 'Fail'
 
         output_path = join(tmpdir, "latex_ground_Test_main_fcc_latex_func.tex")
-        fcc.generate_full_cc_latex([2, 2, 2, 2], only_ground_state=True, path=output_path)
+        fcc.generate_full_cc_latex(fcc_trunc, only_ground_state=True, path=output_path)
 
         with open(output_path, 'r') as fp:
             file_data = fp.read()

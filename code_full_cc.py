@@ -681,9 +681,11 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     """
     # unpack truncations
     _verify_fcc_truncations(truncations)
+    maximum_h_rank = truncations[tkeys.H]
     maximum_cc_rank = truncations[tkeys.CC]
+    s_taylor_max_order = truncations[tkeys.S]
     omega_max_order = truncations[tkeys.P]
-
+    truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order  # tuple beyond here ask neil about depth
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
 
     # ------------------------------------------------------------------------------------------- #

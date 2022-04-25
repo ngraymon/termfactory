@@ -1529,6 +1529,7 @@ def generate_full_cc_latex(truncations, only_ground_state=False, path="./generat
     maximum_cc_rank = truncations[tkeys.CC]
     s_taylor_max_order = truncations[tkeys.S]
     omega_max_order = truncations[tkeys.P]
+    truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
     H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
