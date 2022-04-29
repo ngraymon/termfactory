@@ -20,63 +20,63 @@ from code_w_equations import generate_w_operator_equations_file
 from code_dt_equations import generate_dt_amplitude_equations_file
 
 
-def generate_latex_files(truncations, only_ground_state=True, remove_f_terms=False, thermal=False, file=None):
-    """ only generates .tex files to be compiled into pdf files """
+# def generate_latex_files(truncations, only_ground_state=True, remove_f_terms=False, thermal=False, file=None):
+#     """ only generates .tex files to be compiled into pdf files """
 
-    if file == 'full cc':
-        if only_ground_state:
-            generate_full_cc_latex(truncations, only_ground_state=True, path="./ground_state_full_cc_equations.tex")
-        else:
-            generate_full_cc_latex(truncations, only_ground_state=False, path="./full_cc_equations.tex")
+#     if file == 'full cc':
+#         if only_ground_state:
+#             generate_full_cc_latex(truncations, only_ground_state=True, path="./ground_state_full_cc_equations.tex")
+#         else:
+#             generate_full_cc_latex(truncations, only_ground_state=False, path="./full_cc_equations.tex")
 
-    # this doesn't care about the truncation numbers
-    elif file == 'w equations':
+#     # this doesn't care about the truncation numbers
+#     elif file == 'w equations':
 
-        """
-        eventually we want to merge both the
-        `ground_state_w_equations_latex`
-        and the
-        `excited_state_w_equations_latex`
-        functions
-        """
+#         """
+#         eventually we want to merge both the
+#         `ground_state_w_equations_latex`
+#         and the
+#         `excited_state_w_equations_latex`
+#         functions
+#         """
 
-        max_w_order = 5  # this is the
+#         max_w_order = 5  # this is the
 
-        if only_ground_state:
-            path = "./ground_state_w_equations.tex"
-            ground_state_w_equations_latex(max_w_order, path)
-        else:
-            path = "./excited_state_w_equations.tex"
-            # assert False, 'the excited_state_w_equations_latex has not been verified'
-            print('WARNING: The excited_state_w_equations_latex has not been verified')
-            excited_state_w_equations_latex(max_w_order, path)
+#         if only_ground_state:
+#             path = "./ground_state_w_equations.tex"
+#             ground_state_w_equations_latex(max_w_order, path)
+#         else:
+#             path = "./excited_state_w_equations.tex"
+#             # assert False, 'the excited_state_w_equations_latex has not been verified'
+#             print('WARNING: The excited_state_w_equations_latex has not been verified')
+#             excited_state_w_equations_latex(max_w_order, path)
 
-    # the `s_taylor_max_order` isn't relevant for this execution pathway
-    elif file == 'z_t ansatz':
-        f_term_string = "_no_f_terms" if remove_f_terms else ''
+#     # the `s_taylor_max_order` isn't relevant for this execution pathway
+#     elif file == 'z_t ansatz':
+#         f_term_string = "_no_f_terms" if remove_f_terms else ''
 
-        if only_ground_state:
-            path = f"./ground_state_z_t_symmetric_equations{f_term_string}.tex"
-        else:
-            path = f"./z_t_symmetric_equations{f_term_string}.tex"
+#         if only_ground_state:
+#             path = f"./ground_state_z_t_symmetric_equations{f_term_string}.tex"
+#         else:
+#             path = f"./z_t_symmetric_equations{f_term_string}.tex"
 
-        generate_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
+#         generate_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
 
-    # the `s_taylor_max_order` isn't relevant for this execution pathway
-    elif file == 'eT_z_t ansatz':
-        f_term_string = "_no_f_terms" if remove_f_terms else ''
+#     # the `s_taylor_max_order` isn't relevant for this execution pathway
+#     elif file == 'eT_z_t ansatz':
+#         f_term_string = "_no_f_terms" if remove_f_terms else ''
 
-        if only_ground_state:
-            path = f"./ground_state_eT_z_t_symmetric_equations{f_term_string}.tex"
-        else:
-            path = f"./eT_z_t_symmetric_equations{f_term_string}.tex"
+#         if only_ground_state:
+#             path = f"./ground_state_eT_z_t_symmetric_equations{f_term_string}.tex"
+#         else:
+#             path = f"./eT_z_t_symmetric_equations{f_term_string}.tex"
 
-        generate_eT_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
+#         generate_eT_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
 
-    else:
-        raise Exception(f"Wrong file type specified in {file=}")
+#     else:
+#         raise Exception(f"Wrong file type specified in {file=}")
 
-    return
+#     return
 
 
 def generate_python_files(truncations, only_ground_state=True, thermal=False):
@@ -95,57 +95,118 @@ def generate_python_files(truncations, only_ground_state=True, thermal=False):
     return
 
 
-def main():
+# def main():
     """ x """
 
-    fcc_trunc = {
-        tkeys.H: 2,
-        tkeys.CC: 6,
-        tkeys.S: 2,
-        tkeys.P: 3
+# fcc_trunc = {
+#     tkeys.H: 2,
+#     tkeys.CC: 6,
+#     tkeys.S: 2,
+#     tkeys.P: 3
+# }
+
+# _verify_fcc_truncations(fcc_trunc)
+
+# # for the 'eT_z_t ansatz' only
+# eT_trunc = {
+#     tkeys.H: 2,
+#     tkeys.CC: 4,
+#     tkeys.T: 1,
+#     tkeys.eT: 4,
+#     tkeys.P: 4
+# }
+
+# _verify_eT_z_t_truncations(eT_trunc)
+def _make_trunc(tuple):
+    # temp, makes a fcc ENUM
+    trunc={
+    tkeys.H: tuple[0],
+    tkeys.CC: tuple[1],
+    tkeys.S: tuple[2],
+    tkeys.P: tuple[3]
     }
+    return trunc
 
-    _verify_fcc_truncations(fcc_trunc)
 
-    # for the 'eT_z_t ansatz' only
-    eT_trunc = {
-        tkeys.H: 2,
-        tkeys.CC: 4,
-        tkeys.T: 1,
-        tkeys.eT: 4,
-        tkeys.P: 4
+
+def _generate_latex(trunc, **kwargs):
+    default_kwargs = {
+        'only_ground_state': True,
+        'remove_f_terms': False,
+        'ansatz': 'full cc'
     }
+    # if empty dict
+    if not bool(kwargs):
+        kwargs = default_kwargs
 
-    _verify_eT_z_t_truncations(eT_trunc)
+    if kwargs['ansatz'] == 'full cc':
+        assert tkeys.key_list_type(trunc)=='fcc', "Truncations must be fcc type"
+        default_kwargs.update(kwargs)
+        default_kwargs.pop('ansatz')
+        default_kwargs.pop('remove_f_terms')
+        _gen_wrapper_full_cc_latex(trunc, **default_kwargs)
 
-    switch = 1
+    elif kwargs['ansatz'] == 'z_t ansat':
+        assert tkeys.key_list_type(trunc)=='fcc', "Truncations must be fcc type"
+        default_kwargs.update(kwargs)
+        default_kwargs.pop('ansatz')
+        _gen_wrapper_z_t_latex(trunc, **default_kwargs)
 
-    if switch == 1:
-        generate_latex_files(
-            eT_trunc,
-            only_ground_state=True,
-            remove_f_terms=False,
-            thermal=False,
-            file='eT_z_t ansatz'
+    elif kwargs['ansatz'] == 'eT_z_t ansatz':
+        assert tkeys.key_list_type(trunc)=='eTz', "Truncations must be eTz type"
+        default_kwargs.update(kwargs)
+        default_kwargs.pop('ansatz')
+        _gen_wrapper_eT_z_t_latex(trunc, **default_kwargs)
+
+    else:
+        string = (
+            f'Invalid {kwargs["ansatz"] = }\n'
+            "Only 'full cc' or 'z_t ansatz' or 'eT_z_t ansatz' are valid values.\n"
         )
-    if switch == 2:
-        generate_latex_files(
-            fcc_trunc,
-            only_ground_state=False,
-            remove_f_terms=False,
-            thermal=False,
-            file='z_t ansatz'
-        )
-    if switch == 3:
-        generate_latex_files(
-            fcc_trunc,
-            only_ground_state=True,
-            remove_f_terms=False,
-            thermal=False,
-            file='full cc'
-        )
-    if switch == 4:
-        generate_eT_zhz_python(eT_trunc, only_ground_state=True)
-        # generate_full_cc_python(truncations, only_ground_state=True)
+        raise Exception(string)
 
-    print("We reached the end of main")
+    # file='eT_z_t ansatz'
+    
+
+def _gen_wrapper_full_cc_latex(truncations, only_ground_state=True):
+
+    if only_ground_state:
+        path = f"./ground_state_full_cc_equations.tex"
+    else:
+        path = f"./full_cc_equations.tex"
+
+    generate_full_cc_latex(truncations, only_ground_state, path)
+
+def _gen_wrapper_z_t_latex(truncations, only_ground_state=True, remove_f_terms=False):
+    # the 's_taylor_max_order' isn't releveant for this execution pathway
+    f_term_string = "_no_f_terms" if remove_f_terms else ''
+
+    if only_ground_state:
+        path = f"./ground_state_z_t_symmetric_equations{f_term_string}.tex"
+    else:
+        path = f"./z_t_symmetric_equations{f_term_string}.tex"
+
+    generate_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
+
+def _gen_wrapper_eT_z_t_latex(truncations, only_ground_state=True, remove_f_terms=False):
+    # the 's_taylor_max_order' isn't releveant for this execution pathway
+    f_term_string = "_no_f_terms" if remove_f_terms else ''
+    if only_ground_state:
+        path = f"./ground_state_eT_z_t_symmetric_equations{f_term_string}.tex"
+    else:
+        path = f"./eT_z_t_symmetric_equations{f_term_string}.tex"
+
+    generate_eT_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
+
+# def funcs():
+#     pass
+#         generate_latex_files(eT_z_t_truncations,only_ground_state=True,remove_f_terms=False,thermal=False,file='eT_z_t ansatz')
+#         generate_latex_files(truncations,only_ground_state=False,remove_f_terms=False,thermal=False,file='z_t ansatz')
+#         generate_latex_files(truncations,only_ground_state=True,remove_f_terms=False,thermal=False,file='full cc')
+
+#         generate_eT_zhz_python(eT_z_t_truncations, only_ground_state=True)
+#         generate_full_cc_python(truncations, only_ground_state=True)
+
+# _generate_latex(eT_trunc, ansatz='eT_z_t ansatz', only_ground_state=True, remove_f_terms=True)
+
+# print("We reached the end of main")

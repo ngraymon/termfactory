@@ -366,7 +366,8 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
         ``
     """
 
-    maximum_h_rank, maximum_cc_rank, _, _ = truncations
+    maximum_h_rank = truncations[tkeys.H]
+    maximum_cc_rank = truncations[tkeys.CC]
 
     if t_term_list == []:
         return ["pass  # no valid terms here", ]
@@ -510,7 +511,10 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
     """Return a string containing python code to be placed into a .py file.
     This does all the work of generating the einsums.
     """
-    maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
+    maximum_h_rank = truncations[tkeys.H]
+    maximum_cc_rank = truncations[tkeys.CC]
+    s_taylor_max_order = truncations[tkeys.S]
+    omega_max_order = truncations[tkeys.P]
 
     H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
     s_taylor_expansion = generate_s_taylor_expansion(maximum_cc_rank, s_taylor_max_order, only_ground_state)
@@ -546,7 +550,10 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
 
 def _generate_full_cc_compute_function(omega_term, truncations, only_ground_state=False, opt_einsum=False):
     """ x """
-    maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
+    maximum_h_rank = truncations[tkeys.H]
+    maximum_cc_rank = truncations[tkeys.CC]
+    s_taylor_max_order = truncations[tkeys.S]
+    omega_max_order = truncations[tkeys.P]
 
     return_string = ""
     specifier_string = f"m{omega_term.m}_n{omega_term.n}"
@@ -685,7 +692,7 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     maximum_cc_rank = truncations[tkeys.CC]
     s_taylor_max_order = truncations[tkeys.S]
     omega_max_order = truncations[tkeys.P]
-    truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order  # tuple beyond here ask neil about depth
+
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
 
     # ------------------------------------------------------------------------------------------- #

@@ -1,9 +1,20 @@
+"""
+We take a hands off approach to verifying the correct structure of the truncations.
+Only checking at a high level in each individual python file.
+For exmaple generate_full_cc_python but non of the otehr functions verify.
+There is no intent of warding off malicious/incompetrent users
+
+"""
+
+
 # system imports
 import os
 import copy
 import json
 import itertools as it
 from collections import namedtuple
+
+from tomli import load
 
 # third party imports
 
@@ -15,11 +26,14 @@ truncation_maximums = {
     'maximum_coupled_cluster_rank': 6,  # maximum_cc_rank
     's_taylor_max_order': 6,
     'omega_max_order': 6,
+    'maximum_T_rank': 1,        
+    'eT_taylor_max_order': 8
+}
+# depricated
+old_trunc_max = {
     'max_residual_order': 8,
-    'max_w_order': 8,           # implement some connection here
+    'max_w_order': 8,           
     'dt_order': 8,
-    'maximum_T_rank': 1,        # ask neil
-    'eT_taylor_max_order': 4    # ask neil
 }
 
 ################################################################################
@@ -144,23 +158,33 @@ def _load_from_JSON(path):
 
     # check that all keys are actually valid
     # before calling `change_dictionary_keys_from_strings_to_enum_members`
-    for key in input_dictionary:
-        try:
-            new_key = tkeys(key)
-            input_dictionary[new_key] = input_dictionary.pop(key)
-        except ValueError:
-            print(f'Invalid dictionary {key = }')
-            print(
-                'Only these keys allowed:' + ''.join(
-                    ['\n    ' + str(a) for a in list(tkeys)]
-                )
-            )
-            import sys; sys.exit(0)
+    # for key in input_dictionary:
+    #     try:
+    #         new_key = tkeys(key)
+    #         input_dictionary[new_key] = input_dictionary.pop(key)
+    #     except ValueError:
+    #         print(f'Invalid dictionary {key = }')
+    #         print(
+    #             'Only these keys allowed:' + ''.join(
+    #                 ['\n    ' + str(a) for a in list(tkeys)]
+    #             )
+    #         )
+    #         import sys; sys.exit(0)
 
     tkeys.change_dictionary_keys_from_strings_to_enum_members(input_dictionary)
 
     for key, value in input_dictionary.items():
         input_dictionary[key] = value
+
+    if tkeys.key_list_type(input_dictionary)=='fcc':
+        _verify_fcc_truncations(input_dictionary)
+
+    elif tkeys.key_list_type(input_dictionary)=='eTz':
+        _verify_eT_z_t_truncations(input_dictionary)
+
+    else:
+        raise Exception("Invalid dictionary") # TODO flush this out 
+        # actually redundant bc tkeys.key_list_type would error first
 
     return input_dictionary
 
@@ -173,12 +197,12 @@ def load_trunc_from_JSON(path, dictionary=None):
 
     # no arrays were provided so return newly created arrays after filling them with the appropriate values
     if not bool(dictionary):
-        new_model_dict = _load_from_JSON(path)
+        new_trunc_dict = _load_from_JSON(path)
 
         # TODO - we might want to make sure that none of the values in the dictionary have all zero values or are None
 
         # verify_model_parameters(new_model_dict)
-        return new_model_dict
+        return new_trunc_dict
 
     # arrays were provided so fill them with the appropriate values
     # else:

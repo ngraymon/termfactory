@@ -52,3 +52,13 @@ class TruncationsKeys(Enum):
         """
         #  maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order = truncations
         return [cls.H, cls.CC, cls.T, cls.eT, cls.P]
+
+    @classmethod
+    def key_list_type(cls, dictionary):
+        """ Returns a short string indicating what type of truncation dictionary etc. """
+        if len(dictionary) == len(cls.fcc_key_list()):
+            return 'fcc'
+        elif len(dictionary) == len(cls.eT_key_list()):
+            return 'eTz'
+        else:
+            raise Exception(f'Invalid dictionary?!\n{dictionary = }\n')
