@@ -14,8 +14,6 @@ import json
 import itertools as it
 from collections import namedtuple
 
-from tomli import load
-
 # third party imports
 
 # local imports
@@ -200,14 +198,14 @@ def _load_from_JSON(path):
     for key, value in input_dictionary.items():
         input_dictionary[key] = value
 
-    if tkeys.key_list_type(input_dictionary)=='fcc':
+    if tkeys.key_list_type(input_dictionary) == 'fcc':
         _verify_fcc_truncations(input_dictionary)
 
-    elif tkeys.key_list_type(input_dictionary)=='eTz':
+    elif tkeys.key_list_type(input_dictionary) == 'eTz':
         _verify_eT_z_t_truncations(input_dictionary)
 
     else:
-        raise Exception("Invalid dictionary") # TODO flush this out
+        raise Exception("Invalid dictionary")  # TODO flush this out
         # actually redundant bc tkeys.key_list_type would error first
 
     return input_dictionary

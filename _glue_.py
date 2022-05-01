@@ -138,23 +138,22 @@ def _generate_latex(trunc, **kwargs):
     # if empty dict
     if not bool(kwargs):
         kwargs = default_kwargs
+    else:
+        default_kwargs.update(kwargs)
 
     if kwargs['ansatz'] == 'full cc':
-        assert tkeys.key_list_type(trunc)=='fcc', "Truncations must be fcc type"
-        default_kwargs.update(kwargs)
+        assert tkeys.key_list_type(trunc) == 'fcc', "Truncations must be fcc type"
         default_kwargs.pop('ansatz')
         default_kwargs.pop('remove_f_terms')
         _gen_wrapper_full_cc_latex(trunc, **default_kwargs)
 
     elif kwargs['ansatz'] == 'z_t ansat':
-        assert tkeys.key_list_type(trunc)=='fcc', "Truncations must be fcc type"
-        default_kwargs.update(kwargs)
+        assert tkeys.key_list_type(trunc) == 'fcc', "Truncations must be fcc type"
         default_kwargs.pop('ansatz')
         _gen_wrapper_z_t_latex(trunc, **default_kwargs)
 
     elif kwargs['ansatz'] == 'eT_z_t ansatz':
-        assert tkeys.key_list_type(trunc)=='eTz', "Truncations must be eTz type"
-        default_kwargs.update(kwargs)
+        assert tkeys.key_list_type(trunc) == 'eTz', "Truncations must be eTz type"
         default_kwargs.pop('ansatz')
         _gen_wrapper_eT_z_t_latex(trunc, **default_kwargs)
 
@@ -166,37 +165,38 @@ def _generate_latex(trunc, **kwargs):
         raise Exception(string)
 
     # file='eT_z_t ansatz'
-    
 
-def _gen_wrapper_full_cc_latex(truncations, only_ground_state=True):
 
-    if only_ground_state:
-        path = f"./ground_state_full_cc_equations.tex"
-    else:
-        path = f"./full_cc_equations.tex"
+def _gen_wrapper_full_cc_latex(truncations, **kwargs):
 
-    generate_full_cc_latex(truncations, only_ground_state, path)
+    f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
+    gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
-def _gen_wrapper_z_t_latex(truncations, only_ground_state=True, remove_f_terms=False):
+    path = f"./{gs_string}full_cc_equations{f_term_string}.tex"
+
+    generate_full_cc_latex(truncations, **kwargs)
+
+
+def _gen_wrapper_z_t_latex(truncations, **kwargs):
     # the 's_taylor_max_order' isn't releveant for this execution pathway
-    f_term_string = "_no_f_terms" if remove_f_terms else ''
 
-    if only_ground_state:
-        path = f"./ground_state_z_t_symmetric_equations{f_term_string}.tex"
-    else:
-        path = f"./z_t_symmetric_equations{f_term_string}.tex"
+    f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
+    gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
-    generate_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
+    path = f"./{gs_string}z_t_symmetric_equations{f_term_string}.tex"
 
-def _gen_wrapper_eT_z_t_latex(truncations, only_ground_state=True, remove_f_terms=False):
+    generate_z_t_symmetric_latex(truncations, **kwargs)
+
+
+def _gen_wrapper_eT_z_t_latex(truncations, **kwargs):
     # the 's_taylor_max_order' isn't releveant for this execution pathway
-    f_term_string = "_no_f_terms" if remove_f_terms else ''
-    if only_ground_state:
-        path = f"./ground_state_eT_z_t_symmetric_equations{f_term_string}.tex"
-    else:
-        path = f"./eT_z_t_symmetric_equations{f_term_string}.tex"
 
-    generate_eT_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
+    f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
+    gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
+
+    path = f"./{gs_string}eT_z_t_symmetric_equations{f_term_string}.tex"
+
+    generate_eT_z_t_symmetric_latex(truncations, **kwargs)
 
 # def funcs():
 #     pass

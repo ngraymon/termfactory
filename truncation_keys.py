@@ -40,6 +40,13 @@ class TruncationsKeys(Enum):
         return
 
     @classmethod
+    def zhz_key_list(cls):
+        """ returns a list of all enum members that are omitted from the .json file if all of their array's values are 0
+        """
+        #  maximum_h_rank, maximum_cc_rank, omega_max_order = truncations
+        return [cls.H, cls.CC, cls.P]
+
+    @classmethod
     def fcc_key_list(cls):
         """ returns a list of all enum members that are omitted from the .json file if all of their array's values are 0
         """
@@ -47,7 +54,7 @@ class TruncationsKeys(Enum):
         return [cls.H, cls.CC, cls.S, cls.P]
 
     @classmethod
-    def eT_key_list(cls):
+    def eTz_key_list(cls):
         """ returns a list of all enum members that are omitted from the .json file if all of their array's values are 0
         """
         #  maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order = truncations
@@ -58,7 +65,9 @@ class TruncationsKeys(Enum):
         """ Returns a short string indicating what type of truncation dictionary etc. """
         if len(dictionary) == len(cls.fcc_key_list()):
             return 'fcc'
-        elif len(dictionary) == len(cls.eT_key_list()):
+        elif len(dictionary) == len(cls.eTz_key_list()):
             return 'eTz'
+        elif len(dictionary) == len(cls.zhz_key_list()):
+            return 'zhz'
         else:
             raise Exception(f'Invalid dictionary?!\n{dictionary = }\n')
