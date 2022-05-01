@@ -26,13 +26,13 @@ truncation_maximums = {
     'maximum_coupled_cluster_rank': 6,  # maximum_cc_rank
     's_taylor_max_order': 6,
     'omega_max_order': 6,
-    'maximum_T_rank': 1,        
+    'maximum_T_rank': 1,
     'eT_taylor_max_order': 8
 }
 # depricated
 old_trunc_max = {
     'max_residual_order': 8,
-    'max_w_order': 8,           
+    'max_w_order': 8,
     'dt_order': 8,
 }
 
@@ -51,6 +51,12 @@ eT_z_t type:
 maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order = truncations
 
 """
+zhz_key_list = [
+    'maximum_hamiltonian_rank',
+    'maximum_coupled_cluster_rank',
+    'omega_max_order'
+]
+
 fcc_key_list = [
     'maximum_hamiltonian_rank',
     'maximum_coupled_cluster_rank',
@@ -89,6 +95,24 @@ def __verify_keys(truncations, key_list):
         assert key in truncations, f"Missing key, {key = :s} not in provided dictionary {truncations=:}"
         assert truncations[key] >= 1, "Truncations need to be positive integers"
         assert truncations[key] <= truncation_maximums[key], f"Key {key} is over the maximum of {truncation_maximums[key]}"
+
+
+def _verify_zhz_truncations(truncations):
+    """ x """
+
+    # verify not empty
+    assert bool(truncations), 'Empty dictionary is not correct'
+
+    for key in truncations.keys():
+        if key not in tkeys:
+            raise Exception(
+                f"{key = } is not one of the valid keys for zhz.\n{tkeys.zhz_key_list()}"
+            )
+
+    # change in the future possibly? if we use enums for all lists?
+    string_copy = truncations.copy()  # this works because all values are immutable
+    tkeys.change_dictionary_keys_from_enum_members_to_strings(string_copy)
+    __verify_keys(string_copy, zhz_key_list)
 
 
 def _verify_fcc_truncations(truncations):
@@ -183,7 +207,7 @@ def _load_from_JSON(path):
         _verify_eT_z_t_truncations(input_dictionary)
 
     else:
-        raise Exception("Invalid dictionary") # TODO flush this out 
+        raise Exception("Invalid dictionary") # TODO flush this out
         # actually redundant bc tkeys.key_list_type would error first
 
     return input_dictionary

@@ -1520,7 +1520,7 @@ def _wrap_align_environment(omega, rank_name, lhs, eqns):
     return string
 
 
-def generate_full_cc_latex(truncations, only_ground_state=False, path="./generated_latex.txt"):
+def generate_full_cc_latex(truncations, only_ground_state=False, remove_f_terms=False, path="./generated_latex.txt"):
     """Generates and saves to a file the latex equations for full CC expansion."""
 
     # unpack truncations
@@ -1551,7 +1551,7 @@ def generate_full_cc_latex(truncations, only_ground_state=False, path="./generat
         lhs_string = _generate_left_hand_side(omega_term)
 
         # where we do all the work of generating the latex
-        equations_string = _generate_cc_latex_equations(omega_term, H, s_taylor_expansion, remove_f_terms=False)
+        equations_string = _generate_cc_latex_equations(omega_term, H, s_taylor_expansion, remove_f_terms)
 
         # header for the sub section
         latex_code += '%\n%\n%\n%\n%\n\n'

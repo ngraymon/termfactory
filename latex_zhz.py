@@ -1723,7 +1723,7 @@ def generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_t
     # unpack truncations
     maximum_h_rank = truncations[tkeys.H]
     maximum_cc_rank = truncations[tkeys.CC]
-    s_taylor_max_order = truncations[tkeys.S]
+    # s_taylor_max_order = truncations[tkeys.S]
     omega_max_order = truncations[tkeys.P]
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
