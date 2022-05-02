@@ -1439,6 +1439,16 @@ class Test_main_fcc_latex_func:
 
         assert file_data == reference_file_data, 'Fail'
 
+        with open(output_path, 'r') as fp:
+            file_data = fp.read()
+
+        func_name = "excited_state_fcc_latex.tex"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            reference_file_data = fp.read()
+
+        assert file_data == reference_file_data, 'Fail'
+
         output_path = join(tmpdir, "latex_ground_Test_main_fcc_latex_func.tex")
         fcc.generate_full_cc_latex(fcc_trunc, only_ground_state=True, remove_f_terms=False, path=output_path)
 
