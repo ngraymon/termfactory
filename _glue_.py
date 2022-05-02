@@ -20,78 +20,10 @@ from code_w_equations import generate_w_operator_equations_file
 from code_dt_equations import generate_dt_amplitude_equations_file
 
 
-# def generate_latex_files(truncations, only_ground_state=True, remove_f_terms=False, thermal=False, file=None):
-#     """ only generates .tex files to be compiled into pdf files """
-
-#     if file == 'full cc':
-#         if only_ground_state:
-#             generate_full_cc_latex(truncations, only_ground_state=True, path="./ground_state_full_cc_equations.tex")
-#         else:
-#             generate_full_cc_latex(truncations, only_ground_state=False, path="./full_cc_equations.tex")
-
-#     # this doesn't care about the truncation numbers
-#     elif file == 'w equations':
-
-#         """
-#         eventually we want to merge both the
-#         `ground_state_w_equations_latex`
-#         and the
-#         `excited_state_w_equations_latex`
-#         functions
-#         """
-
-#         max_w_order = 5  # this is the
-
-#         if only_ground_state:
-#             path = "./ground_state_w_equations.tex"
-#             ground_state_w_equations_latex(max_w_order, path)
-#         else:
-#             path = "./excited_state_w_equations.tex"
-#             # assert False, 'the excited_state_w_equations_latex has not been verified'
-#             print('WARNING: The excited_state_w_equations_latex has not been verified')
-#             excited_state_w_equations_latex(max_w_order, path)
-
-#     # the `s_taylor_max_order` isn't relevant for this execution pathway
-#     elif file == 'z_t ansatz':
-#         f_term_string = "_no_f_terms" if remove_f_terms else ''
-
-#         if only_ground_state:
-#             path = f"./ground_state_z_t_symmetric_equations{f_term_string}.tex"
-#         else:
-#             path = f"./z_t_symmetric_equations{f_term_string}.tex"
-
-#         generate_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
-
-#     # the `s_taylor_max_order` isn't relevant for this execution pathway
-#     elif file == 'eT_z_t ansatz':
-#         f_term_string = "_no_f_terms" if remove_f_terms else ''
-
-#         if only_ground_state:
-#             path = f"./ground_state_eT_z_t_symmetric_equations{f_term_string}.tex"
-#         else:
-#             path = f"./eT_z_t_symmetric_equations{f_term_string}.tex"
-
-#         generate_eT_z_t_symmetric_latex(truncations, only_ground_state, remove_f_terms, path)
-
-#     else:
-#         raise Exception(f"Wrong file type specified in {file=}")
-
-#     return
-
-
 def generate_python_files(truncations, only_ground_state=True, thermal=False):
     """ generates .py files which will be used when calculating desired quantities """
-
     generate_full_cc_python(truncations, only_ground_state)
-
     generate_eT_zhz_python(truncations, only_ground_state)
-
-    # max_residual_order = 6
-    # generate_residual_equations_file(max_residual_order, truncations[0])
-    # max_w_order = 6
-    # generate_w_operator_equations_file(max_w_order)
-    # dt_order = 6
-    # generate_dt_amplitude_equations_file(dt_order)
     return
 
 
@@ -118,6 +50,7 @@ def generate_python_files(truncations, only_ground_state=True, thermal=False):
 
 # _verify_eT_z_t_truncations(eT_trunc)
 
+
 def _generate_latex(trunc, **kwargs):
     default_kwargs = {
         'only_ground_state': True,
@@ -134,7 +67,7 @@ def _generate_latex(trunc, **kwargs):
         assert tkeys.key_list_type(trunc) == 'fcc', "Truncations must be fcc type"
         _gen_wrapper_full_cc_latex(trunc, **default_kwargs)
 
-    elif kwargs['ansatz'] == 'z_t ansat':
+    elif kwargs['ansatz'] == 'z_t ansatz':
         assert tkeys.key_list_type(trunc) == 'zhz', "Truncations must be zhz type"
         _gen_wrapper_z_t_latex(trunc, **default_kwargs)
 
@@ -158,7 +91,7 @@ def _gen_wrapper_full_cc_latex(truncations, **kwargs):
     gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
     path = f"./{gs_string}full_cc_equations{f_term_string}.tex"
-    kwargs['path']=path
+    kwargs['path'] = path
 
     generate_full_cc_latex(truncations, **kwargs)
 
@@ -170,7 +103,7 @@ def _gen_wrapper_z_t_latex(truncations, **kwargs):
     gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
     path = f"./{gs_string}z_t_symmetric_equations{f_term_string}.tex"
-    kwargs['path']=path
+    kwargs['path'] = path
 
     generate_z_t_symmetric_latex(truncations, **kwargs)
 
@@ -182,7 +115,6 @@ def _gen_wrapper_eT_z_t_latex(truncations, **kwargs):
     gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
     path = f"./{gs_string}eT_z_t_symmetric_equations{f_term_string}.tex"
-    kwargs['path']=path
+    kwargs['path'] = path
 
     generate_eT_z_t_symmetric_latex(truncations, **kwargs)
-

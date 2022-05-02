@@ -70,4 +70,5 @@ class TruncationsKeys(Enum):
         elif len(dictionary) == len(cls.zhz_key_list()):
             return 'zhz'
         else:
+            # maybe improved error message in the future?
             raise Exception(f'Invalid dictionary?!\n{dictionary = }\n')

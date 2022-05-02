@@ -30,20 +30,20 @@ def prepare_parsed_arguments():
     parser.add_argument('-s', '--stdlog', action='store_true', help='provide if you want the log to be piped to stdout')
 
     # ----- input args -------
-    parser.add_argument('--t', nargs='+', type=int, help="Provided Truncations, example: -t 2 2 2 2")
+    parser.add_argument('-t', nargs='+', type=int, default=None, help="Provided Truncations, example: -t 2 2 2 2")
     parser.add_argument('-a', '--ansatz', type=str, default='full cc', help="Specify Ansatz")
     parser.add_argument('-es', '--excited_state', type=bool, default=True, help="Only ground state?")
     parser.add_argument('-rf', '--remove_f_terms', type=bool, default=False, help="Choose to remove f terms")
 
     # ----- file save/load args -------
-    parser.add_argument('-p', '--path', type=str, default="../trunc.json", help="filename of load/save file")
+    parser.add_argument('-p', '--path', type=str, default=None, help="filename of load/save file")
 
     # ----- depricated args -------
     # parser.add_argument('-q', '--quiet', action='store_true', help='provide if you want to suppress all output/logging')
     # parser.add_argument('-gs', '--ground_state', type=bool, default=True, help="Only ground state?")
     # parser.add_argument('--root', type=str, default="./", help="Path to the root directory where file load/save will occur") #change to workdir save tex here too?
 
-    return parser.parse_args()
+    return parser, parser.parse_args()
 
 
 def _make_trunc(input_tuple):
@@ -66,10 +66,8 @@ def _make_trunc(input_tuple):
 
 if (__name__ == '__main__'):
     """ x """
-    pargs = prepare_parsed_arguments()
-    # pargs looks like below, this makes if/else logic difficult sometimes:
-    # Namespace(log_path='default_logging_file.txt', stdlog=False, t=None, ansatz='eT_z_t ansatz', excited_state=True, remove_f_terms=False, path='../eT_test.json')
-    print(pargs)
+    parser, pargs = prepare_parsed_arguments()
+
     # process logging parameters
     import log_conf
     if pargs.stdlog is True:
@@ -79,19 +77,24 @@ if (__name__ == '__main__'):
         log = log_conf.get_filebased_logger(logging_output_filename)
 
     # process execution parameters (truncation and/or keyword args / flags)
-    # if not(pargs.t==None) and pargs.path:
-    #     raise Exception('User provided raw truncation values AND path to truncation file. Unclear what they want to do')
+    if not(pargs.t is None) and not(pargs.path is None):
+        raise Exception(
+            'User provided raw truncation values AND path to truncation file. Unclear what they want to do\n'
+            'Only use `-t` or `--path` not both at the same time.\n'
+            f'See the following help message:\n\n{parser.format_help()}'
+        )
 
     # if the user provides a tuple on the command line
-    if not(pargs.t==None):
+    if not(pargs.t is None):
         trunc = _make_trunc(tuple(pargs.t))
-        save_trunc_to_JSON('../truncs.json',trunc)
+        save_trunc_to_JSON('../truncs.json', trunc)
 
     # the user provides a path to a JSON file containing the truncation values
-    elif pargs.path:
+    elif not(pargs.path is None):
         assert os.path.isfile(pargs.path), 'invalid path to JSON file'
         trunc = load_trunc_from_JSON(pargs.path)
         # here you load the file
+
     else:
         raise Exception('user provided no truncation values')
 
@@ -101,13 +104,13 @@ if (__name__ == '__main__'):
         'ansatz': 'eT_z_t ansatz'
     }
 
-    if pargs.excited_state == False:
+    if pargs.excited_state is False:
         default_kwargs['only_ground_state'] = True
 
     if pargs.remove_f_terms:
         default_kwargs['remove_f_terms'] = True
 
-    ansatz_list = ['eT_z_t ansatz', 'z_t ansat', 'full cc']
+    ansatz_list = ['eT_z_t ansatz', 'z_t ansatz', 'full cc']
 
     if pargs.ansatz:
         assert pargs.ansatz in ansatz_list, f'bad ansatz {pargs.ansatz = }\n should be\n{ansatz_list = }'
