@@ -511,10 +511,11 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
     """Return a string containing python code to be placed into a .py file.
     This does all the work of generating the einsums.
     """
+
+    # unpack truncations
     maximum_h_rank = truncations[tkeys.H]
     maximum_cc_rank = truncations[tkeys.CC]
     s_taylor_max_order = truncations[tkeys.S]
-    omega_max_order = truncations[tkeys.P]
 
     H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
     s_taylor_expansion = generate_s_taylor_expansion(maximum_cc_rank, s_taylor_max_order, only_ground_state)
@@ -550,11 +551,6 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
 
 def _generate_full_cc_compute_function(omega_term, truncations, only_ground_state=False, opt_einsum=False):
     """ x """
-    maximum_h_rank = truncations[tkeys.H]
-    maximum_cc_rank = truncations[tkeys.CC]
-    s_taylor_max_order = truncations[tkeys.S]
-    omega_max_order = truncations[tkeys.P]
-
     return_string = ""
     specifier_string = f"m{omega_term.m}_n{omega_term.n}"
     five_tab = "\n" + tab*5
@@ -615,8 +611,7 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
 
 
 def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
-    """Write the wrapper function which `vibronic_hamiltonian.py` calls.
-    """
+    """Write the wrapper function which `vibronic_hamiltonian.py` calls."""
 
     specifier_string = f"m{omega_term.m}_n{omega_term.n}"
 
@@ -686,11 +681,10 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     """Return a string containing the python code to generate w operators up to (and including) `max_order`.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
     """
+
     # unpack truncations
     _verify_fcc_truncations(truncations)
-    maximum_h_rank = truncations[tkeys.H]
     maximum_cc_rank = truncations[tkeys.CC]
-    s_taylor_max_order = truncations[tkeys.S]
     omega_max_order = truncations[tkeys.P]
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
@@ -740,9 +734,11 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
 
 def generate_full_cc_python(truncations, **kwargs):
     """Generates and saves to a file the code to calculate the terms for the full CC approach."""
+
     # unpack kwargs
     only_ground_state = kwargs['only_ground_state']
     path = kwargs['path']
+
     # start with the import statements
     file_data = code_import_statements_module.full_cc_import_statements
 

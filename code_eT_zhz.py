@@ -1384,8 +1384,10 @@ def _generate_eT_zhz_python_file_contents(truncations, **kwargs):
     """ Return a string containing the python code.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
     """
+
     # unpack kwargs
     only_ground_state = kwargs['only_ground_state']
+
     # unpack truncations
     _verify_eT_z_t_truncations(truncations)
     maximum_h_rank = truncations[tkeys.H]
@@ -1450,17 +1452,17 @@ def _generate_eT_zhz_python_file_contents(truncations, **kwargs):
     return string
 
 
-def generate_eT_zhz_python(truncations, only_ground_state=False, path="./eT_zhz_equations.py"):
+def generate_eT_zhz_python(truncations, **kwargs):
     """Generates and saves to a file the code to calculate the terms for the full CC approach."""
 
     # start with the import statements
     file_data = code_import_statements_module.eT_zhz_import_statements
 
     # write the functions to calculate the W operators
-    file_data += _generate_eT_zhz_python_file_contents(truncations, only_ground_state)
+    file_data += _generate_eT_zhz_python_file_contents(truncations, **kwargs)
 
     # save data
-    with open(path, 'w') as fp:
+    with open(kwargs['path'], 'w') as fp:
         fp.write(file_data)
 
     return

@@ -20,35 +20,73 @@ from code_w_equations import generate_w_operator_equations_file
 from code_dt_equations import generate_dt_amplitude_equations_file
 
 
-def generate_python_files(truncations, only_ground_state=True, thermal=False):
-    """ generates .py files which will be used when calculating desired quantities """
-    generate_full_cc_python(truncations, only_ground_state)
-    generate_eT_zhz_python(truncations, only_ground_state)
-    return
+def _generate_python(trunc, **kwargs):
+    default_kwargs = {
+        'only_ground_state': True,
+        'remove_f_terms': False,
+        'ansatz': 'full cc'
+    }
+    # if empty dict
+    if not bool(kwargs):
+        kwargs = default_kwargs
+    else:
+        default_kwargs.update(kwargs)
+
+    if kwargs['ansatz'] == 'full cc':
+        assert tkeys.key_list_type(trunc) == 'fcc', "Truncations must be fcc type"
+        _gen_wrapper_full_cc_python(trunc, **default_kwargs)
+
+    elif kwargs['ansatz'] == 'z_t ansatz':
+        assert tkeys.key_list_type(trunc) == 'zhz', "Truncations must be zhz type"
+        raise Exception('There is no code generator for this ansatz. It was never implemented.')
+
+    elif kwargs['ansatz'] == 'eT_z_t ansatz':
+        assert tkeys.key_list_type(trunc) == 'eTz', "Truncations must be eTz type"
+        _gen_wrapper_eT_zhz_python(trunc, **default_kwargs)
+
+    else:
+        string = (
+            f'Invalid {kwargs["ansatz"] = }\n'
+            "Only 'full cc' or 'eT_z_t ansatz' are valid values.\n"
+        )
+        raise Exception(string)
+
+    # file='eT_z_t ansatz'
 
 
-# def main():
-    """ x """
+def _gen_wrapper_full_cc_python(truncations, **kwargs):
 
-# fcc_trunc = {
-#     tkeys.H: 2,
-#     tkeys.CC: 6,
-#     tkeys.S: 2,
-#     tkeys.P: 3
-# }
+    f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
+    gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
-# _verify_fcc_truncations(fcc_trunc)
+    path = f"./{gs_string}full_cc_equations{f_term_string}.py"
+    kwargs['path'] = path
 
-# # for the 'eT_z_t ansatz' only
-# eT_trunc = {
-#     tkeys.H: 2,
-#     tkeys.CC: 4,
-#     tkeys.T: 1,
-#     tkeys.eT: 4,
-#     tkeys.P: 4
-# }
+    generate_full_cc_python(truncations, **kwargs)
 
-# _verify_eT_z_t_truncations(eT_trunc)
+
+def _gen_wrapper_eT_zhz_python(truncations, **kwargs):
+    # the 's_taylor_max_order' isn't releveant for this execution pathway
+
+    # f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
+    # gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
+    # path = f"./{gs_string}eT_zhz_equations{f_term_string}.py"
+
+    # temporary naming scheme until a better one can be designed
+    # also hot band equation generation has not been implemented anyways
+    path = (
+        "./eT_zhz_eqs"
+        f"_H({truncations[tkeys.H]})"
+        f"_P({truncations[tkeys.P]})"
+        f"_T({truncations[tkeys.T]})"
+        f"_exp({truncations[tkeys.eT]})"
+        f"_Z({truncations[tkeys.CC]})"
+        ".py"
+    )
+
+    kwargs['path'] = path
+
+    generate_eT_zhz_python(truncations, **kwargs)
 
 
 def _generate_latex(trunc, **kwargs):

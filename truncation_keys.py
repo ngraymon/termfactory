@@ -63,12 +63,12 @@ class TruncationsKeys(Enum):
     @classmethod
     def key_list_type(cls, dictionary):
         """ Returns a short string indicating what type of truncation dictionary etc. """
-        if len(dictionary) == len(cls.fcc_key_list()):
+        if len(dictionary) == len(cls.zhz_key_list()):
+            return 'zhz'
+        elif len(dictionary) == len(cls.fcc_key_list()):
             return 'fcc'
         elif len(dictionary) == len(cls.eTz_key_list()):
             return 'eTz'
-        elif len(dictionary) == len(cls.zhz_key_list()):
-            return 'zhz'
         else:
             # maybe improved error message in the future?
             raise Exception(f'Invalid dictionary?!\n{dictionary = }\n')

@@ -31,9 +31,10 @@ def prepare_parsed_arguments():
 
     # ----- input args -------
     parser.add_argument('-t', nargs='+', type=int, default=None, help="Provided Truncations, example: -t 2 2 2 2")
-    parser.add_argument('-a', '--ansatz', type=str, default='full cc', help="Specify Ansatz")
+    parser.add_argument('-a', '--ansatz', type=str, default=None, help="Specify Ansatz")
     parser.add_argument('-es', '--excited_state', type=bool, default=True, help="Only ground state?")
     parser.add_argument('-rf', '--remove_f_terms', type=bool, default=False, help="Choose to remove f terms")
+    parser.add_argument('-c', '--code', action='store_true', help="Generate LaTeX by default; `-c` generates code instead.")
 
     # ----- file save/load args -------
     parser.add_argument('-p', '--path', type=str, default=None, help="filename of load/save file")
@@ -87,6 +88,8 @@ if (__name__ == '__main__'):
     # if the user provides a tuple on the command line
     if not(pargs.t is None):
         trunc = _make_trunc(tuple(pargs.t))
+        # probably need to set some kind of default path?
+        # some better path management here would be good
         save_trunc_to_JSON('../truncs.json', trunc)
 
     # the user provides a path to a JSON file containing the truncation values
@@ -112,14 +115,27 @@ if (__name__ == '__main__'):
 
     ansatz_list = ['eT_z_t ansatz', 'z_t ansatz', 'full cc']
 
+    # user provided ansatz
     if pargs.ansatz:
         assert pargs.ansatz in ansatz_list, f'bad ansatz {pargs.ansatz = }\n should be\n{ansatz_list = }'
         default_kwargs['ansatz'] = pargs.ansatz
 
-    # print(pargs)
+    # infer ansatz from provided tuple and/or input JSON file
+    else:
+        name = tkeys.key_list_type(trunc)
+        if name == 'fcc':
+            default_kwargs['ansatz'] = 'full cc'
+        elif name == 'eTz':
+            default_kwargs['ansatz'] = 'eT_z_t ansatz'
+        else:
+            raise Exception()
+
     # dump_all_stdout_to_devnull()   # calling this removes all prints / logs from stdout
     # log.setLevel('CRITICAL')
 
     import _glue_
     # load test
-    _glue_._generate_latex(trunc, **default_kwargs)
+    if not(pargs.code):
+        _glue_._generate_latex(trunc, **default_kwargs)
+    else:
+        _glue_._generate_python(trunc, **default_kwargs)
