@@ -17,7 +17,8 @@ import code_w_equations as code_weqn
 import code_dt_equations as code_dt_eqn
 
 import namedtuple_defines as nt
-
+from truncation_keys import TruncationsKeys as tkeys
+from driver import _make_trunc
 # third party imports
 import pytest
 
@@ -58,7 +59,12 @@ class TestFullccLatex():
         # check that it fails with the specific assert
         # `Truncations need to be positive integers`
         with pytest.raises(AssertionError,  match="Truncations need to be positive integers") as exc_info:
-            fcc.generate_full_cc_latex((0, 1, 1, 1), only_ground_state=True, path="./ground_state_full_cc_equations.tex")
+            fcc.generate_full_cc_latex(
+                _make_trunc((0, 1, 1, 1)),
+                only_ground_state=True,
+                remove_f_terms=False,
+                path="./ground_state_full_cc_equations.tex"
+            )
             # exception_raised = exc_info.value
 
     @pytest.fixture(scope="class", params=[1, 2, 3])
@@ -79,50 +85,89 @@ class TestFullccLatex():
 
     @pytest.fixture(scope="class")
     def truncations(self, A, B, C, D):
-        return [A, B, C, D]
+        fcc_trunc = {
+            tkeys.H: A,
+            tkeys.CC: B,
+            tkeys.S: C,
+            tkeys.P: D
+        }
+        return fcc_trunc
 
     def test_ground_state(self, truncations):
-        fcc.generate_full_cc_latex(truncations, only_ground_state=True, path="./ground_state_full_cc_equations.tex")
+        fcc.generate_full_cc_latex(
+            truncations,
+            only_ground_state=True,
+            remove_f_terms=False,
+            path="./ground_state_full_cc_equations.tex"
+        )
 
     def test_excited_state(self, truncations):
-        fcc.generate_full_cc_latex(truncations, only_ground_state=False, path="./full_cc_equations.tex")
+        fcc.generate_full_cc_latex(
+            truncations,
+            only_ground_state=False,
+            remove_f_terms=False,
+            path="./full_cc_equations.tex"
+        )
 
-    def test_m_h_omega_cannot_equal_h_n_o(self): #ie h_kwargs['n_o'] != o_kwargs['m_h']
-        #ADD RAISE EXCEPTION, AS NON-BLANKET VERSION WILL BREAK THIS LATER
-        fcc._generate_explicit_connections(nt.general_operator_namedtuple('b', 1, 1, 1), fcc.h_operator_namedtuple(2, 2, 2), {(fcc.connected_namedtuple(0, 1, 0, 0),)})
+    def test_m_h_omega_cannot_equal_h_n_o(self):  # ie h_kwargs['n_o'] != o_kwargs['m_h']
+        # ADD RAISE EXCEPTION, AS NON-BLANKET VERSION WILL BREAK THIS LATER
+        fcc._generate_explicit_connections(
+            nt.general_operator_namedtuple('b', 1, 1, 1),
+            fcc.h_operator_namedtuple(2, 2, 2),
+            {
+                (
+                    fcc.connected_namedtuple(0, 1, 0, 0),
+                )
+            }
+        )
 
     def test_sep_s_terms_by_connection_linear_exception(self):
         with pytest.raises(Exception,  match="Linear terms should always be connected or disconnected") as exc_info:
-            #total_list=[[fcc.connected_omega_operator_namedtuple(1, 0, 0, 0, 0, [0], [0]),fcc.connected_h_operator_namedtuple(0, 0, 0, 0, 0, [0], [0]),fcc.disconnected_namedtuple((0, 0, 0, 0))],[],[]]
-            total_list=[[fcc.connected_omega_operator_namedtuple(1, 1, 1, 1, 1, [1], [1]),
-                        fcc.connected_h_operator_namedtuple(1, 0, 0, 0, 0, [0], [0]),
-                        (fcc.disconnected_namedtuple(1, 1, 2, 1),)],
-                        [fcc.connected_omega_operator_namedtuple(1, 0, 0, 0, 0, [0], [0]),
-                        fcc.connected_h_operator_namedtuple(1, 0, 1, 0, 0, [0], [1]),
-                        (fcc.connected_namedtuple(1, 0, 0, 0),)],
-                        [fcc.connected_omega_operator_namedtuple(0, 0, 0, 0, 0, [0], [0]),
-                        fcc.connected_h_operator_namedtuple(1, 1, 0, 0, 0, [1], [0]),
-                        (fcc.connected_namedtuple(0, 1, 0, 0),)]]
+            T1 = [
+                fcc.connected_omega_operator_namedtuple(1, 1, 1, 1, 1, [1], [1]),
+                fcc.connected_h_operator_namedtuple(1, 0, 0, 0, 0, [0], [0]),
+                (fcc.disconnected_namedtuple(1, 1, 2, 1),)
+            ]
+            T2 = [
+                fcc.connected_omega_operator_namedtuple(1, 0, 0, 0, 0, [0], [0]),
+                fcc.connected_h_operator_namedtuple(1, 0, 1, 0, 0, [0], [1]),
+                (fcc.connected_namedtuple(1, 0, 0, 0),)
+            ]
+            T3 = [
+                fcc.connected_omega_operator_namedtuple(0, 0, 0, 0, 0, [0], [0]),
+                fcc.connected_h_operator_namedtuple(1, 1, 0, 0, 0, [1], [0]),
+                (fcc.connected_namedtuple(0, 1, 0, 0),)
+            ]
+            total_list = [T1, T2, T3]
             fcc._seperate_s_terms_by_connection(total_list)
 
     def test_sep_s_terms_by_connection_tuple_except(self):
         with pytest.raises(Exception,  match=re.escape("term contains something other than connected/disconnected namedtuple??\n")) as exc_info:
-                total_list=[[(1, 1, 1, 1, 1, [1], [1]),
+            L1 = [
+                (1, 1, 1, 1, 1, [1], [1]),
                 (1, 0, 0, 0, 0, [0], [0]),
-                ((1,1, 2, 1),)],
-                [(1, 0, 0, 0, 0, [0], [0]),
+                ((1, 1, 2, 1),)
+            ]
+            L2 = [
+                (1, 0, 0, 0, 0, [0], [0]),
                 (1, 0, 1, 0, 0, [0], [1]),
-                ((1, 0, 0, 0),)],
-                [(0, 0, 0, 0, 0, [0], [0]),
-                (1, 1, 0, 0, 0, [1], [0]),
-                ((0, 1, 0, 0),)]]
-                fcc._seperate_s_terms_by_connection(total_list)
+                ((1, 0, 0, 0),)
+            ]
+            # O^1_0   h^0_0  t_0
+            L3 = [
+                (0, 0, 0, 0, 0, [0], [0]),  # omega term
+                (1, 1, 0, 0, 0, [1], [0]),  # h term
+                ((0, 1, 0, 0),)             # list of t terms
+            ]
+            total_list = [L1, L2, L3]
+
+            fcc._seperate_s_terms_by_connection(total_list)
 
     def test_simplify_full_cc_python_prefactor_numerator_greater_than_denom(self):
         fcc._simplify_full_cc_python_prefactor(['2!', '2!', '2!'], ['2!', '2!'])
 
     def test_simplify_full_cc_python_prefactor_long_list_printer(self):
-        fcc._simplify_full_cc_python_prefactor(['2!', '2!', '2!','2!', '2!', '2!'], ['2!', '2!'])
+        fcc._simplify_full_cc_python_prefactor(['2!', '2!', '2!', '2!', '2!', '2!'], ['2!', '2!'])
 
 class Test_latex_eT_z_t_ansatz():
 
@@ -134,7 +179,7 @@ class Test_latex_eT_z_t_ansatz():
     def B(self, request):
         return request.param
 
-    @pytest.fixture(scope="class", params=[1, 2])
+    @pytest.fixture(scope="class", params=[1])
     def C(self, request):
         return request.param
 
@@ -148,11 +193,23 @@ class Test_latex_eT_z_t_ansatz():
 
     @pytest.fixture(scope="class")
     def truncations(self, A, B, C, D, E):
-        return [A, B, C, D, E]
+        eT_trunc = {
+            tkeys.H: A,
+            tkeys.CC: B,
+            tkeys.T: C,
+            tkeys.eT: D,
+            tkeys.P: E
+        }
+        return eT_trunc
 
     def test_ground_state(self, truncations, tmpdir):
         output_path = join(tmpdir, "latex_ground_Test_latex_eT_z_t_ansatz.tex")
-        eTzhz.generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, path=output_path)
+        eTzhz.generate_eT_z_t_symmetric_latex(
+            truncations,
+            only_ground_state=True,
+            remove_f_terms=False,
+            path=output_path
+        )
 
     # def test_excited_state(self, truncations, tmpdir):
     #     output_path = join(tmpdir, "latex_excited_Test_latex_eT_z_t_ansatz.tex")
@@ -169,10 +226,10 @@ class Test_latex_w_equations:
         weqn.ground_state_w_equations_latex(max_w_order, path="./ground_state_w_equations.tex")
 
     def test_excited_state(self, max_w_order):
-         weqn.excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex")
+        weqn.excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex")
 
     def test_zero_case(self):
-        weqn.generate_t_terms_group(nt.w_namedtuple_latex(0,0))
+        weqn.generate_t_terms_group(nt.w_namedtuple_latex(0, 0))
 
 class Test_latex_zhz():
 
@@ -194,7 +251,13 @@ class Test_latex_zhz():
 
     @pytest.fixture(scope="class")
     def truncations(self, A, B, C, D):
-        return [A, B, C, D]
+        fcc_trunc = {
+            tkeys.H: A,
+            tkeys.CC: B,
+            tkeys.S: C,
+            tkeys.P: D
+        }
+        return fcc_trunc
 
     def test_ground_state(self, truncations, tmpdir):
         output_path = join(tmpdir, "latex_ground_Test_latex_zhz.tex")
@@ -202,10 +265,11 @@ class Test_latex_zhz():
 
     def test_excited_state(self, truncations, tmpdir):
         not_implemented_yet_message = (
-        "The logic for the supporting functions (such as `_filter_out_valid_z_terms` and others)\n"
-        "Has only been verified to work for the LHS * H * Z (`third_z`) case.\n"
-        "The code may produce some output without halting, but the output is meaningless from a theory standpoint.\n"
-        "Do not remove this Exception without consulting with someone else and implementing the requisite functions.")
+            "The logic for the supporting functions (such as `_filter_out_valid_z_terms` and others)\n"
+            "Has only been verified to work for the LHS * H * Z (`third_z`) case.\n"
+            "The code may produce some output without halting, but the output is meaningless from a theory standpoint.\n"
+            "Do not remove this Exception without consulting with someone else and implementing the requisite functions."
+        )
         output_path = join(tmpdir, "latex_excited_Test_latex_zhz.tex")
         with pytest.raises(Exception,  match=re.escape(not_implemented_yet_message)):
             zhz.generate_z_t_symmetric_latex(truncations, only_ground_state=False, remove_f_terms=False, path=output_path)
@@ -232,7 +296,13 @@ class Test_code_fcc():
 
     @pytest.fixture(scope="class")
     def truncations(self, A, B, C, D):
-        return [A, B, C, D]
+        fcc_trunc = {
+            tkeys.H: A,
+            tkeys.CC: B,
+            tkeys.S: C,
+            tkeys.P: D
+        }
+        return fcc_trunc
 
     def test_fcc_code(self, truncations):
         code_fcc.generate_full_cc_python(truncations, only_ground_state=False, path="./full_cc_equations.py")
@@ -247,10 +317,10 @@ class Test_code_residuals():
     def maximum_h_rank(self, request):
         return request.param
 
-    def test_residuals_code(self, max_residual_order,maximum_h_rank):
+    def test_residuals_code(self, max_residual_order, maximum_h_rank):
         code_res.generate_residual_equations_file(max_residual_order, maximum_h_rank, path="./residual_equations.py")
 
-    ## need to resolve key error for certain combinations
+    # need to resolve key error for certain combinations
 
 class Test_code_w_equations():
 

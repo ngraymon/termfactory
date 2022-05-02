@@ -7,6 +7,7 @@ classtest = 'test_latex_eT_zhz'
 # local imports
 from . import context
 from . import large_test_data
+from truncation_keys import TruncationsKeys as tkeys
 import latex_eT_zhz as et
 import latex_full_cc as fcc
 import latex_zhz as zhz
@@ -2220,10 +2221,16 @@ class Test_run_main_et_zhz:
 
         output_path = join(tmpdir, "latex_Test_run_main_et_zhz.tex")
 
-        truncations = [1, 1, 1, 1, 1]
+        eT_trunc = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.T: 1,
+            tkeys.eT: 1,
+            tkeys.P: 1
+        }
 
         et.generate_eT_z_t_symmetric_latex(
-            truncations,
+            eT_trunc,
             only_ground_state=True,
             remove_f_terms=False,
             path=output_path

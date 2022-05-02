@@ -14,7 +14,8 @@ from namedtuple_defines import (
     connected_namedtuple,
     disconnected_namedtuple,
 )
-
+from truncations import _verify_fcc_truncations
+from truncation_keys import TruncationsKeys as tkeys
 # temp
 
 # temp logging fix
@@ -1519,13 +1520,20 @@ def _wrap_align_environment(omega, rank_name, lhs, eqns):
     return string
 
 
-def generate_full_cc_latex(truncations, only_ground_state=False, path="./generated_latex.txt"):
+def generate_full_cc_latex(truncations, **kwargs):
     """Generates and saves to a file the latex equations for full CC expansion."""
 
-    assert len(truncations) == 4, "truncations argument needs to be tuple of four integers!!"
-    for trunc in truncations:
-        assert trunc >= 1, "Truncations need to be positive integers"
-    maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
+    # unpack kwargs
+    only_ground_state = kwargs['only_ground_state']
+    remove_f_terms = kwargs['remove_f_terms']
+    path = kwargs['path']
+
+    # unpack truncations
+    _verify_fcc_truncations(truncations)
+    maximum_h_rank = truncations[tkeys.H]
+    maximum_cc_rank = truncations[tkeys.CC]
+    s_taylor_max_order = truncations[tkeys.S]
+    omega_max_order = truncations[tkeys.P]
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
     H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
@@ -1548,7 +1556,7 @@ def generate_full_cc_latex(truncations, only_ground_state=False, path="./generat
         lhs_string = _generate_left_hand_side(omega_term)
 
         # where we do all the work of generating the latex
-        equations_string = _generate_cc_latex_equations(omega_term, H, s_taylor_expansion, remove_f_terms=False)
+        equations_string = _generate_cc_latex_equations(omega_term, H, s_taylor_expansion, remove_f_terms)
 
         # header for the sub section
         latex_code += '%\n%\n%\n%\n%\n\n'
