@@ -1434,7 +1434,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     # do the terms without T contributions first
     zero_eT_term = eT_taylor_expansion[0]
     log.debug(zero_eT_term, "-"*100, "\n\n")
-    _filter_out_valid_eTz_terms(LHS, zero_eT_term, H, None, Z, valid_zero_list)
+    _filter_out_valid_eTz_terms(LHS, zero_eT_term, H, None, Z, valid_zero_list, 'RHS')
 
     # cheat and remove all t terms
     # for i, _ in enumerate(valid_zero_list):
@@ -1445,7 +1445,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
         log.debug(eT_series_term, "-"*100, "\n\n")
 
         # generate all valid combinations
-        _filter_out_valid_eTz_terms(LHS, eT_series_term, H, None, Z, valid_term_list)
+        _filter_out_valid_eTz_terms(LHS, eT_series_term, H, None, Z, valid_term_list, 'RHS')
 
     if False:  # debug
         old_print_wrapper('\n\n\n')
