@@ -410,62 +410,163 @@ def _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True):
         return ''
 
     # initialize
-    numerator_value = 1
-    denominator_value = 1
-    numerator_list = []
-    denominator_list = []
+    numerator_value, denominator_value = 1, 1
+    numerator_list, denominator_list = [], []
 
     # account for prefactor from Hamiltonian term `h`
     # connections = np.count_nonzero([h.m_t[i]+h.n_t[i] for i in range(len(h.m_t))])
     # connected_ts = [t for t in t_list if t.m_h > 0 or t.n_h > 0]
 
+    extra_flag = True
+
     if h.m > 1:
         denominator_value *= math.factorial(h.m)
         denominator_list.append(f'factorial({h.m})')
+
+        if extra_flag:
+            # to account for the permutations of eT-H internal labels around
+            external_perms = math.comb(h.m, h.m_lhs)
+            if external_perms > 1:
+                numerator_value *= external_perms
+                numerator_list.append(f'({external_perms})')
+
+            # like drawing cards from a deck we remove the permutations of the LHS
+            new_max = h.m - h.m_lhs
+
+            # to account for the permutations of H-Z internal labels around the external labels
+            internal_perms = math.comb(new_max, h.m_r)
+            if internal_perms > 1:
+                numerator_value *= internal_perms
+                numerator_list.append(f'({internal_perms})')
+
+            # to account for the permutations of eT-Z internal labels with themselves
+            # as we should have accounted for all permutations by
+            # moving H-Z and external labels prior
+            # count_t = sum(h.m_t)
+            # if count_t > 1:
+            #     # account for permutations among the internal labels
+            #     numerator_value *= math.factorial(count_t)
+            #     numerator_list.append(f'{count_t}!')
 
     if h.n > 1:
         denominator_value *= math.factorial(h.n)
         denominator_list.append(f'factorial({h.n})')
 
+        if extra_flag:
+            # to account for the permutations of eT-H internal labels around
+            external_perms = math.comb(h.n, h.n_lhs)
+            if external_perms > 1:
+                numerator_value *= external_perms
+                numerator_list.append(f'({external_perms})')
+
+            # like drawing cards from a deck we remove the permutations of the LHS
+            new_max = h.n - h.n_lhs
+
+            # to account for the permutations of H-Z internal labels around the external labels
+            internal_perms = math.comb(new_max, h.n_r)
+            if internal_perms > 1:
+                numerator_value *= internal_perms
+                numerator_list.append(f'({internal_perms})')
+
+            # to account for the permutations of eT-Z internal labels with themselves
+            # as we should have accounted for all permutations by
+            # moving H-Z and external labels prior
+            # count_t = sum(h.n_t)
+            # if count_t > 1:
+            #     # account for permutations among the internal labels
+            #     numerator_value *= math.factorial(count_t)
+            #     numerator_list.append(f'{count_t}!')
+
     if z_right.m > 1:
         denominator_value *= math.factorial(z_right.m)
         denominator_list.append(f'factorial({z_right.m})')
 
-        # to account for the permutations of internal labels
-        # if z_right.m_h > 1:
-        #     numerator_value *= math.factorial(z_right.m_h)
-        #     numerator_list.append(f'{z_right.m_h}!')
+        if extra_flag:
 
-        # to account for the permutations of external labels
-        number = math.comb(z_right.m, z_right.m_lhs)
-        if number > 1:
-            numerator_value *= number
-            numerator_list.append(f'{number}')
+            # to account for the permutations of external labels with other labels on z
+            # (we don't account for permuting with themselves as we will symmetrize them later)
+            external_perms = math.comb(z_right.m, z_right.m_lhs)
+            if external_perms > 1:
+                numerator_value *= external_perms
+                numerator_list.append(f'({external_perms})')
+
+            # like drawing cards from a deck we remove the permutations of the LHS
+            new_max = z_right.m - z_right.m_lhs
+
+            # to account for the permutations of H-Z internal labels with other labels on z
+            internal_perms = math.comb(new_max, z_right.m_h)
+            if internal_perms > 1:
+                numerator_value *= internal_perms
+                numerator_list.append(f'({internal_perms})')
+
+            # like drawing cards from a deck we remove the permutations of the H
+            new_max -= z_right.m_h
+
+            # to account for the permutations of H-Z internal labels with themselves
+            if z_right.m_h > 1:
+                numerator_value *= math.factorial(z_right.m_h)
+                numerator_list.append(f'{z_right.m_h}!')
+
+            # to account for the permutations of eT-Z internal labels with themselves
+            # as we should have accounted for all permutations by
+            # moving H-Z and external labels prior
+            count_t = sum(z_right.m_t)
+            # if count_t > 1:
+            #     # account for permutations among the internal labels
+            #     numerator_value *= math.factorial(count_t)
+            #     numerator_list.append(f'{count_t}!')
+
+            # account for permutations with respect to other labels
+            # (this is just to prove that we already accounted for these permutations)
+            number = math.comb(new_max, count_t)
+            assert number == 1, 'you broke something!!!'
+            if number > 1:  # pragma: no cover
+                numerator_value *= number
+                numerator_list.append(f'{number}')
 
     if z_right.n > 1:
         denominator_value *= math.factorial(z_right.n)
         denominator_list.append(f'factorial({z_right.n})')
 
-        # to account for the permutations of internal labels
-        # if z_right.n_h > 1:
-        #     numerator_value *= math.factorial(z_right.n_h)
-        #     numerator_list.append(f'{z_right.n_h}!')
+        if extra_flag:
+            # to account for the permutations of external labels
+            number = math.comb(z_right.n, z_right.n_lhs)
+            if number > 1:
+                numerator_value *= number
+                numerator_list.append(f'{number}')
 
-        # to account for the permutations of external labels
-        number = math.comb(z_right.n, z_right.n_lhs)
-        if number > 1:
-            numerator_value *= number
-            numerator_list.append(f'{number}')
+            # to account for the permutations of internal labels (with h)
+            if z_right.n_h > 1:
+                numerator_value *= math.factorial(z_right.n_h)
+                numerator_list.append(f'{z_right.n_h}!')
 
-    # account for the number of permutations of all t-amplitudes
-    if len(t_list) > 1:
-        denominator_value *= math.factorial(len(t_list))
-        denominator_list.append(f'factorial({len(t_list)})')
+            # to account for the permutations of internal labels (with t terms)
+            count_t = sum(z_right.n_t)
+            # if count_t > 1:
+            #     # account for permutations among the internal labels
+            #     numerator_value *= math.factorial(count_t)
+            #     numerator_list.append(f'{count_t}!')
+
+            #     # account for permutations with respect to other labels
+            #     number = math.comb(z_right.n, count_t)
+            #     numerator_value *= number
+            #     numerator_list.append(f'{number}')
+
+    # # account for the number of permutations of all t-amplitudes
+    # if len(t_list) > 1:
+    #     denominator_value *= math.factorial(len(t_list))
+    #     denominator_list.append(f'factorial({len(t_list)})')
 
     for t in t_list:
-        if t.rank > 1:
-            denominator_value *= math.factorial(t.rank)
-            denominator_list.append(f'factorial({t.rank})')
+        if t.m > 1:
+            # by definition
+            denominator_value *= math.factorial(t.m)
+            denominator_list.append(f'{t.m}!')
+
+        if t.n > 1:
+            # by definition
+            denominator_value *= math.factorial(t.n)
+            denominator_list.append(f'{t.n}!')
 
     # simplify
     if simplify_flag:
@@ -569,6 +670,133 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
     for i in range(H.maximum_rank+1):
         hamiltonian_rank_list.append(dict([(i, {}) for i in range(master_omega.maximum_rank+1)]))
 
+    def compute_prefactor_adjustment(h, z_right):
+        """ x """
+
+        adjustment = 1
+        bottom = 1
+
+        if h.m > 1:
+            bottom *= math.factorial(h.m)
+
+            # to account for the permutations of eT-H internal labels around
+            external_perms = math.comb(h.m, h.m_lhs)
+            if external_perms > 1:
+                adjustment *= external_perms
+
+            # like drawing cards from a deck we remove the permutations of the LHS
+            new_max = h.m - h.m_lhs
+
+            # to account for the permutations of H-Z internal labels around the external labels
+            internal_perms = math.comb(new_max, h.m_r)
+            if internal_perms > 1:
+                adjustment *= internal_perms
+
+            # to account for the permutations of eT-Z internal labels with themselves
+            # as we should have accounted for all permutations by
+            # moving H-Z and external labels prior
+            count_t = sum(h.m_t)
+            if count_t > 1:
+                # account for permutations among the internal labels
+                adjustment *= math.factorial(count_t)
+
+        if h.n > 1:
+            bottom *= math.factorial(h.n)
+
+            # to account for the permutations of eT-H internal labels around
+            external_perms = math.comb(h.n, h.n_lhs)
+            if external_perms > 1:
+                adjustment *= external_perms
+
+            # like drawing cards from a deck we remove the permutations of the LHS
+            new_max = h.n - h.n_lhs
+
+            # to account for the permutations of H-Z internal labels around the external labels
+            internal_perms = math.comb(new_max, h.n_r)
+            if internal_perms > 1:
+                adjustment *= internal_perms
+
+            # to account for the permutations of eT-Z internal labels with themselves
+            # as we should have accounted for all permutations by
+            # moving H-Z and external labels prior
+            count_t = sum(h.n_t)
+            if count_t > 1:
+                # account for permutations among the internal labels
+                adjustment *= math.factorial(count_t)
+
+        # ---------------------------------------------------------------------------------------------------------
+
+        if z_right.m > 1:
+            bottom *= math.factorial(z_right.m)
+
+            # to account for the permutations of external labels with other labels on z
+            # (we don't account for permuting with themselves as we will symmetrize them later)
+            external_perms = math.comb(z_right.m, z_right.m_lhs)
+            if external_perms > 1:
+                adjustment *= external_perms
+
+            # like drawing cards from a deck we remove the permutations of the LHS
+            new_max = z_right.m - z_right.m_lhs
+
+            # to account for the permutations of H-Z internal labels with other labels on z
+            internal_perms = math.comb(new_max, z_right.m_h)
+            if internal_perms > 1:
+                adjustment *= internal_perms
+
+            # like drawing cards from a deck we remove the permutations of the H
+            new_max -= z_right.m_h
+
+            # to account for the permutations of H-Z internal labels with themselves
+            if z_right.m_h > 1:
+                adjustment *= math.factorial(z_right.m_h)
+
+            # to account for the permutations of eT-Z internal labels with themselves
+            # as we should have accounted for all permutations by
+            # moving H-Z and external labels prior
+            count_t = sum(z_right.m_t)
+            if count_t > 1:
+                # account for permutations among the internal labels
+                adjustment *= math.factorial(count_t)
+
+            # account for permutations with respect to other labels
+            # (this is just to prove that we already accounted for these permutations)
+            number = math.comb(new_max, count_t)
+            assert number == 1, 'you broke something!!!'
+            if number > 1:  # pragma: no cover
+                adjustment *= number
+
+        if z_right.n > 1:
+            bottom *= math.factorial(z_right.n)
+
+            # to account for the permutations of external labels
+            number = math.comb(z_right.n, z_right.n_lhs)
+            if number > 1:
+                adjustment *= number
+
+            # to account for the permutations of internal labels (with h)
+            if z_right.n_h > 1:
+                adjustment *= math.factorial(z_right.n_h)
+
+            # to account for the permutations of internal labels (with t terms)
+            count_t = sum(z_right.n_t)
+            if count_t > 1:
+                # account for permutations among the internal labels
+                adjustment *= math.factorial(count_t)
+
+                # account for permutations with respect to other labels
+                number = math.comb(z_right.n, count_t)
+                adjustment *= number
+
+        print(f"{adjustment = }")
+        print(f"{bottom = }")
+        print(f"{ adjustment / bottom = }")
+
+        return adjustment / bottom
+
+    #
+    #
+    #
+    # the big loop
     for term in t_term_list:
 
         omega, t_list, h, z_pair, not_sure_what_this_one_is_for = term
@@ -622,7 +850,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 # we also do a prefactor adjustment based on the number of terms h and z share because we only want to permute them once
                 # even though `_build_eT_zhz_python_prefactor` counts them 'twice' in a sense
                 assert (h.m_r == z_right.n_h) and (h.n_r == z_right.m_h), f'f{h.m_r = }    {h.n_r}\n{z_right.n_h = }    {z_right.m_h}\n'
-                prefactor_adjustment2 = max(h.m_r + h.n_r, 1)
+                # prefactor_adjustment2 = compute_prefactor_adjustment(h, z_right)
+                # prefactor_adjustment2 = max(h.m_r + h.n_r, 1)
+                prefactor_adjustment = 1
+                prefactor_adjustment2 = 1
 
                 prefactor, n, d = _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True)
 
@@ -651,7 +882,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
         # -----------------------------------------------------------------------------------------
         # build with permutations
-        hamiltonian_rank_list[max(h.m, h.n)].setdefault(max_t_rank, {}).setdefault(prefactor, [])
+        hamiltonian_rank_list[max(h.m, h.n)].setdefault(max_t_rank, {}).setdefault(z_right.rank, {}).setdefault(prefactor, [])
 
         # old_print_wrapper(f"{t_list = }")
         e_a = _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag)
@@ -685,7 +916,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                     string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
 
                     # append that string to the current list
-                    hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
+                    hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
 
                 # this means we need to permute over the remaining (external) indices/labels
                 elif len(remaining_indices) >= 1:
@@ -705,7 +936,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                         string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
 
                         # append that string to the current list
-                        hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
+                        hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
 
                     # wait why are we passing instead of exiting?
                     if len(remaining_indices) >= 2:
@@ -745,7 +976,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                     string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
 
                     # append that string to the current list
-                    hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
+                    hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
 
         # if there is multiple distinguishable t terms
         # eg: t1 * t2 * t1 ---> 2 distinguishable t terms (t1, t2)
@@ -786,7 +1017,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
 
                 # append that string to the current list
-                hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
+                hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
 
             old_print_wrapper(f"{string = }")
 
@@ -800,79 +1031,96 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
     the point is that we expect to have duplicate strings in our hamiltonian_rank_list and we want to remove them
     so we just loop over all elements/sub elements of the list and apply list(set(x)) on that respective element
     """
+    investigate_flag = False
     for i, e in enumerate(hamiltonian_rank_list):
         old_print_wrapper(f"{type(e) = }")
-        for key, t_dict in hamiltonian_rank_list[i].items():
-            old_print_wrapper(f"{key = } {t_dict = }")
-            for pref, e_list in t_dict.items():
+        for key_t, t_dict in hamiltonian_rank_list[i].items():
+            old_print_wrapper(f"{key_t = } {t_dict = }")
+            for key_z, z_dict in t_dict.items():
+                for pref, p_list in z_dict.items():
 
-                unique_list = sorted(list(set(e_list)))
+                    unique_list = sorted(list(set(p_list)))
 
-                # if there are no duplicates then simply move on
-                if len(e_list) == len(unique_list):
-                    pass
+                    # if there are no duplicates then simply move on
+                    if len(p_list) == len(unique_list):
+                        pass
 
-                else:
-                    hamiltonian_rank_list[i][key][pref] = unique_list
+                    else:
+                        # print("Found duplicates")
+                        # import pdb; pdb.set_trace()
+                        hamiltonian_rank_list[i][key_t][key_z][pref] = unique_list
 
-                    # temp_dict = {}
-                    # for s in e_list:
-                    #     temp_dict[s] = 1 + temp_dict.get(s, 0)
-                    # no_dupe_list = [s for s, count in temp_dict.items() if count == 1]
-                    # dupe_dict = dict([(s, count) for s, count in temp_dict.items() if s not in no_dupe_list])
-                    # old_print_wrapper('')
-                    # old_prefactor = pref
-                    # for s, count in dupe_dict.items():
-                    #     old_print_wrapper(f"{old_prefactor = } {count = } \n{s = }\n")
+                        # temp_dict = {}
+                        # for s in e_list:
+                        #     temp_dict[s] = 1 + temp_dict.get(s, 0)
+                        # no_dupe_list = [s for s, count in temp_dict.items() if count == 1]
+                        # dupe_dict = dict([(s, count) for s, count in temp_dict.items() if s not in no_dupe_list])
+                        # old_print_wrapper('')
+                        # old_prefactor = pref
+                        # for s, count in dupe_dict.items():
+                        #     old_print_wrapper(f"{old_prefactor = } {count = } \n{s = }\n")
 
-                    # # import pdb; pdb.set_trace()
+                        # # import pdb; pdb.set_trace()
 
-                    # hamiltonian_rank_list[i][key][pref] = no_dupe_list
+                        # hamiltonian_rank_list[i][key][pref] = no_dupe_list
 
-                # # otherwise we remove the duplicates and re-assign them to different prefactors
-                # else:
-                #     old_print_wrapper(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
-                #     old_print_wrapper(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }")
+                    # # otherwise we remove the duplicates and re-assign them to different prefactors
+                    # else:
+                    #     old_print_wrapper(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
+                    #     old_print_wrapper(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }")
 
-                #     # we first collect all the items into a dictionary
-                #     temp_dict = {}
-                #     for s in e_list:
-                #         temp_dict[s] = 1 + temp_dict.get(s, 0)
+                    #     # we first collect all the items into a dictionary
+                    #     temp_dict = {}
+                    #     for s in e_list:
+                    #         temp_dict[s] = 1 + temp_dict.get(s, 0)
 
-                #     # create a list of the non duplicated summations
-                #     no_dupe_list = [s for s, count in temp_dict.items() if count == 1]
+                    #     # create a list of the non duplicated summations
+                    #     no_dupe_list = [s for s, count in temp_dict.items() if count == 1]
 
-                #     # put the non dupes back with their appropriate prefactor
-                #     hamiltonian_rank_list[i][key][pref] = no_dupe_list.copy()
+                    #     # put the non dupes back with their appropriate prefactor
+                    #     hamiltonian_rank_list[i][key][pref] = no_dupe_list.copy()
 
-                #     # remove the non duplicate items
-                #     dupe_dict = dict([(s, count) for s, count in temp_dict.items() if s not in no_dupe_list])
-                #     for s in no_dupe_list:
-                #         del temp_dict[s]
+                    #     # remove the non duplicate items
+                    #     dupe_dict = dict([(s, count) for s, count in temp_dict.items() if s not in no_dupe_list])
+                    #     for s in no_dupe_list:
+                    #         del temp_dict[s]
 
-                #     # now on a case-by-case basis determine what the new prefactors should be
-                #     for s, count in dupe_dict.items():
-                #         # this is how much we need to change the prefactor by
-                #         adjustment_factor = count
+                    #     # now on a case-by-case basis determine what the new prefactors should be
+                    #     for s, count in dupe_dict.items():
+                    #         # this is how much we need to change the prefactor by
+                    #         adjustment_factor = count
 
-                #         n, rest = pref[1:].split('/')
-                #         d = rest.split(')')[0]
-                #         old_print_wrapper(f"{n = } {d = }")
+                    #         n, rest = pref[1:].split('/')
+                    #         d = rest.split(')')[0]
+                    #         old_print_wrapper(f"{n = } {d = }")
 
-                #         old_print_wrapper(f"{adjustment_factor = } {pref = } {s = }")
-                #         import pdb; pdb.set_trace()
+                    #         old_print_wrapper(f"{adjustment_factor = } {pref = } {s = }")
+                    #         import pdb; pdb.set_trace()
 
-                #     hamiltonian_rank_list[i][key][pref] = list(set(e_list))
+                    #     hamiltonian_rank_list[i][key][pref] = list(set(e_list))
 
-                #     old_print_wrapper(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
-                #     old_print_wrapper(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }\n")
+                    #     old_print_wrapper(f"\n{pref = }       {len(hamiltonian_rank_list[i][key][pref])}")
+                    #     old_print_wrapper(f"{e_list = } \n{hamiltonian_rank_list[i][key][pref] = }\n")
 
+                # print(f"before removal of empty z terms\n{hamiltonian_rank_list[i][key_t][pref]}")
+                # remove all empty prefactors
+                hamiltonian_rank_list[i][key_t][key_z] = dict([
+                    (pref, p_list)
+                    for pref, p_list in sorted(hamiltonian_rank_list[i][key_t][key_z].items())
+                    if p_list != []
+                ])
+                # print(f"after removal of empty z terms\n{hamiltonian_rank_list[i][key_t][pref]}")
+                if investigate_flag: import pdb; pdb.set_trace();
+
+            # print(f"before removal of empty prefactors\n{hamiltonian_rank_list[i][key_t]}")
             # remove all empty prefactors
-            hamiltonian_rank_list[i][key] = dict([
-                (pref, e_list)
-                for pref, e_list in hamiltonian_rank_list[i][key].items()
-                if e_list != []
+            hamiltonian_rank_list[i][key_t] = dict([
+                (key_z, z_dict)
+                for key_z, z_dict in sorted(hamiltonian_rank_list[i][key_t].items())
+                if z_dict != {}
             ])
+            # print(f"after removal of empty prefactors\n{hamiltonian_rank_list[i][key_t]}")
+            if investigate_flag: import pdb; pdb.set_trace();
 
     def compact_display_of_hamiltonian_rank_list(hamiltonian_rank_list):
         """ for debugging purposes """
@@ -896,12 +1144,19 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 else:
                     old_print_wrapper(f"{tab}{key = :<3} {len(t_rank_dict) = }")
 
-                for key2, prefactor_list in t_rank_dict.items():
+                for key2, z_rank_dict in t_rank_dict.items():
 
-                    if prefactor_list == []:
-                        old_print_wrapper(f"{tab}{tab}{key2 = :<20s} {tab}{prefactor_list = }")
+                    if z_rank_dict == {}:
+                        old_print_wrapper(f"{tab}{key2 = :<3} {z_rank_dict = }")
                     else:
-                        old_print_wrapper(f"{tab}{tab}{key2 = :<20s} {tab}{len(prefactor_list) = }")
+                        old_print_wrapper(f"{tab}{key2 = :<3} {len(z_rank_dict) = }")
+
+                    for key3, prefactor_list in z_rank_dict.items():
+
+                        if prefactor_list == []:
+                            old_print_wrapper(f"{tab}{tab}{key3 = :<20s} {tab}{prefactor_list = }")
+                        else:
+                            old_print_wrapper(f"{tab}{tab}{key3 = :<20s} {tab}{len(prefactor_list) = }")
 
     compact_display_of_hamiltonian_rank_list(hamiltonian_rank_list)
 
@@ -953,97 +1208,114 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
             output_list.append(f"{tabber})")
 
         else:
+            # print(f"c {string_list = }")
             output_list.append(f"{tabber}R += {prefactor}{string_list[0]}")
 
         return output_list
 
     h_contribution_list = []
 
-    # h^0_0 with zero order Taylor series contributions
-    for prefactor, string_list in hamiltonian_rank_list[0][0].items():
-        # old_print_wrapper(f"{string_list = }")
-        _handle_multiline_same_prefactor(h_contribution_list, prefactor, string_list, nof_tabs=0)
+    def collect_z_contributions(h_dict, return_array, nof_tabs=0):
+        """ x """
 
-    # old_print_wrapper(f"\n{h_contribution_list = }")
-    # import pdb; pdb.set_trace()
+        # h^0_0 with zero order Taylor series contributions
+        for z_order, z_dict in h_dict.items():
+            if z_dict is {}: continue;  # skip if empty
+
+            # exception case for z_order == 0 which has no if statement
+            tab_adjust = nof_tabs if z_order == 0 else nof_tabs + 1
+
+            temp_z_list = []  # if not empty
+
+            for prefactor, string_list in z_dict.items():
+                if string_list == []: continue;  # skip if empty
+
+                _handle_multiline_same_prefactor(temp_z_list, prefactor, string_list, nof_tabs=tab_adjust)
+
+            # processing
+            if temp_z_list == [] and suppress_empty_if_checks:
+                continue
+
+            if z_order == 0:
+                return_array.extend(temp_z_list)
+
+            else:
+                tabstr = tab*nof_tabs
+                z_header_if_string = f"{tabstr}if {trunc_obj_name}.z_at_least_{hamiltonian_order_tag[z_order]}:"
+
+                if temp_z_list == []:
+                    return_array.append(z_header_if_string)
+                    return_array.append(f"{tabstr}{tab}pass")
+                else:
+                    return_array.append(z_header_if_string)
+                    return_array.extend(temp_z_list)
+
+    collect_z_contributions(hamiltonian_rank_list[0][0], h_contribution_list, nof_tabs=0)
 
     # loop over first order (and higher) Taylor series contributions
-
     for j in range(1, master_omega.maximum_rank+1):
+        if hamiltonian_rank_list[0][j] is {}: continue;  # skip if empty
 
-        # skip if empty
-        if hamiltonian_rank_list[0][j] is {}:
-            continue
-
-        # if not empty
-        temp_list = []
+        temp_list = []  # if not empty
 
         # h^0_0 with first order (and higher) Taylor series contributions
-        for prefactor, string_list in hamiltonian_rank_list[0][j].items():
-            # old_print_wrapper(f"{j = } {string_list = }")
-            _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=1)
+        collect_z_contributions(hamiltonian_rank_list[0][j], temp_list, nof_tabs=1)
 
         # processing
+        if temp_list == [] and suppress_empty_if_checks:
+            continue
+        t_header_if_string = f"if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:"
         if temp_list == []:
-            if suppress_empty_if_checks:
-                pass
-            else:
-                h_contribution_list.append(f"if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:")
-                h_contribution_list.append(f"{tab}pass")
+            h_contribution_list.append(t_header_if_string)
+            h_contribution_list.append(f"{tab}pass")
         else:
-            h_contribution_list.append(f"if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:")
+            h_contribution_list.append(t_header_if_string)
             h_contribution_list.extend(temp_list)
-
-    # old_print_wrapper(f"\n{h_contribution_list = }")
-    # import pdb; pdb.set_trace()
 
     # loop over first order (and higher) h^i_j terms
     for i in range(1, H.maximum_rank+1):
+        if hamiltonian_rank_list[i] is {}: continue;  # skip if empty
 
-        # skip if empty
-        if hamiltonian_rank_list[i] is {}:
-            continue
-
-        # if not empty
-        temp_list = []
+        temp_list = []  # if not empty
 
         # h^i_j with zero order Taylor series contributions
-        for prefactor, string_list in hamiltonian_rank_list[i][0].items():
-            # old_print_wrapper(f"{i = } {string_list = }")
-            _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=1)
+        collect_z_contributions(hamiltonian_rank_list[i][0], temp_list, nof_tabs=1)
+
+        # for prefactor in hamiltonian_rank_list[i][0].keys():
+        #     if hamiltonian_rank_list[i][0][prefactor] is {}: continue;  # skip if empty
+
+        #     for z_order, string_list in hamiltonian_rank_list[i][0][prefactor].items():
+        #         _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=1)
 
         # processing
-        h_contribution_list.append("")
-
         h_header_if_string = f"if {trunc_obj_name}.h_at_least_{hamiltonian_order_tag[i]}:"
+        h_contribution_list.append("")  # spacer
         h_contribution_list.append(h_header_if_string)
+
         if temp_list != []:
             h_contribution_list.extend(temp_list)
 
         # loop over first order (and higher) Taylor series contributions
         for j in range(1, master_omega.maximum_rank+1):
+            if hamiltonian_rank_list[i][j] is {}: continue;  # skip if empty
 
-            # skip if empty
-            if hamiltonian_rank_list[i][j] is {}:
-                continue
-
-            # if not empty
-            temp_list = []
+            temp_list = []  # if not empty
 
             # h^i_j with first order (and higher) Taylor series contributions
-            for prefactor, string_list in hamiltonian_rank_list[i][j].items():
-                # old_print_wrapper(f"{i = } {j = } {string_list = }")
-                _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=2)
+            collect_z_contributions(hamiltonian_rank_list[i][j], temp_list, nof_tabs=2)
 
             # processing
+            if temp_list == [] and suppress_empty_if_checks:
+                continue
+
+            # else
+            t_header_if_string = f"{tab}if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:"
+
             if temp_list == []:
-                if suppress_empty_if_checks:
-                    pass
-                else:
-                    h_contribution_list.append(f"{tab}if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:")
-                    h_contribution_list.append(f"{tab}{tab}pass")
+                h_contribution_list.append(t_header_if_string)
+                h_contribution_list.append(f"{tab}{tab}pass")
             else:
-                h_contribution_list.append(f"{tab}if {trunc_obj_name}.t_{taylor_series_order_tag[j]}:")
+                h_contribution_list.append(t_header_if_string)
                 h_contribution_list.extend(temp_list)
 
             if not suppress_empty_if_checks:
@@ -1213,7 +1485,9 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     # import pdb; pdb.set_trace()
 
     return_list = [
+        # all summation terms where e^T = 1
         _write_third_eTz_einsum_python(LHS.rank, operators, valid_zero_list, b_loop_flag=True),
+        # the rest of the summation terms with e^T != 1
         _write_third_eTz_einsum_python(LHS.rank, operators, valid_term_list, b_loop_flag=True),
     ]
 
@@ -1229,8 +1503,8 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
 
     # pre-defines
     specifier_string = f"m{LHS.m}_n{LHS.n}"
-    four_tab = "\n" + tab*4
-    five_tab = "\n" + tab*5
+    four_tabbed_newline = "\n" + tab*4
+    five_tabbed_newline = "\n" + tab*5
 
     # generate ground state einsums
     ground_state_only_einsums = _generate_eT_zhz_einsums(LHS, operators, only_ground_state=True, opt_einsum=opt_einsum)
@@ -1243,8 +1517,10 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
 
     # the ordering of the functions is linked to the output ordering from `_generate_eT_zhz_einsums`
     # they must be in the same order
-    # for i, term_type in enumerate(['HZ', 'eT_HZ']):  # ['h', 'zh', 'hz', 'zhz']
-    for i, term_type in enumerate(['HZ', ]):  # ['h', 'zh', 'hz', 'zhz']
+    # list = ['HZ', ]
+    debugging_list = ['HZ', 'eT_HZ']
+    # for i, term_type in enumerate(['HZ', ]):  # ['h', 'zh', 'hz', 'zhz']
+    for i, term_type in enumerate(debugging_list):  # ['h', 'zh', 'hz', 'zhz']
 
         # the name of the function
         if not opt_einsum:
@@ -1258,30 +1534,35 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
         else:
             positional_arguments = "R, ansatz, truncation, t_args, h_args, z_args, opt_einsum"
 
-        # the docstring of the function
-        if not opt_einsum:
-            docstring = (
-                f"Calculate the {LHS} {term_type} terms.\n{four_tab}"
-                f"These terms have no vibrational contribution from the e^T operator.\n{four_tab}"
-                "This reduces the number of possible non-zero permutations of creation/annihilation operators."
+        # specify if the function is only calculating (H) * (Z) terms
+        if term_type == 'HZ':
+            vib_docstring = (
+                f"These terms have no vibrational contribution from the e^T operator.{four_tabbed_newline}"
+                f"This reduces the number of possible non-zero permutations of creation/annihilation operators."
             )
-        else:
-            docstring = (
-                f"Optimized calculation of the {LHS} {term_type} terms.\n{four_tab}"
-                f"These terms include the vibrational contributions from the e^T operator.\n{four_tab}"
+        # or (e^T) * (H) * (Z) terms
+        elif term_type == 'eT_HZ':
+            vib_docstring = (
+                f"These terms include the vibrational contributions from the e^T operator.{four_tabbed_newline}"
                 "This increases the number of possible non-zero permutations of creation/annihilation operators."
             )
+
+        # specify the docstring based on whether or not this is an optimized function
+        if not opt_einsum:
+            opt_docstring = f"Calculate the {LHS} {term_type} terms.{four_tabbed_newline}"
+        else:
+            opt_docstring = f"Optimized calculation of the {LHS} {term_type} terms.{four_tabbed_newline}"
 
         # glue all these strings together in a specific manner to form the function definition
         function_string = f'''
             def {func_name}({positional_arguments}):
-                """{docstring}
+                """ {opt_docstring}{vib_docstring}
                 """
 
                 if ansatz.ground_state:
-                    {five_tab.join(ground_state_only_einsums[i])}
+                    {five_tabbed_newline.join(ground_state_only_einsums[i])}
                 else:
-                    {five_tab.join(ground_and_excited_state_einsums[i])}
+                    {five_tabbed_newline.join(ground_and_excited_state_einsums[i])}
 
                 return
         '''
@@ -1345,7 +1626,7 @@ def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
                 {truncation_checks:s}
 
                 # the residual tensor
-                R = np.zeros(shape=({', '.join(['A','A',] + ['N',]*LHS.rank)}), dtype=complex)
+                R = np.zeros(shape=({', '.join(['A',] + ['N',]*LHS.rank)}), dtype=complex)
 
                 # add the terms
                 add_{specifier_string}_HZ_terms(R, {common_positional_arguments})
@@ -1360,7 +1641,7 @@ def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
                 {truncation_checks:s}
 
                 # the residual tensor
-                R = np.zeros(shape=({', '.join(['A','A',] + ['N',]*LHS.rank)}), dtype=complex)
+                R = np.zeros(shape=({', '.join(['A',] + ['N',]*LHS.rank)}), dtype=complex)
 
                 # unpack the optimized paths
                 optimized_HZ_paths, optimized_eT_HZ_paths = opt_paths
