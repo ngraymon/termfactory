@@ -1520,9 +1520,12 @@ def _wrap_align_environment(omega, rank_name, lhs, eqns):
     return string
 
 
-def generate_full_cc_latex(truncations, only_ground_state=False, remove_f_terms=False, path="./generated_latex.txt"):
+def generate_full_cc_latex(truncations, **kwargs):
     """Generates and saves to a file the latex equations for full CC expansion."""
-
+    # unpack kwargs
+    only_ground_state = kwargs['only_ground_state']
+    remove_f_terms = kwargs['remove_f_terms']
+    path = kwargs['path']
     # unpack truncations
     _verify_fcc_truncations(truncations)
     maximum_h_rank = truncations[tkeys.H]

@@ -204,6 +204,9 @@ def _load_from_JSON(path):
     elif tkeys.key_list_type(input_dictionary) == 'eTz':
         _verify_eT_z_t_truncations(input_dictionary)
 
+    elif tkeys.key_list_type(input_dictionary) == 'zhz':
+        _verify_zhz_truncations(input_dictionary)
+
     else:
         raise Exception("Invalid dictionary")  # TODO flush this out
         # actually redundant bc tkeys.key_list_type would error first

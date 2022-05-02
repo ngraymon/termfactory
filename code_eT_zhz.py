@@ -1380,11 +1380,12 @@ def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
     return trimmed_string
 
 
-def _generate_eT_zhz_python_file_contents(truncations, only_ground_state=False):
+def _generate_eT_zhz_python_file_contents(truncations, **kwargs):
     """ Return a string containing the python code.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
     """
-
+    # unpack kwargs
+    only_ground_state = kwargs['only_ground_state']
     # unpack truncations
     _verify_eT_z_t_truncations(truncations)
     maximum_h_rank = truncations[tkeys.H]

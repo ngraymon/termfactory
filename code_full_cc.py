@@ -738,9 +738,11 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     return string
 
 
-def generate_full_cc_python(truncations, only_ground_state=False, path="./full_cc_equations.py"):
+def generate_full_cc_python(truncations, **kwargs):
     """Generates and saves to a file the code to calculate the terms for the full CC approach."""
-
+    # unpack kwargs
+    only_ground_state = kwargs['only_ground_state']
+    path = kwargs['path']
     # start with the import statements
     file_data = code_import_statements_module.full_cc_import_statements
 

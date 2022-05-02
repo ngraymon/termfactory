@@ -1717,9 +1717,12 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
     # return r'%'
 
 
-def generate_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex"):
+def generate_z_t_symmetric_latex(truncations, **kwargs):
     """Generates and saves to a file the latex equations for full CC expansion."""
-
+    # unpack kwargs
+    only_ground_state = kwargs['only_ground_state']
+    remove_f_terms = kwargs['remove_f_terms']
+    path = kwargs['path']
     # unpack truncations
     maximum_h_rank = truncations[tkeys.H]
     maximum_cc_rank = truncations[tkeys.CC]

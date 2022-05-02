@@ -1,4 +1,5 @@
 # system imports
+from ast import Num
 import os
 import sys
 import argparse
@@ -24,30 +25,30 @@ def prepare_parsed_arguments():
 
     # parse the arguments
     parser = argparse.ArgumentParser(description="Code/Latex Generator", formatter_class=formatclass)
-    # ----- a args -------
+    # ----- logging args -------
     parser.add_argument('-l', '--log_path', type=str, default='default_logging_file.txt', metavar='/path/filename.txt', help='path to log file')
     parser.add_argument('-s', '--stdlog', action='store_true', help='provide if you want the log to be piped to stdout')
-    # parser.add_argument('-q', '--quiet', action='store_true', help='provide if you want to suppress all output/logging')
 
-    # ----- a args -------
-    parser.add_argument('-t', type=tuple, default=(1,1,1,1), help="Provided Truncations")
-    parser.add_argument('-a', '--ansatz', type=str, default='full fcc', help="Specify Ansatz")
-    # parser.add_argument('-gs', '--ground_state', type=bool, default=True, help="Only ground state?")
+    # ----- input args -------
+    parser.add_argument('--t', nargs='+', type=int, help="Provided Truncations, example: -t 2 2 2 2")
+    parser.add_argument('-a', '--ansatz', type=str, default='full cc', help="Specify Ansatz")
     parser.add_argument('-es', '--excited_state', type=bool, default=True, help="Only ground state?")
     parser.add_argument('-rf', '--remove_f_terms', type=bool, default=False, help="Choose to remove f terms")
 
-    # ----- a args -------
+    # ----- file save/load args -------
+    parser.add_argument('-p', '--path', type=str, default="../trunc.json", help="filename of load/save file")
+
+    # ----- depricated args -------
+    # parser.add_argument('-q', '--quiet', action='store_true', help='provide if you want to suppress all output/logging')
+    # parser.add_argument('-gs', '--ground_state', type=bool, default=True, help="Only ground state?")
     # parser.add_argument('--root', type=str, default="./", help="Path to the root directory where file load/save will occur") #change to workdir save tex here too?
-    # parser.add_argument('-st', action='store_true', help='enables save file')
-    # parser.add_argument('-lt', action='store_true', help='enables load file')
-    parser.add_argument('-p', '--path', type=str, default="trunc.json", help="filename of load/save file")
 
     return parser.parse_args()
 
 
 def _make_trunc(input_tuple):
     # temp, makes a fcc ENUM
-    name = tkeys.key_list_type(input_tuple)
+    name = tkeys.key_list_type(tuple(input_tuple))
 
     if name == 'fcc':
         key_list = tkeys.fcc_key_list()
@@ -66,7 +67,9 @@ def _make_trunc(input_tuple):
 if (__name__ == '__main__'):
     """ x """
     pargs = prepare_parsed_arguments()
-
+    # pargs looks like below, this makes if/else logic difficult sometimes:
+    # Namespace(log_path='default_logging_file.txt', stdlog=False, t=None, ansatz='eT_z_t ansatz', excited_state=True, remove_f_terms=False, path='../eT_test.json')
+    print(pargs)
     # process logging parameters
     import log_conf
     if pargs.stdlog is True:
@@ -76,12 +79,13 @@ if (__name__ == '__main__'):
         log = log_conf.get_filebased_logger(logging_output_filename)
 
     # process execution parameters (truncation and/or keyword args / flags)
-    if pargs.t and pargs.path:
-        raise Exception('User provided raw truncation values AND path to truncation file. Unclear what they want to do')
+    # if not(pargs.t==None) and pargs.path:
+    #     raise Exception('User provided raw truncation values AND path to truncation file. Unclear what they want to do')
 
     # if the user provides a tuple on the command line
-    elif pargs.t:
+    if not(pargs.t==None):
         trunc = _make_trunc(pargs.t)
+        save_trunc_to_JSON('../truncs.json',trunc)
 
     # the user provides a path to a JSON file containing the truncation values
     elif pargs.path:
@@ -97,19 +101,19 @@ if (__name__ == '__main__'):
         'ansatz': 'eT_z_t ansatz'
     }
 
-    if pargs.es:
-        default_kwargs['only_ground_state'] = False
+    if pargs.excited_state == False:
+        default_kwargs['only_ground_state'] = True
 
-    if pargs.rf:
+    if pargs.remove_f_terms:
         default_kwargs['remove_f_terms'] = True
 
     ansatz_list = ['eT_z_t ansatz', 'z_t ansat', 'full cc']
 
-    if pargs.a:
-        assert pargs.a in ansatz_list, f'bad ansatz {pargs.a = }\n should be\n{ansatz_list = }'
-        default_kwargs['ansatz'] = pargs.a
+    if pargs.ansatz:
+        assert pargs.ansatz in ansatz_list, f'bad ansatz {pargs.ansatz = }\n should be\n{ansatz_list = }'
+        default_kwargs['ansatz'] = pargs.ansatz
 
-    print(pargs)
+    # print(pargs)
     # dump_all_stdout_to_devnull()   # calling this removes all prints / logs from stdout
     # log.setLevel('CRITICAL')
 

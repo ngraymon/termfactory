@@ -117,17 +117,6 @@ def generate_python_files(truncations, only_ground_state=True, thermal=False):
 # }
 
 # _verify_eT_z_t_truncations(eT_trunc)
-def _make_trunc(tuple):
-    # temp, makes a fcc ENUM
-    trunc={
-    tkeys.H: tuple[0],
-    tkeys.CC: tuple[1],
-    tkeys.S: tuple[2],
-    tkeys.P: tuple[3]
-    }
-    return trunc
-
-
 
 def _generate_latex(trunc, **kwargs):
     default_kwargs = {
@@ -143,18 +132,14 @@ def _generate_latex(trunc, **kwargs):
 
     if kwargs['ansatz'] == 'full cc':
         assert tkeys.key_list_type(trunc) == 'fcc', "Truncations must be fcc type"
-        default_kwargs.pop('ansatz')
-        default_kwargs.pop('remove_f_terms')
         _gen_wrapper_full_cc_latex(trunc, **default_kwargs)
 
     elif kwargs['ansatz'] == 'z_t ansat':
-        assert tkeys.key_list_type(trunc) == 'fcc', "Truncations must be fcc type"
-        default_kwargs.pop('ansatz')
+        assert tkeys.key_list_type(trunc) == 'zhz', "Truncations must be zhz type"
         _gen_wrapper_z_t_latex(trunc, **default_kwargs)
 
     elif kwargs['ansatz'] == 'eT_z_t ansatz':
         assert tkeys.key_list_type(trunc) == 'eTz', "Truncations must be eTz type"
-        default_kwargs.pop('ansatz')
         _gen_wrapper_eT_z_t_latex(trunc, **default_kwargs)
 
     else:
@@ -173,6 +158,7 @@ def _gen_wrapper_full_cc_latex(truncations, **kwargs):
     gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
     path = f"./{gs_string}full_cc_equations{f_term_string}.tex"
+    kwargs['path']=path
 
     generate_full_cc_latex(truncations, **kwargs)
 
@@ -184,6 +170,7 @@ def _gen_wrapper_z_t_latex(truncations, **kwargs):
     gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
     path = f"./{gs_string}z_t_symmetric_equations{f_term_string}.tex"
+    kwargs['path']=path
 
     generate_z_t_symmetric_latex(truncations, **kwargs)
 
@@ -195,18 +182,7 @@ def _gen_wrapper_eT_z_t_latex(truncations, **kwargs):
     gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
     path = f"./{gs_string}eT_z_t_symmetric_equations{f_term_string}.tex"
+    kwargs['path']=path
 
     generate_eT_z_t_symmetric_latex(truncations, **kwargs)
 
-# def funcs():
-#     pass
-#         generate_latex_files(eT_z_t_truncations,only_ground_state=True,remove_f_terms=False,thermal=False,file='eT_z_t ansatz')
-#         generate_latex_files(truncations,only_ground_state=False,remove_f_terms=False,thermal=False,file='z_t ansatz')
-#         generate_latex_files(truncations,only_ground_state=True,remove_f_terms=False,thermal=False,file='full cc')
-
-#         generate_eT_zhz_python(eT_z_t_truncations, only_ground_state=True)
-#         generate_full_cc_python(truncations, only_ground_state=True)
-
-# _generate_latex(eT_trunc, ansatz='eT_z_t ansatz', only_ground_state=True, remove_f_terms=True)
-
-# print("We reached the end of main")

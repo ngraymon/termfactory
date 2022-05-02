@@ -2031,9 +2031,12 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
     return return_string.replace("^{}", "").replace("_{}", "")
 
 
-def generate_eT_z_t_symmetric_latex(truncations, only_ground_state=True, remove_f_terms=False, path="./generated_latex.tex"):
+def generate_eT_z_t_symmetric_latex(truncations, **kwargs):
     """Generates and saves to a file the latex equations for full CC expansion."""
-
+    # unpack kwargs
+    only_ground_state = kwargs['only_ground_state']
+    remove_f_terms = kwargs['remove_f_terms']
+    path = kwargs['path']
     # unpack truncations
     _verify_eT_z_t_truncations(truncations)
     maximum_h_rank = truncations[tkeys.H]
