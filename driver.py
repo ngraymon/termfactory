@@ -48,7 +48,7 @@ def prepare_parsed_arguments():
 
 def _make_trunc(input_tuple):
     # temp, makes a fcc ENUM
-    name = tkeys.key_list_type(tuple(input_tuple))
+    name = tkeys.key_list_type(input_tuple)
 
     if name == 'fcc':
         key_list = tkeys.fcc_key_list()
@@ -84,7 +84,7 @@ if (__name__ == '__main__'):
 
     # if the user provides a tuple on the command line
     if not(pargs.t==None):
-        trunc = _make_trunc(pargs.t)
+        trunc = _make_trunc(tuple(pargs.t))
         save_trunc_to_JSON('../truncs.json',trunc)
 
     # the user provides a path to a JSON file containing the truncation values
