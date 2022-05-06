@@ -646,7 +646,7 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
     return valid_upper_perm_combinations, valid_lower_perm_combinations
 
 
-def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, found_it_bool=False):
+def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, lhs_rhs, found_it_bool=False):
     """ Generate all possible permutations of matching with LHS, and h for e^T and z_terms """
 
     annotated_permutations = []  # store output here
@@ -1919,7 +1919,7 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, lhs_rhs
         log_conf.setLevelDebug(log)
         # we need to generate all possible combinations of
         # each z with the LHS, eT, h operators and the other z
-        eT_connection_permutations = _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations)
+        eT_connection_permutations = _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, lhs_rhs)
 
         if zhz_debug or True:  # debug prints
             for p in eT_connection_permutations:

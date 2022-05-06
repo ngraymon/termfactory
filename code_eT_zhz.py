@@ -29,7 +29,7 @@ from truncation_keys import TruncationsKeys as tkeys
 # temp logging fix
 import log_conf
 
-log = log_conf.get_filebased_logger('outdput.txt', submodule_name=__name__)
+log = log_conf.get_filebased_logger('output.txt', submodule_name=__name__)
 header_log = log_conf.HeaderAdapter(log, {})
 subheader_log = log_conf.SubHeaderAdapter(log, {})
 
@@ -647,7 +647,7 @@ def _multiple_perms_logic(term, print_indist_perms: bool = False):
     raise Exception("Shouldn't get here")
 
 
-def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name='truncation', b_loop_flag=False, suppress_empty_if_checks=True):
+def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_obj_name='truncation', b_loop_flag=False, suppress_empty_if_checks=True):
     """ Still being written
 
     the flag `suppress_empty_if_checks` is to toggle the "suppression" of code such as
@@ -948,10 +948,16 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
 
                 # create the string of (t terms/t_operands) that we are tracing over
                 # since they are all identical we don't care about ordering
-                t_operands = ', '.join([
-                    f"t_args[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]"
-                    for t in t_list
-                ])
+                if lhs_rhs == 'RHS':
+                    t_operands = ', '.join([
+                        f"t_args[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]"
+                        for t in t_list
+                    ])
+                elif lhs_rhs == 'LHS'
+                    s_operands = ', '.join([
+                        f"s_args[({s.m_lhs + s.m_h + s.m_r}, {s.n_lhs + s.n_h + s.n_r})]"
+                        for s in t_list  # correct / continue
+                    ])
 
                 for perm in permutations:
                     old_print_wrapper(f"{permutations = } {perm = }")
@@ -996,10 +1002,16 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, trunc_obj_name=
                 re_ordered_t_list = [t_list[i] for i in perm]
 
                 # now we can just easily iterate over the re-ordered list
-                t_operands = ', '.join([
-                    f"t_args[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]"
-                    for t in re_ordered_t_list
-                ])
+                if lhs_rhs == 'RHS':
+                    t_operands = ', '.join([
+                        f"t_args[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]"
+                        for t in re_ordered_t_list
+                    ])
+                elif lhs_rhs == 'LHS':
+                    s_operands = ', '.join([
+                        f"t_args[({s.m_lhs + s.m_h + s.m_r}, {s.n_lhs + s.n_h + s.n_r})]"
+                        for s in re_ordered_t_list  # not actually correct
+                    ])
 
                 # create the t term indices
                 combined_electronic_vibrational = [f"{e_a[i]}{v_a[p]}" for i, p in enumerate(perm)]
@@ -1400,7 +1412,7 @@ def remove_all_excited_state_t_terms(eT_taylor_expansion):
     return filtered_eT_taylor_expansion
 
 
-def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_terms=False, opt_einsum=False):
+def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, remove_f_terms=False, opt_einsum=False):
     """Return a string containing python code to be placed into a .py file.
     This does all the work of generating the einsums.
 
@@ -1434,7 +1446,7 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
     # do the terms without T contributions first
     zero_eT_term = eT_taylor_expansion[0]
     log.debug(zero_eT_term, "-"*100, "\n\n")
-    _filter_out_valid_eTz_terms(LHS, zero_eT_term, H, None, Z, valid_zero_list, 'RHS')
+    _filter_out_valid_eTz_terms(LHS, zero_eT_term, H, None, Z, valid_zero_list, lhs_rhs)
 
     # cheat and remove all t terms
     # for i, _ in enumerate(valid_zero_list):
@@ -1486,15 +1498,15 @@ def _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False, remove_f_t
 
     return_list = [
         # all summation terms where e^T = 1
-        _write_third_eTz_einsum_python(LHS.rank, operators, valid_zero_list, b_loop_flag=True),
+        _write_third_eTz_einsum_python(LHS.rank, operators, valid_zero_list, lhs_rhs, b_loop_flag=True),
         # the rest of the summation terms with e^T != 1
-        _write_third_eTz_einsum_python(LHS.rank, operators, valid_term_list, b_loop_flag=True),
+        _write_third_eTz_einsum_python(LHS.rank, operators, valid_term_list, lhs_rhs, b_loop_flag=True),
     ]
 
     return return_list
 
 
-def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, opt_einsum=False):
+def _construct_eT_zhz_compute_function(LHS, operators, lhs_rhs, only_ground_state=False, opt_einsum=False):
     """ x """
 
     # temp
@@ -1507,11 +1519,11 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
     five_tabbed_newline = "\n" + tab*5
 
     # generate ground state einsums
-    ground_state_only_einsums = _generate_eT_zhz_einsums(LHS, operators, only_ground_state=True, opt_einsum=opt_einsum)
+    ground_state_only_einsums = _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=True, opt_einsum=opt_einsum)
 
     # generate ground + excited state einsums
     if not only_ground_state:
-        ground_and_excited_state_einsums = _generate_eT_zhz_einsums(LHS, operators, only_ground_state=False,  opt_einsum=opt_einsum)
+        ground_and_excited_state_einsums = _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False,  opt_einsum=opt_einsum)
     else:
         ground_and_excited_state_einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*2
 
@@ -1529,10 +1541,16 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
             func_name = f"add_{specifier_string}_{term_type}_terms_optimized"
 
         # the positional arguments it takes (no keyword arguments are used currently)
-        if not opt_einsum:
-            positional_arguments = "R, ansatz, truncation, t_args, h_args, z_args"
-        else:
-            positional_arguments = "R, ansatz, truncation, t_args, h_args, z_args, opt_einsum"
+        if lhs_rhs == 'RHS':
+            if not opt_einsum:
+                positional_arguments = "R, ansatz, truncation, t_args, h_args, z_args"
+            else:
+                positional_arguments = "R, ansatz, truncation, t_args, h_args, z_args, opt_einsum"
+        elif lhs_rhs == 'LHS':
+            if not opt_einsum:
+                positional_arguments = "R, ansatz, truncation, s_args, dt_args, dz_args"
+            else:
+                positional_arguments = "R, ansatz, truncation, s_args, dt_args, dz_args, opt_einsum"
 
         # specify if the function is only calculating (H) * (Z) terms
         if term_type == 'HZ':
@@ -1581,7 +1599,7 @@ def _construct_eT_zhz_compute_function(LHS, operators, only_ground_state=False, 
     return return_string
 
 
-def _wrap_eT_zhz_generation(master_omega, operators, only_ground_state=False, opt_einsum=False):
+def _wrap_eT_zhz_generation(master_omega, operators, lhs_rhs, only_ground_state=False, opt_einsum=False):
     """ x """
     return_string = ""
 
@@ -1595,12 +1613,12 @@ def _wrap_eT_zhz_generation(master_omega, operators, only_ground_state=False, op
         return_string += '\n' + named_line(f"{LHS} TERMS", s2//2)
 
         # functions
-        return_string += _construct_eT_zhz_compute_function(LHS, operators, only_ground_state, opt_einsum)
+        return_string += _construct_eT_zhz_compute_function(LHS, operators, lhs_rhs, only_ground_state, opt_einsum)
 
     return return_string
 
 
-def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
+def _write_master_eT_zhz_compute_function(LHS, lhs_rhs, opt_einsum=False):
     """ Write the wrapper function which `vibronic_hamiltonian.py` calls. """
 
     specifier_string = f"m{LHS.m}_n{LHS.n}"
@@ -1617,7 +1635,10 @@ def _write_master_eT_zhz_compute_function(LHS, opt_einsum=False):
     truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_sextuples()' if ((LHS.m >= 6) or (LHS.n >= 6)) else ''
 
     # shared by all functions
-    common_positional_arguments = 'ansatz, truncation, t_args, h_args, z_args'
+    if lhs_rhs == 'RHS':
+        common_positional_arguments = 'ansatz, truncation, t_args, h_args, z_args'
+    elif lhs_rhs == 'LHS':
+        common_positional_arguments = 'ansatz, truncation, s_args, dt_args, dz_args'
 
     if not opt_einsum:
         func_string = f'''
@@ -1668,7 +1689,7 @@ def _generate_eT_zhz_python_file_contents(truncations, **kwargs):
 
     # unpack kwargs
     only_ground_state = kwargs['only_ground_state']
-
+    lhs_rhs = kwargs['lhs_rhs']
     # unpack truncations
     _verify_eT_z_t_truncations(truncations)
     maximum_h_rank = truncations[tkeys.H]
@@ -1694,13 +1715,13 @@ def _generate_eT_zhz_python_file_contents(truncations, **kwargs):
     # header
     string += '\n' + named_line("INDIVIDUAL TERMS", l2) + '\n\n'
     # the actual code
-    string += _wrap_eT_zhz_generation(master_omega, operators, only_ground_state)
+    string += _wrap_eT_zhz_generation(master_omega, operators, lhs_rhs, only_ground_state)
     # ----------------------------------------------------------------------- #
     # header
     string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
     # the wrapper functions that call the code made inside `_wrap_eT_zhz_generation`
     string += "".join([
-        _write_master_eT_zhz_compute_function(LHS)
+        _write_master_eT_zhz_compute_function(LHS, lhs_rhs)
         for LHS in master_omega.operator_list
     ])
 
@@ -1712,13 +1733,13 @@ def _generate_eT_zhz_python_file_contents(truncations, **kwargs):
     # header
     string += '\n' + named_line("INDIVIDUAL TERMS", l2) + '\n\n'
     # the actual code
-    string += _wrap_eT_zhz_generation(master_omega, operators, only_ground_state, opt_einsum=True)
+    string += _wrap_eT_zhz_generation(master_omega, operators, lhs_rhs, only_ground_state, opt_einsum=True)
     # ----------------------------------------------------------------------- #
     # header
     string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
     # the wrapper functions that call the code made inside `_wrap_eT_zhz_generation`
     string += "".join([
-        _write_master_eT_zhz_compute_function(LHS, opt_einsum=True)
+        _write_master_eT_zhz_compute_function(LHS, lhs_rhs,opt_einsum=True)
         for LHS in master_omega.operator_list
     ])
 
