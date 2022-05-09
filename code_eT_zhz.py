@@ -802,11 +802,26 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         omega, t_list, h, z_pair, not_sure_what_this_one_is_for = term
 
         # define the indexing of the `h_args` dictionary
-        h_operand = f"h_args[({h.m}, {h.n})]"
+        if lhs_rhs == 'RHS':
+            h_operand = f"h_args[({h.m}, {h.n})]"
+        elif lhs_rhs == 'LHS':
+            if h.m == 0 and h.n == 0:
+                h_operand = None
+            else:
+                h_operand = f"dT[({h.m}, {h.n})]"
 
         # define the indexing of the `z_args` dictionary
-        z_left, z_right = z_pair
-        z_operand = f"z_args[({z_right.m}, {z_right.n})]"
+        if lhs_rhs == 'RHS':
+            z_left, z_right = z_pair
+            z_operand = f"z_args[({z_right.m}, {z_right.n})]"
+        elif lhs_rhs == 'LHS':
+            # TODO
+            # dz_args is a list of dz_# where if Z is max order 3 then the length is 3 - the value of the current function call. 
+            # So compute_z_0_residual(Z, t_conj, dT, dz_args) that dz_args would be length 3 (3-0) and include dz_3, dz_2, dz_1
+
+            # z_operand = f"dz_args[({dz3}, {dz2}, {dz1})]"
+            z_left, z_right = z_pair
+            z_operand = f"dz_args[({z_right.m}, {z_right.n})]"
 
         # the t counts as identity
         if t_list == []:
@@ -913,7 +928,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
                     string = ", ".join(combined_electronic_vibrational)
 
                     # stick the indices into the full einsum function call
-                    string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
+                    if h_operand is None:
+                        string = f"np.einsum('{string} -> a{remaining_indices}', {z_operand})"
+                    else:
+                        string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
 
                     # append that string to the current list
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
@@ -933,8 +951,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
                         string = ", ".join(combined_electronic_vibrational)
 
                         # stick the indices into the full einsum function call
-                        string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
-
+                        if h_operand is None:
+                            string = f"np.einsum('{string} -> a{remaining_indices}', {z_operand})"
+                        else:
+                            string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
                         # append that string to the current list
                         hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
 
@@ -949,16 +969,13 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
                 # create the string of (t terms/t_operands) that we are tracing over
                 # since they are all identical we don't care about ordering
                 if lhs_rhs == 'RHS':
-                    t_operands = ', '.join([
-                        f"t_args[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]"
-                        for t in t_list
-                    ])
-                elif lhs_rhs == 'LHS'
-                    s_operands = ', '.join([
-                        f"s_args[({s.m_lhs + s.m_h + s.m_r}, {s.n_lhs + s.n_h + s.n_r})]"
-                        for s in t_list  # correct / continue
-                    ])
-
+                    arg_string_name = 't_args'
+                elif lhs_rhs == 'LHS':
+                    arg_string_name = 't_conj'
+                t_operands = ', '.join([
+                    f"{arg_string_name}[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]"
+                    for t in t_list
+                ])
                 for perm in permutations:
                     old_print_wrapper(f"{permutations = } {perm = }")
                     old_print_wrapper(t_list, unique_dict)
@@ -979,7 +996,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
                     string = ", ".join(combined_electronic_vibrational)
 
                     # stick the indices into the full einsum function call
-                    string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
+                    if h_operand is None:
+                        string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {z_operand})"
+                    else:
+                        string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
 
                     # append that string to the current list
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
@@ -1003,15 +1023,13 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
                 # now we can just easily iterate over the re-ordered list
                 if lhs_rhs == 'RHS':
-                    t_operands = ', '.join([
-                        f"t_args[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]"
-                        for t in re_ordered_t_list
-                    ])
+                    arg_string_name = 't_args'
                 elif lhs_rhs == 'LHS':
-                    s_operands = ', '.join([
-                        f"t_args[({s.m_lhs + s.m_h + s.m_r}, {s.n_lhs + s.n_h + s.n_r})]"
-                        for s in re_ordered_t_list  # not actually correct
-                    ])
+                    arg_string_name = 't_conj'
+                t_operands = ', '.join([
+                    f"{arg_string_name}[({t.m_lhs + t.m_h + t.m_r}, {t.n_lhs + t.n_h + t.n_r})]"
+                    for t in re_ordered_t_list
+                ])
 
                 # create the t term indices
                 combined_electronic_vibrational = [f"{e_a[i]}{v_a[p]}" for i, p in enumerate(perm)]
@@ -1026,7 +1044,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
                 string = ", ".join(combined_electronic_vibrational)
 
                 # stick the indices into the full einsum function call
-                string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
+                if h_operand is None:
+                    string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {z_operand})"
+                else:
+                    string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
 
                 # append that string to the current list
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
@@ -1186,7 +1207,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
     # -----------------------------------------------------------------------------------------
 
-    def _handle_multiline_same_prefactor(output_list, prefactor, string_list, nof_tabs=0):
+    def _handle_multiline_same_prefactor(output_list, prefactor, string_list, lhs_rhs, nof_tabs=0):
         """ Specific formatting of multiple terms that share the same prefactor
 
         When we have multiple einsum terms which share the same prefactor
@@ -1207,7 +1228,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         if len(string_list) > 1:
 
             # header
-            output_list.append(f"{tabber}R += {prefactor}(")
+            if lhs_rhs == 'RHS':
+                output_list.append(f"{tabber}R += {prefactor}(")
+            elif lhs_rhs == 'LHS':
+                output_list.append(f"{tabber}Z += {prefactor}(")
 
             # add each line
             for string in string_list:
@@ -1221,7 +1245,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
         else:
             # print(f"c {string_list = }")
-            output_list.append(f"{tabber}R += {prefactor}{string_list[0]}")
+            if lhs_rhs == 'RHS':
+                output_list.append(f"{tabber}R += {prefactor}{string_list[0]}")
+            elif lhs_rhs == 'LHS':
+                output_list.append(f"{tabber}Z += {prefactor}{string_list[0]}")
 
         return output_list
 
@@ -1242,7 +1269,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
             for prefactor, string_list in z_dict.items():
                 if string_list == []: continue;  # skip if empty
 
-                _handle_multiline_same_prefactor(temp_z_list, prefactor, string_list, nof_tabs=tab_adjust)
+                _handle_multiline_same_prefactor(temp_z_list, prefactor, string_list, lhs_rhs, nof_tabs=tab_adjust)
 
             # processing
             if temp_z_list == [] and suppress_empty_if_checks:
@@ -1535,10 +1562,16 @@ def _construct_eT_zhz_compute_function(LHS, operators, lhs_rhs, only_ground_stat
     for i, term_type in enumerate(debugging_list):  # ['h', 'zh', 'hz', 'zhz']
 
         # the name of the function
-        if not opt_einsum:
-            func_name = f"add_{specifier_string}_{term_type}_terms"
-        else:
-            func_name = f"add_{specifier_string}_{term_type}_terms_optimized"
+        if lhs_rhs == 'RHS':
+            if not opt_einsum:
+                func_name = f"add_{specifier_string}_{term_type}_terms"
+            else:
+                func_name = f"add_{specifier_string}_{term_type}_terms_optimized"
+        elif lhs_rhs == 'LHS':
+            if not opt_einsum:
+                func_name = f"compute_{specifier_string}_{term_type}_LHS"
+            else:
+                func_name = f"compute_{specifier_string}_{term_type}_LHS_optimized"
 
         # the positional arguments it takes (no keyword arguments are used currently)
         if lhs_rhs == 'RHS':
@@ -1548,9 +1581,9 @@ def _construct_eT_zhz_compute_function(LHS, operators, lhs_rhs, only_ground_stat
                 positional_arguments = "R, ansatz, truncation, t_args, h_args, z_args, opt_einsum"
         elif lhs_rhs == 'LHS':
             if not opt_einsum:
-                positional_arguments = "R, ansatz, truncation, s_args, dt_args, dz_args"
+                positional_arguments = "Z, ansatz, truncation, t_conj, dT, dz_args"
             else:
-                positional_arguments = "R, ansatz, truncation, s_args, dt_args, dz_args, opt_einsum"
+                positional_arguments = "Z, ansatz, truncation, t_conj, dT, dz_args, opt_einsum"
 
         # specify if the function is only calculating (H) * (Z) terms
         if term_type == 'HZ':
@@ -1637,8 +1670,14 @@ def _write_master_eT_zhz_compute_function(LHS, lhs_rhs, opt_einsum=False):
     # shared by all functions
     if lhs_rhs == 'RHS':
         common_positional_arguments = 'ansatz, truncation, t_args, h_args, z_args'
+        tensor = 'R'
+        step_name = 'add'
+        t_type = 'terms'
     elif lhs_rhs == 'LHS':
-        common_positional_arguments = 'ansatz, truncation, s_args, dt_args, dz_args'
+        common_positional_arguments = 'ansatz, truncation, t_conj, dT, dz_args'
+        tensor = 'dz'
+        step_name = 'compute'
+        t_type = 'LHS'
 
     if not opt_einsum:
         func_string = f'''
@@ -1647,12 +1686,12 @@ def _write_master_eT_zhz_compute_function(LHS, lhs_rhs, opt_einsum=False):
                 {truncation_checks:s}
 
                 # the residual tensor
-                R = np.zeros(shape=({', '.join(['A',] + ['N',]*LHS.rank)}), dtype=complex)
+                {tensor} = np.zeros(shape=({', '.join(['A',] + ['N',]*LHS.rank)}), dtype=complex)
 
-                # add the terms
-                add_{specifier_string}_HZ_terms(R, {common_positional_arguments})
-                add_{specifier_string}_eT_HZ_terms(R, {common_positional_arguments})
-                return R
+                # {step_name} the terms
+                {step_name}_{specifier_string}_HZ_{t_type}({tensor}, {common_positional_arguments})
+                {step_name}_{specifier_string}_eT_HZ_{t_type}({tensor}, {common_positional_arguments})
+                return {tensor}
 
         '''
     else:
@@ -1662,15 +1701,15 @@ def _write_master_eT_zhz_compute_function(LHS, lhs_rhs, opt_einsum=False):
                 {truncation_checks:s}
 
                 # the residual tensor
-                R = np.zeros(shape=({', '.join(['A',] + ['N',]*LHS.rank)}), dtype=complex)
+                {tensor} = np.zeros(shape=({', '.join(['A',] + ['N',]*LHS.rank)}), dtype=complex)
 
                 # unpack the optimized paths
                 optimized_HZ_paths, optimized_eT_HZ_paths = opt_paths
 
-                # add the terms
-                add_{specifier_string}_HZ_terms_optimized(R, {common_positional_arguments}, optimized_HZ_paths)
-                add_{specifier_string}_eT_HZ_terms_optimized(R, {common_positional_arguments}, optimized_eT_HZ_paths)
-                return R
+                # {step_name} the terms
+                {step_name}_{specifier_string}_HZ_{t_type}_optimized({tensor}, {common_positional_arguments}, optimized_HZ_paths)
+                {step_name}_{specifier_string}_eT_HZ_{t_type}_optimized({tensor}, {common_positional_arguments}, optimized_eT_HZ_paths)
+                return {tensor}
 
         '''
 
