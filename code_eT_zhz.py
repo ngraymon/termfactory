@@ -1355,7 +1355,11 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
     h_contribution_list = []
 
     def collect_z_contributions(h_dict, return_array, nof_tabs=0):
-        """ x """
+        """ This is a gatekeeper for all einsum equations that are printed
+        everything gets parsed through this function
+        every single line that gets printed with `einsum` in it comes from the `return_array`
+        which this function appends to
+        """
 
         # h^0_0 with zero order Taylor series contributions
         for z_order, z_dict in h_dict.items():
