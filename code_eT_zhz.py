@@ -1658,7 +1658,10 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
         pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
 
     if valid_zero_list == [] and valid_term_list == []:
-        return ""
+        return [
+            ["pass  # all terms invalid", ],
+            ["pass  # all terms invalid", ],
+        ]
 
     for i, _ in enumerate(valid_term_list):
         # old_print_wrapper(i, valid_term_list[i])
@@ -1695,8 +1698,6 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
 
 def _construct_eT_zhz_compute_function(LHS, operators, lhs_rhs, only_ground_state=False, opt_einsum=False):
     """ x """
-
-    # temp
 
     return_string = ""  # concatenate all results to this
 
