@@ -3,7 +3,7 @@ stages:
 
 default:
   image: python:3.9
-  tags: [lightsail]
+  tags: [ci]
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
