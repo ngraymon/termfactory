@@ -92,6 +92,7 @@ def _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag=False):
 
     return electronic_components
 
+
 def _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag=False):
     """ fix this
 
@@ -135,6 +136,8 @@ def _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag=Fal
     electronic_components.append('c')
 
     return electronic_components
+# ----------------------------------------------------------------------------------------------- #
+# handle all the vibrational einsum string component
 
 
 def _build_z_term_python_labels(z_right, offset_dict):
@@ -360,7 +363,7 @@ def _eT_zhz_einsum_vibrational_components_lhs(t_list, h, z_right, b_loop_flag=Fa
     for i in range(len(alist)):
         vibrational_components.append(alist[i] + blist[i])
 
-    # add h term vibrational components    
+    # add h term vibrational components
     if h.m == 0 and h.n == 0:
         h_labels, offset_dict = _build_h_term_python_labels(h, offset_dict)
         vibrational_components.append(h_labels[0] + h_labels[1])
@@ -378,13 +381,19 @@ def _eT_zhz_einsum_vibrational_components_lhs(t_list, h, z_right, b_loop_flag=Fa
     remaining_list = [r for r in blist] + [h_labels[1], z_labels[1], ]
     print('remaining_list= ',remaining_list)
     return vibrational_components, ''.join(remaining_list)
+# ----------------------------------------------------------------------------------------------- #
+# old and unused
 
 
 def _eT_zhz_einsum_subscript_generator(h, t_list):  # pragma: no cover
     """ x """
 
+    # assert lhs_flag in ['lhs', 'rhs']
     return_string = ""
 
+    # if LHS:
+    #     electronic_components = _lhs_einsum_electronic_components(t_list)
+    # else:
     electronic_components = _eT_zhz_einsum_electronic_components(t_list)
 
     vibrational_components, remaining_indices = _eT_zhz_einsum_vibrational_components(h, t_list)
@@ -403,6 +412,8 @@ def _eT_zhz_einsum_prefactor(term):  # pragma: no cover
     string = "0.69"
 
     return string
+# ----------------------------------------------------------------------------------------------- #
+# all three are dealing with prefactor determination
 
 
 def _simplify_eT_zhz_python_prefactor(numerator_list, denominator_list):
@@ -722,6 +733,8 @@ def _multiple_perms_logic(term, print_indist_perms: bool = False):
     #     return dict([(k, list(*unique_permutations(range(v)))) for k, v in unique_dict.items()]), unique_dict
 
     raise Exception("Shouldn't get here")
+# ----------------------------------------------------------------------------------------------- #
+# big boy function that does most of the work
 
 
 def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_obj_name='truncation', b_loop_flag=False, suppress_empty_if_checks=True):
@@ -895,7 +908,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
             z_operand = f"z_args[({z_right.m}, {z_right.n})]"
         elif lhs_rhs == 'LHS':
             # TODO
-            # dz_args is a list of dz_# where if Z is max order 3 then the length is 3 - the value of the current function call. 
+            # dz_args is a list of dz_# where if Z is max order 3 then the length is 3 - the value of the current function call.
             # So compute_z_0_residual(Z, t_conj, dT, dz_args) that dz_args would be length 3 (3-0) and include dz_3, dz_2, dz_1
 
             # z_operand = f"dz_args[({dz3}, {dz2}, {dz1})]"
@@ -905,7 +918,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
             else:
                 z_left, z_right = z_pair
                 z_operand = f"z_args[({z_right.m}, {z_right.n})]"
-            
+
 
         # the t counts as identity
         if t_list == []:
@@ -990,6 +1003,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         elif lhs_rhs == 'LHS':
             e_a = _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag)
             v_a, remaining_indices = _eT_zhz_einsum_vibrational_components_lhs(t_list, h, z_right, b_loop_flag)
+
         print(len(e_a),len(v_a))
         # if there is only a single distinguishable t term
         # eg: t1 * t1 * t1 ---> 3 indistinguishable t terms
@@ -1468,6 +1482,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         return_list.extend(h_contribution_list)
 
     return return_list
+# ----------------------------------------------------------------------------------------------- #
 
 
 def remove_all_excited_state_t_terms(eT_taylor_expansion):
@@ -1524,6 +1539,8 @@ def remove_all_excited_state_t_terms(eT_taylor_expansion):
 
     # return
     return filtered_eT_taylor_expansion
+# ----------------------------------------------------------------------------------------------- #
+# this function definitely needs a rework its not sure what its trying to do exactly
 
 
 def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, remove_f_terms=False, opt_einsum=False):
@@ -1618,6 +1635,8 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
     ]
 
     return return_list
+# ----------------------------------------------------------------------------------------------- #
+# everything below here is pretty standard wrapping and string processing stuff (nothing too fancy)
 
 
 def _construct_eT_zhz_compute_function(LHS, operators, lhs_rhs, only_ground_state=False, opt_einsum=False):
