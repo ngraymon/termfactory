@@ -1844,7 +1844,7 @@ def _write_master_eT_zhz_compute_function(LHS, lhs_rhs, opt_einsum=False):
         step_name = 'add'
         t_type = 'terms'
     elif lhs_rhs == 'LHS':
-        common_positional_arguments = 'ansatz, truncation, t_conj, dT, dz_args'
+        common_positional_arguments = 'ansatz, truncation, t_conj, dT, z_args, dz_args'
         tensor = 'dz'
         step_name = 'compute'
         t_type = 'LHS'
