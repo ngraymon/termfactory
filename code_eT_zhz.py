@@ -54,7 +54,6 @@ def _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag=False):
     For now this function assumes that `b_loop_flag` is always true.
     It is unclear what the function should produce when it is False.
 
-
     If `b_loop_flag` is True then we instead treat each of the t terms as NOT
     having an electronic label, the Z term as only having one electronic d.o.f
     and the H term as having the same two electronic d.o.f Such as
@@ -93,8 +92,16 @@ def _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag=False):
     return electronic_components
 
 
-def _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag=False):
-    """ fix this
+def _eT_zhz_einsum_electronic_components_lhs(t_list, dT, z_right, b_loop_flag=False):
+    """ Return a list of strings to be used in a numpy.einsum() call.
+
+    For now this function assumes that `b_loop_flag` is always true.
+    It is unclear what the function should produce when it is False.
+
+    If `b_loop_flag` is True then we instead treat each of the t terms as NOT
+    having an electronic label, the Z term as only having one electronic d.o.f
+    and the dT term as having the same two electronic d.o.f Such as
+        `ac, c -> a`
 
     """
     assert b_loop_flag is True, 'Unclear how to implement function for vectorized mode'
@@ -107,7 +114,7 @@ def _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag=Fal
         # treat the t terms as having no electronic labels
         electronic_components += ['', ] * (len(t_list))
 
-        # the dt term has no electronic components
+        # the dT term has no electronic components
         electronic_components.append('')
 
         # Z always contributes
@@ -120,7 +127,7 @@ def _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag=Fal
     # for each t term add 1 electronic label
     electronic_components += ['a', ] * len(t_list)
 
-    # the dt term has 1 electronic components
+    # the dT term has 1 electronic components
     electronic_components.append('a')
 
     # we assume Z always contributes
@@ -885,6 +892,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         # define the indexing of the `h_args` dictionary
         if lhs_rhs == 'RHS':
             h_operand = f"h_args[({h.m}, {h.n})]"
+
         elif lhs_rhs == 'LHS':
             if h.m == 0 and h.n == 0:
                 h_operand = None
@@ -897,6 +905,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         if lhs_rhs == 'RHS':
             z_left, z_right = z_pair
             z_operand = f"z_args[({z_right.m}, {z_right.n})]"
+
         elif lhs_rhs == 'LHS':
             # TODO
             # dz_args is a list of dz_# where if Z is max order 3 then the length is 3 - the value of the current function call.
