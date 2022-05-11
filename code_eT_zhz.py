@@ -342,7 +342,7 @@ def _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag=False)
     vibrational_components.append(z_labels[0] + z_labels[1])
 
     # remaining term lists
-    remaining_list = [r for r in blist[::-1]] + [ z_labels[1], ]
+    remaining_list = [r for r in blist] + [h_labels[1], z_labels[1], ]
 
     return vibrational_components, ''.join(remaining_list)
 
