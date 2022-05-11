@@ -1904,6 +1904,9 @@ def _generate_eT_zhz_python_file_contents(truncations, **kwargs):
     Z = generate_z_operator(maximum_cc_rank, only_ground_state)
     eT_taylor_expansion = generate_eT_taylor_expansion(maximum_T_rank, eT_taylor_max_order)
 
+    if True:  # until we work with thermal equations this should always be true (need to remove when working on thermal stuff)
+        master_omega.operator_list[:] = [p for p in master_omega.operator_list if p.m == 0]
+
     # stick them in a tuple
     operators = master_omega, H, Z, eT_taylor_expansion
 
