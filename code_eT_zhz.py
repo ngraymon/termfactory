@@ -1566,6 +1566,13 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
     `disconnected_namedtuple`s.
     """
 
+    # until we work with thermal equations this should always be true (need to remove when working on thermal stuff)
+    if LHS.m != 0:
+        return [
+            ["pass  # no valid terms here (thermal not implemented)", ],
+            ["pass  # no valid terms here (thermal not implemented)", ],
+        ]
+
     # remove excited state contributions
     if only_ground_state:
 
