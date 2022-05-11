@@ -1594,20 +1594,19 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
     `disconnected_namedtuple`s.
     """
 
-    # until we work with thermal equations this should always be true (need to remove when working on thermal stuff)
-    if LHS.m != 0:
-        return [
-            ["pass  # no valid terms here (thermal not implemented)", ],
-            ["pass  # no valid terms here (thermal not implemented)", ],
-        ]
-
     # remove excited state contributions
     if only_ground_state:
 
         # remove all excited state Z's
-        Z.operator_list[:] = it.takewhile(lambda z: z.n == 0,  Z.operator_list)
+        Z.operator_list[:] = [z for z in Z.operator_list if z.n == 0]
 
         eT_taylor_expansion = remove_all_excited_state_t_terms(eT_taylor_expansion)
+
+        if lhs_rhs == 'LHS':
+            # in this case H is actually masquerading as dT/dtau which needs to be treated the same as Z
+            H.operator_list[:] = [h for h in H.operator_list if h.n == 0]
+
+        #
 
     # do the terms without T contributions first
     zero_eT_term = eT_taylor_expansion[0]
