@@ -92,6 +92,50 @@ def _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag=False):
 
     return electronic_components
 
+def _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag=False):
+    """ fix this
+
+    """
+    assert b_loop_flag is True, 'Unclear how to implement function for vectorized mode'
+
+    electronic_components = []
+
+    # special b loop case
+    if b_loop_flag:
+
+        # treat the t terms as having no electronic labels
+        # print(t_list)
+        if h.n == 0 and h.m == 0:
+            electronic_components += ['', ] * len(t_list)
+
+            # the H term always has 2
+            electronic_components.append('')
+        else:
+            electronic_components += ['', ] * (len(t_list))
+
+            # the H term always has 2
+            electronic_components.append('ac')
+
+        # we assume Z always contributes
+        electronic_components.append('c')
+
+        return electronic_components
+
+    # otherwise
+
+    # for each t term add 1 electronic label
+    electronic_components += ['a', ] * len(t_list)
+
+    # the H term always has 2
+    if h.n == 0 and h.m == 0:
+        electronic_components.append('ac')
+    else:
+        electronic_components.append('')
+    # we assume Z always contributes
+    electronic_components.append('c')
+
+    return electronic_components
+
 
 def _build_z_term_python_labels(z_right, offset_dict):
     """ x """
@@ -298,8 +342,41 @@ def _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag=False)
     vibrational_components.append(z_labels[0] + z_labels[1])
 
     # remaining term lists
-    remaining_list = [r for r in blist] + [h_labels[1], z_labels[1], ]
+    remaining_list = [r for r in blist[::-1]] + [ z_labels[1], ]
 
+    return vibrational_components, ''.join(remaining_list)
+
+
+def _eT_zhz_einsum_vibrational_components_lhs(t_list, h, z_right, b_loop_flag=False):
+    """ fix
+    """
+
+    vibrational_components = []  # store return values here
+
+    old_print_wrapper(t_list, h, z_right)
+
+    # add t term vibrational components
+    alist, blist, offset_dict = _build_t_term_python_group(t_list, h, z_right)
+    for i in range(len(alist)):
+        vibrational_components.append(alist[i] + blist[i])
+
+    # add h term vibrational components    
+    if h.m == 0 and h.n == 0:
+        h_labels, offset_dict = _build_h_term_python_labels(h, offset_dict)
+        vibrational_components.append(h_labels[0] + h_labels[1])
+        print('h_labels[0]= ', h_labels[0])
+        print('h_labels[1]= ', h_labels[1])
+    else:
+        h_labels, offset_dict = _build_h_term_python_labels(h, offset_dict)
+        vibrational_components.append(h_labels[0] + h_labels[1])
+
+    # add z term vibrational components
+    z_labels, offset_dict = _build_z_term_python_labels(z_right, offset_dict)
+    vibrational_components.append(z_labels[0] + z_labels[1])
+
+    # remaining term lists
+    remaining_list = [r for r in blist] + [h_labels[1], z_labels[1], ]
+    print('remaining_list= ',remaining_list)
     return vibrational_components, ''.join(remaining_list)
 
 
@@ -807,8 +884,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         elif lhs_rhs == 'LHS':
             if h.m == 0 and h.n == 0:
                 h_operand = None
+                dT = False
             else:
                 h_operand = f"dT[({h.m}, {h.n})]"
+                dT = True
 
         # define the indexing of the `z_args` dictionary
         if lhs_rhs == 'RHS':
@@ -820,8 +899,13 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
             # So compute_z_0_residual(Z, t_conj, dT, dz_args) that dz_args would be length 3 (3-0) and include dz_3, dz_2, dz_1
 
             # z_operand = f"dz_args[({dz3}, {dz2}, {dz1})]"
-            z_left, z_right = z_pair
-            z_operand = f"dz_args[({z_right.m}, {z_right.n})]"
+            if dT is False:
+                z_left, z_right = z_pair
+                z_operand = f"dz_args[({z_right.m}, {z_right.n})]"
+            else:
+                z_left, z_right = z_pair
+                z_operand = f"z_args[({z_right.m}, {z_right.n})]"
+            
 
         # the t counts as identity
         if t_list == []:
@@ -900,10 +984,13 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         hamiltonian_rank_list[max(h.m, h.n)].setdefault(max_t_rank, {}).setdefault(z_right.rank, {}).setdefault(prefactor, [])
 
         # old_print_wrapper(f"{t_list = }")
-        e_a = _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag)
-        # old_print_wrapper(f"{e_a = }")
-        v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag)
-
+        if lhs_rhs == 'RHS':
+            e_a = _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag)
+            v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag)
+        elif lhs_rhs == 'LHS':
+            e_a = _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag)
+            v_a, remaining_indices = _eT_zhz_einsum_vibrational_components_lhs(t_list, h, z_right, b_loop_flag)
+        print(len(e_a),len(v_a))
         # if there is only a single distinguishable t term
         # eg: t1 * t1 * t1 ---> 3 indistinguishable t terms
         # as opposed to t1 * t2 being two distinguishable t terms
@@ -1581,9 +1668,9 @@ def _construct_eT_zhz_compute_function(LHS, operators, lhs_rhs, only_ground_stat
                 positional_arguments = "R, ansatz, truncation, t_args, h_args, z_args, opt_einsum"
         elif lhs_rhs == 'LHS':
             if not opt_einsum:
-                positional_arguments = "Z, ansatz, truncation, t_conj, dT, dz_args"
+                positional_arguments = "Z, ansatz, truncation, t_conj, dT, z_args, dz_args"
             else:
-                positional_arguments = "Z, ansatz, truncation, t_conj, dT, dz_args, opt_einsum"
+                positional_arguments = "Z, ansatz, truncation, t_conj, dT, z_args, dz_args, opt_einsum"
 
         # specify if the function is only calculating (H) * (Z) terms
         if term_type == 'HZ':
