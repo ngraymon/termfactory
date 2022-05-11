@@ -919,7 +919,6 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
                 z_left, z_right = z_pair
                 z_operand = f"z_args[({z_right.m}, {z_right.n})]"
 
-
         # the t counts as identity
         if t_list == []:
             permutations = None
@@ -1004,7 +1003,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
             e_a = _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag)
             v_a, remaining_indices = _eT_zhz_einsum_vibrational_components_lhs(t_list, h, z_right, b_loop_flag)
 
-        print(len(e_a),len(v_a))
+        print(len(e_a), len(v_a))
         # if there is only a single distinguishable t term
         # eg: t1 * t1 * t1 ---> 3 indistinguishable t terms
         # as opposed to t1 * t2 being two distinguishable t terms
@@ -1499,6 +1498,13 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
     # append the last element from the list
     no_duplicate_list.append(return_list[-1])
+
+    # the list should never begin with a newline
+    if no_duplicate_list[0] == '':
+        no_duplicate_list.pop(0)
+
+    # print(f"{no_duplicate_list = }")
+    # import pdb; pdb.set_trace()
 
     return no_duplicate_list
 # ----------------------------------------------------------------------------------------------- #
