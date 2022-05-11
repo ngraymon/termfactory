@@ -1481,7 +1481,26 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
     else:
         return_list.extend(h_contribution_list)
 
-    return return_list
+    """ in case we have any double-empty-lines remove them
+    note: should find a better way to solve this in the future
+    this removes any empty strings '' when they follow each other
+        ['a', '', ''] -> ['a', '']
+    or
+        ['a', '', 'b', '', '', 'c'] -> ['a', '', 'b', '', 'c']
+    """
+    no_duplicate_list = []
+    for i in range(len(return_list)-1):
+        # print(i)
+        # print(return_list[i])
+        if (return_list[i+1] == '') and (return_list[i] == ''):
+            continue
+        else:
+            no_duplicate_list.append(return_list[i])
+
+    # append the last element from the list
+    no_duplicate_list.append(return_list[-1])
+
+    return no_duplicate_list
 # ----------------------------------------------------------------------------------------------- #
 
 
