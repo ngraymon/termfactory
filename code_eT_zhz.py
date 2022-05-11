@@ -1611,6 +1611,26 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
     log.debug(zero_eT_term, "-"*100, "\n\n")
     _filter_out_valid_eTz_terms(LHS, zero_eT_term, H, None, Z, valid_zero_list, lhs_rhs)
 
+    """ remove the actual dz/dtau term that we are trying to calculate as in d(z^m_n)/dtau = RHS `- LHS`
+    where this whole module is trying to write code to compute the `LHS` part and then we subtract it later
+
+    We need to make sure we DONT subtract the specific 1 * 1 * d(z^m_n)/dtau term
+
+    At this point in the code we will try to remove that term from `valid_zero_list` so that it is NOT printed as a contribution
+    also assume that we do not support thermal equations (LHS.m IS ALWAYS ZERO)
+    """
+    for term in valid_zero_list:
+
+        # if the Hamiltonian / (dt/tau) term is rank 0
+        middle_term_rank_zero = bool(term[2].rank == 0)
+        z_derivative_is_correct_order = bool(term[3][1].m == term[0].n)
+
+        if middle_term_rank_zero and z_derivative_is_correct_order:
+            valid_zero_list.remove(term)
+            break  # we should only ever remove a single term
+
+    # import pdb; pdb.set_trace()
+
     # cheat and remove all t terms
     # for i, _ in enumerate(valid_zero_list):
     #     valid_zero_list[i][1] = []
