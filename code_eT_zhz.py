@@ -105,19 +105,12 @@ def _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag=Fal
     if b_loop_flag:
 
         # treat the t terms as having no electronic labels
-        # print(t_list)
-        if h.n == 0 and h.m == 0:
-            electronic_components += ['', ] * len(t_list)
+        electronic_components += ['', ] * (len(t_list))
 
-            # the H term always has 2
-            electronic_components.append('')
-        else:
-            electronic_components += ['', ] * (len(t_list))
+        # the dt term has no electronic components
+        electronic_components.append('')
 
-            # the H term always has 2
-            electronic_components.append('ac')
-
-        # we assume Z always contributes
+        # Z always contributes
         electronic_components.append('c')
 
         return electronic_components
@@ -127,11 +120,9 @@ def _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag=Fal
     # for each t term add 1 electronic label
     electronic_components += ['a', ] * len(t_list)
 
-    # the H term always has 2
-    if h.n == 0 and h.m == 0:
-        electronic_components.append('ac')
-    else:
-        electronic_components.append('')
+    # the dt term has 1 electronic components
+    electronic_components.append('a')
+
     # we assume Z always contributes
     electronic_components.append('c')
 
@@ -999,9 +990,16 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         if lhs_rhs == 'RHS':
             e_a = _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag)
             v_a, remaining_indices = _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag)
+
         elif lhs_rhs == 'LHS':
             e_a = _eT_zhz_einsum_electronic_components_lhs(t_list, h, z_right, b_loop_flag)
             v_a, remaining_indices = _eT_zhz_einsum_vibrational_components_lhs(t_list, h, z_right, b_loop_flag)
+
+        # the output einsum argument is different for RHS versus LHS
+        if lhs_rhs == 'RHS':
+            e_char = 'a'
+        elif lhs_rhs == 'LHS':
+            e_char = 'c'
 
         print(len(e_a), len(v_a))
         # if there is only a single distinguishable t term
@@ -1029,9 +1027,9 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
                     # stick the indices into the full einsum function call
                     if h_operand is None:
-                        string = f"np.einsum('{string} -> a{remaining_indices}', {z_operand})"
+                        string = f"np.einsum('{string} -> {e_char}{remaining_indices}', {z_operand})"
                     else:
-                        string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
+                        string = f"np.einsum('{string} -> {e_char}{remaining_indices}', {h_operand}, {z_operand})"
 
                     # append that string to the current list
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
@@ -1052,9 +1050,10 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
                         # stick the indices into the full einsum function call
                         if h_operand is None:
-                            string = f"np.einsum('{string} -> a{remaining_indices}', {z_operand})"
+                            string = f"np.einsum('{string} -> {e_char}{remaining_indices}', {z_operand})"
                         else:
-                            string = f"np.einsum('{string} -> a{remaining_indices}', {h_operand}, {z_operand})"
+                            string = f"np.einsum('{string} -> {e_char}{remaining_indices}', {h_operand}, {z_operand})"
+
                         # append that string to the current list
                         hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
 
@@ -1097,9 +1096,9 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
                     # stick the indices into the full einsum function call
                     if h_operand is None:
-                        string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {z_operand})"
+                        string = f"np.einsum('{string} -> {e_char}{remaining_indices}', {t_operands}, {z_operand})"
                     else:
-                        string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
+                        string = f"np.einsum('{string} -> {e_char}{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
 
                     # append that string to the current list
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
@@ -1145,9 +1144,9 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
                 # stick the indices into the full einsum function call
                 if h_operand is None:
-                    string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {z_operand})"
+                    string = f"np.einsum('{string} -> {e_char}{remaining_indices}', {t_operands}, {z_operand})"
                 else:
-                    string = f"np.einsum('{string} -> a{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
+                    string = f"np.einsum('{string} -> {e_char}{remaining_indices}', {t_operands}, {h_operand}, {z_operand})"
 
                 # append that string to the current list
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][z_right.rank][prefactor].append(string)
