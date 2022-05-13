@@ -208,7 +208,8 @@ class Test_latex_eT_z_t_ansatz():
             truncations,
             only_ground_state=True,
             remove_f_terms=False,
-            path=output_path
+            path=output_path,
+            lhs_rhs='RHS'
         )
 
     # def test_excited_state(self, truncations, tmpdir):

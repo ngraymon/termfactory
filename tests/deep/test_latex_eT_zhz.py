@@ -964,12 +964,14 @@ class Test_generate_all_o_eT_h_z_connection_permutations:
                 et.general_operator_namedtuple(name='z', rank=0, m=0, n=0)
             )
         ]
+        lhs_rhs = 'RHS'
 
         # run function
         function_output = et._generate_all_o_eT_h_z_connection_permutations(
             LHS,
             h,
             valid_permutations,
+            lhs_rhs,
             found_it_bool=False
         )
         expected_result = [
@@ -1001,12 +1003,14 @@ class Test_generate_all_o_eT_h_z_connection_permutations:
                 et.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)
             )
         ]
+        lhs_rhs = 'RHS'
 
         # run function
         function_output = et._generate_all_o_eT_h_z_connection_permutations(
             LHS,
             h,
             valid_permutations,
+            lhs_rhs,
             found_it_bool=False
         )
         expected_result = [
@@ -1038,12 +1042,14 @@ class Test_generate_all_o_eT_h_z_connection_permutations:
                 et.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)
             )
         ]
+        lhs_rhs = 'RHS'
 
         # run function
         function_output = et._generate_all_o_eT_h_z_connection_permutations(
             LHS,
             h,
             valid_permutations,
+            lhs_rhs,
             found_it_bool=False
         )
         expected_result = [
@@ -1773,9 +1779,10 @@ class Test_build_eT_term_latex_labels:
         # input data
         t_list = (zero_disconnected_t_op_nt,)
         offset_dict = blank_offset_dict
+        lhs_rhs = 'RHS'
 
         # run the function
-        function_output = et._build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True)
+        function_output = et._build_eT_term_latex_labels(t_list, offset_dict, lhs_rhs, color=True, letters=True)
         expected_result = '\\mathds{1}'
 
         assert function_output == expected_result
@@ -1788,9 +1795,10 @@ class Test_build_eT_term_latex_labels:
             build_t_operator("disconnected", rank=1, n=1, n_r=1),
         )
         offset_dict = blank_offset_dict
+        lhs_rhs = 'RHS'
 
         # run the function
-        function_output = et._build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True)
+        function_output = et._build_eT_term_latex_labels(t_list, offset_dict, lhs_rhs, color=True, letters=True)
         expected_result = '\\bt^{}_{\\magenta{}\\blue{}\\magenta{k}\\red{}}'
 
         assert function_output == expected_result
@@ -1803,9 +1811,10 @@ class Test_build_eT_term_latex_labels:
             build_t_operator("disconnected", rank=1, m=1, m_r=1),
         )
         offset_dict = blank_offset_dict
+        lhs_rhs = 'RHS'
 
         # run the function
-        function_output = et._build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True)
+        function_output = et._build_eT_term_latex_labels(t_list, offset_dict, lhs_rhs, color=True, letters=True)
         expected_result = '\\bt^{\\magenta{}\\blue{}\\magenta{l}\\red{}}_{}'
 
         assert function_output == expected_result
@@ -1820,9 +1829,10 @@ class Test_build_eT_hz_term_latex_labels:
         # input data
         h = zero_h_z_op_nt
         offset_dict = blank_offset_dict
+        lhs_rhs = 'RHS'
 
         # run the function
-        function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True)
+        function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, lhs_rhs, color=True, letters=True)
         expected_result = '\\bh_0'
 
         assert function_output == expected_result
@@ -1833,9 +1843,10 @@ class Test_build_eT_hz_term_latex_labels:
         # input data
         h = build_h_z_operator_namedtuple(rank=1, n=1, n_r=1)
         offset_dict = blank_offset_dict
+        lhs_rhs = 'RHS'
 
         # run the function
-        function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True)
+        function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, lhs_rhs, color=True, letters=True)
         expected_result = '\\bh^{}_{\\blue{}\\blue{m}\\red{}}'
 
         assert function_output == expected_result
@@ -1855,9 +1866,10 @@ class Test_build_eT_hz_term_latex_labels:
             'unlinked_index': 0,
             'summation_index': 1
         }
+        lhs_rhs = 'RHS'
 
         # run the function
-        function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True)
+        function_output = et._build_eT_hz_term_latex_labels(h, offset_dict, lhs_rhs, color=True, letters=True)
         expected_result = '\\bh^{\\blue{k}\\blue{}\\red{}}_{}'
 
         assert function_output == expected_result
@@ -1873,9 +1885,10 @@ class Test_build_eT_right_z_term:
         h = zero_h_z_op_nt
         z_right = zero_disconnected_z_right
         offset_dict = blank_offset_dict
+        lhs_rhs = 'RHS'
 
         # run the function
-        function_output = et._build_eT_right_z_term(h, z_right, offset_dict, color=True, letters=True)
+        function_output = et._build_eT_right_z_term(h, z_right, offset_dict, lhs_rhs, color=True, letters=True)
         expected_result = '\\bz_0'
 
         assert function_output == expected_result
@@ -1896,9 +1909,9 @@ class Test_build_eT_right_z_term:
             'unlinked_index': 0,
             'summation_index': 1
         }
-
+        lhs_rhs = 'RHS'
         # run the function
-        function_output = et._build_eT_right_z_term(h, z_right, offset_dict, color=True, letters=True)
+        function_output = et._build_eT_right_z_term(h, z_right, offset_dict, lhs_rhs, color=True, letters=True)
         expected_result = '\\bz^{}_{\\red{}}'
 
         assert function_output == expected_result
@@ -1919,9 +1932,9 @@ class Test_build_eT_right_z_term:
             'unlinked_index': 0,
             'summation_index': 1
         }
-
+        lhs_rhs = 'RHS'
         # run the function
-        function_output = et._build_eT_right_z_term(h, z_right, offset_dict, color=True, letters=True)
+        function_output = et._build_eT_right_z_term(h, z_right, offset_dict, lhs_rhs, color=True, letters=True)
         expected_result = '\\bz^{\\blue{k}\\red{}}_{}'
 
         assert function_output == expected_result
@@ -1969,10 +1982,10 @@ class Test_prepare_third_eTz_latex:
 
     def test_basic(self):
         """ x """
-
+        lhs_rhs = 'RHS'
         # run the function
         function_output = et._prepare_third_eTz_latex(
-            self.term_list, split_width=5, remove_f_terms=False, print_prefactors=True, suppress_duplicates=True
+            self.term_list, lhs_rhs, split_width=5, remove_f_terms=False, print_prefactors=True, suppress_duplicates=True
         )
 
         # read in the expected result
@@ -1986,10 +1999,10 @@ class Test_prepare_third_eTz_latex:
 
     def test_f_terms_and_dupes(self):
         """ x """
-
+        lhs_rhs = 'RHS'
         # run the function
         function_output = et._prepare_third_eTz_latex(
-            self.term_list, split_width=5, remove_f_terms=True, print_prefactors=True, suppress_duplicates=False
+            self.term_list, lhs_rhs, split_width=5, remove_f_terms=True, print_prefactors=True, suppress_duplicates=False
         )
 
         # read in the expected result
@@ -2003,11 +2016,11 @@ class Test_prepare_third_eTz_latex:
 
     def test_long_line_splitting(self):
         """ x """
-
+        lhs_rhs = 'RHS'
         # run the function
         term_list = large_test_data.test_long_line_splitting.terms
         function_output = et._prepare_third_eTz_latex(
-            term_list, split_width=5, remove_f_terms=False, print_prefactors=True, suppress_duplicates=True
+            term_list, lhs_rhs, split_width=5, remove_f_terms=False, print_prefactors=True, suppress_duplicates=True
         )
 
         # read in the expected result
@@ -2112,9 +2125,10 @@ class Test_filter_out_valid_eTz_terms:
             ]
         )
         total_list = []
+        lhs_rhs = 'RHS'
 
         # run the function
-        function_output = et._filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_debug=False)
+        function_output = et._filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, lhs_rhs, zhz_debug=False)
 
         expected_result = None
 
@@ -2148,9 +2162,10 @@ class Test_build_third_eTz_term:
                 et.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)
             ]
         )
+        lhs_rhs = 'RHS'
 
         # run the function
-        function_output = et._build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False)
+        function_output = et._build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, lhs_rhs, remove_f_terms=False)
 
         # read in testing data from specific file
         func_name = "_build_third_eTz_term_test_basic_out.txt"
@@ -2192,6 +2207,7 @@ class Test_generate_eT_z_symmetric_latex_equations:
                 et.general_operator_namedtuple(name='z^1', rank=1, m=1, n=0)
             ]
         )
+        lhs_rhs = 'RHS'
 
         # run the function
         function_output = et._generate_eT_z_symmetric_latex_equations(
@@ -2199,6 +2215,7 @@ class Test_generate_eT_z_symmetric_latex_equations:
             eT_taylor_expansion,
             H,
             Z,
+            lhs_rhs,
             only_ground_state=True,
             remove_f_terms=False
         )
@@ -2228,12 +2245,20 @@ class Test_run_main_et_zhz:
             tkeys.eT: 1,
             tkeys.P: 1
         }
+        default_kwargs = {
+            'only_ground_state': True,
+            'remove_f_terms': False,
+            'path': output_path,
+            'lhs_rhs': 'RHS',
+        }
+        # lhs_rhs = 'RHS'
 
         et.generate_eT_z_t_symmetric_latex(
             eT_trunc,
             only_ground_state=True,
             remove_f_terms=False,
-            path=output_path
+            path=output_path,
+            lhs_rhs='RHS'
         )
 
         with open(output_path, 'r') as fp:
