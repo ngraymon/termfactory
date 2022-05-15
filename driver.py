@@ -132,7 +132,7 @@ if (__name__ == '__main__'):
         else:
             raise Exception()
 
-    if pargs.lhs == True:
+    if pargs.lhs is True:
         default_kwargs['lhs_rhs'] = 'LHS'
 
     # dump_all_stdout_to_devnull()   # calling this removes all prints / logs from stdout
