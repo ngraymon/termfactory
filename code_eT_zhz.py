@@ -389,7 +389,7 @@ def _eT_zhz_einsum_subscript_generator(h, t_list):  # pragma: no cover
     # assert lhs_flag in ['lhs', 'rhs']
     return_string = ""
 
-    # if LHS:
+    # if Proj:
     #     electronic_components = _lhs_einsum_electronic_components(t_list)
     # else:
     electronic_components = _eT_zhz_einsum_electronic_components(t_list)
@@ -516,7 +516,7 @@ def _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True):
                 numerator_value *= external_perms
                 numerator_list.append(f'({external_perms})')
 
-            # like drawing cards from a deck we remove the permutations of the LHS
+            # like drawing cards from a deck we remove the permutations of the Proj
             new_max = h.m - h.m_lhs
 
             # to account for the permutations of H-Z internal labels around the external labels
@@ -545,7 +545,7 @@ def _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True):
                 numerator_value *= external_perms
                 numerator_list.append(f'({external_perms})')
 
-            # like drawing cards from a deck we remove the permutations of the LHS
+            # like drawing cards from a deck we remove the permutations of the Proj
             new_max = h.n - h.n_lhs
 
             # to account for the permutations of H-Z internal labels around the external labels
@@ -576,7 +576,7 @@ def _build_eT_zhz_python_prefactor(t_list, h, z_right, simplify_flag=True):
                 numerator_value *= external_perms
                 numerator_list.append(f'({external_perms})')
 
-            # like drawing cards from a deck we remove the permutations of the LHS
+            # like drawing cards from a deck we remove the permutations of the Proj
             new_max = z_right.m - z_right.m_lhs
 
             # to account for the permutations of H-Z internal labels with other labels on z
@@ -772,7 +772,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
             if external_perms > 1:
                 adjustment *= external_perms
 
-            # like drawing cards from a deck we remove the permutations of the LHS
+            # like drawing cards from a deck we remove the permutations of the Proj
             new_max = h.m - h.m_lhs
 
             # to account for the permutations of H-Z internal labels around the external labels
@@ -796,7 +796,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
             if external_perms > 1:
                 adjustment *= external_perms
 
-            # like drawing cards from a deck we remove the permutations of the LHS
+            # like drawing cards from a deck we remove the permutations of the Proj
             new_max = h.n - h.n_lhs
 
             # to account for the permutations of H-Z internal labels around the external labels
@@ -823,7 +823,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
             if external_perms > 1:
                 adjustment *= external_perms
 
-            # like drawing cards from a deck we remove the permutations of the LHS
+            # like drawing cards from a deck we remove the permutations of the Proj
             new_max = z_right.m - z_right.m_lhs
 
             # to account for the permutations of H-Z internal labels with other labels on z
@@ -1580,11 +1580,11 @@ def remove_all_excited_state_t_terms(eT_taylor_expansion):
 # this function definitely needs a rework its not sure what its trying to do exactly
 
 
-def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, remove_f_terms=False, opt_einsum=False):
+def _generate_eT_zhz_einsums(Proj, operators, lhs_rhs, only_ground_state=False, remove_f_terms=False, opt_einsum=False):
     """Return a string containing python code to be placed into a .py file.
     This does all the work of generating the einsums.
 
-    LHS * (t*t*t) * H * Z
+    Proj * (t*t*t) * H * Z
 
     This one basically needs to be like the t term stuff EXCEPT:
         - there is a single z term
@@ -1620,7 +1620,7 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
     # do the terms without T contributions first
     zero_eT_term = eT_taylor_expansion[0]
     log.debug(zero_eT_term, "-"*100, "\n\n")
-    _filter_out_valid_eTz_terms(LHS, zero_eT_term, H, None, Z, valid_zero_list, lhs_rhs)
+    _filter_out_valid_eTz_terms(Proj, zero_eT_term, H, None, Z, valid_zero_list, lhs_rhs)
 
     """ remove the actual dz/dtau term that we are trying to calculate as in d(z^m_n)/dtau = RHS `- LHS`
     where this whole module is trying to write code to compute the `LHS` part and then we subtract it later
@@ -1651,7 +1651,7 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
         log.debug(eT_series_term, "-"*100, "\n\n")
 
         # generate all valid combinations
-        _filter_out_valid_eTz_terms(LHS, eT_series_term, H, None, Z, valid_term_list, 'RHS')
+        _filter_out_valid_eTz_terms(Proj, eT_series_term, H, None, Z, valid_term_list, 'RHS')
 
     if False:  # debug
         old_print_wrapper('\n\n\n')
@@ -1681,11 +1681,11 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
     # return _prepare_third_eTz_latex(valid_term_list, remove_f_terms=remove_f_terms)
 
     # alst = [
-    #     _write_third_eTz_einsum_python(LHS.rank, operators, valid_zero_list, b_loop_flag=True),
+    #     _write_third_eTz_einsum_python(Proj.rank, operators, valid_zero_list, b_loop_flag=True),
     # ]
 
     # blst = [
-    #     _write_third_eTz_einsum_python(LHS.rank, operators, valid_term_list, b_loop_flag=True),
+    #     _write_third_eTz_einsum_python(Proj.rank, operators, valid_term_list, b_loop_flag=True),
     # ]
 
     # old_print_wrapper('\n\na', alst)
@@ -1695,9 +1695,9 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
 
     return_list = [
         # all summation terms where e^T = 1
-        _write_third_eTz_einsum_python(LHS.rank, operators, valid_zero_list, lhs_rhs, b_loop_flag=True),
+        _write_third_eTz_einsum_python(Proj.rank, operators, valid_zero_list, lhs_rhs, b_loop_flag=True),
         # the rest of the summation terms with e^T != 1
-        _write_third_eTz_einsum_python(LHS.rank, operators, valid_term_list, lhs_rhs, b_loop_flag=True),
+        _write_third_eTz_einsum_python(Proj.rank, operators, valid_term_list, lhs_rhs, b_loop_flag=True),
     ]
 
     return return_list
@@ -1705,22 +1705,22 @@ def _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False, r
 # everything below here is pretty standard wrapping and string processing stuff (nothing too fancy)
 
 
-def _construct_eT_zhz_compute_function(LHS, operators, lhs_rhs, only_ground_state=False, opt_einsum=False):
+def _construct_eT_zhz_compute_function(Proj, operators, lhs_rhs, only_ground_state=False, opt_einsum=False):
     """ x """
 
     return_string = ""  # concatenate all results to this
 
     # pre-defines
-    specifier_string = f"m{LHS.m}_n{LHS.n}"
+    specifier_string = f"m{Proj.m}_n{Proj.n}"
     four_tabbed_newline = "\n" + tab*4
     five_tabbed_newline = "\n" + tab*5
 
     # generate ground state einsums
-    ground_state_only_einsums = _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=True, opt_einsum=opt_einsum)
+    ground_state_only_einsums = _generate_eT_zhz_einsums(Proj, operators, lhs_rhs, only_ground_state=True, opt_einsum=opt_einsum)
 
     # generate ground + excited state einsums
     if not only_ground_state:
-        ground_and_excited_state_einsums = _generate_eT_zhz_einsums(LHS, operators, lhs_rhs, only_ground_state=False,  opt_einsum=opt_einsum)
+        ground_and_excited_state_einsums = _generate_eT_zhz_einsums(Proj, operators, lhs_rhs, only_ground_state=False,  opt_einsum=opt_einsum)
     else:
         ground_and_excited_state_einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*2
 
@@ -1770,9 +1770,9 @@ def _construct_eT_zhz_compute_function(LHS, operators, lhs_rhs, only_ground_stat
 
         # specify the docstring based on whether or not this is an optimized function
         if not opt_einsum:
-            opt_docstring = f"Calculate the {LHS} {term_type} terms.{four_tabbed_newline}"
+            opt_docstring = f"Calculate the {Proj} {term_type} terms.{four_tabbed_newline}"
         else:
-            opt_docstring = f"Optimized calculation of the {LHS} {term_type} terms.{four_tabbed_newline}"
+            opt_docstring = f"Optimized calculation of the {Proj} {term_type} terms.{four_tabbed_newline}"
 
         # glue all these strings together in a specific manner to form the function definition
         function_string = f'''
@@ -1806,36 +1806,36 @@ def _wrap_eT_zhz_generation(master_omega, operators, lhs_rhs, only_ground_state=
     """ x """
     return_string = ""
 
-    for i, LHS in enumerate(master_omega.operator_list):
+    for i, Proj in enumerate(master_omega.operator_list):
 
         # only print the header when we change rank (from linear to quadratic for example)
-        if LHS.rank > master_omega.operator_list[i-1].rank:
-            return_string += spaced_named_line(f"RANK {LHS.rank:2d} FUNCTIONS", s2) + '\n'
+        if Proj.rank > master_omega.operator_list[i-1].rank:
+            return_string += spaced_named_line(f"RANK {Proj.rank:2d} FUNCTIONS", s2) + '\n'
 
         # header
-        return_string += '\n' + named_line(f"{LHS} TERMS", s2//2)
+        return_string += '\n' + named_line(f"{Proj} TERMS", s2//2)
 
         # functions
-        return_string += _construct_eT_zhz_compute_function(LHS, operators, lhs_rhs, only_ground_state, opt_einsum)
+        return_string += _construct_eT_zhz_compute_function(Proj, operators, lhs_rhs, only_ground_state, opt_einsum)
 
     return return_string
 
 
-def _write_master_eT_zhz_compute_function(LHS, lhs_rhs, opt_einsum=False):
+def _write_master_eT_zhz_compute_function(Proj, lhs_rhs, opt_einsum=False):
     """ Write the wrapper function which `vibronic_hamiltonian.py` calls. """
 
-    specifier_string = f"m{LHS.m}_n{LHS.n}"
+    specifier_string = f"m{Proj.m}_n{Proj.n}"
 
     tab = ' '*4
     four_tabs = tab*4
 
     # shared by all functions
     truncation_checks = 'truncation.confirm_at_least_singles()'
-    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_doubles()' if ((LHS.m >= 2) or (LHS.n >= 2)) else ''
-    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_triples()' if ((LHS.m >= 3) or (LHS.n >= 3)) else ''
-    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_quadruples()' if ((LHS.m >= 4) or (LHS.n >= 4)) else ''
-    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_quintuples()' if ((LHS.m >= 5) or (LHS.n >= 5)) else ''
-    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_sextuples()' if ((LHS.m >= 6) or (LHS.n >= 6)) else ''
+    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_doubles()' if ((Proj.m >= 2) or (Proj.n >= 2)) else ''
+    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_triples()' if ((Proj.m >= 3) or (Proj.n >= 3)) else ''
+    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_quadruples()' if ((Proj.m >= 4) or (Proj.n >= 4)) else ''
+    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_quintuples()' if ((Proj.m >= 5) or (Proj.n >= 5)) else ''
+    truncation_checks += f'\n{four_tabs}truncation.confirm_at_least_sextuples()' if ((Proj.m >= 6) or (Proj.n >= 6)) else ''
 
     # shared by all functions
     if lhs_rhs == 'RHS':
@@ -1852,11 +1852,11 @@ def _write_master_eT_zhz_compute_function(LHS, lhs_rhs, opt_einsum=False):
     if not opt_einsum:
         func_string = f'''
             def compute_{specifier_string}_amplitude(A, N, {common_positional_arguments}):
-                """Compute the {LHS} amplitude."""
+                """Compute the {Proj} amplitude."""
                 {truncation_checks:s}
 
                 # the residual tensor
-                {tensor} = np.zeros(shape=({', '.join(['A',] + ['N',]*LHS.rank)}), dtype=complex)
+                {tensor} = np.zeros(shape=({', '.join(['A',] + ['N',]*Proj.rank)}), dtype=complex)
 
                 # {step_name} the terms
                 {step_name}_{specifier_string}_HZ_{t_type}({tensor}, {common_positional_arguments})
@@ -1867,11 +1867,11 @@ def _write_master_eT_zhz_compute_function(LHS, lhs_rhs, opt_einsum=False):
     else:
         func_string = f'''
             def compute_{specifier_string}_amplitude_optimized(A, N, {common_positional_arguments}, opt_paths):
-                """Compute the {LHS} amplitude."""
+                """Compute the {Proj} amplitude."""
                 {truncation_checks:s}
 
                 # the residual tensor
-                {tensor} = np.zeros(shape=({', '.join(['A',] + ['N',]*LHS.rank)}), dtype=complex)
+                {tensor} = np.zeros(shape=({', '.join(['A',] + ['N',]*Proj.rank)}), dtype=complex)
 
                 # unpack the optimized paths
                 optimized_HZ_paths, optimized_eT_HZ_paths = opt_paths
@@ -1933,8 +1933,8 @@ def _generate_eT_zhz_python_file_contents(truncations, **kwargs):
     string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
     # the wrapper functions that call the code made inside `_wrap_eT_zhz_generation`
     string += "".join([
-        _write_master_eT_zhz_compute_function(LHS, lhs_rhs)
-        for LHS in master_omega.operator_list
+        _write_master_eT_zhz_compute_function(Proj, lhs_rhs)
+        for Proj in master_omega.operator_list
     ])
 
     # ------------------------------------------------------------------------------------------- #
@@ -1951,8 +1951,8 @@ def _generate_eT_zhz_python_file_contents(truncations, **kwargs):
     string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
     # the wrapper functions that call the code made inside `_wrap_eT_zhz_generation`
     string += "".join([
-        _write_master_eT_zhz_compute_function(LHS, lhs_rhs,opt_einsum=True)
-        for LHS in master_omega.operator_list
+        _write_master_eT_zhz_compute_function(Proj, lhs_rhs, opt_einsum=True)
+        for Proj in master_omega.operator_list
     ])
 
     # ------------------------------------------------------------------------------------------- #
