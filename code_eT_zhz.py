@@ -349,35 +349,44 @@ def _eT_zhz_einsum_vibrational_components(t_list, h, z_right, b_loop_flag=False)
 
 
 def _eT_zhz_einsum_vibrational_components_lhs(t_list, h, z_right, b_loop_flag=False):
-    """ fix
+    """ Return two lists of strings to be used in a numpy.einsum() call.
+
+    The first list is all the vibrational components of each term (t_conj, dT, z or dz),
+    (dz if no dT) to be traced over; which will be appended to the electronic components.
+    The second is the leftover indices, which indicated external labels; these
+    will be appended to the output string.
+
+    Each string is paired with a t_conj, dT, or z / dz term.
+    The default is to assume all terms have two electronic degrees of freedom.
+    We also assume that we want the final shape to have electronic dimensions `ab`.
+    Therefore we start with `ac` and simply iterate over `cdefgh` like so:              ?still correct?
+        `ac, cd, de, ef, fg, gh, hb -> ab`
+    or
+        `ac, cd, db -> ab`
+    and so clearly the current implementation only supports up to 7 terms.
+
     """
 
     vibrational_components = []  # store return values here
 
     old_print_wrapper(t_list, h, z_right)
 
-    # add t term vibrational components
+    # add t_conj term vibrational components
     alist, blist, offset_dict = _build_t_term_python_group(t_list, h, z_right)
     for i in range(len(alist)):
         vibrational_components.append(alist[i] + blist[i])
 
-    # add h term vibrational components
-    if h.m == 0 and h.n == 0:
-        h_labels, offset_dict = _build_h_term_python_labels(h, offset_dict)
-        vibrational_components.append(h_labels[0] + h_labels[1])
-        print('h_labels[0]= ', h_labels[0])
-        print('h_labels[1]= ', h_labels[1])
-    else:
-        h_labels, offset_dict = _build_h_term_python_labels(h, offset_dict)
-        vibrational_components.append(h_labels[0] + h_labels[1])
+    # add dT term vibrational components
+    h_labels, offset_dict = _build_h_term_python_labels(h, offset_dict)
+    vibrational_components.append(h_labels[0] + h_labels[1])
 
-    # add z term vibrational components
+    # add z / dz term vibrational components
     z_labels, offset_dict = _build_z_term_python_labels(z_right, offset_dict)
     vibrational_components.append(z_labels[0] + z_labels[1])
 
     # remaining term lists
     remaining_list = [r for r in blist] + [h_labels[1], z_labels[1], ]
-    print('remaining_list= ',remaining_list)
+    print('remaining_list= ', remaining_list)
     return vibrational_components, ''.join(remaining_list)
 # ----------------------------------------------------------------------------------------------- #
 # old and unused
