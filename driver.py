@@ -35,6 +35,7 @@ def prepare_parsed_arguments():
     parser.add_argument('-es', '--excited_state', type=bool, default=True, help="Only ground state?")
     parser.add_argument('-rf', '--remove_f_terms', type=bool, default=False, help="Choose to remove f terms")
     parser.add_argument('-c', '--code', action='store_true', help="Generate LaTeX by default; `-c` generates code instead.")
+    parser.add_argument('-lhs', action='store_true', help="Generate LaTeX by default; `-c` generates code instead.")
 
     # ----- file save/load args -------
     parser.add_argument('-p', '--path', type=str, default=None, help="filename of load/save file")
@@ -104,7 +105,8 @@ if (__name__ == '__main__'):
     default_kwargs = {
         'only_ground_state': True,
         'remove_f_terms': False,
-        'ansatz': 'eT_z_t ansatz'
+        'ansatz': 'eT_z_t ansatz',
+        'lhs_rhs': 'RHS'
     }
 
     if pargs.excited_state is False:
@@ -130,11 +132,14 @@ if (__name__ == '__main__'):
         else:
             raise Exception()
 
+    if pargs.lhs is True:
+        default_kwargs['lhs_rhs'] = 'LHS'
+
     # dump_all_stdout_to_devnull()   # calling this removes all prints / logs from stdout
     # log.setLevel('CRITICAL')
 
     import _glue_
-    # load test
+
     if not(pargs.code):
         _glue_._generate_latex(trunc, **default_kwargs)
     else:

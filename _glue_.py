@@ -19,13 +19,17 @@ from code_residual_equations import generate_residual_equations_file
 from code_w_equations import generate_w_operator_equations_file
 from code_dt_equations import generate_dt_amplitude_equations_file
 
+default_lhs_rhs = ['LHS', 'RHS'][1]
+
 
 def _generate_python(trunc, **kwargs):
     default_kwargs = {
         'only_ground_state': True,
         'remove_f_terms': False,
-        'ansatz': 'full cc'
+        'ansatz': 'full cc',
+        'lhs_rhs': default_lhs_rhs,
     }
+
     # if empty dict
     if not bool(kwargs):
         kwargs = default_kwargs
@@ -59,7 +63,12 @@ def _gen_wrapper_full_cc_python(truncations, **kwargs):
     f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
     gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
-    path = f"./{gs_string}full_cc_equations{f_term_string}.py"
+    if kwargs['lhs_rhs'] == 'RHS':
+        lhs_rhs_string = "equations"
+    elif kwargs['lhs_rhs'] == 'LHS':
+        lhs_rhs_string = "special_LHS_equations"
+
+    path = f"./{gs_string}full_cc_{lhs_rhs_string}{f_term_string}.py"
     kwargs['path'] = path
 
     generate_full_cc_python(truncations, **kwargs)
@@ -74,8 +83,10 @@ def _gen_wrapper_eT_zhz_python(truncations, **kwargs):
 
     # temporary naming scheme until a better one can be designed
     # also hot band equation generation has not been implemented anyways
+
     path = (
         "./eT_zhz_eqs"
+        f"_{kwargs['lhs_rhs']}"
         f"_H({truncations[tkeys.H]})"
         f"_P({truncations[tkeys.P]})"
         f"_T({truncations[tkeys.T]})"
@@ -93,7 +104,8 @@ def _generate_latex(trunc, **kwargs):
     default_kwargs = {
         'only_ground_state': True,
         'remove_f_terms': False,
-        'ansatz': 'full cc'
+        'ansatz': 'full cc',
+        'lhs_rhs': default_lhs_rhs,
     }
     # if empty dict
     if not bool(kwargs):
@@ -128,7 +140,12 @@ def _gen_wrapper_full_cc_latex(truncations, **kwargs):
     f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
     gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
-    path = f"./{gs_string}full_cc_equations{f_term_string}.tex"
+    if kwargs['lhs_rhs'] == 'RHS':
+        lhs_rhs_string = "symmetric_equations"
+    elif kwargs['lhs_rhs'] == 'LHS':
+        lhs_rhs_string = "special_LHS_terms"
+
+    path = f"./{gs_string}full_cc_{lhs_rhs_string}{f_term_string}.tex"
     kwargs['path'] = path
 
     generate_full_cc_latex(truncations, **kwargs)
@@ -140,7 +157,12 @@ def _gen_wrapper_z_t_latex(truncations, **kwargs):
     f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
     gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
-    path = f"./{gs_string}z_t_symmetric_equations{f_term_string}.tex"
+    if kwargs['lhs_rhs'] == 'RHS':
+        lhs_rhs_string = "symmetric_equations"
+    elif kwargs['lhs_rhs'] == 'LHS':
+        lhs_rhs_string = "special_LHS_terms"
+
+    path = f"./{gs_string}z_t_{lhs_rhs_string}{f_term_string}.tex"
     kwargs['path'] = path
 
     generate_z_t_symmetric_latex(truncations, **kwargs)
@@ -152,7 +174,12 @@ def _gen_wrapper_eT_z_t_latex(truncations, **kwargs):
     f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
     gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
 
-    path = f"./{gs_string}eT_z_t_symmetric_equations{f_term_string}.tex"
+    if kwargs['lhs_rhs'] == 'RHS':
+        lhs_rhs_string = "symmetric_equations"
+    elif kwargs['lhs_rhs'] == 'LHS':
+        lhs_rhs_string = "special_LHS_terms"
+
+    path = f"./{gs_string}eT_z_t_{lhs_rhs_string}{f_term_string}.tex"
     kwargs['path'] = path
 
     generate_eT_z_t_symmetric_latex(truncations, **kwargs)
