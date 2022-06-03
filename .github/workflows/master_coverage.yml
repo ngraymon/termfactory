@@ -5,8 +5,10 @@ on:
   # on pull requests yet.
   push:
     branches:
-      - master #change to test_* or *test etc later
-  workflow_dispatch:
+      - master
+  pull_request:
+    branches:
+      - master
 
 env:
   PIP_DISABLE_PIP_VERSION_CHECK: 1
@@ -15,7 +17,7 @@ jobs:
   coverage:
     name: "Python 3.9 on Ubuntu"
     #container: python:3.9
-    runs-on: ci
+    runs-on: ubuntu-latest
     steps:
       - name: "Check out the repo"
         uses: "actions/checkout@v3"

@@ -15,7 +15,7 @@ jobs:
   coverage:
     name: "Python 3.9 on Ubuntu"
     #container: python:3.9
-    runs-on: ci
+    runs-on: ubuntu-latest
     steps:
       - name: "Check out the repo"
         uses: "actions/checkout@v3"
