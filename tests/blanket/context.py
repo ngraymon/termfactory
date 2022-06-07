@@ -4,4 +4,4 @@ import sys
 
 # import the path to the pibronic package
 my_directory = dirname(__file__)
-sys.path.insert(0, abspath(join(my_directory, pardir, pardir)))
+sys.path.insert(0, abspath(join(my_directory, pardir, pardir, 'residual_term_builder')))
