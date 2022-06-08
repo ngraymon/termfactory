@@ -3,6 +3,7 @@
 # third party imports
 
 # local imports
+import code_import_statements_module
 from namedtuple_defines import t_term_namedtuple
 from helper_funcs import (
     generate_un_linked_disconnected_partitions_of_n,
@@ -353,7 +354,7 @@ def _generate_vemx_contributions(order, opt_einsum=False):
             old_print_wrapper(partition, partition[0])
             # we have to space the line correct (how many tabs)
             if max(partition) >= 2:
-                print('reached')
+                old_print_wrapper('reached')
                 return_string += f"{tab}{tab}{W_array} += {prefactor} * {t_terms[partition[0]].string}\n"
             else:
                 return_string += f"{tab}{W_array} += {prefactor} * {t_terms[partition[0]].string}\n"
@@ -961,19 +962,7 @@ def generate_w_operator_equations_file(max_w_order, path="./w_operator_equations
     """Generates and saves to a file the code to calculate the w operator equations for the CC approach."""
 
     # start with the import statements
-    file_data = (
-        "# system imports\n"
-        "from math import factorial\n"
-        "\n"
-        "# third party imports\n"
-        "import numpy as np\n"
-        "import opt_einsum as oe\n"
-        "\n"
-        "# local imports\n"
-        "from .symmetrize import symmetrize_tensor\n"
-        "from ..log_conf import log\n"
-        "\n"
-    )
+    file_data = code_import_statements_module.w_equations_import_statements
 
     # write the functions to calculate the W operators
     file_data += generate_w_operators_string(max_order=max_w_order)

@@ -1,0 +1,1 @@
+(\bz_0\bh_0 + f\bz^{k\blue{}\red{}}_{}\bh^{}_{\blue{k}\blue{}\red{}} + \bar{f}\bz^{}_{k\blue{}\red{}}\bh^{\blue{k}\blue{}\red{}}_{})

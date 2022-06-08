@@ -1,49 +1,25 @@
 # system imports
+import functools
 
 # third party imports
 
 # local imports
-from namedtuple_defines import (
-    general_operator_namedtuple,
-    omega_namedtuple,
-)
-from helper_funcs import unique_permutations
+import helper_funcs
+from helper_funcs import unique_permutations, named_line
+from namedtuple_defines import general_operator_namedtuple, omega_namedtuple
 from common_imports import tab, tab_length, summation_indices, unlinked_indices, old_print_wrapper
 from latex_full_cc import (
-    disconnected_namedtuple,
     generate_full_cc_hamiltonian_operator,
     generate_s_taylor_expansion,
+    generate_omega_operator,
     _filter_out_valid_s_terms,
     _seperate_s_terms_by_connection,
     _debug_print_valid_term_list,
     _debug_print_different_types_of_terms
 )
+from namedtuple_defines import disconnected_namedtuple
 from code_w_equations import taylor_series_order_tag, hamiltonian_order_tag
-
-
-def generate_omega_operator(maximum_cc_rank=2, omega_max_order=3):
-    """Return an `omega_namedtuple` whose attributes are determined by `maximum_cc_rank`.
-
-    The `operator_list` contains all permutations of (`m`,`n`) for `m` & `n` in `range(maximum_cc_rank + 1)`.
-    The name is a string of the chars `d` and `b` according to `m` and `n` respectively.
-    `m` is associated with creation operators (d) and `n` is associated with annihilation operators (b).
-
-    For m == n == 0 we generate `operator(name='', m=0, n=0)` which represents the zero order equation
-    """
-
-    return_list = []
-
-    for m in range(maximum_cc_rank + 1):          # m is the upper label (creation operators)
-        for n in range(maximum_cc_rank + 1 - m):  # n is the lower label (annihilation operators)
-
-            name = "d"*m + "b"*n
-
-            if m+n <= omega_max_order:
-                return_list.append(general_operator_namedtuple(name, m+n, m, n))
-
-    return_list.sort(key=lambda x: len(x.name))
-
-    return omega_namedtuple(maximum_cc_rank, return_list)
+import code_import_statements_module
 
 
 # temp logging fix
@@ -53,6 +29,14 @@ log = log_conf.get_filebased_logger(f'{__name__}.txt', submodule_name=__name__)
 header_log = log_conf.HeaderAdapter(log, {})
 subheader_log = log_conf.SubHeaderAdapter(log, {})
 
+##########################################################################################
+# Defines for labels and spacing
+
+s1, s2 = 75, 28
+l1, l2 = 109, 45
+
+spaced_named_line = functools.partial(helper_funcs.spaced_named_line, spacing_line=f"# {'-'*s1} #\n")
+long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, large_spacing_line=f"# {'-'*l1} #\n")
 ##########################################################################################
 
 # ----------------------------------------------------------------------------------------------- #
@@ -356,9 +340,31 @@ def _multiple_perms_logic(term):
     raise Exception("Shouldn't get here")  # pragma: no cover
 
 
-def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_name='truncation'):
-    """ x """
-    maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
+def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='truncation'):
+    """ Do all the work here.
+    Context: for a given omega(m,n) we generate (based on on `trunc_obj_name`'s value):
+     - fully
+     - linked-disconnected
+     - disconnected
+     terms.
+
+    We do this by first building up all einsums in a big list of dicts of dicts of lists
+    The `hamiltonian_rank_list` stores all the einsums, and they are glued together after
+    the loop over `t_term_list` is done.
+    1 - The outer list is indexed by the maximum rank of h, effectively checking the rank of h.
+    2 - For a given dict in the outer list it is indexed by the maximum t-rank.
+    3 - The value associated with a given t-rank is a dictionary
+    4 - an individual key,value pair is a string representation of a prefactor
+        in a minimal fractional form; if the prefactor is 0.25 then the string representation
+        is `1/4`
+
+    An example:
+        `outer_list = [e1, e2, e3, ....]`
+        `e1 = {'0': d1, '1': d2, 2: d3, ....}`
+        ``
+    """
+
+    maximum_h_rank, maximum_cc_rank, _, _ = truncations
 
     if t_term_list == []:
         return ["pass  # no valid terms here", ]
@@ -393,6 +399,7 @@ def _write_cc_einsum_python_from_list(rank, truncations, t_term_list, trunc_obj_
         # -----------------------------------------------------------------------------------------
         # build with permutations
         hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor] = []
+        old_print_wrapper(hamiltonian_rank_list)
 
         if permutations is None:
             t_operands = ', '.join([f"t_args[({t.m_h + t.m_o}, {t.n_h + t.n_o})]" for t in t_list])
@@ -527,9 +534,9 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
         _debug_print_different_types_of_terms(fully, linked, unlinked)
 
     return_list = [
-        _write_cc_einsum_python_from_list(omega_term.rank, truncations, fully),
-        _write_cc_einsum_python_from_list(omega_term.rank, truncations, linked),
-        _write_cc_einsum_python_from_list(omega_term.rank, truncations, unlinked),
+        _write_cc_einsum_python_from_list(truncations, fully),
+        _write_cc_einsum_python_from_list(truncations, linked),
+        _write_cc_einsum_python_from_list(truncations, unlinked),
     ]
 
     return return_list
@@ -541,71 +548,59 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
 
     return_string = ""
     specifier_string = f"m{omega_term.m}_n{omega_term.n}"
+    five_tab = "\n" + tab*5
 
-    if not opt_einsum:
+    # generate ground state einsums
+    ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True, opt_einsum=opt_einsum)
 
-        # generate ground state einsums
-        ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True)
+    # generate ground + excited state einsums
+    if not only_ground_state:
+        einsums = _generate_full_cc_einsums(omega_term, truncations, opt_einsum=opt_einsum)
+    else:  # pragma: no cover
+        einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
 
-        # generate einsums if not ground state
-        if not only_ground_state:
-            einsums = _generate_full_cc_einsums(omega_term, truncations)
-        else:  # pragma: no cover
-            einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
-            # old_print_wrapper(einsums)
-            # sys.exit(0)
+    for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
 
-        six_tab = "\n" + tab*6
+        # the name of the function
+        if not opt_einsum:
+            func_name = f"add_{specifier_string}_{term_type}_terms"
+        else:
+            func_name = f"add_{specifier_string}_{term_type}_terms_optimized"
 
-        for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
-            # write function definition
-            function_string = f'''
-                def add_{specifier_string}_{term_type}_terms(R, ansatz, truncation, h_args, t_args):
-                    """Compute the {omega_term} {term_type} terms."""
-                    if ansatz.ground_state:
-                        {six_tab.join(ground_state_only_einsums[i])}
-                    else:
-                        {six_tab.join(einsums[i])}
-                    return
-            '''
-            # remove space fr
+        # the positional arguments it takes (no keyword arguments are used currently)
+        if not opt_einsum:
+            positional_arguments = "R, ansatz, truncation, h_args, t_args"
+        else:
+            positional_arguments = "R, ansatz, truncation, h_args, t_args, opt_paths"
 
-            # remove 4 consecutive tabs from the multi-line string `function_string`
-            function_string = "\n".join([line[tab_length*4:].rstrip() for line in function_string.splitlines()])
-            # two lines between each function
-            return_string += function_string + '\n'
+        # the docstring of the function
+        if not opt_einsum:
+            docstring = f"Calculate the {omega_term} {term_type} terms."
+        else:
+            docstring = f"Optimized calculation of the {omega_term} {term_type} terms."
 
-    # optimized term calculations
-    else:
+        # glue all these strings together in a specific manner to form the function definition
+        function_string = f'''
+            def {func_name}({positional_arguments}):
+                """{docstring}"""
 
-        # generate ground state einsums
-        ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True, opt_einsum=True)
+                if ansatz.ground_state:
+                    {five_tab.join(ground_state_only_einsums[i])}
+                else:
+                    {five_tab.join(einsums[i])}
+                return
+        '''
 
-        # generate einsums if not ground state
-        if not only_ground_state:
-            einsums = _generate_full_cc_einsums(omega_term, truncations, opt_einsum=True)
-        else:  # pragma: no cover
-            einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
+        """
+            remove 3 consecutive tabs from the multi-line string `function_string`
+            this is because we use triple single quotes over multiple lines
+            therefore introducing 3 extra tabs of indentation that we DO NOT want
+            to be present when we write the string to a file
+        """
+        function_string = "\n".join([line[tab_length*3:].rstrip() for line in function_string.splitlines()])
 
-        six_tab = "\n" + tab*6
-
-        for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
-            # write function definition
-            function_string = f'''
-                def add_{specifier_string}_{term_type}_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
-                    """Optimized calculation of the of the {omega_term} {term_type} terms."""
-
-                    if ansatz.ground_state:
-                        {six_tab.join(ground_state_only_einsums[i])}
-                    else:
-                        {six_tab.join(einsums[i])}
-                    return
-            '''
-
-            # remove 4 consecutive tabs from the multi-line string `function_string`
-            function_string = "\n".join([line[tab_length*4:] for line in function_string.splitlines()])
-            # two lines between each function
-            return_string += function_string + '\n'
+        # add an additional line between each function
+        return_string += function_string + '\n'
 
     return return_string
 
@@ -687,61 +682,41 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
 
     # ------------------------------------------------------------------------------------------- #
-    # for generating labels and spacing
-    def named_line(name, width):
-        return "# " + "-"*width + f" {name} " + "-"*width + " #"
-
-    s1, s2 = 75, 28
-    spacing_line = "# " + "-"*s1 + " #\n"
-
-    def spaced_named_line(name, width):
-        return spacing_line + named_line(name, width) + '\n' + spacing_line
-
-    s3, s4 = 109, 45
-    large_spacing_line = "# " + "-"*s3 + " #\n"
-
-    def long_spaced_named_line(name, width):
-        return large_spacing_line + named_line(name, width) + '\n' + large_spacing_line
-    # ------------------------------------------------------------------------------------------- #
-    #
-    # ------------------------------------------------------------------------------------------- #
     # header for default functions (as opposed to the optimized functions)
-    string = long_spaced_named_line("DEFAULT FUNCTIONS", s4)
+    string = long_spaced_named_line("DEFAULT FUNCTIONS", l2)
     # ----------------------------------------------------------------------- #
     # header
-    string += '\n' + named_line("INDIVIDUAL TERMS", s4) + '\n\n'
+    string += '\n' + named_line("INDIVIDUAL TERMS", l2) + '\n\n'
     # generate
     string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state)
     # ----------------------------------------------------------------------- #
     # header
-    string += '\n' + named_line("RESIDUAL FUNCTIONS", s4)
+    string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
     # generate
     string += "".join([
         _write_master_full_cc_compute_function(omega_term)
         for omega_term in master_omega.operator_list
     ])
-    # ------------------------------------------------------------------------------------------- #
-    #
+
     # ------------------------------------------------------------------------------------------- #
     # header for optimized functions
-    string += long_spaced_named_line("OPTIMIZED FUNCTIONS", s4-1)
+    string += long_spaced_named_line("OPTIMIZED FUNCTIONS", l2-1)
     # ----------------------------------------------------------------------- #
     # header
-    string += '\n' + named_line("INDIVIDUAL TERMS", s4) + '\n\n'
+    string += '\n' + named_line("INDIVIDUAL TERMS", l2) + '\n\n'
     # generate
     string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state, opt_einsum=True)
     # ----------------------------------------------------------------------- #
     # generate
-    string += '\n' + named_line("RESIDUAL FUNCTIONS", s4)
+    string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
     string += "".join([
         _write_master_full_cc_compute_function(omega_term, opt_einsum=True)
         for omega_term in master_omega.operator_list
     ])
-    # ------------------------------------------------------------------------------------------- #
-    #
+
     # ------------------------------------------------------------------------------------------- #
     # header for optimized paths function
-    string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", s4)
+    string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", l2)
     # write the code for generating optimized paths for full CC, this is probably different than the W code?!?
     # maybe... im not sure?
     # both VEMX and VECC
@@ -753,19 +728,7 @@ def generate_full_cc_python(truncations, only_ground_state=False, path="./full_c
     """Generates and saves to a file the code to calculate the terms for the full CC approach."""
 
     # start with the import statements
-    file_data = (
-        "# system imports\n"
-        "from math import factorial\n"
-        "\n"
-        "# third party imports\n"
-        "import numpy as np\n"
-        "import opt_einsum as oe\n"
-        "\n"
-        "# local imports\n"
-        "from .symmetrize import symmetrize_tensor\n"
-        "from ..log_conf import log\n"
-        "\n"
-    )
+    file_data = code_import_statements_module.full_cc_import_statements
 
     # write the functions to calculate the W operators
     file_data += _generate_full_cc_python_file_contents(truncations, only_ground_state)

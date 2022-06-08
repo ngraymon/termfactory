@@ -11,6 +11,8 @@ from namedtuple_defines import (
     general_operator_namedtuple,
     hamiltonian_namedtuple,
     omega_namedtuple,
+    connected_namedtuple,
+    disconnected_namedtuple,
 )
 
 # temp
@@ -48,10 +50,6 @@ So a h_1 couples with t^1 but the values inside the t^1 `namedtuple` object woul
 # so o^2_1 h^1 t_1 t_1 would mean m_t = [1, 1]
 connected_omega_operator_namedtuple = namedtuple('connected_omega', ['rank', 'm', 'n', 'm_h', 'n_h', 'm_t', 'n_t'])
 connected_h_operator_namedtuple = namedtuple('connected_h', ['rank', 'm', 'n', 'm_o', 'n_o', 'm_t', 'n_t'])
-
-# namedtuples for the t amplitudes
-connected_namedtuple = namedtuple('connected', ['m_h', 'n_h', 'm_o', 'n_o'])
-disconnected_namedtuple = namedtuple('disconnected', ['m_h', 'n_h', 'm_o', 'n_o'])
 
 
 # ---------------------- generating basic operators ------------------------- #
@@ -548,7 +546,7 @@ def _generate_explicit_connections(omega, h, unique_s_permutations):
             log.debug(f"Found an invalid term (h.m_o != o.n_h)\n{term_string}")
             continue
 
-        elif h_kwargs['n_o'] != o_kwargs['m_h']: # pragma: no cover
+        elif h_kwargs['n_o'] != o_kwargs['m_h']:  # pragma: no cover
             # TODO prebake something to trigger this
             term_string = f"{tab}{omega}, {h}, {s_list}\n{tab}{o_kwargs=}\n{tab}{h_kwargs=}\n"
             log.debug(f"Found an invalid term (h.n_o != o.m_h)\n{term_string}")
@@ -682,7 +680,7 @@ def _seperate_s_terms_by_connection(total_list):
                 # linked disconnected
                 else:
                     # this shouldn't happen, but we check just in case
-                    if omega.rank == 1: # pragma: no cover
+                    if omega.rank == 1:  # pragma: no cover
                         old_print_wrapper('??', s, term)
                         raise Exception("Linear terms should always be connected or disconnected")
 
