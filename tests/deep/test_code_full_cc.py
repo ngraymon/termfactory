@@ -9,6 +9,7 @@ classtest = 'test_code_full_cc'
 from . import context
 import code_full_cc as cfcc
 import latex_full_cc as fcc
+from truncation_keys import TruncationsKeys as tkeys
 from . import large_test_data
 
 # global vars
@@ -367,7 +368,12 @@ class Test_write_cc_einsum_python_from_list:
 
         # input data
         rank = 1
-        truncations = [1, 1, 1, 1]
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }   
         t_term_list = [
             [
                 fcc.connected_omega_operator_namedtuple(rank=1, m=0, n=1, m_h=0, n_h=0, m_t=[0], n_t=[1]),
@@ -394,7 +400,12 @@ class Test_write_cc_einsum_python_from_list:
 
         # input data
         rank = 1
-        truncations = [1, 1, 1, 1]
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }   
         t_term_list = [
             [
                 fcc.connected_omega_operator_namedtuple(rank=1, m=0, n=1, m_h=0, n_h=1, m_t=[0], n_t=[0]),
@@ -420,7 +431,12 @@ class Test_write_cc_einsum_python_from_list:
 
         # input data
         rank = 0
-        truncations = [1, 1, 1, 1]
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }   
         t_term_list = [
             [
                 fcc.connected_omega_operator_namedtuple(rank=0, m=0, n=0, m_h=0, n_h=0, m_t=[0], n_t=[0]),
@@ -455,7 +471,12 @@ class Test_write_cc_einsum_python_from_list:
 
         # input data
         rank = 2
-        truncations = [2, 2, 2, 2]
+        truncations = {
+            tkeys.H: 2,
+            tkeys.CC: 2,
+            tkeys.S: 2,
+            tkeys.P: 2
+        }   
         t_term_list = large_test_data.write_cc_einsum_python_from_list_single_unique_key.t_term_list
 
         # run function
@@ -471,7 +492,12 @@ class Test_generate_full_cc_einsums:
 
         # input data
         omega_term = fcc.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
-        truncations = [1, 1, 1, 1]
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }   
 
         # run function
         function_output = cfcc._generate_full_cc_einsums(
@@ -506,7 +532,12 @@ class Test_generate_full_cc_compute_function:
 
         # input data
         omega_term = fcc.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
-        truncations = [1, 1, 1, 1]
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }   
 
         # run function
         function_output = cfcc._generate_full_cc_compute_function(
@@ -529,7 +560,12 @@ class Test_generate_full_cc_compute_function:
 
         # input data
         omega_term = fcc.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
-        truncations = [1, 1, 1, 1]
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }   
 
         # run function
         function_output = cfcc._generate_full_cc_compute_function(
@@ -601,7 +637,12 @@ class Test_wrap_full_cc_generation:
             return spacing_line + named_line(name, width) + '\n' + spacing_line
 
         # input data
-        truncations = [1, 1, 1, 1]
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }   
         master_omega = fcc.omega_namedtuple(
             maximum_rank=1,
             operator_list=[
@@ -637,10 +678,14 @@ class Test_generate_full_cc_python_file_contents:
         """run main gen"""
 
         # input data
-        truncations = [1, 1, 1, 1]
-
+        fcc_trunc = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }
         # run function
-        function_output = cfcc._generate_full_cc_python_file_contents(truncations, only_ground_state=False)
+        function_output = cfcc._generate_full_cc_python_file_contents(fcc_trunc, only_ground_state=False)
 
         # open file
         func_name = "generate_full_cc_python_file_contents_out.py"
@@ -658,8 +703,13 @@ class Test_generate_full_cc_python:
 
         # run function
         output_path = join(tmpdir, "full_cc_equations.py")
-        truncations = [1, 1, 1, 1]
-        cfcc.generate_full_cc_python(truncations, only_ground_state=False, path=output_path)
+        fcc_trunc = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }
+        cfcc.generate_full_cc_python(fcc_trunc, only_ground_state=False, path=output_path)
 
         with open(output_path, 'r') as fp:
             file_data = fp.read()

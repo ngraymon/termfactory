@@ -20,6 +20,8 @@ from latex_full_cc import (
 from namedtuple_defines import disconnected_namedtuple
 from code_w_equations import taylor_series_order_tag, hamiltonian_order_tag
 import code_import_statements_module
+from truncations import _verify_fcc_truncations
+from truncation_keys import TruncationsKeys as tkeys
 
 
 # temp logging fix
@@ -364,7 +366,8 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
         ``
     """
 
-    maximum_h_rank, maximum_cc_rank, _, _ = truncations
+    maximum_h_rank = truncations[tkeys.H]
+    maximum_cc_rank = truncations[tkeys.CC]
 
     if t_term_list == []:
         return ["pass  # no valid terms here", ]
@@ -508,7 +511,11 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
     """Return a string containing python code to be placed into a .py file.
     This does all the work of generating the einsums.
     """
-    maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
+
+    # unpack truncations
+    maximum_h_rank = truncations[tkeys.H]
+    maximum_cc_rank = truncations[tkeys.CC]
+    s_taylor_max_order = truncations[tkeys.S]
 
     H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
     s_taylor_expansion = generate_s_taylor_expansion(maximum_cc_rank, s_taylor_max_order, only_ground_state)
@@ -544,8 +551,6 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
 
 def _generate_full_cc_compute_function(omega_term, truncations, only_ground_state=False, opt_einsum=False):
     """ x """
-    maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
-
     return_string = ""
     specifier_string = f"m{omega_term.m}_n{omega_term.n}"
     five_tab = "\n" + tab*5
@@ -606,8 +611,7 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
 
 
 def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
-    """Write the wrapper function which `vibronic_hamiltonian.py` calls.
-    """
+    """Write the wrapper function which `vibronic_hamiltonian.py` calls."""
 
     specifier_string = f"m{omega_term.m}_n{omega_term.n}"
 
@@ -677,8 +681,12 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     """Return a string containing the python code to generate w operators up to (and including) `max_order`.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
     """
-    assert len(truncations) == 4, "truncations argument needs to be tuple of four integers!!"
-    maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
+
+    # unpack truncations
+    _verify_fcc_truncations(truncations)
+    maximum_cc_rank = truncations[tkeys.CC]
+    omega_max_order = truncations[tkeys.P]
+
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
 
     # ------------------------------------------------------------------------------------------- #
@@ -724,8 +732,12 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     return string
 
 
-def generate_full_cc_python(truncations, only_ground_state=False, path="./full_cc_equations.py"):
+def generate_full_cc_python(truncations, **kwargs):
     """Generates and saves to a file the code to calculate the terms for the full CC approach."""
+
+    # unpack kwargs
+    only_ground_state = kwargs['only_ground_state']
+    path = kwargs['path']
 
     # start with the import statements
     file_data = code_import_statements_module.full_cc_import_statements

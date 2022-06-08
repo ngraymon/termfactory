@@ -10,6 +10,7 @@ from . import context
 import latex_zhz as zhz
 import namedtuple_defines as nt
 from . import large_test_data
+from truncation_keys import TruncationsKeys as tkeys
 
 # global vars
 
@@ -1012,10 +1013,15 @@ class Test_run_main_zhz_for_coverage:
 
         output_path = join(tmpdir, "latex_Test_run_main_zhz_for_coverage.tex")
 
-        truncations = [1, 1, 1, 1]
+        fcc_trunc = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }
 
         zhz.generate_z_t_symmetric_latex(
-            truncations,
+            fcc_trunc,
             only_ground_state=True,
             remove_f_terms=False,
             path=output_path
