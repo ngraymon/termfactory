@@ -11,6 +11,8 @@ from namedtuple_defines import (
     general_operator_namedtuple,
     hamiltonian_namedtuple,
     omega_namedtuple,
+    connected_namedtuple,
+    disconnected_namedtuple,
 )
 
 # temp
@@ -48,10 +50,6 @@ So a h_1 couples with t^1 but the values inside the t^1 `namedtuple` object woul
 # so o^2_1 h^1 t_1 t_1 would mean m_t = [1, 1]
 connected_omega_operator_namedtuple = namedtuple('connected_omega', ['rank', 'm', 'n', 'm_h', 'n_h', 'm_t', 'n_t'])
 connected_h_operator_namedtuple = namedtuple('connected_h', ['rank', 'm', 'n', 'm_o', 'n_o', 'm_t', 'n_t'])
-
-# namedtuples for the t amplitudes
-connected_namedtuple = namedtuple('connected', ['m_h', 'n_h', 'm_o', 'n_o'])
-disconnected_namedtuple = namedtuple('disconnected', ['m_h', 'n_h', 'm_o', 'n_o'])
 
 
 # ---------------------- generating basic operators ------------------------- #
