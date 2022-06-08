@@ -646,7 +646,7 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
     return valid_upper_perm_combinations, valid_lower_perm_combinations
 
 
-def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, found_it_bool=False):
+def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, lhs_rhs, found_it_bool=False):
     """ Generate all possible permutations of matching with LHS, and h for e^T and z_terms """
 
     annotated_permutations = []  # store output here
@@ -826,11 +826,17 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, f
 
                         if t.m != sum(t_upper):  # pragma: no cover
                             log.debug(f"Bad t perms + z perms: {t.m = } {t_upper = }")
-                            raise Exception('''Code is not robust and I'm not sure what is wrong, To-Do!''')
+                            if lhs_rhs == 'RHS':
+                                raise Exception('''Code is not robust and I'm not sure what is wrong, To-Do!''')
+                            elif lhs_rhs == 'LHS':
+                                continue
 
                         if t.n != sum(t_lower):  # pragma: no cover
                             log.debug(f"Bad t perms + z perms: {t.n = } {t_lower = }")
-                            raise Exception('''Code is not robust and I'm not sure what is wrong, To-Do!''')
+                            if lhs_rhs == 'RHS':
+                                raise Exception('''Code is not robust and I'm not sure what is wrong, To-Do!''')
+                            elif lhs_rhs == 'LHS':
+                                continue
 
                         t_kwargs = {
                             'rank': t.rank,
@@ -1130,9 +1136,7 @@ def _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
     a = [0, ] * 11
     old_print_wrapper('-'*100)
 
-    numerator_value = 1
-    denominator_value = 1
-
+    numerator_value, denominator_value = 1, 1
     numerator_list, denominator_list = [], []
     # ---------------------------------------------------------------------------------------------------------
     # numerator *= overcounting_prefactor
@@ -1160,8 +1164,7 @@ def _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
             numerator_value *= internal_perms
             numerator_list.append(f'({internal_perms})')
 
-        # to account for the permutations of eT-Z internal labels
-        # with themselves
+        # to account for the permutations of eT-Z internal labels with themselves
         # as we should have accounted for all permutations by
         # moving H-Z and external labels prior
         count_t = sum(h.m_t)
@@ -1190,8 +1193,7 @@ def _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
             numerator_value *= internal_perms
             numerator_list.append(f'({internal_perms})')
 
-        # to account for the permutations of eT-Z internal labels
-        # with themselves
+        # to account for the permutations of eT-Z internal labels with themselves
         # as we should have accounted for all permutations by
         # moving H-Z and external labels prior
         count_t = sum(h.n_t)
@@ -1207,8 +1209,7 @@ def _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
         denominator_value *= math.factorial(z_right.m)
         denominator_list.append(f'{z_right.m}!')
 
-        # to account for the permutations of external labels
-        # with other labels on z
+        # to account for the permutations of external labels with other labels on z
         # (we don't account for permuting with themselves as we will symmetrize them later)
         external_perms = math.comb(z_right.m, z_right.m_lhs)
         if external_perms > 1:
@@ -1218,8 +1219,7 @@ def _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
         # like drawing cards from a deck we remove the permutations of the LHS
         new_max = z_right.m - z_right.m_lhs
 
-        # to account for the permutations of H-Z internal labels
-        # with other labels on z
+        # to account for the permutations of H-Z internal labels with other labels on z
         internal_perms = math.comb(new_max, z_right.m_h)
         if internal_perms > 1:
             numerator_value *= internal_perms
@@ -1228,14 +1228,12 @@ def _build_eThz_latex_prefactor(t_list, h, z_left, z_right, overcounting_prefact
         # like drawing cards from a deck we remove the permutations of the H
         new_max -= z_right.m_h
 
-        # to account for the permutations of H-Z internal labels
-        # with themselves
+        # to account for the permutations of H-Z internal labels with themselves
         if z_right.m_h > 1:
             numerator_value *= math.factorial(z_right.m_h)
             numerator_list.append(f'{z_right.m_h}!')
 
-        # to account for the permutations of eT-Z internal labels
-        # with themselves
+        # to account for the permutations of eT-Z internal labels with themselves
         # as we should have accounted for all permutations by
         # moving H-Z and external labels prior
         count_t = sum(z_right.m_t)
@@ -1400,13 +1398,15 @@ def _fbar_t_zL_contributions(t_list, z_left):  # pragma: no cover
     return return_list
 
 
-def _build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True):
+def _build_eT_term_latex_labels(t_list, offset_dict, lhs_rhs, color=True, letters=True):
     """ Builds latex code for labeling a `connected_t_operator_namedtuple`."""
 
     return_list = []
 
     old_print_wrapper("t_list\n", t_list, '\n')
+
     for t in t_list:
+
         if t.rank == 0:
             return f"\\mathds{{1}}"
 
@@ -1472,16 +1472,25 @@ def _build_eT_term_latex_labels(t_list, offset_dict, color=True, letters=True):
                 lower_indices += r'\red{' + z_unlinked_indices[u:u + t.n_lhs] + '}'
                 offset_dict['unlinked_index'] += t.n_lhs
 
-        return_list.append(f"{bold_t_latex}^{{{upper_indices}}}_{{{lower_indices}}}")
+        if lhs_rhs == 'RHS':
+            latex_label = f"{bold_t_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
+        elif lhs_rhs == 'LHS':
+            latex_label = f"{bold_s_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
+
+        return_list.append(latex_label)
 
     return ''.join(return_list)
 
 
-def _build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True):
+def _build_eT_hz_term_latex_labels(h, offset_dict, lhs_rhs, color=True, letters=True):
     """ Builds latex code for labeling a `connected_h_operator_namedtuple`."""
 
     if h.rank == 0:
-        return f"{bold_h_latex}_0"
+        if lhs_rhs == 'RHS':
+            return f"{bold_h_latex}_0"
+
+        elif lhs_rhs == 'LHS':
+            return f"\\mathds{1}"
 
     upper_indices, lower_indices = '', ''
 
@@ -1527,18 +1536,37 @@ def _build_eT_hz_term_latex_labels(h, offset_dict, color=True, letters=True):
             upper_indices += r'\red{' + z_unlinked_indices[u:u + h.m_lhs] + '}'
             offset_dict['unlinked_index'] += h.m_lhs
 
-    return f"{bold_h_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
+    if lhs_rhs == 'RHS':
+        return f"{bold_h_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
+
+    elif lhs_rhs == 'LHS':
+        t_str = f"{bold_t_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
+        return f"\\left(i\\dv{{{t_str}}}{{\\tau}}\\right)"
 
 
-def _build_eT_right_z_term(h, z_right, offset_dict, color=True, letters=True):
+def _build_eT_right_z_term(h, z_right, offset_dict, lhs_rhs, color=True, letters=True):
     """ Builds latex code for labeling a `connected_z_right_operator_namedtuple`.
 
     The `condense_offset` is an optional argument which is needed when creating latex code
     for linked disconnected terms in a condensed format.
     """
-    if z_right.rank == 0:
-        return f"{bold_z_latex}_0"
 
+    if (z_right.rank == 0):
+
+        zero_z_str = f"{bold_z_latex}_0"
+
+        if lhs_rhs == 'RHS':
+            return zero_z_str
+
+        # the LHS only returns Z_0 if the H component has a value
+        # otherwise it will return dZ_0/dtau
+        elif lhs_rhs == 'LHS':
+            if (h.rank != 0):
+                return zero_z_str
+            else:
+                return f"\\left(i\\dv{{{zero_z_str}}}{{\\tau}}\\right)"
+
+    # non zero terms
     upper_indices, lower_indices = '', ''
 
     if not letters:
@@ -1569,11 +1597,20 @@ def _build_eT_right_z_term(h, z_right, offset_dict, color=True, letters=True):
             upper_indices += r'\red{' + z_unlinked_indices[u:u + z_right.m_lhs] + '}'
             offset_dict['unlinked_index'] += z_right.m_lhs
 
-    return f"{bold_z_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
+    z_str = f"{bold_z_latex}^{{{upper_indices}}}_{{{lower_indices}}}"
+
+    if lhs_rhs == 'RHS':
+        return z_str
+
+    elif lhs_rhs == 'LHS':
+        if h.rank == 0:
+            return f"\\left(i\\dv{{{z_str}}}{{\\tau}}\\right)"
+        else:
+            return z_str
 
 
 def _prepare_third_eTz_latex(
-    term_list, split_width=5,
+    term_list, lhs_rhs, split_width=4,
     remove_f_terms=False, print_prefactors=True, suppress_duplicates=True
 ):
     """Return the latex commands to write the provided terms.
@@ -1650,7 +1687,7 @@ def _prepare_third_eTz_latex(
             'summation_index': 0,
         }
 
-        t_terms = _build_eT_term_latex_labels(t_list, t_offset_dict)
+        t_terms = _build_eT_term_latex_labels(t_list, t_offset_dict, lhs_rhs)
 
         left_z = ''
 
@@ -1661,7 +1698,7 @@ def _prepare_third_eTz_latex(
         #     'unlinked_index': t_offset_dict['unlinked_index']
         # }
 
-        h_term = _build_eT_hz_term_latex_labels(h, t_offset_dict)
+        h_term = _build_eT_hz_term_latex_labels(h, t_offset_dict, lhs_rhs)
 
         # right_z_offset_dict = {
         #     't_lower': sum([t.m_h for t in t_list]),
@@ -1673,7 +1710,7 @@ def _prepare_third_eTz_latex(
         #     'unlinked_index': h_offset_dict['unlinked_index'] + h.m_lhs + h.n_lhs
         # }
 
-        right_z = _build_eT_right_z_term(h, z_right, t_offset_dict)
+        right_z = _build_eT_right_z_term(h, z_right, t_offset_dict, lhs_rhs)
 
         # old_print_wrapper('Check t terms:\n', t_terms)
         # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
@@ -1789,6 +1826,7 @@ def _prepare_eTz_T_terms(eT_series_term):
         order = 0
         eT_series_term = [[eT_series_term, ], ]  # wrap in a list of lists
 
+    # todo - check here (does the if/elif statement here make a difference?)
     # T^1 operator, straightforward
     if isinstance(eT_series_term, list) and isinstance(eT_series_term[0], general_operator_namedtuple):
         subheader_log.info("PROCESSING T^1")
@@ -1812,7 +1850,7 @@ def _prepare_eTz_T_terms(eT_series_term):
     return eT_series_term, order
 
 
-def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_debug=False):
+def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, lhs_rhs, zhz_debug=False):
     """ fill up the `term_list` and `total_list` for the Z^n term
     first we find out what term (in the taylor expansion of e^Z) `z_series_term` represents
     set a boolean flag, and wrap the lower order terms in lists so that they have the same
@@ -1824,6 +1862,12 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
 
     # next we process the z operators inside z_term_list
     for h in H.operator_list:
+
+        if lhs_rhs == 'LHS':
+            # only creation operators for 'h'/t
+            # but H^0_0 must be treated specially
+            if (h.n != 0):
+                continue
 
         if True:  # debug
             nof_terms = sum([len(x) for x in eT])
@@ -1875,7 +1919,7 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
         log_conf.setLevelDebug(log)
         # we need to generate all possible combinations of
         # each z with the LHS, eT, h operators and the other z
-        eT_connection_permutations = _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations)
+        eT_connection_permutations = _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, lhs_rhs)
 
         if zhz_debug or True:  # debug prints
             for p in eT_connection_permutations:
@@ -1938,7 +1982,7 @@ def _filter_out_valid_eTz_terms(LHS, eT, H, Z_left, Z_right, total_list, zhz_deb
     return
 
 
-def _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False):
+def _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, lhs_rhs, remove_f_terms=False):
     """
     LHS * (t*t*t) * H * Z
 
@@ -1960,7 +2004,7 @@ def _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False):
 
         log.setLevel('DEBUG')
         # generate all valid combinations
-        _filter_out_valid_eTz_terms(LHS, eT_series_term, H, None, Z, valid_term_list)
+        _filter_out_valid_eTz_terms(LHS, eT_series_term, H, None, Z, valid_term_list, lhs_rhs)
         log.setLevel('INFO')
 
     if False:  # debug
@@ -1972,12 +2016,12 @@ def _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms=False):
     if valid_term_list == []:  # pragma: no cover
         return ""
 
-    return _prepare_third_eTz_latex(valid_term_list, remove_f_terms=remove_f_terms)
+    return _prepare_third_eTz_latex(valid_term_list, lhs_rhs, remove_f_terms=remove_f_terms)
 
 
 # -------------------------------------------------------------------------------- #
 
-def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, only_ground_state=True, remove_f_terms=False):
+def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, lhs_rhs, only_ground_state=True, remove_f_terms=False):
     """Return a string containing latex code to be placed into a .tex file.
     For a given set of input arguments: (`LHS`, `H`, `Z`) we generate
     all possible and valid CC terms. Note that:
@@ -1998,7 +2042,11 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
     return_string = ""
 
     # the first H term
-    return_string += _build_first_z_term(LHS)
+    if lhs_rhs == 'RHS':
+        return_string += _build_first_z_term(LHS)
+
+    elif lhs_rhs == 'LHS':
+        pass  # do nothing
 
     # the second (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist  # pragma: no cover
@@ -2011,7 +2059,8 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
         return_string += r'\\&-\Big(' + _build_second_z_term(LHS, H, Z, remove_f_terms) + r'\Big)'
 
     # the third (addition) term
-    return_string += r'\\&+\sum\Big(' + _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, remove_f_terms) + r'\Big)(1-\delta_{cb})'
+    #
+    return_string += r'\\&+\sum\Big(' + _build_third_eTz_term(LHS, eT_taylor_expansion, H, Z, lhs_rhs, remove_f_terms) + r'\Big)'
 
     # the fourth (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist  # pragma: no cover
@@ -2021,11 +2070,19 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
             "Which loops over `eT_taylor_expansion` in the same way as `_build_third_eTz_term`"
             "Do not remove this exception unless you have fully implemented the new function `_build_fourth_eTz_term`"
         )
-        return_string += r'\\&-\sum\Big(' + _build_fourth_z_term(LHS, H, Z, remove_f_terms) + r'\Big)(1-\delta_{db})'
+        return_string += r'\\&-\sum\Big(' + _build_fourth_z_term(LHS, H, Z, remove_f_terms) + r'\Big)'
 
-    if only_ground_state:  # If we are acting on the vacuum state then we add these extra terms
-        temporary_string = r"\text{all permutations of }\dv{\hat{t}_{\gamma}}{\tau}\hat{z}"
-        return_string += r'\\&-i\sum\Big(' + _build_fifth_z_term(LHS, Z) + r'\Big)'
+        if lhs_rhs == 'RHS':
+            return_string += r'(1-\delta_{db})'
+        elif lhs_rhs == 'LHS':
+            pass  # do nothing
+
+    if lhs_rhs == 'RHS':
+        if only_ground_state:  # If we are acting on the vacuum state then we add these extra terms
+            temporary_string = r"\text{all permutations of }\dv{\hat{t}_{\gamma}}{\tau}\hat{z}"
+            return_string += r'\\&-i\sum\Big(' + _build_fifth_z_term(LHS, Z) + r'\Big)'
+    elif lhs_rhs == 'LHS':
+        pass  # do nothing
 
     # remove all empty ^{}/_{} terms that are no longer needed
     return return_string.replace("^{}", "").replace("_{}", "")
@@ -2033,10 +2090,13 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, onl
 
 def generate_eT_z_t_symmetric_latex(truncations, **kwargs):
     """Generates and saves to a file the latex equations for full CC expansion."""
+
     # unpack kwargs
     only_ground_state = kwargs['only_ground_state']
     remove_f_terms = kwargs['remove_f_terms']
     path = kwargs['path']
+    lhs_rhs_flag = kwargs['lhs_rhs']
+
     # unpack truncations
     _verify_eT_z_t_truncations(truncations)
     maximum_h_rank = truncations[tkeys.H]
@@ -2136,17 +2196,28 @@ def generate_eT_z_t_symmetric_latex(truncations, **kwargs):
             """ Latex commands to wrap around the generated terms `lhs` and `eqns`
             so that the *.tex file compiles correctly.
             """
-            string = (
-                '\\begin{align}\\begin{split}\n'
-                r'LHS &='
-                '\n'
-                f"{tab}{lhs}\n"
-                r'\\ RHS &='
-                '\n%\n%\n'
-                f'{eqns}\n'
-                r'\end{split}\end{align}'
-                '\n\n'
-            )
+            if lhs_rhs_flag == 'RHS':
+                string = (
+                    '\\begin{align}\\begin{split}\n'
+                    r'LHS &='
+                    '\n'
+                    f"{tab}{lhs}\n"
+                    r'\\ RHS &='
+                    '\n%\n%\n'
+                    f'{eqns}\n'
+                    r'\end{split}\end{align}'
+                    '\n\n'
+                )
+            elif lhs_rhs_flag == 'LHS':
+                string = (
+                    '\\begin{align}\\begin{split}\n'
+                    r'LHS &='
+                    '\n%\n%\n'
+                    f'{eqns}\n'
+                    r'\end{split}\end{align}'
+                    '\n\n'
+                )
+
             return string
 
         def _generate_z_lhs(omega):
@@ -2166,7 +2237,7 @@ def generate_eT_z_t_symmetric_latex(truncations, **kwargs):
 
             # where we do all the work of generating the latex
             equations_string = _generate_eT_z_symmetric_latex_equations(
-                omega_term, eT_taylor_expansion, H, Z, only_ground_state, remove_f_terms
+                omega_term, eT_taylor_expansion, H, Z, lhs_rhs_flag, only_ground_state, remove_f_terms
             )
 
             # header for the sub section
