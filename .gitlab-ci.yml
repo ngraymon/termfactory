@@ -45,12 +45,12 @@ cov_test:
     - python -m coverage run -m pytest >> printing_output.txt
     - python -m coverage html
     - python -m coverage report
-    - ls ./htmlcov
+    - python driver.py
 
   artifacts:
     paths:
         - ./setup_output.txt
-        - ./logging_output.txt
+        - ./default_logging_file.txt
         - ./printing_output.txt
         - ./vulture_output.txt
         - ./htmlcov/*

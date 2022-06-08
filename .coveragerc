@@ -1,14 +1,11 @@
 # .coveragerc to control coverage.py
 [run]
 include =
-    reference_latex_headers.py
     code_dt_equations.py
     code_full_cc.py
     code_residual_equations.py
     code_w_equations.py
-    common_imports.py
     helper_funcs.py
-    latex_defines.py
     latex_eT_zhz.py
     latex_full_cc.py
     latex_w_equations.py
@@ -19,10 +16,41 @@ include =
 exclude_lines =
     # Have to re-enable the standard pragma
     pragma: no cover
-
     # Don't complain if non-runnable code isn't run:
     if 0:
     if __name__ == .__main__.:
+    def _debug
+    log.debug
+    raise e
+    pass
+    continue
+    if not letters:
+    if debug_flag:
+    def old_print_wrapper
+    old_print_wrapper
+    new_t_list = t_list
+    # currently unused functions
+        # full cc latex
+    def _build_latex_h_string
+    def _build_latex_t_string
+    def _build_h_string
+        #latex zhz
+    def _generate_t_symmetric_left_hand_side
+    def _write_t_symmetric_latex_from_lists
+    def _generate_t_symmetric_latex_equations
+    def _generate_t_symmetric_left_hand_side
+    def _make_z_symmetric_latex
+        #code w
+    def _next_list
+    def _generate_t_lists
+    def _generate_t_terms_dictionary
+    def _permutation_function
+    def _write_permutations
+    #color based exceptions
+    if not color:
+
+    
+
 
 ignore_errors = True
 

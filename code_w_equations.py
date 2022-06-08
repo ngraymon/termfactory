@@ -349,10 +349,12 @@ def _generate_vemx_contributions(order, opt_einsum=False):
         prefactor = _generate_w_operator_prefactor(partition)
 
         # order 1 case is simple
-        if len(partition) == 1:  # no permutation is needed for this term
+        if len(partition) == 1:  # no permutation is needed for this term # pragma: no cover
+            # code never gets here I think? bc if order < 2 has a return above
             old_print_wrapper(partition, partition[0])
             # we have to space the line correct (how many tabs)
             if max(partition) >= 2:
+                print('reached')
                 return_string += f"{tab}{tab}{W_array} += {prefactor} * {t_terms[partition[0]].string}\n"
             else:
                 return_string += f"{tab}{W_array} += {prefactor} * {t_terms[partition[0]].string}\n"
@@ -472,7 +474,8 @@ def _generate_vecc_contributions(order, opt_einsum=False):
         prefactor = _generate_w_operator_prefactor(partition)
 
         # order 1 case is simple
-        if len(partition) == 1:  # no permutation is needed for this term
+        if len(partition) == 1:  # no permutation is needed for this term # pragma: no cover
+            # order 1 can't get here?
             old_print_wrapper(partition, partition[0])
             # we have to space the line correct (how many tabs)
             if max(partition) >= 2:
@@ -485,7 +488,7 @@ def _generate_vecc_contributions(order, opt_einsum=False):
         # compile a list of the einsum calls
         einsum_list = _optimized_w_einsum_list(partition, order) if opt_einsum else _w_einsum_list(partition, order)
 
-        if len(partition) == order:
+        if len(partition) == order:  # pragma: no cover, code never gets here
             # join them together
             sum_of_einsums = " + ".join(einsum_list)
             # add the whole line to the main string

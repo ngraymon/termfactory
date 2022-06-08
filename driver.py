@@ -40,9 +40,6 @@ if (__name__ == '__main__'):
         logging_output_filename = str(pargs.log_path)
         log = log_conf.get_filebased_logger(logging_output_filename)
 
-    header_log = log_conf.HeaderAdapter(log, {})
-    subheader_log = log_conf.SubHeaderAdapter(log, {})
-
     # dump_all_stdout_to_devnull()   # calling this removes all prints / logs from stdout
     # log.setLevel('CRITICAL')
 

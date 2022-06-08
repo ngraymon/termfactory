@@ -99,7 +99,7 @@ def main():
     maximum_h_rank = 2
     maximum_cc_rank = 6
     s_taylor_max_order = 2  # this doesn't matter for the Z ansatz
-    omega_max_order = 0
+    omega_max_order = 3
 
     # for the 'z_t ansatz'
     truncations = maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order
@@ -109,7 +109,7 @@ def main():
     maximum_cc_rank = 4
     maximum_T_rank = 1
     eT_taylor_max_order = 4
-    omega_max_order = 0
+    omega_max_order = 2
 
     # need to have truncation of e^T
     eT_z_t_truncations = maximum_h_rank, maximum_cc_rank, maximum_T_rank, eT_taylor_max_order, omega_max_order
@@ -142,6 +142,6 @@ def main():
         )
     if switch == 4:
         generate_eT_zhz_python(eT_z_t_truncations, only_ground_state=True)
-        generate_full_cc_python(truncations, only_ground_state=True)
+        # generate_full_cc_python(truncations, only_ground_state=True)
 
     print("We reached the end of main")

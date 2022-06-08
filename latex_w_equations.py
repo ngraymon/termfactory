@@ -246,7 +246,7 @@ def excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex
     latex_code += "\\end{equation}\n"
 
     # if file already exists then update it
-    if os.path.isfile(path):
+    if os.path.isfile(path): # pragma: no cover
 
         # read the entire file contents
         with open(path, 'r') as fp:
@@ -260,7 +260,7 @@ def excited_state_w_equations_latex(max_w_order, path="./thermal_w_equations.tex
             fp.write(header + latex_code + r'\end{document}')
 
     # otherwise write a new file
-    else:
+    else: # pragma: no cover
         with open(path, 'w') as fp:
             fp.write(latex_code)
 

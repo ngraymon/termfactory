@@ -15,7 +15,7 @@ def unique_permutations(iterable):
     return sorted(list(set(it.permutations(iterable))))
 
 
-def build_symmetrizing_function(max_order=5, show_perm=False):
+def build_symmetrizing_function(max_order=5, show_perm=False): #pragma: no cover
     """ x """
     string = ""
     string += (
@@ -40,7 +40,7 @@ def build_symmetrizing_function(max_order=5, show_perm=False):
     return string
 
 
-def print_residual_data(R_lists, term_lists, print_equations=False, print_tuples=False):
+def print_residual_data(R_lists, term_lists, print_equations=False, print_tuples=False): #pragma: no cover
     """Print to stdout in a easily readable format the residual terms and term tuples."""
     if print_equations:
         for i, R in enumerate(R_lists):
@@ -70,19 +70,19 @@ def _partitions(number):
     return sorted(list(answer), reverse=True)
 
 
-def generate_partitions_of_n(n):
+def generate_partitions_of_n(n): 
     """Return partitions of n. Such as (5,), (4, 1), (3, 1, 1), (2, 2, 1) ... etc."""
     return _partitions(n)
 
 
-def generate_mixed_partitions_of_n(n):
+def generate_mixed_partitions_of_n(n): #pragma: no cover
     """Return partitions of n that include at most one number greater than 1.
     Such as (5,), (4, 1), (3, 1, 1), (2, 1, 1, 1) ... etc, but not (3, 2) or (2, 2, 1)
     """
     return [p for p in _partitions(n) if n - max(p) + 1 == len(p)]
 
 
-def genereate_connected_partitions_of_n(n):
+def genereate_connected_partitions_of_n(n): #pragma: no cover
     """Return partitions of n which are only comprised of 1's.
     Such as (1, 1), or (1, 1, 1). The max value should only ever be 1.
     """
@@ -96,7 +96,7 @@ def generate_linked_disconnected_partitions_of_n(n):
     return [p for p in _partitions(n) if n - max(p) + 1 == len(p) and max(p) < n]
 
 
-def generate_un_linked_disconnected_partitions_of_n(n):
+def generate_un_linked_disconnected_partitions_of_n(n): #pragma: no cover
     """Return partitions of n that represent the unlinked disconnected wave operator parts.
     Such as (3, 2), (2, 2, 1) ... etc, but not (5,), (4, 1), (3, 1, 1), (2, 1, 1, 1)
     """
