@@ -30,29 +30,33 @@ cache:
     - venv/
 
 before_script:
-
   # prepare the virtual environment
   - python -V               # Print out python version for debugging
   - python -m pip install virtualenv >> setup_output.txt
   - virtualenv venv  >> setup_output.txt
   - source venv/bin/activate
+  - python -m pip install -r requirements.txt >> setup_output.txt
+  - python -m pip install -r test_requirements.txt >> setup_output.txt
 
 cov_test:
   stage: code_analysis
   script:
     - python vulture_wrapper.py
-    - python -m coverage run code_cov.py logging_output.txt
+    - python -m coverage run -m pytest >> printing_output.txt
     - python -m coverage html
     - python -m coverage report
+    - python driver.py
 
   artifacts:
     paths:
         - ./setup_output.txt
-        - ./logging_output.txt
+        - ./default_logging_file.txt
+        - ./printing_output.txt
         - ./vulture_output.txt
-        - ./htmlcov/*.css
-        - ./htmlcov/*.js
-        - ./htmlcov/driver.html
+        - ./htmlcov/*
+        # - ./htmlcov/*.css
+        # - ./htmlcov/*.js
+        # - ./htmlcov/*.html
 
     # reports:
     #   cobertura:

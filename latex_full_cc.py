@@ -7,14 +7,18 @@ import itertools as it
 from latex_defines import *
 import reference_latex_headers as headers
 from common_imports import tab, summation_indices, unlinked_indices, old_print_wrapper
-from namedtuple_defines import general_operator_namedtuple, hamiltonian_namedtuple
+from namedtuple_defines import (
+    general_operator_namedtuple,
+    hamiltonian_namedtuple,
+    omega_namedtuple,
+)
 
 # temp
 
 # temp logging fix
 import log_conf
 
-log = log_conf.get_filebased_logger('output.txt')
+log = log_conf.get_filebased_logger(f'{__name__}.txt', submodule_name=__name__)
 header_log = log_conf.HeaderAdapter(log, {})
 subheader_log = log_conf.SubHeaderAdapter(log, {})
 
@@ -31,8 +35,6 @@ h_operator_namedtuple = namedtuple('h_operator', ['rank', 'm', 'n'])
 # these serve the same purpose as `hamiltonian_namedtuple`
 # we changed the typename from "operator" to distinguish the specific role and improve debugging
 s_operator_namedtuple = namedtuple('s_operator', ['maximum_rank', 'operator_list'])
-omega_namedtuple = namedtuple('Omega', ['maximum_rank', 'operator_list'])
-
 """
 Note that the attributes for these `namedtuples` operate in a specific manner.
 The general rule that can be followed is the m/n refers to the object it is an attribute of:
@@ -123,6 +125,33 @@ def generate_s_operator(maximum_cc_rank=2, only_ground_state=False):
     return s_operator_namedtuple(maximum_cc_rank, return_list)
 
 
+def _zero_order_s_taylor_expansion(s_taylor_expansion):
+    """ x """
+    s_taylor_expansion[0] = general_operator_namedtuple("1", 0, 0, 0)
+
+
+def _1st_order_s_taylor_expansion(s_taylor_expansion, S):
+    """ x """
+    s_taylor_expansion[1] = S.operator_list
+
+
+def _2nd_or_higher_order_s_taylor_expansion(s_taylor_expansion, S, s_taylor_max_order):
+    """ We compute all combinations including non unique ones ON PURPOSE!!
+    The products of S operators do not have indices mapping them to omega and H.
+    Therefore s^2 * s^1 === s^1 * s^2.
+    Later when we add indices, the non unique combinations will become unique,
+    due to the nature of the process of assigning the indices.
+    For example, if omega = b and h_{ij}:
+     - s^2 * s^1 can become s^{ij} * s^{z}, which would be a disconnected term.
+     - s^1 * s^2 can become s^{i} * s^{jz}, which would be a connected term.
+    """
+    for n in range(2, s_taylor_max_order+1):
+        s_taylor_expansion[n] = [
+            list(tup)
+            for tup in it.product(S.operator_list, repeat=n)
+        ]
+
+
 def generate_s_taylor_expansion(maximum_cc_rank=2, s_taylor_max_order=3, only_ground_state=False):
     """Return a list of lists of `s_operator_namedtuple`s.
 
@@ -147,20 +176,16 @@ def generate_s_taylor_expansion(maximum_cc_rank=2, s_taylor_max_order=3, only_gr
     # create the list
     s_taylor_expansion = [None, ]*(s_taylor_max_order+1)
 
-    s_taylor_expansion[0] = general_operator_namedtuple("1", 0, 0, 0)  # 1 term
-    s_taylor_expansion[1] = S.operator_list                         # S term
+    # 1 term
+    _zero_order_s_taylor_expansion(s_taylor_expansion)
 
-    """ We compute all combinations including non unique ones ON PURPOSE!!
-    The products of S operators do not have indices mapping them to omega and H.
-    Therefore s^2 * s^1 === s^1 * s^2.
-    Later when we add indices, the non unique combinations will become unique,
-    due to the nature of the process of assigning the indices.
-    For example, if omega = b and h_{ij}:
-     - s^2 * s^1 can become s^{ij} * s^{z}, which would be a disconnected term.
-     - s^1 * s^2 can become s^{i} * s^{jz}, which would be a connected term.
-    """
-    for n in range(2, s_taylor_max_order+1):
-        s_taylor_expansion[n] = [list(tup) for tup in it.product(S.operator_list, repeat=n)]
+    # S term
+    if s_taylor_max_order >= 1:
+        _1st_order_s_taylor_expansion(s_taylor_expansion, S)
+
+    # S^(n > 2) terms
+    if s_taylor_max_order >= 2:
+        _2nd_or_higher_order_s_taylor_expansion(s_taylor_expansion, S, s_taylor_max_order)
 
     return s_taylor_expansion
 
@@ -523,7 +548,8 @@ def _generate_explicit_connections(omega, h, unique_s_permutations):
             log.debug(f"Found an invalid term (h.m_o != o.n_h)\n{term_string}")
             continue
 
-        elif h_kwargs['n_o'] != o_kwargs['m_h']:
+        elif h_kwargs['n_o'] != o_kwargs['m_h']: # pragma: no cover
+            # TODO prebake something to trigger this
             term_string = f"{tab}{omega}, {h}, {s_list}\n{tab}{o_kwargs=}\n{tab}{h_kwargs=}\n"
             log.debug(f"Found an invalid term (h.n_o != o.m_h)\n{term_string}")
             continue
@@ -656,7 +682,7 @@ def _seperate_s_terms_by_connection(total_list):
                 # linked disconnected
                 else:
                     # this shouldn't happen, but we check just in case
-                    if omega.rank == 1:
+                    if omega.rank == 1: # pragma: no cover
                         old_print_wrapper('??', s, term)
                         raise Exception("Linear terms should always be connected or disconnected")
 
@@ -668,7 +694,7 @@ def _seperate_s_terms_by_connection(total_list):
                     continue
 
             # this shouldn't happen, but we check just in case
-            else:
+            else: # pragma: no cover
                 old_print_wrapper('??', s, term)
                 raise Exception("term contains something other than connected/disconnected namedtuple??\n")
 
@@ -860,7 +886,7 @@ def _generate_linked_common_terms(term_list):
     #     old_print_wrapper(omega)
     #     sys.exit(0)
 
-    return
+    # return
 
 
 def prepare_condensed_terms(term_list, linked_condense=False, unlinked_condense=False):
@@ -895,8 +921,9 @@ def prepare_condensed_terms(term_list, linked_condense=False, unlinked_condense=
             f"not rank {omega.rank}"
         )
 
-        if omega.rank == 1:
-            raise Exception("Linear omega operators (omega.rank == 1) do not have linked disconnected terms!")
+        # above assert prevents this from ever being reached
+        # if omega.rank == 1:
+        #     raise Exception("Linear omega operators (omega.rank == 1) do not have linked disconnected terms!")
 
         if omega.rank == 2:
             linked_commonfactor_list = _generate_linked_common_terms(term_list)
@@ -1498,6 +1525,8 @@ def generate_full_cc_latex(truncations, only_ground_state=False, path="./generat
     """Generates and saves to a file the latex equations for full CC expansion."""
 
     assert len(truncations) == 4, "truncations argument needs to be tuple of four integers!!"
+    for trunc in truncations:
+        assert trunc >= 1, "Truncations need to be positive integers"
     maximum_h_rank, maximum_cc_rank, s_taylor_max_order, omega_max_order = truncations
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
