@@ -13,6 +13,10 @@ output.txt
 # Include the LaTeX files in the testing directory
 !tests/**/*.tex
 !tests/**/*.pdf
+
+# prototype
+!/new/first_try.tex
+!/new/first_try.pdf
 # ------------------------------
 
 
