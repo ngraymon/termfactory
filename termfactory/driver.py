@@ -32,7 +32,7 @@ def prepare_parsed_arguments():
     # ----- input args -------
     parser.add_argument('-t', nargs='+', type=int, default=None, help="Provided Truncations, example: -t 2 2 2 2")
     parser.add_argument('-a', '--ansatz', type=str, default=None, help="Specify Ansatz")
-    parser.add_argument('-es', '--excited_state', type=bool, default=True, help="Only ground state?")
+    parser.add_argument('-es', '--excited_state', action='store_true', help="Only ground state?")
     parser.add_argument('-rf', '--remove_f_terms', type=bool, default=False, help="Choose to remove f terms")
     parser.add_argument('-c', '--code', action='store_true', help="Generate LaTeX by default; `-c` generates code instead.")
     parser.add_argument('-lhs', action='store_true', help="Generate LaTeX by default; `-c` generates code instead.")
@@ -109,8 +109,8 @@ if (__name__ == '__main__'):
         'lhs_rhs': 'RHS'
     }
 
-    if pargs.excited_state is False:
-        default_kwargs['only_ground_state'] = True
+    if pargs.excited_state:
+        default_kwargs['only_ground_state'] = False
 
     if pargs.remove_f_terms:
         default_kwargs['remove_f_terms'] = True
@@ -127,6 +127,8 @@ if (__name__ == '__main__'):
         name = tkeys.key_list_type(trunc)
         if name == 'fcc':
             default_kwargs['ansatz'] = 'full cc'
+        elif name == 'zhz':
+            default_kwargs['ansatz'] = 'z_t ansatz'
         elif name == 'eTz':
             default_kwargs['ansatz'] = 'eT_z_t ansatz'
         else:
