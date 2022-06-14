@@ -118,14 +118,14 @@ def solve_doubles_equations(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_arg
 
 # ---------------------------- DISCONNECTED TERMS ---------------------------- #
 
-def _order_1_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list):
+def _order_1_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_linked_path_list):
     """Exists for error checking."""
     raise Exception(
         "the first possible purely VECI/CC term is (1, 1) or (dt_i * t_i)"
         "which requires a residual of at least 2nd order"
     )
 
-def _order_2_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list):
+def _order_2_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_linked_path_list):
     """Calculate all uniquely linked disconnected terms generated from the wave operator ansatz.
     This means for order 5 we include terms such as (4, 1), (3, 1, 1), (2, 1, 1, 1)
     But not terms (5), (3, 2), (2, 2, 1), (1, 1, 1, 1, 1)
@@ -134,8 +134,8 @@ def _order_2_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, o
     # unpack the `t_args` and 'dt_args'
     t_i, *unusedargs = t_args
     dt_i, *unusedargs = dt_args
-    # make an iterable out of the `opt_path_list`
-    optimized_einsum = iter(opt_path_list)
+    # make an iterable out of the `opt_linked_path_list`
+    optimized_einsum = iter(opt_linked_path_list)
     # Creating the 2nd order return array
     linked_disconnected_terms = np.zeros((A, A, N, N), dtype=complex)
     # the (1, 1) term
@@ -146,14 +146,14 @@ def _order_2_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, o
 
     return linked_disconnected_terms
 
-def _order_1_un_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list):
+def _order_1_un_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_unlinked_path_list):
     """Exists for error checking."""
     raise Exception(
         "the first possible purely VECC term is (2, 2) or (dt_ij * t_ij)"
         "which requires a residual of at least 4th order"
     )
 
-def _order_2_un_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list):
+def _order_2_un_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_unlinked_path_list):
     """Exists for error checking."""
     raise Exception(
         "the first possible purely VECC term is (2, 2) or (dt_ij * t_ij)"
@@ -162,7 +162,7 @@ def _order_2_un_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args
 
 # ---------------------------- dt AMPLITUDES ---------------------------- #
 
-def _calculate_order_1_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_epsilon, opt_path_list):
+def _calculate_order_1_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_epsilon, opt_linked_path_list, opt_unlinked_path_list):
     """Calculate the derivative of the 1 t-amplitude for use in the calculation of the residuals.
     Uses optimized summation paths generate using `contract_expression` from the `opt_einsum` library.
     """
@@ -185,14 +185,12 @@ def _calculate_order_1_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_ar
     dt_i = symmetrize_tensor(N, residual, order=1)
     return dt_i
 
-def _calculate_order_2_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_epsilon, opt_path_list):
+def _calculate_order_2_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_epsilon, opt_linked_path_list, opt_unlinked_path_list):
     """Calculate the derivative of the 2 t-amplitude for use in the calculation of the residuals.
     Uses optimized summation paths generate using `contract_expression` from the `opt_einsum` library.
     """
     # unpack the `w_args`
     w_i, w_ij, *unusedargs = w_args
-    # make an iterable out of the `opt_path_list`
-    optimized_einsum = iter(opt_path_list)
     # Calculate the 2nd order residual
     residual = residual_equations.calculate_order_2_residual(A, N, trunc, h_args, w_args)
     # subtract the epsilon term (which is R_0)
@@ -202,9 +200,9 @@ def _calculate_order_2_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_ar
     if ansatz.VECI:
         pass  # veci does not include any disconnected terms
     elif ansatz.VE_MIXED:
-        residual -= _order_2_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list)
+        residual -= _order_2_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_linked_path_list)
     elif ansatz.VECC:
-        residual -= _order_2_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list)
+        residual -= _order_2_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_linked_path_list)
         pass  # no un-linked disconnected terms for order < 4
 
     # Symmetrize the residual operator
@@ -221,7 +219,14 @@ def solve_singles_equations_optimized(A, N, ansatz, trunc, epsilon, h_args, t_ar
             "It appears that singles is not true, this cannot be."
             "Something went terribly wrong!!!"
         )
-    dt_i = _calculate_order_1_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_path_list)
+
+    # unpack the opt_einsum path's
+    opt_epsilon_path_list, opt_linked_path_list, opt_unlinked_path_list = opt_path_list
+
+    dt_i = _calculate_order_1_dt_amplitude_optimized(
+        A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args,
+        opt_epsilon_path_list[0], opt_linked_path_list[0], opt_unlinked_path_list[0]
+    )
     return dt_i
 
 def solve_doubles_equations_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_path_list):
@@ -232,16 +237,68 @@ def solve_doubles_equations_optimized(A, N, ansatz, trunc, epsilon, h_args, t_ar
             "It appears that doubles is not true, this cannot be."
             "Something went terribly wrong!!!"
         )
-    dt_ij = _calculate_order_2_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_path_list)
+
+    # unpack the opt_einsum path's
+    opt_epsilon_path_list, opt_linked_path_list, opt_unlinked_path_list = opt_path_list
+
+    dt_ij = _calculate_order_2_dt_amplitude_optimized(
+        A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args,
+        opt_epsilon_path_list[1], opt_linked_path_list[1], opt_unlinked_path_list[1]
+    )
     return dt_ij
 
 # ---------------------------- OPTIMIZED PATHS FUNCTION ---------------------------- #
 
 def compute_optimized_paths(A, N, truncation):
-    """Calculate optimized paths for the einsum calls up to `highest_order`."""
+    """Calculate all optimized paths for the `opt_einsum` calls."""
+
+    epsilon_opt_paths = compute_optimized_epsilon_paths(A, N, truncation)
+    linked_opt_paths = compute_optimized_linked_paths(A, N, truncation)
+    unlinked_opt_paths = compute_optimized_unlinked_paths(A, N, truncation)
+
+    all_opt_paths = [epsilon_opt_paths, linked_opt_paths, unlinked_opt_paths]
+
+    return all_opt_paths
+
+
+def compute_optimized_epsilon_paths(A, N, truncation):
+    """Calculate optimized paths for the constant/epsilon einsum calls up to `highest_order`."""
+
+    epsilon_path_list = []
+
+    if truncation.singles:
+        epsilon_path_list.append(oe.contract_expression('aci,cb->abi', (A, A, N), (A, A)))
+
+    if truncation.doubles:
+        epsilon_path_list.append(oe.contract_expression('acij,cb->abij', (A, A, N, N), (A, A)))
+
+    return epsilon_path_list
+
+
+def compute_optimized_linked_paths(A, N, truncation):
+    """Calculate optimized paths for the linked-disconnected einsum calls up to `highest_order`."""
 
     order_1_list, order_2_list, order_3_list = [], [], []
     order_4_list, order_5_list, order_6_list = [], [], []
 
-    return [None]
+    if truncation.singles:
+        order_2_list.extend([
+            oe.contract_expression('aci, cbj->abij', (A, A, N), (A, A, N)),
+            oe.contract_expression('aci, cbj->abij', (A, A, N), (A, A, N)),
+        ])
+
+    return [order_1_list, order_2_list]
+
+
+def compute_optimized_unlinked_paths(A, N, truncation):
+    """Calculate optimized paths for the unlinked-disconnected einsum calls up to `highest_order`."""
+
+    order_1_list, order_2_list, order_3_list = [], [], []
+    order_4_list, order_5_list, order_6_list = [], [], []
+
+    if not truncation.doubles:
+        log.warning('Did not calculate optimized unlinked paths of the dt amplitudes')
+        return [[], [], [], [], [], []]
+
+    return [order_1_list, order_2_list, order_3_list]
 

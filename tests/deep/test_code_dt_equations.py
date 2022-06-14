@@ -427,17 +427,54 @@ class Test_write_master_dt_amplitude_function:
 
 class Test_write_optimized_dt_amplitude_paths_function:
 
-    def test_basic(self):
-        """basic test"""
+
+    def test_epsilon_paths(self):
+        """epsilon test"""
 
         # input data
-        max_order = 2
+        max_order = 5
 
         # run function
-        function_output = cdt._write_optimized_dt_amplitude_paths_function(max_order)
+        function_output = cdt._write_optimized_epsilon_paths_function(max_order)
 
         # open file
-        func_name = "write_optimized_dt_amplitude_paths_function_out.py"
+        func_name = "write_optimized_epsilon_paths_function_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+
+        assert function_output == expected_result
+
+
+    def test_linked_paths(self):
+        """linked test"""
+
+        # input data
+        max_order = 5
+
+        # run function
+        function_output = cdt._write_optimized_linked_paths_function(max_order)
+
+        # open file
+        func_name = "write_optimized_linked_paths_function_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+
+        assert function_output == expected_result
+
+
+    def test_unlinked_paths(self):
+        """unlinked test"""
+
+        # input data
+        max_order = 5
+
+        # run function
+        function_output = cdt._write_optimized_unlinked_paths_function(max_order)
+
+        # open file
+        func_name = "write_optimized_unlinked_paths_function_out.py"
         file_name = join(root_dir, classtest, func_name)
         with open(file_name, 'r') as fp:
             expected_result = fp.read()
