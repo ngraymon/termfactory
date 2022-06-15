@@ -11,7 +11,7 @@ name: Upload Python Package to PyPy
 on:
   push:
     branches:
-    - "dummy branch"
+    - "prepare_package"
 
 permissions:
   contents: read
