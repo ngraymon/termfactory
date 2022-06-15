@@ -155,7 +155,7 @@ def _construct_linked_disconnected_definition(return_string, order, opt_einsum=F
         )
     else:
         return_string += (
-            f"\ndef _order_{order}_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list):\n"
+            f"\ndef _order_{order}_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_linked_path_list):\n"
             f'{tab}"""Calculate all uniquely linked disconnected terms generated from the wave operator ansatz.\n'
             f'{tab}This means for order 5 we include terms such as (4, 1), (3, 1, 1), (2, 1, 1, 1)\n'
             f'{tab}But not terms (5), (3, 2), (2, 2, 1), (1, 1, 1, 1, 1)\n'
@@ -166,8 +166,8 @@ def _construct_linked_disconnected_definition(return_string, order, opt_einsum=F
             f"{tab}{dt_arg_string} = dt_args\n"
         )
         return_string += (
-            f"{tab}# make an iterable out of the `opt_path_list`\n"
-            f"{tab}{iterator_name} = iter(opt_path_list)\n"
+            f"{tab}# make an iterable out of the `opt_linked_path_list`\n"
+            f"{tab}{iterator_name} = iter(opt_linked_path_list)\n"
         )
 
     return return_string
@@ -258,7 +258,7 @@ def _construct_un_linked_disconnected_definition(return_string, order, opt_einsu
         )
     else:
         return_string += (
-            f"\ndef _order_{order}_un_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list):\n"
+            f"\ndef _order_{order}_un_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_unlinked_path_list):\n"
             f'{tab}"""Calculate all uniquely un-linked disconnected terms generated from the wave operator ansatz.\n'
             f'{tab}This means for order 5 we include terms such as (3, 2), (2, 2, 1)\n'
             f'{tab}But not terms (5), (4, 1), (3, 1, 1), (2, 1, 1, 1), (1, 1, 1, 1, 1)\n'
@@ -269,8 +269,8 @@ def _construct_un_linked_disconnected_definition(return_string, order, opt_einsu
             f"{tab}{dt_arg_string} = dt_args\n"
         )
         return_string += (
-            f"{tab}# make an iterable out of the `opt_path_list`\n"
-            f"{tab}{iterator_name} = iter(opt_path_list)\n"
+            f"{tab}# make an iterable out of the `opt_unlinked_path_list`\n"
+            f"{tab}{iterator_name} = iter(opt_unlinked_path_list)\n"
         )
 
     return return_string
@@ -357,18 +357,13 @@ def _construct_dt_amplitude_definition(return_string, order, opt_einsum=False, i
         )
     else:
         return_string += (
-            f"\ndef _calculate_order_{order}_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_epsilon, opt_path_list):\n"
+            f"\ndef _calculate_order_{order}_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_epsilon, opt_linked_path_list, opt_unlinked_path_list):\n"
             f'{tab}"""Calculate the derivative of the {order} t-amplitude for use in the calculation of the residuals.\n'
             f'{tab}Uses optimized summation paths generate using `contract_expression` from the `opt_einsum` library.\n'
             f'{tab}"""\n'
             f"{tab}# unpack the `w_args`\n"
             f"{tab}{w_arg_string} = w_args\n"
         )
-        if order >= 2:
-            return_string += (
-                f"{tab}# make an iterable out of the `opt_path_list`\n"
-                f"{tab}{iterator_name} = iter(opt_path_list)\n"
-            )
 
     return return_string
 
@@ -425,17 +420,17 @@ def _write_dt_amplitude_strings(order, opt_einsum=False):
             vecc_operations = f"{tab}{tab}pass  # no un-linked disconnected terms for order < 4\n"
         else:
             vemx_operations = (
-                f"{tab}{tab}residual -= _order_{order}_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list)\n"
+                f"{tab}{tab}residual -= _order_{order}_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_linked_path_list)\n"
             )
             if order < 4:
                 vecc_operations = (
-                    f"{tab}{tab}residual -= _order_{order}_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list)\n"
+                    f"{tab}{tab}residual -= _order_{order}_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_linked_path_list)\n"
                     f"{tab}{tab}pass  # no un-linked disconnected terms for order < 4\n"
                 )
             else:
                 vecc_operations = (
-                    f"{tab}{tab}residual -= _order_{order}_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list)\n"
-                    f"{tab}{tab}residual -= _order_{order}_un_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_path_list)\n"
+                    f"{tab}{tab}residual -= _order_{order}_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_linked_path_list)\n"
+                    f"{tab}{tab}residual -= _order_{order}_un_linked_disconnected_terms_optimized(A, N, trunc, t_args, dt_args, opt_unlinked_path_list)\n"
                 )
 
     return_string += (
@@ -491,7 +486,14 @@ def _write_master_dt_amplitude_function(order, opt_einsum=False):
                         "It appears that {name} is not true, this cannot be."
                         "Something went terribly wrong!!!"
                     )
-                {dt_term} = _calculate_order_{order}_dt_amplitude_optimized(A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args, opt_path_list)
+
+                # unpack the opt_einsum path's
+                opt_epsilon_path_list, opt_linked_path_list, opt_unlinked_path_list = opt_path_list
+
+                {dt_term} = _calculate_order_{order}_dt_amplitude_optimized(
+                    A, N, ansatz, trunc, epsilon, h_args, t_args, dt_args, w_args,
+                    opt_epsilon_path_list[{order-1}], opt_linked_path_list[{order-1}], opt_unlinked_path_list[{order-1}]
+                )
                 return {dt_term}
         '''
 
@@ -504,41 +506,231 @@ def _write_master_dt_amplitude_function(order, opt_einsum=False):
 
 
 # ----------------------------------------------------------------------------------------------- #
-def _write_optimized_dt_amplitude_paths_function(max_order):
-    """Return strings to write all the `oe.contract_expression` calls.
-    Unfortunately the code got a lot messier when I had to add in the truncation if statements.
-    It should get a rework/factorization at some point
+def _t_term_shape_string(order):
+    """Return the string `(A, A, N, ...)` with `order` number of `N`'s."""
+    return f"({', '.join(['A','A',] + ['N',]*order)})"
+
+
+def _contracted_expressions(partition_list, order):
+    """Return a list of each of the `oe.contract_expression` calls
+    for a W operator of order `order`.
     """
-    assert max_order < 7, "optimized paths only implemented up to 6th order"
+    exp_list = []
+
+    # for each partition (the mathematical term) of the integer `order`
+    for partition in partition_list:
+
+        # there is nothing to optimize for the N^th case
+        # we simply add the largest t_term to the W operator
+        # no multiplication required
+        if len(partition) == 1:
+            continue
+
+        # the unique permutations of the `partition` of the integer `order`
+        combinations = unique_permutations(partition)
+        # the einsum indices for the surface dimensions
+        surf_index = _generate_surface_index(partition)
+        # the einsum indices for the normal mode dimensions
+        mode_index = _generate_mode_index(partition, order)
+
+        temp_list = []
+
+        # `combinations` is a list of tuples such as (2, 2, 1, ) or (5,)
+        for i, tupl in enumerate(combinations):
+            # the input dimensions are two character strings representing the surface dimensions
+            # plus 1 or more characters representing the normal mode dimensions
+            in_dims = ", ".join([surf_index[a]+mode_index[i][a] for a in range(len(surf_index))])
+            # the output dimension is the same for all einsum calls for a given `partition` argument
+            out_dims = f"ab{tag_str[0:order]}"
+            # the shape of the t_terms are (A, A, N, ...) where the number of N dimensions is
+            # determined by the integer elements of each tuple `tupl`
+            # so (2, 1) -> ("(A, A, N, N)", "(A, A, N")
+            pterms = ", ".join([_t_term_shape_string(n) for n in tupl])
+            # loop over the possible permutations of the location of `dt` terms
+            # we don't actually need to use the `dt_index` but we DO need to append in the loop
+            for dt_index in range(len(partition)):
+                temp_list.append(f"oe.contract_expression('{in_dims}->{out_dims}', {pterms}),\n")
+
+        exp_list.append([max(partition), ] + temp_list)
+
+    return exp_list
+
+
+def _write_optimized_master_paths_function():
+    """Return wrapper function for creating ALL optimized einsum paths"""
 
     string = (
         f"\ndef compute_optimized_paths(A, N, truncation):\n"
-        f'{tab}"""Calculate optimized paths for the einsum calls up to `highest_order`."""\n'
+        f'{tab}"""Calculate all optimized paths for the `opt_einsum` calls."""\n'
+        "\n"
+        f"{tab}epsilon_opt_paths = compute_optimized_epsilon_paths(A, N, truncation)\n"
+        f"{tab}linked_opt_paths = compute_optimized_linked_paths(A, N, truncation)\n"
+        f"{tab}unlinked_opt_paths = compute_optimized_unlinked_paths(A, N, truncation)\n"
+        "\n"
+        f"{tab}all_opt_paths = [epsilon_opt_paths, linked_opt_paths, unlinked_opt_paths]\n"
+        "\n"
+        f"{tab}return all_opt_paths\n"
     )
-    # we need three optimized lists:
-    # 1 - optimized epsilon call
-    # 2 - optimized linked disconnected calls
-    # 3 - optimized un-linked disconnected calls
 
-    optimized_orders = list(range(2, max_order+1))
+    return string
 
-    for order in optimized_orders:
-        pass
 
-    string += (
+def _write_optimized_epsilon_paths_function(max_order):
+    """Return strings to write all the constant `oe.contract_expression` calls."""
+    assert max_order < 7, "optimized paths only implemented up to 6th order"
+
+    string = (
+        f"\ndef compute_optimized_epsilon_paths(A, N, truncation):\n"
+        f'{tab}"""Calculate optimized paths for the constant/epsilon einsum calls up to `highest_order`."""\n'
+        "\n"
+        f"{tab}epsilon_path_list = []\n"
+        "\n"
+    )
+
+    for order in range(1, max_order+1):
+
+        """
+        just manually form these because they don't vary with different orders
+        they're always
+            ac[...],cb -> ab[...]
+        """
+        in_dims = f"ac{tag_str[0:order]},cb"
+        out_dims = f"ab{tag_str[0:order]}"
+        pterms = ", ".join([
+            _t_term_shape_string(order),    # the w term
+            _t_term_shape_string(0)         # the epsilon term
+        ])
+
+        optimized_expression = (
+            f"oe.contract_expression('{in_dims}->{out_dims}', {pterms})"
+        )
+
+        # the string representation (doubles, triples, quadruples... etc)
+        contribution_name = lambda n: taylor_series_order_tag[n].lower()
+
+        string += (
+            f"{tab}if truncation.{contribution_name(order)}:\n"
+            f"{tab}{tab}epsilon_path_list.append({optimized_expression})\n"
+            "\n"
+        )
+
+    string += f"{tab}return epsilon_path_list\n"
+
+    return string
+
+
+def _write_optimized_linked_paths_function(max_order):
+    """Return strings to write all the linked `oe.contract_expression` calls."""
+    assert max_order < 7, "optimized paths only implemented up to 6th order"
+
+    string = (
+        f"\ndef compute_optimized_linked_paths(A, N, truncation):\n"
+        f'{tab}"""Calculate optimized paths for the linked-disconnected einsum calls up to `highest_order`."""\n'
         "\n"
         f"{tab}order_1_list, order_2_list, order_3_list = [], [], []\n"
         f"{tab}order_4_list, order_5_list, order_6_list = [], [], []\n"
         "\n"
     )
 
-    # return_list = ', '.join(['order_1_list',] + [f'order_{order}_list' for order in optimized_orders])
-    return_list = None
+    # there are no linked contributions for order < 2
+    optimized_linked_orders = list(range(2, max_order+1))
+
+    for order in optimized_linked_orders:
+
+        # generate all the elements in the `order_{order}_list`
+        partitions = generate_linked_disconnected_partitions_of_n(order)
+        optimized_path_list = _contracted_expressions(partitions, order)
+
+        for optimized_paths in optimized_path_list:
+            current_max_order = optimized_paths[0]
+            del optimized_paths[0]
+            # old_print_wrapper('ZZ', optimized_paths)
+
+            # the string representation (doubles, triples, quadruples... etc)
+            contribution_name = lambda n: taylor_series_order_tag[n].lower()
+
+            # we need to a big long string, and also remove the first two opt paths
+            optimized_paths = "".join([
+                s.replace("oe.contract", f"{tab}{tab}{tab}oe.contract") for s in optimized_paths
+            ])
+
+            string += (
+                f"{tab}if truncation.{contribution_name(current_max_order)}:\n"
+                f"{tab}{tab}order_{order}_list.extend([\n"
+                f"{optimized_paths}"
+                f"{tab}{tab}])\n"
+                "\n"
+            )
+
+    return_list = ', '.join(
+        ['order_1_list', ] + [f'order_{order}_list' for order in optimized_linked_orders]
+    )
     string += f"{tab}return [{return_list}]\n"
 
     return string
 
 
+def _write_optimized_unlinked_paths_function(max_order):
+    """Return strings to write all the unlinked `oe.contract_expression` calls."""
+    assert max_order < 7, "optimized paths only implemented up to 6th order"
+
+    string = (
+        f"\ndef compute_optimized_unlinked_paths(A, N, truncation):\n"
+        f'{tab}"""Calculate optimized paths for the unlinked-disconnected einsum calls up to `highest_order`."""\n'
+        "\n"
+        f"{tab}order_1_list, order_2_list, order_3_list = [], [], []\n"
+        f"{tab}order_4_list, order_5_list, order_6_list = [], [], []\n"
+        "\n"
+    )
+
+    # there are no unlinked contributions for order < 4
+    optimized_unlinked_orders = list(range(4, max_order+1))
+
+    # since we need at least doubles for things to matter:
+    string += (
+        f"{tab}if not truncation.doubles:\n"
+        f"{tab}{tab}log.warning('Did not calculate optimized unlinked paths of the dt amplitudes')\n"
+        f"{tab}{tab}return {[[], ]*6}\n"
+        "\n"
+    )
+
+    for order in optimized_unlinked_orders:
+
+        # generate all the elements in the `order_{order}_list`
+        partitions = generate_un_linked_disconnected_partitions_of_n(order)
+        optimized_path_list = _contracted_expressions(partitions, order)
+
+        for optimized_paths in optimized_path_list:
+            current_max_order = optimized_paths[0]
+            del optimized_paths[0]
+            # old_print_wrapper('ZZ', optimized_paths)
+
+            # the string representation (doubles, triples, quadruples... etc)
+            contribution_name = lambda n: taylor_series_order_tag[n].lower()
+
+            # we need to a big long string, and also remove the first two opt paths
+            optimized_paths = "".join([
+                s.replace("oe.contract", f"{tab}{tab}{tab}oe.contract") for s in optimized_paths
+            ])
+
+            string += (
+                f"{tab}if truncation.{contribution_name(current_max_order)}:\n"
+                f"{tab}{tab}order_{order}_list.extend([\n"
+                f"{optimized_paths}"
+                f"{tab}{tab}])\n"
+                "\n"
+            )
+
+    return_list = ', '.join(
+        ['order_1_list', 'order_2_list', 'order_3_list', ]
+        + [f'order_{order}_list' for order in optimized_unlinked_orders]
+    )
+    string += f"{tab}return [{return_list}]\n"
+
+    return string
+
+
+# ----------------------------------------------------------------------------------------------- #
 def generate_dt_amplitude_string(max_order, s1=75, s2=28):
     """Return a string containing the python code to generate dt up to (and including) `max_order`.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
@@ -598,10 +790,14 @@ def generate_dt_amplitude_string(max_order, s1=75, s2=28):
     # ----------------------------------------------------------------------- #
     # header for optimized paths function
     string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", s2)
-    # write the code for generating the optimized paths
-    string += _write_optimized_dt_amplitude_paths_function(max_order)
-
-    string += '\n'
+    # write the code for the wrapper function to call the other optimized path generating functions
+    string += _write_optimized_master_paths_function() + '\n'
+    # write the code for generating optimized paths for epsilon
+    string += _write_optimized_epsilon_paths_function(max_order) + '\n'
+    # write the code for generating optimized paths for linked-disconnected
+    string += _write_optimized_linked_paths_function(max_order) + '\n'
+    # write the code for generating optimized paths for unlinked-disconnected
+    string += _write_optimized_unlinked_paths_function(max_order) + '\n'
     # ------------------------------------------------------------------------------------------- #
     return string
 
