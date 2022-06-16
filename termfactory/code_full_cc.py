@@ -342,7 +342,7 @@ def _multiple_perms_logic(term):
     raise Exception("Shouldn't get here")  # pragma: no cover
 
 
-def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='truncation'):
+def _write_cc_einsum_python_from_list(truncations, t_term_list, opt_einsum=False, trunc_obj_name='truncation'):
     """ Do all the work here.
     Context: for a given omega(m,n) we generate (based on on `trunc_obj_name`'s value):
      - fully
@@ -393,7 +393,12 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
         permutations, unique_dict = _multiple_perms_logic(term)
         prefactor = _build_full_cc_python_prefactor(h, t_list)
         max_t_rank = max(_rank_of_t_term_namedtuple(t) for t in t_list)
-        old_print_wrapper(omega, h, t_list, permutations, sep='\n')
+        log.debug(
+            f"omega =        {omega.__str__()}"
+            f"h =            {h.__str__()}"
+            f"t_list =       {t_list.__str__()}"
+            f"permutations = {permutations.__str__()}"
+        )
         # if omega.rank == 1 and permutations != None:
         #     sys.exit(0)
 
@@ -402,7 +407,7 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
         # -----------------------------------------------------------------------------------------
         # build with permutations
         hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor] = []
-        old_print_wrapper(hamiltonian_rank_list)
+        log.debug(f"{hamiltonian_rank_list = }")
 
         if permutations is None:
             t_operands = ', '.join([f"t_args[({t.m_h + t.m_o}, {t.n_h + t.n_o})]" for t in t_list])
@@ -412,16 +417,28 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
 
             # string = f"np.einsum('{summation_subscripts}', {h_operand}, {t_operands})"
             if remaining_indices == '':
-                string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
-                string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+
+                # prepare einsum string
+                if not opt_einsum:
+                    string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
+                    string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+                else:
+                    string = f"next(optimized_einsum)({h_operand}, {t_operands})"
+
+                # save it
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
             elif len(remaining_indices) >= 1:
                 for perm in unique_permutations(remaining_indices):
-                    string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
-                    string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
-                    old_print_wrapper(perm)
-                    old_print_wrapper(remaining_indices)
+
+                    # prepare einsum string
+                    if not opt_einsum:
+                        string = ", ".join([f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))])
+                        string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+                    else:
+                        string = f"next(optimized_einsum)({h_operand}, {t_operands})"
+
+                    # save it
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
                 if len(remaining_indices) >= 2:
@@ -436,8 +453,15 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
             v_a, remaining_indices = _full_cc_einsum_vibrational_components(h, t_list)
 
             for perm in permutations:
-                string = ", ".join([f"{e_a[0]}{v_a[0]}"] + [f"{e_a[i+1]}{v_a[p+1]}" for i, p in enumerate(perm)])
-                string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+
+                # prepare einsum string
+                if not opt_einsum:
+                    string = ", ".join([f"{e_a[0]}{v_a[0]}"] + [f"{e_a[i+1]}{v_a[p+1]}" for i, p in enumerate(perm)])
+                    string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+                else:
+                    string = f"next(optimized_einsum)({h_operand}, {t_operands})"
+
+                # save it
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
         elif len(unique_dict) > 1:
@@ -446,12 +470,21 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
             v_a, remaining_indices = _full_cc_einsum_vibrational_components(h, t_list)
 
             for perm in permutations:
+
+                # these can be quite long; so we prepare them here
                 t_operands = ', '.join([
                     f"t_args[({t_list[i].m_h + t_list[i].m_o}, {t_list[i].n_h + t_list[i].n_o})]"
                     for i in perm
                 ])
-                string = ", ".join([f"{e_a[0]}{v_a[0]}"] + [f"{e_a[i+1]}{v_a[p+1]}" for i, p in enumerate(perm)])
-                string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+
+                # prepare einsum string
+                if not opt_einsum:
+                    string = ", ".join([f"{e_a[0]}{v_a[0]}"] + [f"{e_a[i+1]}{v_a[p+1]}" for i, p in enumerate(perm)])
+                    string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
+                else:
+                    string = f"next(optimized_einsum)({h_operand}, {t_operands})"
+
+                # save it
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
         else:
@@ -466,17 +499,41 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
     # -----------------------------------------------------------------------------------------
 
     def _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=0):
+        """ Attempts to format multi-line summations in a visually appealing manner.
+
+        If `string_list` has 2 or more elements then attempts to produce:
+            R += <prefactor>(
+                np.einsum(<contents>) +
+                np.einsum(<contents>) +
+                np.einsum(<contents>) +
+                np.einsum(<contents>)
+            )
+
+        otherwise just returns a string like:
+            R += <prefactor>np.einsum(<contents>)
+        """
+
         tabber = tab*nof_tabs
 
+        # multi-line case
         if len(string_list) > 1:
+            # open the summation scope
             return_list.append(f"{tabber}R += {prefactor}(")
+
+            # add multi lines of `<contents> +`
             for string in string_list:
                 return_list.append(f"{tabber}{tab}{string} +")
+
             # remove the last plus symbol
             return_list[-1] = return_list[-1][:-2]
+
+            # close the `+=` scope
             return_list.append(f"{tabber})")
+
+        # singular line; just return simple `R += <contents>`
         else:
             return_list.append(f"{tabber}R += {prefactor}{string_list[0]}")
+
         return
 
     # do the fixed H with rank 0 (and no CC component)
@@ -573,9 +630,9 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
         _debug_print_different_types_of_terms(fully, linked, unlinked)
 
     return_list = [
-        _write_cc_einsum_python_from_list(truncations, fully),
-        _write_cc_einsum_python_from_list(truncations, linked),
-        _write_cc_einsum_python_from_list(truncations, unlinked),
+        _write_cc_einsum_python_from_list(truncations, fully, opt_einsum=opt_einsum),
+        _write_cc_einsum_python_from_list(truncations, linked, opt_einsum=opt_einsum),
+        _write_cc_einsum_python_from_list(truncations, unlinked, opt_einsum=opt_einsum),
     ]
 
     return return_list
@@ -602,6 +659,9 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
     else:  # pragma: no cover
         einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
 
+    # for distinguishing the different types of lists of optimized einsum paths
+    optnames = ['connected', 'linked', 'unlinked']
+
     for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
 
         # the name of the function
@@ -614,7 +674,7 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
         if not opt_einsum:
             positional_arguments = "R, ansatz, truncation, h_args, t_args"
         else:
-            positional_arguments = "R, ansatz, truncation, h_args, t_args, opt_paths"
+            positional_arguments = "R, ansatz, truncation, h_args, t_args" + f", opt_{optnames[i]}_path_list"
 
         # the docstring of the function
         if not opt_einsum:
@@ -622,11 +682,21 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
         else:
             docstring = f"Optimized calculation of the {omega_term} {term_type} terms."
 
+        # if we need to unpack the optimize einsum paths
+        if not opt_einsum:
+            unpack_optimized_einsum = ''
+        else:
+            unpack_optimized_einsum = (
+                f"\n{tab*4}# make an iterable out of the `opt_{optnames[i]}_path_list`"
+                f"\n{tab*4}optimized_einsum = iter(opt_{optnames[i]}_path_list)"
+                "\n"
+            )
+
         # glue all these strings together in a specific manner to form the function definition
         function_string = f'''
             def {func_name}({positional_arguments}):
                 """{docstring}"""
-
+                {unpack_optimized_einsum}
                 if ansatz.ground_state:
                     {five_tab.join(ground_state_only_einsums[i])}
                 else:
@@ -671,7 +741,7 @@ def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
         '''
     else:
         func_string = f'''
-            def compute_{specifier_string}_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_paths):
+            def compute_{specifier_string}_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_path_lists):
                 """Compute the {omega_term} amplitude."""
                 truncation.confirm_at_least_singles()
 
@@ -679,12 +749,12 @@ def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
                 R = np.zeros(shape=({', '.join(['A','A',] + ['N',]*omega_term.rank)}), dtype=complex)
 
                 # unpack the optimized paths
-                optimized_connected_paths, optimized_linked_paths, optimized_unlinked_paths = opt_paths
+                opt_connected_path_list, opt_linked_path_list, opt_unlinked_path_list = opt_path_lists[({omega_term.m}, {omega_term.n})]
 
                 # add each of the terms
-                add_{specifier_string}_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_connected_paths)
-                add_{specifier_string}_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_linked_paths)
-                add_{specifier_string}_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_unlinked_paths)
+                add_{specifier_string}_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_connected_path_list)
+                add_{specifier_string}_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_linked_path_list)
+                add_{specifier_string}_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_unlinked_path_list)
                 return R
 
         '''
@@ -710,7 +780,7 @@ def _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_n
         # header
         return_string += '\n' + named_line(f"{omega_term} TERMS", s2//2)
         # functions
-        return_string += _generate_full_cc_compute_functions(omega_term, truncations, only_ground_state, opt_einsum)
+        return_string += _generate_full_cc_compute_functions(omega_term, truncations, only_ground_state, opt_einsum=opt_einsum)
 
     return return_string
 
@@ -726,6 +796,7 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     omega_max_order = truncations[tkeys.P]
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
+
 
     # ------------------------------------------------------------------------------------------- #
     # header for default functions (as opposed to the optimized functions)
