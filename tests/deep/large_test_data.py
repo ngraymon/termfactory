@@ -66,8 +66,6 @@ class write_cc_einsum_python_from_list_single_unique_key:
         "            np.einsum('aci, cdz, dbiy -> abzy', h_args[(0, 1)], t_args[(1, 0)], t_args[(2, 0)]) +",
         "            np.einsum('aci, cdiy, dbz -> abzy', h_args[(0, 1)], t_args[(2, 0)], t_args[(1, 0)])",
         '        )',
-        '',
-        'if truncation.at_least_quadratic:'
     ]
 
 

@@ -389,8 +389,6 @@ class Test_write_cc_einsum_python_from_list:
         expected_result = [
             'if truncation.singles:',
             "    R += np.einsum('ac, cbz -> abz', h_args[(0, 0)], t_args[(1, 0)])",
-            '',
-            'if truncation.at_least_linear:'
         ]
 
         assert function_output == expected_result
@@ -420,8 +418,6 @@ class Test_write_cc_einsum_python_from_list:
         function_output = cfcc._write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='truncation')
         expected_result = [
             'R += h_args[(1, 0)]',
-            '',
-            'if truncation.at_least_linear:'
         ]
 
         assert function_output == expected_result
@@ -509,7 +505,6 @@ class Test_generate_full_cc_einsums:
         expected_result = [
             [
                 'R += h_args[(1, 0)]',
-                '', 'if truncation.at_least_linear:'
             ],
             [
                 'pass  # no valid terms here'
@@ -517,8 +512,6 @@ class Test_generate_full_cc_einsums:
             [
                 'if truncation.singles:',
                 "    R += np.einsum('ac, cbz -> abz', h_args[(0, 0)], t_args[(1, 0)])",
-                '',
-                'if truncation.at_least_linear:'
             ]
         ]
 

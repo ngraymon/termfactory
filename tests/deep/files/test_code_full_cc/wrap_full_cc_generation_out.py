@@ -48,12 +48,8 @@ def add_m0_n1_fully_connected_terms(R, ansatz, truncation, h_args, t_args):
 
     if ansatz.ground_state:
         R += h_args[(1, 0)]
-
-        if truncation.at_least_linear:
     else:
         R += h_args[(1, 0)]
-
-        if truncation.at_least_linear:
     return
 
 
@@ -73,13 +69,9 @@ def add_m0_n1_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)
     if ansatz.ground_state:
         if truncation.singles:
             R += np.einsum('ac, cbz -> abz', h_args[(0, 0)], t_args[(1, 0)])
-
-        if truncation.at_least_linear:
     else:
         if truncation.singles:
             R += np.einsum('ac, cbz -> abz', h_args[(0, 0)], t_args[(1, 0)])
-
-        if truncation.at_least_linear:
     return
 
 
@@ -112,7 +104,5 @@ def add_m1_n0_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)
     else:
         if truncation.singles:
             R += np.einsum('ac, cbz -> abz', h_args[(0, 0)], t_args[(0, 1)])
-
-        if truncation.at_least_linear:
     return
 
