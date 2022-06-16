@@ -624,7 +624,7 @@ def _generate_all_o_h_z_connection_permutations(LHS, h, valid_z_permutations, fo
     """ Generate all possible permutations of matching with LHS and h for t_terms """
 
     annotated_permutations = []  # store output here
-    log_conf.setLevelDebug(log)
+    # log_conf.setLevelDebug(log)
     old_print_wrapper('-'*30 + 'here' + '-'*30)
     i = 0
     for perm in valid_z_permutations:
@@ -712,7 +712,7 @@ def _generate_all_o_h_z_connection_permutations(LHS, h, valid_z_permutations, fo
         # if i == 3:
         #     sys.exit(0)
         i += 1
-    log_conf.setLevelInfo(log)
+    # log_conf.setLevelInfo(log)
 
     return annotated_permutations
 

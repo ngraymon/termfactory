@@ -1,14 +1,20 @@
 #
-#   python3 driver.py -t (1-2) (1-4) 1 (1-6) (1-6)  -lhs -c
-#
-from logging import exception
-import pytest
+#   python3 driver.py -t (1-2) (1-4) 1 (1-4) (1-4)  -lhs -c
+
+# system imports
+# from logging import exception
 from os.path import abspath, dirname, join
+import pytest
+
+# local imports
+from truncation_keys import TruncationsKeys as tkeys
+from code_eT_zhz import generate_eT_zhz_python
+
+# set the path (`root_dir`) to the files we need to compare against
 deep_dir = dirname(abspath(__file__))
 root_dir = join(deep_dir, 'files')
 classtest = 'test_code_eT_zhz'
-from truncation_keys import TruncationsKeys as tkeys
-from code_eT_zhz import generate_eT_zhz_python
+
 
 def _gen_wrapper_eT_zhz_python(truncations, tmpdir, **kwargs):
     # the 's_taylor_max_order' isn't releveant for this execution pathway
@@ -50,11 +56,11 @@ class Test_lhs_gen():
     def C(self, request):
         return request.param
 
-    @pytest.fixture(scope="class", params=[1, 2, 3, 4, 5, 6])
+    @pytest.fixture(scope="class", params=[1, 2, 3, 4])
     def D(self, request):
         return request.param
 
-    @pytest.fixture(scope="class", params=[1, 2, 3, 4, 5, 6])
+    @pytest.fixture(scope="class", params=[1, 2, 3, 4])
     def E(self, request):
         return request.param
 
