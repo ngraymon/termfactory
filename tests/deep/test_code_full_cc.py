@@ -525,7 +525,7 @@ class Test_generate_full_cc_einsums:
         assert function_output == expected_result
 
 
-class Test_generate_full_cc_compute_function:
+class Test_generate_full_cc_compute_functions:
 
     def test_basic(self):
         """x"""
@@ -540,7 +540,7 @@ class Test_generate_full_cc_compute_function:
         }
 
         # run function
-        function_output = cfcc._generate_full_cc_compute_function(
+        function_output = cfcc._generate_full_cc_compute_functions(
             omega_term,
             truncations,
             only_ground_state=False,
@@ -568,7 +568,7 @@ class Test_generate_full_cc_compute_function:
         }
 
         # run function
-        function_output = cfcc._generate_full_cc_compute_function(
+        function_output = cfcc._generate_full_cc_compute_functions(
             omega_term,
             truncations,
             only_ground_state=False,

@@ -549,8 +549,10 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
     return return_list
 
 
-def _generate_full_cc_compute_function(omega_term, truncations, only_ground_state=False, opt_einsum=False):
-    """ x """
+def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_state=False, opt_einsum=False):
+    """ This builds the strings representing the `add_m0_n0_fully_connected_terms`
+    functions
+    """
     return_string = ""
     specifier_string = f"m{omega_term.m}_n{omega_term.n}"
     five_tab = "\n" + tab*5
@@ -558,7 +560,11 @@ def _generate_full_cc_compute_function(omega_term, truncations, only_ground_stat
     # generate ground state einsums
     ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True, opt_einsum=opt_einsum)
 
-    # generate ground + excited state einsums
+    """ Preforms the bulk of the work!!!
+    this part generates  the (ground + excited state) einsums
+    this is the majority of the code that will be generated
+    (most everything else is just glue + window dressing)
+    """
     if not only_ground_state:
         einsums = _generate_full_cc_einsums(omega_term, truncations, opt_einsum=opt_einsum)
     else:  # pragma: no cover
@@ -672,7 +678,7 @@ def _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_n
         # header
         return_string += '\n' + named_line(f"{omega_term} TERMS", s2//2)
         # functions
-        return_string += _generate_full_cc_compute_function(omega_term, truncations, only_ground_state, opt_einsum)
+        return_string += _generate_full_cc_compute_functions(omega_term, truncations, only_ground_state, opt_einsum)
 
     return return_string
 
