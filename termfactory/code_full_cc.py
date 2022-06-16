@@ -648,18 +648,21 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
     specifier_string = f"m{omega_term.m}_n{omega_term.n}"
     five_tab = "\n" + tab*5
 
-    # generate ground state einsums
-    ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True, opt_einsum=opt_einsum)
-
     """ Preforms the bulk of the work!!!
     this part generates  the (ground + excited state) einsums
     this is the majority of the code that will be generated
     (most everything else is just glue + window dressing)
     """
-    if not only_ground_state:
-        einsums = _generate_full_cc_einsums(omega_term, truncations, opt_einsum=opt_einsum)
-    else:  # pragma: no cover
-        einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*3
+    # generate ground state einsums
+    ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True, opt_einsum=opt_einsum)
+
+    """
+    the current code `_generate_full_cc_einsums` DOES produce "something" when asked to try and produce hot band residual equations
+    but I do not trust the output as I haven't verified ANY of it, and I don't even think the code logic is correct
+    additionally the theory here is still in development and may not be pushed forward, it makes no sense to try and write this
+    code if there isn't any theory to inform the rules defining the equations
+    """
+    full_einsums = [("raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')", ), ]*3
 
     # for distinguishing the different types of lists of optimized einsum paths
     optnames = ['connected', 'linked', 'unlinked']
@@ -702,7 +705,7 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
                 if ansatz.ground_state:
                     {five_tab.join(ground_state_only_einsums[i])}
                 else:
-                    {five_tab.join(einsums[i])}
+                    {five_tab.join(full_einsums[i])}
                 return
         '''
 
