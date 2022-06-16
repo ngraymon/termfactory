@@ -396,7 +396,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
 
     # performance improvement because even creating the `dense_output` takes a bit of time
     # which we can save when not doing `DEBUG` level logging
-    if log.level == log_conf.logging.DEBUG:
+    if log.level == log_conf.logging.DEBUG:  # pragma: no cover
         expander = lambda lst: f" {lst}" if len(lst) < 2 else ''.join([f'\n{tab}{tab}{m}' for m in lst])
         log.debug(''.join([
             "Uncombined permutations:",
@@ -445,7 +445,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         # which we can save when not doing `DEBUG` level logging
         if log.level != log_conf.logging.DEBUG:
             dense_output = ''
-        else:
+        else:  # pragma: no cover
             log.debug(f"{each_eT_balanced=}")
             log.debug([(t.n, LHS.m, h.m, left_m_perm[1][i], right_m_perm[1][i]) for i, t in enumerate(t_list)])
             # pdb.set_trace() if inspect.stack()[-1].filename == 'driver.py' else None
@@ -507,7 +507,7 @@ def _generate_all_valid_eT_z_connection_permutations(LHS, t_list, h, left_z, rig
         # which we can save when not doing `DEBUG` level logging
         if log.level != log_conf.logging.DEBUG:
             dense_output = ''
-        else:
+        else:  # pragma: no cover
             dense_output = f"\n{tab}".join([
                 '',
                 f"{'Z_left  perm '}{left_n_perm}",
@@ -702,7 +702,7 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, l
 
         # performance improvement because even creating the `dense_output` takes a bit of time
         # which we can save when not doing `DEBUG` level logging
-        if log.level == log_conf.logging.DEBUG:
+        if log.level == log_conf.logging.DEBUG:  # pragma: no cover
             expander = lambda lst: f" {lst}" if len(lst) < 2 else ''.join([f'\n{tab}{tab}{m}' for m in lst])
             log.debug(''.join([
                 f"\n{tab}Connected permutations (Z left / Z right):",
