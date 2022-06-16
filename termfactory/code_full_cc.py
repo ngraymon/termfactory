@@ -34,8 +34,8 @@ subheader_log = log_conf.SubHeaderAdapter(log, {})
 ##########################################################################################
 # Defines for labels and spacing
 
-s1, s2 = 75, 28
-l1, l2 = 109, 45
+s1, s2, s3 = 75, 28, 25
+l1, l2, l3 = 109, 45, 41
 
 spaced_named_line = functools.partial(helper_funcs.spaced_named_line, spacing_line=f"# {'-'*s1} #\n")
 long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, large_spacing_line=f"# {'-'*l1} #\n")
@@ -648,12 +648,12 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
     specifier_string = f"m{omega_term.m}_n{omega_term.n}"
     five_tab = "\n" + tab*5
 
+    # ----------------------------------------------------------------------------------------------- #
     """ Preforms the bulk of the work!!!
-    this part generates  the (ground + excited state) einsums
+    this part generates the ground state einsums
     this is the majority of the code that will be generated
     (most everything else is just glue + window dressing)
     """
-    # generate ground state einsums
     ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True, opt_einsum=opt_einsum)
 
     """
@@ -663,10 +663,12 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
     code if there isn't any theory to inform the rules defining the equations
     """
     full_einsums = [("raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')", ), ]*3
+    # ----------------------------------------------------------------------------------------------- #
 
     # for distinguishing the different types of lists of optimized einsum paths
     optnames = ['connected', 'linked', 'unlinked']
 
+    # now we glue everything together
     for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
 
         # the name of the function
@@ -723,28 +725,25 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
     return return_string
 
 
-
 # ----------------------------------------------------------------------------------------------- #
-def _write_optimized_master_paths_function():
-    """Return wrapper function for creating ALL optimized einsum paths"""
+def _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state=False, opt_einsum=False):
+    """ x """
+    return_string = ""
 
-    string = (
-        f"\ndef compute_optimized_paths(A, N, truncation):\n"
-        f'{tab}"""Calculate all optimized paths for the `opt_einsum` calls."""\n'
-        "\n"
-        f"{tab}epsilon_opt_paths = compute_optimized_epsilon_paths(A, N, truncation)\n"
-        f"{tab}linked_opt_paths = compute_optimized_linked_paths(A, N, truncation)\n"
-        f"{tab}unlinked_opt_paths = compute_optimized_unlinked_paths(A, N, truncation)\n"
-        "\n"
-        f"{tab}all_opt_paths = [epsilon_opt_paths, linked_opt_paths, unlinked_opt_paths]\n"
-        "\n"
-        f"{tab}return all_opt_paths\n"
-    )
+    for i, omega_term in enumerate(master_omega.operator_list):
 
-    return string
+        # only print the header when we change rank (from linear to quadratic for example)
+        if omega_term.rank > master_omega.operator_list[i-1].rank:
+            return_string += spaced_named_line(f"RANK {omega_term.rank:2d} FUNCTIONS", s2) + '\n'
+
+        # header
+        return_string += '\n' + named_line(f"{omega_term} TERMS", s2//2)
+        # functions
+        return_string += _generate_full_cc_compute_functions(omega_term, truncations, only_ground_state, opt_einsum=opt_einsum)
+
+    return return_string
 
 
-# ----------------------------------------------------------------------------------------------- #
 def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
     """Write the wrapper function which `vibronic_hamiltonian.py` calls."""
 
@@ -794,7 +793,341 @@ def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
     return trimmed_string
 
 
-def _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state=False, opt_einsum=False):
+# ----------------------------------------------------------------------------------------------- #
+term_type_name_list = ['fully_connected', 'linked_disconnected', 'unlinked_disconnected']
+
+
+def _A_A_term_shape_string(order):
+    """Return the string `(A, A, N, ...)` with `order` number of `N`'s."""
+    return f"({', '.join(['A','A',] + ['N',]*order)})"
+
+
+def _write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_name, trunc_obj_name='truncation'):
+    """ Do all the work here.
+    Context: for a given omega(m,n) we generate (based on on `trunc_obj_name`'s value):
+     - fully
+     - linked-disconnected
+     - disconnected
+     terms.
+
+    We do this by first building up all einsums in a big list of dicts of dicts of lists
+    The `hamiltonian_rank_list` stores all the einsums, and they are glued together after
+    the loop over `t_term_list` is done.
+    1 - The outer list is indexed by the maximum rank of h, effectively checking the rank of h.
+    2 - For a given dict in the outer list it is indexed by the maximum t-rank.
+    3 - The value associated with a given t-rank is a dictionary
+    4 - an individual key,value pair is a string representation of a prefactor
+        in a minimal fractional form; if the prefactor is 0.25 then the string representation
+        is `1/4`
+
+    An example:
+        `outer_list = [e1, e2, e3, ....]`
+        `e1 = {'0': d1, '1': d2, 2: d3, ....}`
+        ``
+    """
+
+    maximum_h_rank = truncations[tkeys.H]
+    maximum_cc_rank = truncations[tkeys.CC]
+
+    if t_term_list == []:
+        return ["pass  # no valid terms here", ]
+
+    return_list = []
+
+    hamiltonian_rank_list = []
+    for i in range(maximum_h_rank+1):
+        hamiltonian_rank_list.append(dict([(i, {}) for i in range(maximum_cc_rank+1)]))
+
+    for term in t_term_list:
+
+        omega, h, t_list = term
+
+        # we only care about the size of the tensor
+        h_operand = _A_A_term_shape_string(h.m + h.n)
+        assert h.rank == h.m + h.n
+
+        # these terms are simply added to the residual and don't use einsum
+        # so we don't need to compute an optimal path
+        if (len(t_list) == 1) and t_list[0] == disconnected_namedtuple(0, 0, 0, 0):
+            continue
+
+        # logic about multiple permutations
+        # generate lists of unique t terms
+        permutations, unique_dict = _multiple_perms_logic(term)
+        prefactor = _build_full_cc_python_prefactor(h, t_list)
+        max_t_rank = max(_rank_of_t_term_namedtuple(t) for t in t_list)
+        log.debug(
+            f"omega =        {omega.__str__()}"
+            f"h =            {h.__str__()}"
+            f"t_list =       {t_list.__str__()}"
+            f"permutations = {permutations.__str__()}"
+        )
+
+        # we still need to account for output/omega permutations
+        # -----------------------------------------------------------------------------------------
+        # build with permutations
+        hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor] = []
+        log.debug(f"{hamiltonian_rank_list = }")
+
+        for t in t_list:
+            assert sum(t) == (t.m_h + t.n_h + t.m_o + t.n_o)
+
+        # no permutations
+        if permutations is None:
+            t_operands = ', '.join([_A_A_term_shape_string(sum(t)) for t in t_list])
+
+            # we still need to call this function to get the `remaining_indices
+            _, remaining_indices = _full_cc_einsum_vibrational_components(h, t_list)
+
+            # if we trace over everything
+            if remaining_indices == '':
+
+                # compute contraction
+                string = f"oe.contract_expression({h_operand}, {t_operands})"
+
+                # save it
+                hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
+
+            # if there are some external labels
+            elif len(remaining_indices) >= 1:
+                for perm in unique_permutations(remaining_indices):
+
+                    # compute contraction
+                    string = f"oe.contract_expression({h_operand}, {t_operands})"
+
+                    # save it
+                    hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
+
+        # only 1 permutation
+        elif len(unique_dict.keys()) == 1:
+            t_operands = ', '.join([_A_A_term_shape_string(sum(t)) for t in t_list])
+
+            # there are some external labels
+            for perm in permutations:
+
+                # compute contraction
+                string = f"oe.contract_expression({h_operand}, {t_operands})"
+
+                # save it
+                hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
+
+        # multiple permutations
+        elif len(unique_dict) > 1:
+
+            for perm in permutations:
+
+                t_operands = ', '.join([
+                    _A_A_term_shape_string(sum(t_list[i]))
+                    for i in perm
+                ])
+
+                # compute contraction
+                string = f"oe.contract_expression({h_operand}, {t_operands})"
+
+                # save it
+                hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
+
+        else:
+            raise Exception('')  # pragma: no cover
+
+    # -----------------------------------------------------------------------------------------
+    # remove any duplicates
+    # for h_rank_list in hamiltonian_rank_list:
+    #     for t_rank_list in h_rank_list:
+    #         for prefactor_list in t_rank_list:
+    # -----------------------------------------------------------------------------------------
+
+    def _handle_multiline_same_prefactor(return_list, string_list, nof_tabs=0):
+        """ Attempts to format multi-line list extensions in a visually appealing manner.
+
+        If `string_list` has 2 or more elements then attempts to produce:
+            local_list_name.extend([
+                oe.contract_expression(<contents>),
+                oe.contract_expression(<contents>),
+                oe.contract_expression(<contents>),
+                oe.contract_expression(<contents>)
+            ])
+
+        otherwise just returns a string like:
+            local_list_name.append(oe.contract_expression(<contents>))
+        """
+
+        tabber = tab*nof_tabs
+
+        # multi-line case
+        if len(string_list) > 1:
+            # open the summation scope
+            return_list.append(f"{tabber}{local_list_name}.extend([")
+
+            # add multi lines of `oe.contract_expression(<contents>),`
+            for string in string_list:
+                return_list.append(f"{tabber}{tab}{string},")
+
+            # remove the last plus comma
+            return_list[-1] = return_list[-1][:-1]
+
+            # close the `extend([` scope
+            return_list.append(f"{tabber}])")
+
+        # singular line; just return simple `local_list_name.append(oe.contract_expression(<contents>))`
+        else:
+            return_list.append(f"{tabber}{local_list_name}.append({string_list[0]})")
+
+        return
+
+    # do the fixed H with rank 0 (and no CC component)
+    for prefactor, string_list in hamiltonian_rank_list[0][0].items():  # pragma: no cover
+        _handle_multiline_same_prefactor(return_list, string_list, nof_tabs=0)
+
+    # do all the possible CC truncations with rank 1+ (for a fixed H with rank 0)
+    for j in range(1, maximum_cc_rank+1):
+        if hamiltonian_rank_list[0][j] != {}:
+
+            # add the `h * (t*t* ... )` header string
+            cc_if_statement_string = f"if {trunc_obj_name}.{taylor_series_order_tag[j]}:"
+            return_list.append(cc_if_statement_string)
+
+            for prefactor, string_list in hamiltonian_rank_list[0][j].items():
+                _handle_multiline_same_prefactor(return_list, string_list, nof_tabs=1)
+
+            # prevent hanging if-statements by removing them if they have no code in their scope
+            if return_list[-1] == cc_if_statement_string:
+                del return_list[-1]
+
+    # do all the possible H's with rank 1+
+    for i in range(1, maximum_h_rank+1):
+
+        temp_list = []
+
+        # add spacing
+        temp_list.append('')
+
+        # add the `h` header string
+        h_if_statement_string = f"if {trunc_obj_name}.at_least_{hamiltonian_order_tag[i]}:"
+        temp_list.append(h_if_statement_string)
+
+        for prefactor, string_list in hamiltonian_rank_list[i][0].items():  # pragma: no cover
+            _handle_multiline_same_prefactor(temp_list, string_list, nof_tabs=1)
+
+        # do all the possible CC truncations with rank 1+ (for all H's with rank 1+)
+        for j in range(1, maximum_cc_rank+1):
+            if hamiltonian_rank_list[i][j] != {}:
+
+                # add the `h * (t*t* ... )` header string
+                cc_if_statement_string = f"{tab}if {trunc_obj_name}.{taylor_series_order_tag[j]}:"
+                temp_list.append(cc_if_statement_string)
+
+                for prefactor, string_list in hamiltonian_rank_list[i][j].items():
+                    _handle_multiline_same_prefactor(temp_list, string_list, nof_tabs=2)
+
+                # prevent hanging if-statements by removing them if they have no code in their scope
+                if temp_list[-1] == cc_if_statement_string:
+                    del temp_list[-1]
+
+        # prevent hanging if-statements by not including them if they have no code in their scope
+        if temp_list[-1] == h_if_statement_string:
+            continue
+
+        # otherwise we can include this list since it actually contains einsum equations
+        else:
+            return_list.extend(temp_list)
+
+    return return_list
+
+
+def _generate_full_cc_optimized_paths(omega_term, truncations, only_ground_state=False, opt_einsum=False):
+    """Return a string containing python code to be placed into a .py file.
+    This does all the work of generating the optimized einsum paths.
+    """
+
+    # unpack truncations
+    maximum_h_rank = truncations[tkeys.H]
+    maximum_cc_rank = truncations[tkeys.CC]
+    s_taylor_max_order = truncations[tkeys.S]
+
+    H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
+    s_taylor_expansion = generate_s_taylor_expansion(maximum_cc_rank, s_taylor_max_order, only_ground_state)
+
+    simple_repr_list = []  # old list, not so important anymore, might remove in future
+    valid_term_list = []   # store all valid Omega * h * (s*s*...s) terms here
+
+    """ First we want to generate a list of valid terms.
+    We start with the list of lists `s_taylor_expansion` which is processed by `_filter_out_valid_s_terms`.
+    This function identifies valid pairings AND places those pairings in the `valid_term_list`.
+    Specifically we replace the `general_operator_namedtuple`s with `connected_namedtuple`s and/or
+    `disconnected_namedtuple`s.
+    """
+    for count, s_series_term in enumerate(s_taylor_expansion):
+        log.debug(s_series_term, "-"*100, "\n\n")
+        _filter_out_valid_s_terms(omega_term, H, s_series_term, simple_repr_list, valid_term_list, remove_f_terms=True)
+
+    # take all terms and separate them into their respective groups
+    fully, linked, unlinked = _seperate_s_terms_by_connection(valid_term_list)
+
+    return_list = [
+        _write_cc_optimized_paths_from_list(truncations, fully, local_list_name=f"{term_type_name_list[0]}_opt_path_list"),
+        _write_cc_optimized_paths_from_list(truncations, linked, local_list_name=f"{term_type_name_list[1]}_opt_path_list"),
+        _write_cc_optimized_paths_from_list(truncations, unlinked, local_list_name=f"{term_type_name_list[2]}_opt_path_list"),
+    ]
+
+    return return_list
+
+
+def _generate_optimized_paths_functions(omega_term, truncations, only_ground_state):
+    """Return strings to write all the constant `oe.contract_expression` calls."""
+    return_string = ""
+    specifier_string = f"m{omega_term.m}_n{omega_term.n}"
+    five_tab = "\n" + tab*5
+
+    # ----------------------------------------------------------------------------------------------- #
+    """ Preforms the bulk of the work!!!
+    this part generates the optimized paths for the ground state einsums
+    this is the majority of the code that will be generated
+    (most everything else is just glue + window dressing)
+    """
+    ground_state_only_paths = _generate_full_cc_optimized_paths(omega_term, truncations, only_ground_state=True)
+
+    """
+    the current code `_generate_full_cc_optimized_paths` DOES produce "something" when asked to try and produce hot band residual equations
+    but I do not trust the output as I haven't verified ANY of it, and I don't even think the code logic is correct
+    additionally the theory here is still in development and may not be pushed forward, it makes no sense to try and write this
+    code if there isn't any theory to inform the rules defining the equations
+    """
+    full_paths = [("raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')", ), ]*3
+    # ----------------------------------------------------------------------------------------------- #
+
+    for i, term_type in enumerate(term_type_name_list):
+
+        # glue all these strings together in a specific manner to form the function definition
+        function_string = f'''
+            def compute_{specifier_string}_{term_type}_optimized_paths(A, N, ansatz, truncation):
+                """Calculate optimized einsum paths for the {term_type} terms."""
+
+                {term_type}_opt_path_list = []
+
+                if ansatz.ground_state:
+                    {five_tab.join(ground_state_only_paths[i])}
+                else:
+                    {five_tab.join(full_paths[i])}
+
+                return {term_type}_opt_path_list
+        '''
+
+        """
+            remove 3 consecutive tabs from the multi-line string `function_string`
+            this is because we use triple single quotes over multiple lines
+            therefore introducing 3 extra tabs of indentation that we DO NOT want
+            to be present when we write the string to a file
+        """
+        function_string = "\n".join([line[tab_length*3:].rstrip() for line in function_string.splitlines()])
+
+        # add an additional line between each function
+        return_string += function_string + '\n'
+
+    return return_string
+
+
+def _wrap_optimized_paths_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state=False):
     """ x """
     return_string = ""
 
@@ -802,14 +1135,79 @@ def _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_n
 
         # only print the header when we change rank (from linear to quadratic for example)
         if omega_term.rank > master_omega.operator_list[i-1].rank:
-            return_string += spaced_named_line(f"RANK {omega_term.rank:2d} FUNCTIONS", s2) + '\n'
+            return_string += spaced_named_line(f"RANK {omega_term.rank:2d} OPTIMIZED PATHS", s2) + '\n'
 
         # header
-        return_string += '\n' + named_line(f"{omega_term} TERMS", s2//2)
+        return_string += '\n' + named_line(f"{omega_term} OPTIMIZED PATHS", s2//2)
         # functions
-        return_string += _generate_full_cc_compute_functions(omega_term, truncations, only_ground_state, opt_einsum=opt_einsum)
+        return_string += _generate_optimized_paths_functions(omega_term, truncations, only_ground_state)
 
     return return_string
+
+
+def _write_grouped_optimized_paths_function(omega_term):
+    """Write the projection-specific wrapper function for the optimized paths.
+    This provides the optimized paths for a specific (m, n) projection
+    """
+    M, N = omega_term.m, omega_term.n
+
+    specifier_string = f"m{M}_n{N}"
+
+    func_string = f'''
+        def compute_{specifier_string}_optimized_paths(A, N, ansatz, truncation):
+            """Compute the optimized paths for this {omega_term}."""
+            truncation.confirm_at_least_singles()
+
+            connected_opt_path_list = compute_{specifier_string}_fully_connected_optimized_paths(A, N, ansatz, truncation)
+            linked_opt_path_list = compute_{specifier_string}_linked_disconnected_optimized_paths(A, N, ansatz, truncation)
+            unlinked_opt_path_list = compute_{specifier_string}_unlinked_disconnected_optimized_paths(A, N, ansatz, truncation)
+
+            return_dict = {{
+                ({M}, {N}): [connected_opt_path_list, linked_opt_path_list, unlinked_opt_path_list]
+            }}
+
+            return return_dict
+
+    '''
+
+    # remove three indents from the multi-line string `func_string`
+    lines = func_string.splitlines()
+    # 2 consecutive tabs that we are ignoring/skipping
+    trimmed_string = "\n".join([line[tab_length*2:] for line in lines])
+
+    return trimmed_string
+
+
+def _write_optimized_master_paths_function(master_omega):
+    """Return wrapper function for creating ALL optimized einsum paths"""
+
+    main_strings = []
+
+    for i, omega_term in enumerate(master_omega.operator_list):
+        M, N = omega_term.m, omega_term.n
+        main_strings.append(f"all_opt_path_lists[({M}, {N})] = compute_m{M}_n{N}_optimized_paths(A, N, ansatz, truncation)[({M}, {N})]\n")
+
+    main_strings = f"{tab*3}".join(main_strings)
+
+    func_string = f'''
+        def compute_all_optimized_paths(A, N, ansatz, truncation):
+            """Return dictionary containing optimized contraction paths.
+            Calculates all optimized paths for the `opt_einsum` calls up to
+                a maximum order of m+n={master_omega.maximum_rank} for a projection operator P^m_n
+            """
+            all_opt_path_lists = []
+
+            {main_strings}
+            return all_opt_path_lists
+
+    '''
+
+    # remove three indents from the multi-line string `func_string`
+    lines = func_string.splitlines()
+    # 2 consecutive tabs that we are ignoring/skipping
+    trimmed_string = "\n".join([line[tab_length*2:] for line in lines])
+
+    return trimmed_string
 
 
 # ----------------------------------------------------------------------------------------------- #
@@ -841,7 +1239,6 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
         _write_master_full_cc_compute_function(omega_term)
         for omega_term in master_omega.operator_list
     ])
-
     # ------------------------------------------------------------------------------------------- #
     # header for optimized functions
     string += long_spaced_named_line("OPTIMIZED FUNCTIONS", l2-1)
@@ -851,19 +1248,34 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # generate
     string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state, opt_einsum=True)
     # ----------------------------------------------------------------------- #
-    # generate
+    # header
     string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
+    # generate
     string += "".join([
         _write_master_full_cc_compute_function(omega_term, opt_einsum=True)
         for omega_term in master_omega.operator_list
     ])
-
-    # ------------------------------------------------------------------------------------------- #
+    # # ------------------------------------------------------------------------------------------- #
     # header for optimized paths function
-    string += '\n' + named_line("OPTIMIZED PATHS FUNCTION", l2)
-    # write the code for generating optimized paths for full CC, this is probably different than the W code?!?
-    # maybe... im not sure?
-    # both VEMX and VECC
+    string += long_spaced_named_line("OPTIMIZED PATHS FUNCTIONS", l3)
+    # ----------------------------------------------------------------------- #
+    # header
+    string += '\n' + named_line("INDIVIDUAL OPTIMIZED PATHS", l3) + '\n\n'
+    # generate
+    string += _wrap_optimized_paths_generation(truncations, master_omega, s3, named_line, spaced_named_line, only_ground_state)
+    # ----------------------------------------------------------------------- #
+    # header
+    string += '\n' + named_line("GROUPED BY PROJECTION OPERATOR", l3)
+    # generate
+    string += "".join([
+        _write_grouped_optimized_paths_function(omega_term)
+        for omega_term in master_omega.operator_list
+    ])
+    # ----------------------------------------------------------------------- #
+    # header
+    string += '\n' + named_line("MASTER OPTIMIZED PATH FUNCTION", l3)
+    # generate
+    string += _write_optimized_master_paths_function(master_omega) + '\n'
     # ------------------------------------------------------------------------------------------- #
     return string
 
