@@ -479,30 +479,62 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, trunc_obj_name='
             return_list.append(f"{tabber}R += {prefactor}{string_list[0]}")
         return
 
-    # order the terms as we return them
+    # do the fixed H with rank 0 (and no CC component)
     for prefactor, string_list in hamiltonian_rank_list[0][0].items():  # pragma: no cover
         _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=0)
 
+    # do all the possible CC truncations with rank 1+ (for a fixed H with rank 0)
     for j in range(1, maximum_cc_rank+1):
         if hamiltonian_rank_list[0][j] != {}:
-            return_list.append(f"if {trunc_obj_name}.{taylor_series_order_tag[j]}:")
+
+            # add the `h * (t*t* ... )` header string
+            cc_if_statement_string = f"if {trunc_obj_name}.{taylor_series_order_tag[j]}:"
+            return_list.append(cc_if_statement_string)
+
             for prefactor, string_list in hamiltonian_rank_list[0][j].items():
                 _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=1)
 
-    for i in range(1, maximum_h_rank+1):
-        return_list.append('')
-        return_list.append(f"if {trunc_obj_name}.at_least_{hamiltonian_order_tag[i]}:")
-        for prefactor, string_list in hamiltonian_rank_list[i][0].items():  # pragma: no cover
-            _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=1)
+            # prevent hanging if-statements by removing them if they have no code in their scope
+            if return_list[-1] == cc_if_statement_string:
+                del return_list[-1]
 
+    # do all the possible H's with rank 1+
+    for i in range(1, maximum_h_rank+1):
+
+        temp_list = []
+
+        # add spacing
+        temp_list.append('')
+
+        # add the `h` header string
+        h_if_statement_string = f"if {trunc_obj_name}.at_least_{hamiltonian_order_tag[i]}:"
+        temp_list.append(h_if_statement_string)
+
+        for prefactor, string_list in hamiltonian_rank_list[i][0].items():  # pragma: no cover
+            _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=1)
+
+        # do all the possible CC truncations with rank 1+ (for all H's with rank 1+)
         for j in range(1, maximum_cc_rank+1):
             if hamiltonian_rank_list[i][j] != {}:
-                return_list.append(f"{tab}if {trunc_obj_name}.{taylor_series_order_tag[j]}:")
-                for prefactor, string_list in hamiltonian_rank_list[i][j].items():
-                    _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=2)
 
-    # old_print_wrapper(return_list)
-    # sys.exit(0)
+                # add the `h * (t*t* ... )` header string
+                cc_if_statement_string = f"{tab}if {trunc_obj_name}.{taylor_series_order_tag[j]}:"
+                temp_list.append(cc_if_statement_string)
+
+                for prefactor, string_list in hamiltonian_rank_list[i][j].items():
+                    _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=2)
+
+                # prevent hanging if-statements by removing them if they have no code in their scope
+                if temp_list[-1] == cc_if_statement_string:
+                    del temp_list[-1]
+
+        # prevent hanging if-statements by not including them if they have no code in their scope
+        if temp_list[-1] == h_if_statement_string:
+            continue
+
+        # otherwise we can include this list since it actually contains einsum equations
+        else:
+            return_list.extend(temp_list)
 
     return return_list
 
