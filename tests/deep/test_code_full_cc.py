@@ -373,7 +373,7 @@ class Test_write_cc_einsum_python_from_list:
             tkeys.CC: 1,
             tkeys.S: 1,
             tkeys.P: 1
-        }   
+        }
         t_term_list = [
             [
                 fcc.connected_omega_operator_namedtuple(rank=1, m=0, n=1, m_h=0, n_h=0, m_t=[0], n_t=[1]),
@@ -405,7 +405,7 @@ class Test_write_cc_einsum_python_from_list:
             tkeys.CC: 1,
             tkeys.S: 1,
             tkeys.P: 1
-        }   
+        }
         t_term_list = [
             [
                 fcc.connected_omega_operator_namedtuple(rank=1, m=0, n=1, m_h=0, n_h=1, m_t=[0], n_t=[0]),
@@ -436,7 +436,7 @@ class Test_write_cc_einsum_python_from_list:
             tkeys.CC: 1,
             tkeys.S: 1,
             tkeys.P: 1
-        }   
+        }
         t_term_list = [
             [
                 fcc.connected_omega_operator_namedtuple(rank=0, m=0, n=0, m_h=0, n_h=0, m_t=[0], n_t=[0]),
@@ -476,7 +476,7 @@ class Test_write_cc_einsum_python_from_list:
             tkeys.CC: 2,
             tkeys.S: 2,
             tkeys.P: 2
-        }   
+        }
         t_term_list = large_test_data.write_cc_einsum_python_from_list_single_unique_key.t_term_list
 
         # run function
@@ -497,7 +497,7 @@ class Test_generate_full_cc_einsums:
             tkeys.CC: 1,
             tkeys.S: 1,
             tkeys.P: 1
-        }   
+        }
 
         # run function
         function_output = cfcc._generate_full_cc_einsums(
@@ -537,7 +537,7 @@ class Test_generate_full_cc_compute_function:
             tkeys.CC: 1,
             tkeys.S: 1,
             tkeys.P: 1
-        }   
+        }
 
         # run function
         function_output = cfcc._generate_full_cc_compute_function(
@@ -565,7 +565,7 @@ class Test_generate_full_cc_compute_function:
             tkeys.CC: 1,
             tkeys.S: 1,
             tkeys.P: 1
-        }   
+        }
 
         # run function
         function_output = cfcc._generate_full_cc_compute_function(
@@ -642,7 +642,7 @@ class Test_wrap_full_cc_generation:
             tkeys.CC: 1,
             tkeys.S: 1,
             tkeys.P: 1
-        }   
+        }
         master_omega = fcc.omega_namedtuple(
             maximum_rank=1,
             operator_list=[
