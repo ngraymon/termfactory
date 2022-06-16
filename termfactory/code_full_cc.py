@@ -181,6 +181,7 @@ def _full_cc_einsum_prefactor(term):  # pragma: no cover
     return string
 
 
+# ----------------------------------------------------------------------------------------------- #
 def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
     """ x """
 
@@ -310,6 +311,7 @@ def _build_full_cc_python_prefactor(h, t_list, simplify_flag=True):
         return f"{numerator}/{denominator} * "
 
 
+# ----------------------------------------------------------------------------------------------- #
 def _multiple_perms_logic(term):
     """ x """
     omega, h, t_list = term
@@ -718,6 +720,28 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
     return return_string
 
 
+
+# ----------------------------------------------------------------------------------------------- #
+def _write_optimized_master_paths_function():
+    """Return wrapper function for creating ALL optimized einsum paths"""
+
+    string = (
+        f"\ndef compute_optimized_paths(A, N, truncation):\n"
+        f'{tab}"""Calculate all optimized paths for the `opt_einsum` calls."""\n'
+        "\n"
+        f"{tab}epsilon_opt_paths = compute_optimized_epsilon_paths(A, N, truncation)\n"
+        f"{tab}linked_opt_paths = compute_optimized_linked_paths(A, N, truncation)\n"
+        f"{tab}unlinked_opt_paths = compute_optimized_unlinked_paths(A, N, truncation)\n"
+        "\n"
+        f"{tab}all_opt_paths = [epsilon_opt_paths, linked_opt_paths, unlinked_opt_paths]\n"
+        "\n"
+        f"{tab}return all_opt_paths\n"
+    )
+
+    return string
+
+
+# ----------------------------------------------------------------------------------------------- #
 def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
     """Write the wrapper function which `vibronic_hamiltonian.py` calls."""
 
@@ -785,6 +809,7 @@ def _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_n
     return return_string
 
 
+# ----------------------------------------------------------------------------------------------- #
 def _generate_full_cc_python_file_contents(truncations, only_ground_state=False):
     """Return a string containing the python code to generate w operators up to (and including) `max_order`.
     Requires the following header: `"import numpy as np\nfrom math import factorial"`.
@@ -796,7 +821,6 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     omega_max_order = truncations[tkeys.P]
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
-
 
     # ------------------------------------------------------------------------------------------- #
     # header for default functions (as opposed to the optimized functions)

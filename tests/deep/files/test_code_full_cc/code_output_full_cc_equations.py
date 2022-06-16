@@ -174,27 +174,33 @@ def compute_m1_n0_amplitude(A, N, ansatz, truncation, h_args, t_args):
 
 
 # -------------- operator(name='', rank=0, m=0, n=0) TERMS -------------- #
-def add_m0_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
+def add_m0_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_connected_path_list):
     """Optimized calculation of the operator(name='', rank=0, m=0, n=0) fully_connected terms."""
 
+    # make an iterable out of the `opt_connected_path_list`
+    optimized_einsum = iter(opt_connected_path_list)
+
     if ansatz.ground_state:
         R += h_args[(0, 0)]
 
         if truncation.at_least_linear:
             if truncation.singles:
-                R += np.einsum('aci, cbi -> ab', h_args[(0, 1)], t_args[(1, 0)])
+                R += next(optimized_einsum)(h_args[(0, 1)], t_args[(1, 0)])
     else:
         R += h_args[(0, 0)]
 
         if truncation.at_least_linear:
             if truncation.singles:
-                R += np.einsum('aci, cbi -> ab', h_args[(1, 0)], t_args[(0, 1)])
+                R += next(optimized_einsum)(h_args[(1, 0)], t_args[(0, 1)])
     return
 
 
-def add_m0_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
+def add_m0_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_linked_path_list):
     """Optimized calculation of the operator(name='', rank=0, m=0, n=0) linked_disconnected terms."""
 
+    # make an iterable out of the `opt_linked_path_list`
+    optimized_einsum = iter(opt_linked_path_list)
+
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
@@ -202,8 +208,11 @@ def add_m0_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args,
     return
 
 
-def add_m0_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
+def add_m0_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_unlinked_path_list):
     """Optimized calculation of the operator(name='', rank=0, m=0, n=0) unlinked_disconnected terms."""
+
+    # make an iterable out of the `opt_unlinked_path_list`
+    optimized_einsum = iter(opt_unlinked_path_list)
 
     if ansatz.ground_state:
         pass  # no valid terms here
@@ -217,9 +226,12 @@ def add_m0_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_arg
 
 
 # -------------- operator(name='b', rank=1, m=0, n=1) TERMS -------------- #
-def add_m0_n1_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
+def add_m0_n1_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_connected_path_list):
     """Optimized calculation of the operator(name='b', rank=1, m=0, n=1) fully_connected terms."""
 
+    # make an iterable out of the `opt_connected_path_list`
+    optimized_einsum = iter(opt_connected_path_list)
+
     if ansatz.ground_state:
         R += h_args[(1, 0)]
     else:
@@ -227,9 +239,12 @@ def add_m0_n1_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_a
     return
 
 
-def add_m0_n1_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
+def add_m0_n1_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_linked_path_list):
     """Optimized calculation of the operator(name='b', rank=1, m=0, n=1) linked_disconnected terms."""
 
+    # make an iterable out of the `opt_linked_path_list`
+    optimized_einsum = iter(opt_linked_path_list)
+
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
@@ -237,22 +252,28 @@ def add_m0_n1_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args,
     return
 
 
-def add_m0_n1_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
+def add_m0_n1_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_unlinked_path_list):
     """Optimized calculation of the operator(name='b', rank=1, m=0, n=1) unlinked_disconnected terms."""
+
+    # make an iterable out of the `opt_unlinked_path_list`
+    optimized_einsum = iter(opt_unlinked_path_list)
 
     if ansatz.ground_state:
         if truncation.singles:
-            R += np.einsum('ac, cbz -> abz', h_args[(0, 0)], t_args[(1, 0)])
+            R += next(optimized_einsum)(h_args[(0, 0)], t_args[(1, 0)])
     else:
         if truncation.singles:
-            R += np.einsum('ac, cbz -> abz', h_args[(0, 0)], t_args[(1, 0)])
+            R += next(optimized_einsum)(h_args[(0, 0)], t_args[(1, 0)])
     return
 
 
 # -------------- operator(name='d', rank=1, m=1, n=0) TERMS -------------- #
-def add_m1_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
+def add_m1_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_connected_path_list):
     """Optimized calculation of the operator(name='d', rank=1, m=1, n=0) fully_connected terms."""
 
+    # make an iterable out of the `opt_connected_path_list`
+    optimized_einsum = iter(opt_connected_path_list)
+
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
@@ -260,9 +281,12 @@ def add_m1_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_a
     return
 
 
-def add_m1_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
+def add_m1_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_linked_path_list):
     """Optimized calculation of the operator(name='d', rank=1, m=1, n=0) linked_disconnected terms."""
 
+    # make an iterable out of the `opt_linked_path_list`
+    optimized_einsum = iter(opt_linked_path_list)
+
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
@@ -270,19 +294,22 @@ def add_m1_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args,
     return
 
 
-def add_m1_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_paths):
+def add_m1_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_unlinked_path_list):
     """Optimized calculation of the operator(name='d', rank=1, m=1, n=0) unlinked_disconnected terms."""
+
+    # make an iterable out of the `opt_unlinked_path_list`
+    optimized_einsum = iter(opt_unlinked_path_list)
 
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
         if truncation.singles:
-            R += np.einsum('ac, cbz -> abz', h_args[(0, 0)], t_args[(0, 1)])
+            R += next(optimized_einsum)(h_args[(0, 0)], t_args[(0, 1)])
     return
 
 
 # --------------------------------------------- RESIDUAL FUNCTIONS --------------------------------------------- #
-def compute_m0_n0_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_paths):
+def compute_m0_n0_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_path_lists):
     """Compute the operator(name='', rank=0, m=0, n=0) amplitude."""
     truncation.confirm_at_least_singles()
 
@@ -290,16 +317,16 @@ def compute_m0_n0_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, 
     R = np.zeros(shape=(A, A), dtype=complex)
 
     # unpack the optimized paths
-    optimized_connected_paths, optimized_linked_paths, optimized_unlinked_paths = opt_paths
+    opt_connected_path_list, opt_linked_path_list, opt_unlinked_path_list = opt_path_lists[(0, 0)]
 
     # add each of the terms
-    add_m0_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_connected_paths)
-    add_m0_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_linked_paths)
-    add_m0_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_unlinked_paths)
+    add_m0_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_connected_path_list)
+    add_m0_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_linked_path_list)
+    add_m0_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_unlinked_path_list)
     return R
 
 
-def compute_m0_n1_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_paths):
+def compute_m0_n1_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_path_lists):
     """Compute the operator(name='b', rank=1, m=0, n=1) amplitude."""
     truncation.confirm_at_least_singles()
 
@@ -307,16 +334,16 @@ def compute_m0_n1_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, 
     R = np.zeros(shape=(A, A, N), dtype=complex)
 
     # unpack the optimized paths
-    optimized_connected_paths, optimized_linked_paths, optimized_unlinked_paths = opt_paths
+    opt_connected_path_list, opt_linked_path_list, opt_unlinked_path_list = opt_path_lists[(0, 1)]
 
     # add each of the terms
-    add_m0_n1_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_connected_paths)
-    add_m0_n1_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_linked_paths)
-    add_m0_n1_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_unlinked_paths)
+    add_m0_n1_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_connected_path_list)
+    add_m0_n1_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_linked_path_list)
+    add_m0_n1_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_unlinked_path_list)
     return R
 
 
-def compute_m1_n0_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_paths):
+def compute_m1_n0_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_path_lists):
     """Compute the operator(name='d', rank=1, m=1, n=0) amplitude."""
     truncation.confirm_at_least_singles()
 
@@ -324,12 +351,12 @@ def compute_m1_n0_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, 
     R = np.zeros(shape=(A, A, N), dtype=complex)
 
     # unpack the optimized paths
-    optimized_connected_paths, optimized_linked_paths, optimized_unlinked_paths = opt_paths
+    opt_connected_path_list, opt_linked_path_list, opt_unlinked_path_list = opt_path_lists[(1, 0)]
 
     # add each of the terms
-    add_m1_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_connected_paths)
-    add_m1_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_linked_paths)
-    add_m1_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, optimized_unlinked_paths)
+    add_m1_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_connected_path_list)
+    add_m1_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_linked_path_list)
+    add_m1_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_unlinked_path_list)
     return R
 
 
