@@ -10,6 +10,65 @@ import latex_eT_zhz as et
 import latex_zhz as zhz
 
 
+class write_cc_optimized_paths_from_list_single_unique_key:
+
+    t_term_list = [
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=0, n=2, m_h=0, n_h=1, m_t=[0], n_t=[1]),
+            fcc.connected_h_operator_namedtuple(rank=1, m=1, n=0, m_o=1, n_o=0, m_t=[0], n_t=[0]),
+            (fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=1, n_o=0),)
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=0, n=2, m_h=0, n_h=0, m_t=[0, 0], n_t=[1, 1]),
+            fcc.connected_h_operator_namedtuple(rank=0, m=0, n=0, m_o=0, n_o=0, m_t=[0, 0], n_t=[0, 0]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=1, n_o=0),
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=1, n_o=0)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=0, n=2, m_h=0, n_h=0, m_t=[0, 0], n_t=[1, 1]),
+            fcc.connected_h_operator_namedtuple(rank=1, m=0, n=1, m_o=0, n_o=0, m_t=[0, 0], n_t=[0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=1, n_o=0),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=1, n_o=0)
+            )
+        ],
+        [
+            fcc.connected_omega_operator_namedtuple(rank=2, m=0, n=2, m_h=0, n_h=1, m_t=[0, 0], n_t=[1, 0]),
+            fcc.connected_h_operator_namedtuple(rank=2, m=1, n=1, m_o=1, n_o=0, m_t=[0, 0], n_t=[0, 1]),
+            (
+                fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=1, n_o=0),
+                fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0)
+            )
+        ]
+    ]
+
+    output = [
+        'if truncation.singles:',
+        '    fully_connected_opt_path_list.extend([',
+        "        oe.contract_expression((A, A), (A, A, N), (A, A, N)),",
+        "        oe.contract_expression((A, A), (A, A, N), (A, A, N))",
+        '    ])',
+        '',
+        'if truncation.at_least_linear:',
+        '    if truncation.singles:',
+        '        fully_connected_opt_path_list.extend([',
+        "            oe.contract_expression((A, A, N), (A, A, N)),",
+        "            oe.contract_expression((A, A, N), (A, A, N))",
+        '        ])',
+        '        fully_connected_opt_path_list.extend([',
+        "            oe.contract_expression((A, A, N, N), (A, A, N), (A, A, N)),",
+        "            oe.contract_expression((A, A, N, N), (A, A, N), (A, A, N))",
+        '        ])',
+        '    if truncation.doubles:',
+        '        fully_connected_opt_path_list.extend([',
+        "            oe.contract_expression((A, A, N), (A, A, N), (A, A, N, N)),",
+        "            oe.contract_expression((A, A, N), (A, A, N, N), (A, A, N))",
+        '        ])',
+    ]
+
+
 class write_cc_einsum_python_from_list_single_unique_key:
 
     t_term_list = [
@@ -66,8 +125,6 @@ class write_cc_einsum_python_from_list_single_unique_key:
         "            np.einsum('aci, cdz, dbiy -> abzy', h_args[(0, 1)], t_args[(1, 0)], t_args[(2, 0)]) +",
         "            np.einsum('aci, cdiy, dbz -> abzy', h_args[(0, 1)], t_args[(2, 0)], t_args[(1, 0)])",
         '        )',
-        '',
-        'if truncation.at_least_quadratic:'
     ]
 
 
