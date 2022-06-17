@@ -386,7 +386,7 @@ def _eT_zhz_einsum_vibrational_components_lhs(t_list, h, z_right, b_loop_flag=Fa
 
     # remaining term lists
     remaining_list = [r for r in blist] + [h_labels[1], z_labels[1], ]
-    print('remaining_list= ', remaining_list)
+    log.debug('remaining_list= ', remaining_list)
     return vibrational_components, ''.join(remaining_list)
 # ----------------------------------------------------------------------------------------------- #
 # old and unused
@@ -884,9 +884,9 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
                 number = math.comb(z_right.n, count_t)
                 adjustment *= number
 
-        print(f"{adjustment = }")
-        print(f"{bottom = }")
-        print(f"{ adjustment / bottom = }")
+        log.debug(f"{adjustment = }")
+        log.debug(f"{bottom = }")
+        log.debug(f"{ adjustment / bottom = }")
 
         return adjustment / bottom
 
@@ -1019,7 +1019,7 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         elif lhs_rhs == 'LHS':
             e_char = 'c'
 
-        print(len(e_a), len(v_a))
+        log.debug(len(e_a), len(v_a))
         # if there is only a single distinguishable t term
         # eg: t1 * t1 * t1 ---> 3 indistinguishable t terms
         # as opposed to t1 * t2 being two distinguishable t terms
