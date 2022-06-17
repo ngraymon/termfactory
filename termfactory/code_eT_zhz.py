@@ -1677,13 +1677,15 @@ def _generate_eT_zhz_einsums(Proj, operators, lhs_rhs, only_ground_state=False, 
     """
     for term in valid_zero_list:
 
-        # if the Hamiltonian / (dt/tau) term is rank 0
-        middle_term_rank_zero = bool(term[2].rank == 0)
-        z_derivative_is_correct_order = bool(term[3][1].m == term[0].n)
+        # this should only ever be done for the LEFT-HAND-SIDE
+        if lhs_rhs == "LHS":
+            # if the Hamiltonian / (dt/tau) term is rank 0
+            middle_term_rank_zero = bool(term[2].rank == 0)
+            z_derivative_is_correct_order = bool(term[3][1].m == term[0].n)
 
-        if middle_term_rank_zero and z_derivative_is_correct_order:
-            valid_zero_list.remove(term)
-            break  # we should only ever remove a single term
+            if middle_term_rank_zero and z_derivative_is_correct_order:
+                valid_zero_list.remove(term)
+                break  # we should only ever remove a single term
 
     # import pdb; pdb.set_trace()
 
@@ -2702,15 +2704,15 @@ def _generate_eT_zhz_optimized_paths(Proj, operators, lhs_rhs, only_ground_state
     """
     for term in valid_zero_list:
 
-        # if the Hamiltonian / (dt/tau) term is rank 0
-        middle_term_rank_zero = bool(term[2].rank == 0)
-        z_derivative_is_correct_order = bool(term[3][1].m == term[0].n)
+        # this should only ever be done for the LEFT-HAND-SIDE
+        if lhs_rhs == "LHS":
+            # if the Hamiltonian / (dt/tau) term is rank 0
+            middle_term_rank_zero = bool(term[2].rank == 0)
+            z_derivative_is_correct_order = bool(term[3][1].m == term[0].n)
 
-        if middle_term_rank_zero and z_derivative_is_correct_order:
-            valid_zero_list.remove(term)
-            break  # we should only ever remove a single term
-
-    # import pdb; pdb.set_trace()
+            if middle_term_rank_zero and z_derivative_is_correct_order:
+                valid_zero_list.remove(term)
+                break  # we should only ever remove a single term
 
     # # cheat and remove all t terms
     # if False:  # debug
