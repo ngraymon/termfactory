@@ -460,7 +460,7 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, opt_einsum=False
                 if not opt_einsum:
                     string = ", ".join([f"{e_a[0]}{v_a[0]}"] + [f"{e_a[i+1]}{v_a[p+1]}" for i, p in enumerate(perm)])
                     string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
-                else:
+                else:  # pragma: no cover
                     string = f"next(optimized_einsum)({h_operand}, {t_operands})"
 
                 # save it
@@ -483,7 +483,7 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, opt_einsum=False
                 if not opt_einsum:
                     string = ", ".join([f"{e_a[0]}{v_a[0]}"] + [f"{e_a[i+1]}{v_a[p+1]}" for i, p in enumerate(perm)])
                     string = f"np.einsum('{string} -> ab{remaining_indices}', {h_operand}, {t_operands})"
-                else:
+                else:  # pragma: no cover
                     string = f"next(optimized_einsum)({h_operand}, {t_operands})"
 
                 # save it
@@ -554,7 +554,7 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, opt_einsum=False
                 _handle_multiline_same_prefactor(return_list, prefactor, string_list, nof_tabs=1)
 
             # prevent hanging if-statements by removing them if they have no code in their scope
-            if return_list[-1] == cc_if_statement_string:
+            if return_list[-1] == cc_if_statement_string:  # pragma: no cover
                 del return_list[-1]
 
     # do all the possible H's with rank 1+
@@ -584,7 +584,7 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, opt_einsum=False
                     _handle_multiline_same_prefactor(temp_list, prefactor, string_list, nof_tabs=2)
 
                 # prevent hanging if-statements by removing them if they have no code in their scope
-                if temp_list[-1] == cc_if_statement_string:
+                if temp_list[-1] == cc_if_statement_string:  # pragma: no cover
                     del temp_list[-1]
 
         # prevent hanging if-statements by not including them if they have no code in their scope
@@ -849,6 +849,7 @@ def _write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_nam
         # these terms are simply added to the residual and don't use einsum
         # so we don't need to compute an optimal path
         if (len(t_list) == 1) and t_list[0] == disconnected_namedtuple(0, 0, 0, 0):
+            # return_list.append(f"R += {h_operand}")
             continue
 
         # logic about multiple permutations
@@ -991,7 +992,7 @@ def _write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_nam
                 _handle_multiline_same_prefactor(return_list, string_list, nof_tabs=1)
 
             # prevent hanging if-statements by removing them if they have no code in their scope
-            if return_list[-1] == cc_if_statement_string:
+            if return_list[-1] == cc_if_statement_string:  # pragma: no cover
                 del return_list[-1]
 
     # do all the possible H's with rank 1+
@@ -1021,21 +1022,24 @@ def _write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_nam
                     _handle_multiline_same_prefactor(temp_list, string_list, nof_tabs=2)
 
                 # prevent hanging if-statements by removing them if they have no code in their scope
-                if temp_list[-1] == cc_if_statement_string:
+                if temp_list[-1] == cc_if_statement_string:  # pragma: no cover
                     del temp_list[-1]
 
         # prevent hanging if-statements by not including them if they have no code in their scope
-        if temp_list[-1] == h_if_statement_string:
+        if temp_list[-1] == h_if_statement_string:  # pragma: no cover
             continue
 
         # otherwise we can include this list since it actually contains einsum equations
         else:
             return_list.extend(temp_list)
 
+    if return_list == []:
+        return_list.append("pass  # no valid terms here")
+
     return return_list
 
 
-def _generate_full_cc_optimized_paths(omega_term, truncations, only_ground_state=False, opt_einsum=False):
+def _generate_full_cc_optimized_paths(omega_term, truncations, only_ground_state=False):
     """Return a string containing python code to be placed into a .py file.
     This does all the work of generating the optimized einsum paths.
     """

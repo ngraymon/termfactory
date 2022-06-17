@@ -481,6 +481,129 @@ class Test_write_cc_einsum_python_from_list:
         assert function_output == large_test_data.write_cc_einsum_python_from_list_single_unique_key.output
 
 
+class Test_write_cc_optimized_paths_from_list:
+
+    def test_basic(self):
+        """x"""
+
+        # input data
+        rank = 1
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }
+        t_term_list = [
+            [
+                fcc.connected_omega_operator_namedtuple(rank=1, m=0, n=1, m_h=0, n_h=0, m_t=[0], n_t=[1]),
+                zero_h_op_nt,
+                (
+                    fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=1, n_o=0),
+                )
+            ]
+        ]
+        local_list_name = 'fully_connected_opt_path_list'
+
+        # run function
+        function_output = cfcc._write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_name, trunc_obj_name='truncation')
+        expected_result = [
+            'if truncation.singles:',
+            "    fully_connected_opt_path_list.append(oe.contract_expression((A, A), (A, A, N)))",
+        ]
+
+        assert function_output == expected_result
+
+    def test_zero_dc_case(self):
+        """Case where t_list has length 1 and is populated by a 0,0,0,0 disconnected named tuple"""
+
+        # input data
+        rank = 1
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }
+        t_term_list = [
+            [
+                fcc.connected_omega_operator_namedtuple(rank=1, m=0, n=1, m_h=0, n_h=1, m_t=[0], n_t=[0]),
+                fcc.connected_h_operator_namedtuple(rank=1, m=1, n=0, m_o=1, n_o=0, m_t=[0], n_t=[0]),
+                (
+                    fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=0),
+                )
+            ]
+        ]
+        local_list_name = 'fully_connected_opt_path_list'
+
+        # run function
+        function_output = cfcc._write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_name, trunc_obj_name='truncation')
+        expected_result = [
+            'pass  # no valid terms here',
+        ]
+
+        assert function_output == expected_result
+
+    def test_0_indices(self):
+        """x"""
+
+        # input data
+        rank = 0
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }
+        t_term_list = [
+            [
+                fcc.connected_omega_operator_namedtuple(rank=0, m=0, n=0, m_h=0, n_h=0, m_t=[0], n_t=[0]),
+                zero_h_op_nt,
+                (
+                    fcc.disconnected_namedtuple(m_h=0, n_h=0, m_o=0, n_o=0),
+                )
+            ],
+            [
+                fcc.connected_omega_operator_namedtuple(rank=0, m=0, n=0, m_h=0, n_h=0, m_t=[0], n_t=[0]),
+                fcc.connected_h_operator_namedtuple(rank=1, m=0, n=1, m_o=0, n_o=0, m_t=[0], n_t=[1]),
+                (
+                    fcc.connected_namedtuple(m_h=1, n_h=0, m_o=0, n_o=0),
+                )
+            ]
+        ]
+        local_list_name = 'fully_connected_opt_path_list'
+
+        # run function
+        function_output = cfcc._write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_name, trunc_obj_name='truncation')
+        expected_result = [
+            '',
+            'if truncation.at_least_linear:',
+            '    if truncation.singles:',
+            "        fully_connected_opt_path_list.append(oe.contract_expression((A, A, N), (A, A, N)))"
+        ]
+
+        assert function_output == expected_result
+
+    def test_single_unique_key(self):
+        """x"""
+
+        # input data
+        rank = 2
+        truncations = {
+            tkeys.H: 2,
+            tkeys.CC: 2,
+            tkeys.S: 2,
+            tkeys.P: 2
+        }
+        t_term_list = large_test_data.write_cc_optimized_paths_from_list_single_unique_key.t_term_list
+        local_list_name = 'fully_connected_opt_path_list'
+
+        # run function
+        function_output = cfcc._write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_name, trunc_obj_name='truncation')
+
+        assert function_output == large_test_data.write_cc_optimized_paths_from_list_single_unique_key.output
+
+
 class Test_generate_full_cc_einsums:
 
     def test_basic(self):
@@ -541,7 +664,7 @@ class Test_generate_full_cc_compute_functions:
         )
 
         # open file
-        func_name = "generate_full_cc_compute_function_out.py"
+        func_name = "generate_full_cc_compute_functions_out.py"
         file_name = join(root_dir, classtest, func_name)
         with open(file_name, 'r') as fp:
             expected_result = fp.read()
@@ -571,6 +694,38 @@ class Test_generate_full_cc_compute_functions:
         # open file
         func_name = "generate_full_cc_compute_function_opt_einsum_out.py"
         file_name = join(root_dir, classtest, func_name)
+        with open(file_name, 'r') as fp:
+            expected_result = fp.read()
+
+        assert function_output == expected_result
+
+
+class Test_generate_optimized_paths_functions:
+
+    def test_basic(self):
+        """x"""
+
+        # input data
+        omega_term = fcc.general_operator_namedtuple(name='b', rank=1, m=0, n=1)
+        truncations = {
+            tkeys.H: 1,
+            tkeys.CC: 1,
+            tkeys.S: 1,
+            tkeys.P: 1
+        }
+
+        # run function
+        function_output = cfcc._generate_optimized_paths_functions(
+            omega_term,
+            truncations,
+            only_ground_state=False
+        )
+
+        # open file
+        func_name = "generate_optimized_paths_functions_out.py"
+        file_name = join(root_dir, classtest, func_name)
+        # with open(file_name, 'w') as fp:
+        #     fp.write(function_output)
         with open(file_name, 'r') as fp:
             expected_result = fp.read()
 

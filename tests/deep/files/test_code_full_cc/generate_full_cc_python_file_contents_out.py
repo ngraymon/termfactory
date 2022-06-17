@@ -397,7 +397,7 @@ def compute_m0_n1_fully_connected_optimized_paths(A, N, ansatz, truncation):
     fully_connected_opt_path_list = []
 
     if ansatz.ground_state:
-
+        pass  # no valid terms here
     else:
         raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
 
