@@ -9,9 +9,9 @@
 name: Upload Python Package to PyPy
 
 on:
-  push:
-    branches:
-    - "prepare_package"
+  release:
+    types: [published]
+
 
 permissions:
   contents: read

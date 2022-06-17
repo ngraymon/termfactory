@@ -27,10 +27,8 @@ def read_md(filename):
             return f.read()
 
 VERSION = (
+            1,
             0,
-            3,
-            0,
-            'dev',
             0
             )
 
@@ -43,13 +41,11 @@ def get_version(version=None):
 
 version = get_version(VERSION)
 
-REQUIRED_PYTHON = (3, 5)
+REQUIRED_PYTHON = (3, 9)
 
 EXCLUDE_FROM_PACKAGES = [
-                         'contrib',
                          'docs',
-                         'tests',
-                         'dev',
+                         'tests'
                         ]
 
 
@@ -70,7 +66,6 @@ def setup_package():
         include_package_data=True,
         # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
         classifiers=[
-            'Development Status :: xxx',
             'Intended Audience :: Science/Research',
             'Topic :: Scientific/Engineering :: Chemistry',
             'License :: OSI Approved :: MIT License',
