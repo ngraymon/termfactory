@@ -15,17 +15,23 @@ import sys
 
 
 
-def read_md(filename):
-    """use Pandoc magic to convert Markdown to RST for uploading to PyPi"""
-    here = path.abspath(path.dirname(__file__))
-    with open(path.join(here, filename), encoding='utf-8') as f:
-        try:
-            from pypandoc import convert_text, download_pandoc
-            download_pandoc()
-            return convert_text(f.read(), 'rst', format="md")
-        except ImportError:
-            print("warning: pypandoc module not found, could not convert Markdown to RST")
-            return f.read()
+# def read_md(filename):
+#     """use Pandoc magic to convert Markdown to RST for uploading to PyPi"""
+#     here = path.abspath(path.dirname(__file__))
+#     with open(path.join(here, filename), encoding='utf-8') as f:
+#         try:
+#             from pypandoc import convert_text, download_pandoc
+#             download_pandoc()
+#             return convert_text(f.readlines(), 'rst', format="md")
+#         except ImportError:
+#             print("warning: pypandoc module not found, could not convert Markdown to RST")
+#             return f.read()
+
+
+# import pypandoc
+# pypandoc.download_pandoc()
+# long_description_rst = pypandoc.convert_file('README.md', 'rst')
+long_description_md = open('README.md').read()
 
 VERSION = (
             1,
@@ -61,7 +67,8 @@ def setup_package():
         author='Neil Raymond',
         author_email='neil.raymond@uwaterloo.ca',
         description='A python package for generating LaTeX and python code for evaluating residual terms',
-        long_description=read_md('README.md'),
+        long_description=long_description_md,
+        long_description_content_type='text/markdown',
         license='MIT',
         packages=find_packages(exclude=EXCLUDE_FROM_PACKAGES),
         include_package_data=True,

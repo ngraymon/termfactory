@@ -1,7 +1,9 @@
 # termfactory
-![Master_workflow_coverage](https://github.com/ngraymon/termfactory/actions/workflows/master_coverage.yml/badge.svg)
-![Testing_workflow_coverage](https://github.com/ngraymon/termfactory/actions/workflows/testing_coverage.yml/badge.svg?testing_coverage=ci_testing) <!-- [![codecov](https://img.shields.io/codecov/c/github/ngraymon/termfactory/master?label=master&token=BFcZ9ifNLT)](https://codecov.io/gh/ngraymon/termfactory) -->
-[![codecov](https://img.shields.io/codecov/c/github/ngraymon/termfactory/ci_testing?label=ci_testing&token=BFcZ9ifNLT)](https://codecov.io/gh/ngraymon/termfactory)
+[![Master_workflow_coverage](https://github.com/ngraymon/termfactory/actions/workflows/master_coverage.yml/badge.svg)](https://pypi.org/project/termfactory/)
+[![Testing_workflow_coverage](https://github.com/ngraymon/termfactory/actions/workflows/testing_coverage.yml/badge.svg?testing_coverage=ci_testing)](https://pypi.org/project/termfactory/)
+[![codecov](https://img.shields.io/codecov/c/github/ngraymon/termfactory/master.svg?label=master)](https://codecov.io/gh/ngraymon/termfactory)
+[![codecov](https://img.shields.io/codecov/c/github/ngraymon/termfactory/ci_testing.svglabel=ci_testing)](https://codecov.io/gh/ngraymon/termfactory)
+
 ----
 ## About
 
