@@ -20,7 +20,8 @@ def read_md(filename):
     here = path.abspath(path.dirname(__file__))
     with open(path.join(here, filename), encoding='utf-8') as f:
         try:
-            from pypandoc import convert_text
+            from pypandoc import convert_text, download_pandoc
+            download_pandoc()
             return convert_text(f.read(), 'rst', format="md")
         except ImportError:
             print("warning: pypandoc module not found, could not convert Markdown to RST")
