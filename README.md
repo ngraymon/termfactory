@@ -11,16 +11,18 @@ The package is used to generate the `einsum` equations for the [vecc package (li
 
 At the moment the package provides three primary ansatz:
 
-- full CC `(H, CC, P)`
+- full CC
+      `(H, CC, P)`
 - HZ ansatz `(H, CC, S, P)`
-- e^T HZ `(H, CC, T, eT, P)`
+- e^T HZ
+     `(H, CC, T, eT, P)`
 
 Both LaTeX and python code can be generated.
 Ground state equations are available for all three ansatz.
 There are no excited state equations available for HZ ansatz.
 
 ## Install
-`pip install (final name)`
+`pip install termfactory`
 
 
 ## Usage
