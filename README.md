@@ -64,13 +64,13 @@ Every execution produces three primary files:
 #### full CC
 ----
 
-##### RHS
+#### RHS
 `python3 driver.py -t 1 1 1 1`
 
 Default filename: `ground_state_full_cc_symmetric_equations.tex`
 
 
-##### LHS
+#### LHS
 `python3 driver.py -t 1 1 1 1 -lhs`
 
 Default filename: `ground_state_full_cc_special_LHS_terms.tex`
@@ -82,12 +82,12 @@ Default filename: `ground_state_full_cc_special_LHS_terms.tex`
 ----
 
 
-##### RHS
+#### RHS
 `python3 driver.py -t 1 1 1 1`
 
 Default filename: `ground_state_z_t_symmetric_equations.tex`
 
-##### LHS
+#### LHS
 `python3 driver.py -t 1 1 1 1 -lhs`
 
 Default filename: `ground_state_z_t_special_LHS_terms.tex`
@@ -97,12 +97,12 @@ Default filename: `ground_state_z_t_special_LHS_terms.tex`
 #### e^T HZ
 ----
 
-##### RHS
+#### RHS
 `python3 driver.py -t 1 1 1 1 1`
 
 Default filename: `ground_state_eT_z_t_symmetric_equations.tex`
 
-##### LHS
+#### LHS
 `python3 driver.py -t 1 1 1 1 1 -lhs`
 
 Default filename: `ground_state_eT_z_t_special_LHS_terms.tex`
@@ -115,12 +115,12 @@ Default filename: `ground_state_eT_z_t_special_LHS_terms.tex`
 #### full CC
 ----
 
-##### RHS
+#### RHS
 `python3 driver.py -t 1 1 1 1 -c`
 
 Default filename: `ground_state_full_cc_equations.py`
 
-##### LHS
+#### LHS
 `python3 driver.py -t 1 1 1 1 1 -c -lhs`
 
 Default filename: `ground_state_full_cc_special_LHS_equations.py`
@@ -135,12 +135,12 @@ There is no code generator implemented for the HZ ansatz
 #### e^T HZ
 ----
 
-##### RHS
+#### RHS
 `python3 driver.py -t 1 1 1 1 1 -c`
 
 Default filename: `eT_zhz_eqs_RHS_H(1)_P(1)_T(1)_exp(1)_Z(1).py`
 
-##### LHS
+#### LHS
 `python3 driver.py -t 1 1 1 1 1 -c -lhs`
 
 Default filename: `eT_zhz_eqs_LHS_H(1)_P(1)_T(1)_exp(1)_Z(1).py`
