@@ -8,4 +8,4 @@ min_confidence = 100
 # sort_by_size = true
 # verbose = true
 [build-system]
-requires = ['pypandoc', 'setuptools', 'pep517']
+requires = ['setuptools', 'pep517']

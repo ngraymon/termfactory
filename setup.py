@@ -13,24 +13,6 @@ from codecs import open
 from os import path
 import sys
 
-
-
-# def read_md(filename):
-#     """use Pandoc magic to convert Markdown to RST for uploading to PyPi"""
-#     here = path.abspath(path.dirname(__file__))
-#     with open(path.join(here, filename), encoding='utf-8') as f:
-#         try:
-#             from pypandoc import convert_text, download_pandoc
-#             download_pandoc()
-#             return convert_text(f.readlines(), 'rst', format="md")
-#         except ImportError:
-#             print("warning: pypandoc module not found, could not convert Markdown to RST")
-#             return f.read()
-
-
-# import pypandoc
-# pypandoc.download_pandoc()
-# long_description_rst = pypandoc.convert_file('README.md', 'rst')
 long_description_md = open('README.md').read()
 
 VERSION = (
@@ -57,7 +39,7 @@ EXCLUDE_FROM_PACKAGES = [
 
 
 def setup_package():
-    """ wapper for setup() so that we can check if julia is installed first """
+    """ wrapper for setup()"""
 
     setup_info = dict(
         name='termfactory',
