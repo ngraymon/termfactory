@@ -1,4 +1,5 @@
 # termfactory
+[![PyPI](https://img.shields.io/pypi/v/termfactory.svg)](https://pypi.org/project/termfactory/)
 [![Master_workflow_coverage](https://github.com/ngraymon/termfactory/actions/workflows/master_coverage.yml/badge.svg)](https://pypi.org/project/termfactory/)
 [![Testing_workflow_coverage](https://github.com/ngraymon/termfactory/actions/workflows/testing_coverage.yml/badge.svg?testing_coverage=ci_testing)](https://pypi.org/project/termfactory/)
 [![codecov](https://img.shields.io/codecov/c/github/ngraymon/termfactory/master.svg?label=master)](https://codecov.io/gh/ngraymon/termfactory)
