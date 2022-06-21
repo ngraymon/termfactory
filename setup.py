@@ -5,13 +5,10 @@ https://packaging.python.org/en/latest/distributing.html
 https://github.com/pypa/sampleproject
 https://docs.python.org/3/distutils/setupscript.html#distutils-installing-scripts
 """
-import subprocess
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 # To use a consistent encoding
 from codecs import open
-from os import path
-import sys
 
 long_description_md = open('README.md').read()
 
