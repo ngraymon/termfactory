@@ -64,6 +64,10 @@ class Test_lhs_gen():
     def E(self, request):
         return request.param
 
+    @pytest.fixture(scope="class", params=['LHS', 'RHS'])
+    def left_right_switch(self, request):
+        return request.param
+
     @pytest.fixture(scope="class")
     def truncations(self, A, B, C, D, E):
         eT_trunc = {
@@ -75,18 +79,18 @@ class Test_lhs_gen():
         }
         return eT_trunc
 
-    def test_mass_gen(self, tmpdir, truncations):
+    def test_mass_gen(self, tmpdir, truncations, left_right_switch):
 
         _gen_wrapper_eT_zhz_python(
             truncations,
             tmpdir,
             only_ground_state=True,
             remove_f_terms=False,
-            lhs_rhs='LHS'
+            lhs_rhs=left_right_switch
         )
         path = (
             "eT_zhz_eqs"
-            f"_LHS"
+            f"_{left_right_switch}"
             f"_H({truncations[tkeys.H]})"
             f"_P({truncations[tkeys.P]})"
             f"_T({truncations[tkeys.T]})"
@@ -95,12 +99,13 @@ class Test_lhs_gen():
             ".py"
         )
         output_path = join(tmpdir, path)
+        # output_path = path
 
         with open(output_path, 'r') as fp:
             file_data = fp.read()
 
         file_name = join(root_dir, classtest, path)
-        print(file_name)
+
         with open(file_name, 'r') as fp:
             reference_file_data = fp.read()
 
