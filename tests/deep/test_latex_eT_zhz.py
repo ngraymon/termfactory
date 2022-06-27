@@ -2270,3 +2270,40 @@ class Test_run_main_et_zhz:
             reference_file_data = fp.read()
 
         assert file_data == reference_file_data, 'Fail'
+
+    def test_run_main_LHS(self, tmpdir):
+            """runs main function and compares it to a reference file"""
+
+            output_path = join(tmpdir, "latex_Test_run_main_et_zhz_LHS.tex")
+
+            eT_trunc = {
+                tkeys.H: 1,
+                tkeys.CC: 1,
+                tkeys.T: 1,
+                tkeys.eT: 1,
+                tkeys.P: 1
+            }
+            default_kwargs = {
+                'only_ground_state': True,
+                'remove_f_terms': False,
+                'path': output_path,
+                'lhs_rhs': 'LHS',
+            }
+
+            et.generate_eT_z_t_symmetric_latex(
+                eT_trunc,
+                only_ground_state=True,
+                remove_f_terms=False,
+                path=output_path,
+                lhs_rhs='LHS'
+            )
+
+            with open(output_path, 'r') as fp:
+                file_data = fp.read()
+
+            func_name = "latex_Test_run_main_et_zhz_LHS.tex"
+            file_name = join(root_dir, classtest, func_name)
+            with open(file_name, 'r') as fp:
+                reference_file_data = fp.read()
+
+            assert file_data == reference_file_data, 'Fail'
