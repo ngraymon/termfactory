@@ -5,7 +5,9 @@ on:
   # on pull requests yet.
   push:
     branches:
-      - ci_testing #change to test_* or *test etc later
+      - dev_*
+      - fix_*
+      - test_*
   workflow_dispatch:
 
 env:
