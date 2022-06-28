@@ -8,12 +8,66 @@ import pytest
 
 # local imports
 from truncation_keys import TruncationsKeys as tkeys
-from code_eT_zhz import generate_eT_zhz_python
+from code_eT_zhz import generate_eT_zhz_python, _simplify_eT_zhz_python_prefactor
 
 # set the path (`root_dir`) to the files we need to compare against
 deep_dir = dirname(abspath(__file__))
 root_dir = join(deep_dir, 'files')
 classtest = 'test_code_eT_zhz'
+
+class Test_simplify_eT_zhz_python_prefactor:
+
+    def test_disjoint(self):
+        """basic test"""
+
+        # input data
+        numerator_list = ['1', '2', '3']
+        denominator_list = ['4', '5', '6']
+
+        # run function
+        function_output = _simplify_eT_zhz_python_prefactor(numerator_list, denominator_list)
+        expected_result = (['1', '2', '3'], ['4', '5', '6'])
+
+        assert function_output == expected_result
+    
+    def test_duplicate_prefactors(self):
+        """basic test"""
+
+        # a > b
+
+        # input data
+        numerator_list = ['1', '2', '2']
+        denominator_list = ['2']
+
+        # run function
+        function_output = _simplify_eT_zhz_python_prefactor(numerator_list, denominator_list)
+        expected_result = (['1', '2'], [])
+
+        assert function_output == expected_result
+
+        # a < b
+
+        # input data
+        numerator_list = ['1', '2']
+        denominator_list = ['2', '2', '2']
+
+        # run function
+        function_output = _simplify_eT_zhz_python_prefactor(numerator_list, denominator_list)
+        expected_result = (['1'], ['2', '2'])
+
+        assert function_output == expected_result
+
+        # a == b
+
+        # input data
+        numerator_list = ['1']
+        denominator_list = ['1', '2']
+
+        # run function
+        function_output = _simplify_eT_zhz_python_prefactor(numerator_list, denominator_list)
+        expected_result = ([], ['2'])
+
+        assert function_output == expected_result
 
 
 def _gen_wrapper_eT_zhz_python(truncations, tmpdir, **kwargs):
