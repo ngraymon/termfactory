@@ -18,10 +18,20 @@ include =
 exclude_lines =
     # Have to re-enable the standard pragma
     pragma: no cover
+    pragma: deprecated
+
+    # Code related to Vectorize b_loop
+    pragma: vectorize_b_loop
+
+    # Code related to hot bands or thermal, not implemented
+    pragma: hot_bands_or_thermal
+
+    # Code related ansatz restriction of only using t1 op
+    pragma: t1_truncation
 
     # Don't complain if tests don't hit defensive assertion code:
     raise NotImplementedError
-
+    # raise Exception("Should not get here")
     # Don't complain if non-runnable code isn't run:
     if 0:
     if __name__ == .__main__.:
@@ -36,6 +46,7 @@ exclude_lines =
     def old_print_wrapper
     old_print_wrapper
     new_t_list = t_list
+    if False:
 
     # currently unused functions
         # full cc latex
