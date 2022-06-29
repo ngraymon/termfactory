@@ -125,6 +125,7 @@ def _eT_zhz_einsum_electronic_components_lhs(t_list, dT, z_right, b_loop_flag=Fa
 
     # otherwise
     else:  # pragma: vectorize_b_loop
+
         # for each t term add 1 electronic label
         electronic_components += ['a', ] * len(t_list)
 
