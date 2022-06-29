@@ -941,7 +941,6 @@ def _collect_z_contributions(
 
     # h^0_0 with zero order Taylor series contributions
     for z_order, z_dict in h_dict.items():
-        if z_dict is {}: continue;  # skip if empty
 
         # exception case for z_order == 0 which has no if statement
         tab_adjust = nof_tabs if z_order == 0 else nof_tabs + 1
