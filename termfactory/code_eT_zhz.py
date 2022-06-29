@@ -82,15 +82,15 @@ def _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag=False):
     else:  # pragma: vectorize_b_loop
 
         # for each t term add 1 electronic label
-        electronic_components += ['a', ] * len(t_list)  
+        electronic_components += ['a', ] * len(t_list)
 
         # the H term always has 2
-        electronic_components.append('ac')  
+        electronic_components.append('ac')
 
         # we assume Z always contributes
-        electronic_components.append('c')  
+        electronic_components.append('c')
 
-        return electronic_components  
+        return electronic_components
 
 
 def _eT_zhz_einsum_electronic_components_lhs(t_list, dT, z_right, b_loop_flag=False):
@@ -124,17 +124,17 @@ def _eT_zhz_einsum_electronic_components_lhs(t_list, dT, z_right, b_loop_flag=Fa
         return electronic_components
 
     # otherwise
-    else:  # pragma: vectorize_b_loop 
+    else:  # pragma: vectorize_b_loop
         # for each t term add 1 electronic label
-        electronic_components += ['a', ] * len(t_list)  
+        electronic_components += ['a', ] * len(t_list)
 
         # the dT term has 1 electronic components
-        electronic_components.append('a')  
+        electronic_components.append('a')
 
         # we assume Z always contributes
-        electronic_components.append('c')  
+        electronic_components.append('c')
 
-        return electronic_components  
+        return electronic_components
 # ----------------------------------------------------------------------------------------------- #
 # handle all the vibrational einsum string component
 
@@ -443,18 +443,18 @@ def _simplify_eT_zhz_python_prefactor(numerator_list, denominator_list):
 
     # count number of appearances
     numerator_dict = dict([(key, 0) for key in numerator_set])
-    for string in numerator_list:  
+    for string in numerator_list:
         numerator_dict[string] += 1
 
-    log.debug('nnnn', numerator_dict)  
+    log.debug('nnnn', numerator_dict)
 
-    denominator_dict = dict([(key, 0) for key in denominator_set])  
-    for string in denominator_list:  
+    denominator_dict = dict([(key, 0) for key in denominator_set])
+    for string in denominator_list:
         denominator_dict[string] += 1
 
-    log.debug('dddd', denominator_dict)  
+    log.debug('dddd', denominator_dict)
     # loop over each unique prefactor
-    for key in intersection:  
+    for key in intersection:
         a, b = numerator_dict[key], denominator_dict[key]
         if a > b:
             denominator_dict[key] = 0
@@ -467,11 +467,11 @@ def _simplify_eT_zhz_python_prefactor(numerator_list, denominator_list):
             numerator_dict[key] = 0
 
     # make updated lists
-    new_numerator_list, new_denominator_list = [], []  
+    new_numerator_list, new_denominator_list = [], []
 
-    for k, v in numerator_dict.items():  
+    for k, v in numerator_dict.items():
         new_numerator_list.extend([k, ]*v)
-    for k, v in denominator_dict.items():  
+    for k, v in denominator_dict.items():
         new_denominator_list.extend([k, ]*v)
 
     new_numerator_list.sort()
