@@ -422,7 +422,12 @@ def _eT_zhz_einsum_prefactor(term):  # pragma: no cover
 
     return string
 # ----------------------------------------------------------------------------------------------- #
-# all three are dealing with prefactor determination
+# ----------------------------------------------------------------------------------------------- #
+# helper functions for _write_third_eTz_einsum_python
+
+
+# ----------------------------------------------------------------------------------------------- #
+# all four are dealing with prefactor determination
 
 
 def _simplify_eT_zhz_python_prefactor(numerator_list, denominator_list):
@@ -746,6 +751,233 @@ def _multiple_perms_logic(term, print_indist_perms: bool = False):
     #     return dict([(k, list(*unique_permutations(range(v)))) for k, v in unique_dict.items()]), unique_dict
 
     raise Exception("Should not get here")  # pragma: no cover
+
+
+def compute_prefactor_adjustment(h, z_right):  # pragma: deprecated
+    """ x """
+
+    adjustment = 1
+    bottom = 1
+
+    if h.m > 1:
+        bottom *= math.factorial(h.m)
+
+        # to account for the permutations of eT-H internal labels around
+        external_perms = math.comb(h.m, h.m_lhs)
+        if external_perms > 1:
+            adjustment *= external_perms
+
+        # like drawing cards from a deck we remove the permutations of the Proj
+        new_max = h.m - h.m_lhs
+
+        # to account for the permutations of H-Z internal labels around the external labels
+        internal_perms = math.comb(new_max, h.m_r)
+        if internal_perms > 1:
+            adjustment *= internal_perms
+
+        # to account for the permutations of eT-Z internal labels with themselves
+        # as we should have accounted for all permutations by
+        # moving H-Z and external labels prior
+        count_t = sum(h.m_t)
+        if count_t > 1:
+            # account for permutations among the internal labels
+            adjustment *= math.factorial(count_t)
+
+    if h.n > 1:
+        bottom *= math.factorial(h.n)
+
+        # to account for the permutations of eT-H internal labels around
+        external_perms = math.comb(h.n, h.n_lhs)
+        if external_perms > 1:
+            adjustment *= external_perms
+
+        # like drawing cards from a deck we remove the permutations of the Proj
+        new_max = h.n - h.n_lhs
+
+        # to account for the permutations of H-Z internal labels around the external labels
+        internal_perms = math.comb(new_max, h.n_r)
+        if internal_perms > 1:
+            adjustment *= internal_perms
+
+        # to account for the permutations of eT-Z internal labels with themselves
+        # as we should have accounted for all permutations by
+        # moving H-Z and external labels prior
+        count_t = sum(h.n_t)
+        if count_t > 1:
+            # account for permutations among the internal labels
+            adjustment *= math.factorial(count_t)
+
+    # ---------------------------------------------------------------------------------------------------------
+
+    if z_right.m > 1:
+        bottom *= math.factorial(z_right.m)
+
+        # to account for the permutations of external labels with other labels on z
+        # (we don't account for permuting with themselves as we will symmetrize them later)
+        external_perms = math.comb(z_right.m, z_right.m_lhs)
+        if external_perms > 1:
+            adjustment *= external_perms
+
+        # like drawing cards from a deck we remove the permutations of the Proj
+        new_max = z_right.m - z_right.m_lhs
+
+        # to account for the permutations of H-Z internal labels with other labels on z
+        internal_perms = math.comb(new_max, z_right.m_h)
+        if internal_perms > 1:
+            adjustment *= internal_perms
+
+        # like drawing cards from a deck we remove the permutations of the H
+        new_max -= z_right.m_h
+
+        # to account for the permutations of H-Z internal labels with themselves
+        if z_right.m_h > 1:
+            adjustment *= math.factorial(z_right.m_h)
+
+        # to account for the permutations of eT-Z internal labels with themselves
+        # as we should have accounted for all permutations by
+        # moving H-Z and external labels prior
+        count_t = sum(z_right.m_t)
+        if count_t > 1:
+            # account for permutations among the internal labels
+            adjustment *= math.factorial(count_t)
+
+        # account for permutations with respect to other labels
+        # (this is just to prove that we already accounted for these permutations)
+        number = math.comb(new_max, count_t)
+        assert number == 1, 'you broke something!!!'
+        if number > 1:  # pragma: no cover
+            adjustment *= number
+
+    if z_right.n > 1:
+        bottom *= math.factorial(z_right.n)
+
+        # to account for the permutations of external labels
+        number = math.comb(z_right.n, z_right.n_lhs)
+        if number > 1:
+            adjustment *= number
+
+        # to account for the permutations of internal labels (with h)
+        if z_right.n_h > 1:
+            adjustment *= math.factorial(z_right.n_h)
+
+        # to account for the permutations of internal labels (with t terms)
+        count_t = sum(z_right.n_t)
+        if count_t > 1:
+            # account for permutations among the internal labels
+            adjustment *= math.factorial(count_t)
+
+            # account for permutations with respect to other labels
+            number = math.comb(z_right.n, count_t)
+            adjustment *= number
+
+    print(f"{adjustment = }")
+    print(f"{bottom = }")
+    print(f"{ adjustment / bottom = }")
+
+    return adjustment / bottom
+
+
+# ----------------------------------------------------------------------------------------------- #
+# these handle collating multiple-lines
+
+def _handle_multiline_same_prefactor(
+    output_list, prefactor, string_list, lhs_rhs,
+    nof_tabs=0
+):
+    """ Specific formatting of multiple terms that share the same prefactor
+
+    When we have multiple einsum terms which share the same prefactor
+    we collate them in a specific  manner like so:
+    R += prefactor * (
+        <einsum equation> +
+        <einsum equation> +
+        ...
+        <einsum equation> +
+        <einsum equation>
+    )
+
+    This function simply glues them together in that fashion.
+    """
+
+    tabber = tab*nof_tabs
+
+    if len(string_list) > 1:
+
+        # header
+        if lhs_rhs == 'RHS':
+            output_list.append(f"{tabber}R += {prefactor}(")
+        elif lhs_rhs == 'LHS':
+            output_list.append(f"{tabber}Z += {prefactor}(")
+
+        # add each line
+        for string in string_list:
+            output_list.append(f"{tabber}{tab}{string} +")
+
+        # remove the last plus symbol
+        output_list[-1] = output_list[-1][:-2]
+
+        # footer
+        output_list.append(f"{tabber})")
+
+    else:
+        # print(f"c {string_list = }")
+        if lhs_rhs == 'RHS':
+            output_list.append(f"{tabber}R += {prefactor}{string_list[0]}")
+        elif lhs_rhs == 'LHS':
+            output_list.append(f"{tabber}Z += {prefactor}{string_list[0]}")
+
+    return output_list
+
+
+def _collect_z_contributions(
+    h_dict, return_array, lhs_rhs, trunc_obj_name,
+    suppress_empty_if_checks=True, nof_tabs=0,
+):
+    """ This is a gatekeeper for all einsum equations that are printed
+    everything gets parsed through this function
+    every single line that gets printed with `einsum` in it comes from the `return_array`
+    which this function appends to
+    """
+
+    # h^0_0 with zero order Taylor series contributions
+    for z_order, z_dict in h_dict.items():
+        if z_dict is {}: continue;  # skip if empty
+
+        # exception case for z_order == 0 which has no if statement
+        tab_adjust = nof_tabs if z_order == 0 else nof_tabs + 1
+
+        temp_z_list = []  # if not empty
+
+        for prefactor, string_list in z_dict.items():
+            if string_list == []:  # skip if empty
+                continue
+
+            _handle_multiline_same_prefactor(
+                temp_z_list, prefactor, string_list, lhs_rhs,
+                nof_tabs=tab_adjust
+            )
+
+        # processing
+        if suppress_empty_if_checks and (temp_z_list == []):
+            continue
+
+        if z_order == 0:
+            return_array.extend(temp_z_list)
+
+        else:
+            tabstr = tab * nof_tabs
+            z_header_if_string = (
+                f"{tabstr}if {trunc_obj_name}.z_at_least_{hamiltonian_order_tag[z_order]}:"
+            )
+
+            if temp_z_list == []:  # pragma: no cover
+                return_array.append(z_header_if_string)
+                return_array.append(f"{tabstr}{tab}pass")
+            else:
+                return_array.append(z_header_if_string)
+                return_array.extend(temp_z_list)
+
+
 # ----------------------------------------------------------------------------------------------- #
 # big boy function that does most of the work
 
@@ -769,137 +1001,18 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
     return_list = []
 
+    # hamiltonian_rank_list is as:
+    # list
+    #   of dictionaries
+    #       of dictionaries
+    #           of lists
     hamiltonian_rank_list = []
     for i in range(H.maximum_rank+1):
         hamiltonian_rank_list.append(dict([(i, {}) for i in range(master_omega.maximum_rank+1)]))
 
-    def compute_prefactor_adjustment(h, z_right):  # pragma: deprecated
-        """ x """
-
-        adjustment = 1
-        bottom = 1
-
-        if h.m > 1:
-            bottom *= math.factorial(h.m)
-
-            # to account for the permutations of eT-H internal labels around
-            external_perms = math.comb(h.m, h.m_lhs)
-            if external_perms > 1:
-                adjustment *= external_perms
-
-            # like drawing cards from a deck we remove the permutations of the Proj
-            new_max = h.m - h.m_lhs
-
-            # to account for the permutations of H-Z internal labels around the external labels
-            internal_perms = math.comb(new_max, h.m_r)
-            if internal_perms > 1:
-                adjustment *= internal_perms
-
-            # to account for the permutations of eT-Z internal labels with themselves
-            # as we should have accounted for all permutations by
-            # moving H-Z and external labels prior
-            count_t = sum(h.m_t)
-            if count_t > 1:
-                # account for permutations among the internal labels
-                adjustment *= math.factorial(count_t)
-
-        if h.n > 1:
-            bottom *= math.factorial(h.n)
-
-            # to account for the permutations of eT-H internal labels around
-            external_perms = math.comb(h.n, h.n_lhs)
-            if external_perms > 1:
-                adjustment *= external_perms
-
-            # like drawing cards from a deck we remove the permutations of the Proj
-            new_max = h.n - h.n_lhs
-
-            # to account for the permutations of H-Z internal labels around the external labels
-            internal_perms = math.comb(new_max, h.n_r)
-            if internal_perms > 1:
-                adjustment *= internal_perms
-
-            # to account for the permutations of eT-Z internal labels with themselves
-            # as we should have accounted for all permutations by
-            # moving H-Z and external labels prior
-            count_t = sum(h.n_t)
-            if count_t > 1:
-                # account for permutations among the internal labels
-                adjustment *= math.factorial(count_t)
-
-        # ---------------------------------------------------------------------------------------------------------
-
-        if z_right.m > 1:
-            bottom *= math.factorial(z_right.m)
-
-            # to account for the permutations of external labels with other labels on z
-            # (we don't account for permuting with themselves as we will symmetrize them later)
-            external_perms = math.comb(z_right.m, z_right.m_lhs)
-            if external_perms > 1:
-                adjustment *= external_perms
-
-            # like drawing cards from a deck we remove the permutations of the Proj
-            new_max = z_right.m - z_right.m_lhs
-
-            # to account for the permutations of H-Z internal labels with other labels on z
-            internal_perms = math.comb(new_max, z_right.m_h)
-            if internal_perms > 1:
-                adjustment *= internal_perms
-
-            # like drawing cards from a deck we remove the permutations of the H
-            new_max -= z_right.m_h
-
-            # to account for the permutations of H-Z internal labels with themselves
-            if z_right.m_h > 1:
-                adjustment *= math.factorial(z_right.m_h)
-
-            # to account for the permutations of eT-Z internal labels with themselves
-            # as we should have accounted for all permutations by
-            # moving H-Z and external labels prior
-            count_t = sum(z_right.m_t)
-            if count_t > 1:
-                # account for permutations among the internal labels
-                adjustment *= math.factorial(count_t)
-
-            # account for permutations with respect to other labels
-            # (this is just to prove that we already accounted for these permutations)
-            number = math.comb(new_max, count_t)
-            assert number == 1, 'you broke something!!!'
-            if number > 1:  # pragma: no cover
-                adjustment *= number
-
-        if z_right.n > 1:
-            bottom *= math.factorial(z_right.n)
-
-            # to account for the permutations of external labels
-            number = math.comb(z_right.n, z_right.n_lhs)
-            if number > 1:
-                adjustment *= number
-
-            # to account for the permutations of internal labels (with h)
-            if z_right.n_h > 1:
-                adjustment *= math.factorial(z_right.n_h)
-
-            # to account for the permutations of internal labels (with t terms)
-            count_t = sum(z_right.n_t)
-            if count_t > 1:
-                # account for permutations among the internal labels
-                adjustment *= math.factorial(count_t)
-
-                # account for permutations with respect to other labels
-                number = math.comb(z_right.n, count_t)
-                adjustment *= number
-
-        print(f"{adjustment = }")
-        print(f"{bottom = }")
-        print(f"{ adjustment / bottom = }")
-
-        return adjustment / bottom
-
-    #
-    #
-    #
-    # the big loop
+    # -------------------------------------------------------------- #
+    # the big loop!
+    # -------------------------------------------------------------- #
     for term in t_term_list:
 
         omega, t_list, h, z_pair, not_sure_what_this_one_is_for = term
@@ -1008,7 +1121,13 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
         # -----------------------------------------------------------------------------------------
         # build with permutations
-        hamiltonian_rank_list[max(h.m, h.n)].setdefault(max_t_rank, {}).setdefault(z_right.rank, {}).setdefault(prefactor, [])
+        hamiltonian_rank_list[max(h.m, h.n)].setdefault(
+            max_t_rank, {}
+        ).setdefault(
+            z_right.rank, {}
+        ).setdefault(
+            prefactor, []
+        )
 
         # old_print_wrapper(f"{t_list = }")
         if lhs_rhs == 'RHS':
@@ -1330,93 +1449,14 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
 
     # -----------------------------------------------------------------------------------------
 
-    def _handle_multiline_same_prefactor(output_list, prefactor, string_list, lhs_rhs, nof_tabs=0):
-        """ Specific formatting of multiple terms that share the same prefactor
-
-        When we have multiple einsum terms which share the same prefactor
-        we collate them in a specific  manner like so:
-        R += prefactor * (
-            <einsum equation> +
-            <einsum equation> +
-            ...
-            <einsum equation> +
-            <einsum equation>
-        )
-
-        This function simply glues them together in that fashion.
-        """
-
-        tabber = tab*nof_tabs
-
-        if len(string_list) > 1:
-
-            # header
-            if lhs_rhs == 'RHS':
-                output_list.append(f"{tabber}R += {prefactor}(")
-            elif lhs_rhs == 'LHS':
-                output_list.append(f"{tabber}Z += {prefactor}(")
-
-            # add each line
-            for string in string_list:
-                output_list.append(f"{tabber}{tab}{string} +")
-
-            # remove the last plus symbol
-            output_list[-1] = output_list[-1][:-2]
-
-            # footer
-            output_list.append(f"{tabber})")
-
-        else:
-            # print(f"c {string_list = }")
-            if lhs_rhs == 'RHS':
-                output_list.append(f"{tabber}R += {prefactor}{string_list[0]}")
-            elif lhs_rhs == 'LHS':
-                output_list.append(f"{tabber}Z += {prefactor}{string_list[0]}")
-
-        return output_list
-
     h_contribution_list = []
 
-    def collect_z_contributions(h_dict, return_array, nof_tabs=0):
-        """ This is a gatekeeper for all einsum equations that are printed
-        everything gets parsed through this function
-        every single line that gets printed with `einsum` in it comes from the `return_array`
-        which this function appends to
-        """
-
-        # h^0_0 with zero order Taylor series contributions
-        for z_order, z_dict in h_dict.items():
-            if z_dict is {}: continue;  # skip if empty
-
-            # exception case for z_order == 0 which has no if statement
-            tab_adjust = nof_tabs if z_order == 0 else nof_tabs + 1
-
-            temp_z_list = []  # if not empty
-
-            for prefactor, string_list in z_dict.items():
-                if string_list == []: continue;  # skip if empty
-
-                _handle_multiline_same_prefactor(temp_z_list, prefactor, string_list, lhs_rhs, nof_tabs=tab_adjust)
-
-            # processing
-            if temp_z_list == [] and suppress_empty_if_checks:
-                continue
-
-            if z_order == 0:
-                return_array.extend(temp_z_list)
-
-            else:
-                tabstr = tab*nof_tabs
-                z_header_if_string = f"{tabstr}if {trunc_obj_name}.z_at_least_{hamiltonian_order_tag[z_order]}:"
-
-                if temp_z_list == []:
-                    return_array.append(z_header_if_string)
-                    return_array.append(f"{tabstr}{tab}pass")
-                else:
-                    return_array.append(z_header_if_string)
-                    return_array.extend(temp_z_list)
-
-    collect_z_contributions(hamiltonian_rank_list[0][0], h_contribution_list, nof_tabs=0)
+    _collect_z_contributions(
+        hamiltonian_rank_list[0][0], h_contribution_list,
+        lhs_rhs, trunc_obj_name,
+        suppress_empty_if_checks=suppress_empty_if_checks,
+        nof_tabs=0,
+    )
 
     # loop over first order (and higher) Taylor series contributions
     for j in range(1, master_omega.maximum_rank+1):
@@ -1425,7 +1465,12 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         temp_list = []  # if not empty
 
         # h^0_0 with first order (and higher) Taylor series contributions
-        collect_z_contributions(hamiltonian_rank_list[0][j], temp_list, nof_tabs=1)
+        _collect_z_contributions(
+            hamiltonian_rank_list[0][j], temp_list,
+            lhs_rhs, trunc_obj_name,
+            suppress_empty_if_checks=suppress_empty_if_checks,
+            nof_tabs=1,
+        )
 
         # processing
         if temp_list == [] and suppress_empty_if_checks:
@@ -1445,7 +1490,12 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
         temp_list = []  # if not empty
 
         # h^i_j with zero order Taylor series contributions
-        collect_z_contributions(hamiltonian_rank_list[i][0], temp_list, nof_tabs=1)
+        _collect_z_contributions(
+            hamiltonian_rank_list[i][0], temp_list,
+            lhs_rhs, trunc_obj_name,
+            suppress_empty_if_checks=suppress_empty_if_checks,
+            nof_tabs=1,
+        )
 
         # for prefactor in hamiltonian_rank_list[i][0].keys():
         #     if hamiltonian_rank_list[i][0][prefactor] is {}: continue;  # skip if empty
@@ -1468,7 +1518,12 @@ def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_
             temp_list = []  # if not empty
 
             # h^i_j with first order (and higher) Taylor series contributions
-            collect_z_contributions(hamiltonian_rank_list[i][j], temp_list, nof_tabs=2)
+            _collect_z_contributions(
+                hamiltonian_rank_list[i][j], temp_list,
+                lhs_rhs, trunc_obj_name,
+                suppress_empty_if_checks=suppress_empty_if_checks,
+                nof_tabs=2,
+            )
 
             # processing
             if temp_list == [] and suppress_empty_if_checks:
