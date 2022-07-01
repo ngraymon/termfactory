@@ -53,7 +53,7 @@ def _generate_python(trunc, **kwargs):
             f'Invalid {kwargs["ansatz"] = }\n'
             "Only 'full cc' or 'eT_z_t ansatz' are valid values.\n"
         )
-        raise Exception(string)
+        raise NotImplementedError(string)
 
     # file='eT_z_t ansatz'
 
