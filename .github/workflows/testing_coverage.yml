@@ -34,17 +34,18 @@ jobs:
         id: install
         run: |
           python -V               # Print out python version for debugging
-          python -m pip install virtualenv >> setup_output.txt
-          virtualenv venv  >> setup_output.txt
+          python -m pip install virtualenv | tee -a python_setup_output.txt
+          virtualenv venv  | tee -a python_setup_output.txt
           . venv/bin/activate
-          python -m pip install -r requirements.txt >> setup_output.txt
-          python -m pip install -r test_requirements.txt >> setup_output.txt
+          python -m pip install -r requirements.txt | tee -a python_setup_output.txt
+          python -m pip install -r test_requirements.txt | tee -a python_setup_output.txt
 
+      # only run deep tests (1 ~ 3 seconds long)
       - name: "Run 'deep' pytest suite"
         id: run_test
         run: |
           . venv/bin/activate
-          python -m coverage run -m pytest -k 'deep' --tb=no >> printing_output.txt # only run deep tests (1 ~ 3 seconds long)
+          python -m coverage run -m pytest -k 'deep' --tb=no | tee deep_test_output.txt
 
       - name: "Generate coverage reports"
         id: make_reports
@@ -62,8 +63,8 @@ jobs:
         with:
           name: output_files
           path: |
-            setup_output.txt
-            printing_output.txt
+            python_setup_output.txt
+            deep_test_output.txt
             default_logging_file.txt
 
       - name: "Upload coverage to Codecov"
