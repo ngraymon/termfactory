@@ -1274,7 +1274,8 @@ def _build_hz_latex_prefactor(h, z_left, z_right, simplify_flag=False):
 
     """
 
-    assert z_left is None, 'Logic does not support ZH, or ZHZ terms at the moment'
+    if z_left is not None:
+        raise NotImplementedError('Logic does not support ZH, or ZHZ terms at the moment')
 
     numerator_value = 1
     denominator_value = 1

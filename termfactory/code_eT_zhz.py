@@ -60,7 +60,8 @@ def _eT_zhz_einsum_electronic_components(t_list, z_right, b_loop_flag=False):
         `ac, c -> a`
 
     """
-    assert b_loop_flag is True, 'Unclear how to implement function for vectorized mode'
+    if not b_loop_flag:
+        raise NotImplementedError('Unclear how to implement function for vectorized mode')
 
     electronic_components = []
 
@@ -105,7 +106,9 @@ def _eT_zhz_einsum_electronic_components_lhs(t_list, dT, z_right, b_loop_flag=Fa
         `ac, c -> a`
 
     """
-    assert b_loop_flag is True, 'Unclear how to implement function for vectorized mode'
+
+    if not b_loop_flag:
+        raise NotImplementedError('Unclear how to implement function for vectorized mode')
 
     electronic_components = []
 

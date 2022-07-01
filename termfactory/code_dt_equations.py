@@ -177,7 +177,9 @@ def _write_linked_disconnected_strings(order, opt_einsum=False):
     """Output the python code which generates all CI/CC terms to subtract from dt."""
 
     # may want to switch to numerical arguments for einsum
-    assert order <= 6, "Can only handle up to 6th order due to `einsum_surface_tags` limit"
+
+    if order > 6:
+        raise NotImplementedError("Can only handle up to 6th order due to `einsum_surface_tags` limit")
     return_string = ""  # we store the output in this string
 
     # prepare the function definition, unpacking of arguments, and initialization of the W array
@@ -280,7 +282,8 @@ def _write_un_linked_disconnected_strings(order, opt_einsum=False):
     """Output the python code which generates all CC terms to subtract from dt."""
 
     # may want to switch to numerical arguments for einsum
-    assert order <= 6, "Can only handle up to 6th order due to `einsum_surface_tags` limit"
+    if order > 6:
+        raise NotImplementedError("Can only handle up to 6th order due to `einsum_surface_tags` limit")
     return_string = ""  # we store the output in this string
 
     # prepare the function definition, unpacking of arguments, and initialization of the W array
@@ -372,7 +375,8 @@ def _write_dt_amplitude_strings(order, opt_einsum=False):
     """ output the string of the function `compute_CI_from_CC` which generates all the W's """
 
     # may want to switch to numerical arguments for einsum
-    assert order <= 6, "Can only handle up to 6th order due to `einsum_surface_tags` limit"
+    if order > 6:
+        raise NotImplementedError("Can only handle up to 6th order due to `einsum_surface_tags` limit")
     return_string = ""  # we store the output in this string
 
     # prepare the function definition, unpacking of arguments, and initialization of the W array
@@ -577,7 +581,8 @@ def _write_optimized_master_paths_function():
 
 def _write_optimized_epsilon_paths_function(max_order):
     """Return strings to write all the constant `oe.contract_expression` calls."""
-    assert max_order < 7, "optimized paths only implemented up to 6th order"
+    if max_order > 6:
+        raise NotImplementedError("optimized paths only implemented up to 6th order")
 
     string = (
         f"\ndef compute_optimized_epsilon_paths(A, N, truncation):\n"
@@ -621,7 +626,8 @@ def _write_optimized_epsilon_paths_function(max_order):
 
 def _write_optimized_linked_paths_function(max_order):
     """Return strings to write all the linked `oe.contract_expression` calls."""
-    assert max_order < 7, "optimized paths only implemented up to 6th order"
+    if max_order > 6:
+        raise NotImplementedError("optimized paths only implemented up to 6th order")
 
     string = (
         f"\ndef compute_optimized_linked_paths(A, N, truncation):\n"
@@ -672,7 +678,8 @@ def _write_optimized_linked_paths_function(max_order):
 
 def _write_optimized_unlinked_paths_function(max_order):
     """Return strings to write all the unlinked `oe.contract_expression` calls."""
-    assert max_order < 7, "optimized paths only implemented up to 6th order"
+    if max_order > 6:
+        raise NotImplementedError("optimized paths only implemented up to 6th order")
 
     string = (
         f"\ndef compute_optimized_unlinked_paths(A, N, truncation):\n"

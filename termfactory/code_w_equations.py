@@ -191,7 +191,9 @@ def _generate_surface_index(partition):
     and the rest of the letters in between are in alphabetical order.
     """
     max_i = len(partition)-1
-    assert max_i <= 7, "Our current `einsum_surface_tags` can't support 7th order W operators"
+    if max_i > 7:
+        raise NotImplementedError("Our current `einsum_surface_tags` can't support 7th order W operators")
+
     return_list = [einsum_surface_tags[i:i+2] for i in range(max_i)]
     return_list.append(einsum_surface_tags[max_i] + "b")
     return return_list
@@ -201,7 +203,8 @@ def _generate_mode_index(partition, order):
     """Return a list of strings  [`ij`, `k`, `l`] representing the mode indices
     for the einsum of the W operator.
     """
-    assert order <= 6, "Our current `tag_str` can't support 7th order W operators"
+    if order > 6:
+        raise NotImplementedError("Our current `tag_str` can't support 7th order W operators")
     combinations = unique_permutations(partition)
     # log.debug(f"{combinations=}")
 
@@ -308,7 +311,8 @@ def _construct_vemx_contributions_definition(return_string, order, opt_einsum=Fa
 
 def _generate_vemx_contributions(order, opt_einsum=False):
     """ x """
-    assert order <= 6, "Can only handle up to 6th order due to `einsum_surface_tags` limit"
+    if order > 6:
+        raise NotImplementedError("Can only handle up to 6th order due to `einsum_surface_tags` limit")
 
     return_string = ""  # we store the output in this string
 
@@ -433,7 +437,8 @@ def _construct_vecc_contributions_definition(return_string, order, opt_einsum=Fa
 
 def _generate_vecc_contributions(order, opt_einsum=False):
     """ x """
-    assert order <= 6, "Can only handle up to 6th order due to `einsum_surface_tags` limit"
+    if order > 6:
+        raise NotImplementedError("Can only handle up to 6th order due to `einsum_surface_tags` limit")
 
     return_string = ""  # we store the output in this string
 
@@ -547,7 +552,8 @@ def _construct_w_function_definition(return_string, order, opt_einsum=False, ite
 
 def _write_w_function_strings(order, opt_einsum=False):
     """ x """
-    assert order <= 6, "Can only handle up to 6th order due to `einsum_surface_tags` limit"
+    if order > 6:
+        raise NotImplementedError("Can only handle up to 6th order due to `einsum_surface_tags` limit")
 
     return_string = ""  # we store the output in this string
 
@@ -782,7 +788,8 @@ def _write_optimized_vemx_paths_function(max_order):
     Unfortunately the code got a lot messier when I had to add in the truncation if statements.
     It should get a rework/factorization at some point
     """
-    assert max_order <= 6, "Only implemented up to 6th order"
+    if max_order > 6:
+        raise NotImplementedError("optimized paths only implemented up to 6th order")
 
     string = (
         f"\ndef compute_optimized_vemx_paths(A, N, truncation):\n"
@@ -834,7 +841,8 @@ def _write_optimized_vecc_paths_function(max_order):
     Unfortunately the code got a lot messier when I had to add in the truncation if statements.
     It should get a rework/factorization at some point
     """
-    assert max_order <= 6, "Only implemented up to 6th order"
+    if max_order > 6:
+        raise NotImplementedError("optimized paths only implemented up to 6th order")
 
     string = (
         f"\ndef compute_optimized_vecc_paths(A, N, truncation):\n"
