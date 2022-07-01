@@ -10,7 +10,7 @@ def add_m0_n0_fully_connected_terms(R, ansatz, truncation, h_args, t_args):
             if truncation.singles:
                 R += np.einsum('aci, cbi -> ab', h_args[(0, 1)], t_args[(1, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -20,7 +20,7 @@ def add_m0_n0_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -30,7 +30,7 @@ def add_m0_n0_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 # --------------------------------------------------------------------------- #
@@ -45,7 +45,7 @@ def add_m0_n1_fully_connected_terms(R, ansatz, truncation, h_args, t_args):
     if ansatz.ground_state:
         R += h_args[(1, 0)]
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -55,7 +55,7 @@ def add_m0_n1_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -66,7 +66,7 @@ def add_m0_n1_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)
         if truncation.singles:
             R += np.einsum('ac, cbz -> abz', h_args[(0, 0)], t_args[(1, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -77,7 +77,7 @@ def add_m1_n0_fully_connected_terms(R, ansatz, truncation, h_args, t_args):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -87,7 +87,7 @@ def add_m1_n0_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -97,6 +97,6 @@ def add_m1_n0_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 

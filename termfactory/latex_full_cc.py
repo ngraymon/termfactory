@@ -914,13 +914,14 @@ def prepare_condensed_terms(term_list, linked_condense=False, unlinked_condense=
     # more complicated
     elif linked_condense:
 
-        assert omega.rank in [2, 3], (
-            "Condensing linked disconnected terms "
-            "is only supported for omega's of rank (2,3) "
-            f"not rank {omega.rank}"
-        )
+        if omega.rank not in [2, 3]:
+            raise NotImplementedError(
+                "Condensing linked disconnected terms "
+                "is only supported for omega's of rank (2,3) "
+                f"not rank {omega.rank}"
+            )
 
-        # above assert prevents this from ever being reached
+        # above Exception prevents this from ever being reached
         # if omega.rank == 1:
         #     raise Exception("Linear omega operators (omega.rank == 1) do not have linked disconnected terms!")
 

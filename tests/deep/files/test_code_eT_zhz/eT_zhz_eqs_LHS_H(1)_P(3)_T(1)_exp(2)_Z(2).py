@@ -26,7 +26,7 @@ def compute_m0_n0_HZ_LHS(Z, ansatz, truncation, t_conj, dT, z_args, dz_args):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -50,7 +50,7 @@ def compute_m0_n0_eT_HZ_LHS(Z, ansatz, truncation, t_conj, dT, z_args, dz_args):
                 if truncation.z_at_least_linear:
                     Z += np.einsum('i, j, j, ci -> c', t_conj[(0, 1)], t_conj[(0, 1)], dT[(1, 0)], z_args[(1, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -70,7 +70,7 @@ def compute_m0_n1_HZ_LHS(Z, ansatz, truncation, t_conj, dT, z_args, dz_args):
         if truncation.h_at_least_linear:
             Z += np.einsum('z, c -> cz', dT[(1, 0)], z_args[(0, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -97,7 +97,7 @@ def compute_m0_n1_eT_HZ_LHS(Z, ansatz, truncation, t_conj, dT, z_args, dz_args):
                     Z += np.einsum('i, j, j, ciz -> cz', t_conj[(0, 1)], t_conj[(0, 1)], dT[(1, 0)], z_args[(2, 0)])
                     Z += (1 / 2) * np.einsum('i, j, z, cij -> cz', t_conj[(0, 1)], t_conj[(0, 1)], dT[(1, 0)], z_args[(2, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -118,7 +118,7 @@ def compute_m0_n2_HZ_LHS(Z, ansatz, truncation, t_conj, dT, z_args, dz_args):
             if truncation.z_at_least_linear:
                 Z += np.einsum('z, cy -> czy', dT[(1, 0)], z_args[(1, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -136,7 +136,7 @@ def compute_m0_n2_eT_HZ_LHS(Z, ansatz, truncation, t_conj, dT, z_args, dz_args):
                     Z += np.einsum('i, z, ciy -> czy', t_conj[(0, 1)], dT[(1, 0)], z_args[(2, 0)])
                     Z += (1 / 2) * np.einsum('i, i, czy -> czy', t_conj[(0, 1)], dT[(1, 0)], z_args[(2, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -198,7 +198,7 @@ def compute_m0_n0_HZ_LHS_optimized(Z, ansatz, truncation, t_conj, dT, z_args, dz
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -222,7 +222,7 @@ def compute_m0_n0_eT_HZ_LHS_optimized(Z, ansatz, truncation, t_conj, dT, z_args,
                 if truncation.z_at_least_linear:
                     Z += np.einsum('i, j, j, ci -> c', t_conj[(0, 1)], t_conj[(0, 1)], dT[(1, 0)], z_args[(1, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -242,7 +242,7 @@ def compute_m0_n1_HZ_LHS_optimized(Z, ansatz, truncation, t_conj, dT, z_args, dz
         if truncation.h_at_least_linear:
             Z += np.einsum('z, c -> cz', dT[(1, 0)], z_args[(0, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -269,7 +269,7 @@ def compute_m0_n1_eT_HZ_LHS_optimized(Z, ansatz, truncation, t_conj, dT, z_args,
                     Z += np.einsum('i, j, j, ciz -> cz', t_conj[(0, 1)], t_conj[(0, 1)], dT[(1, 0)], z_args[(2, 0)])
                     Z += (1 / 2) * np.einsum('i, j, z, cij -> cz', t_conj[(0, 1)], t_conj[(0, 1)], dT[(1, 0)], z_args[(2, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -290,7 +290,7 @@ def compute_m0_n2_HZ_LHS_optimized(Z, ansatz, truncation, t_conj, dT, z_args, dz
             if truncation.z_at_least_linear:
                 Z += np.einsum('z, cy -> czy', dT[(1, 0)], z_args[(1, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
@@ -308,7 +308,7 @@ def compute_m0_n2_eT_HZ_LHS_optimized(Z, ansatz, truncation, t_conj, dT, z_args,
                     Z += np.einsum('i, z, ciy -> czy', t_conj[(0, 1)], dT[(1, 0)], z_args[(2, 0)])
                     Z += (1 / 2) * np.einsum('i, i, czy -> czy', t_conj[(0, 1)], dT[(1, 0)], z_args[(2, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented!')
+        raise NotImplementedError('Hot Band amplitudes not implemented!')
 
     return
 
