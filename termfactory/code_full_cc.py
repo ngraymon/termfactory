@@ -341,7 +341,7 @@ def _multiple_perms_logic(term):
     #     old_print_wrapper([unique_permutations(range(v)) for k, v in unique_dict.items()])
     #     return dict([(k, list(*unique_permutations(range(v)))) for k, v in unique_dict.items()]), unique_dict
 
-    raise Exception("Shouldn't get here")  # pragma: no cover
+    raise Exception("Should not get here")  # pragma: no cover
 
 
 def _write_cc_einsum_python_from_list(truncations, t_term_list, opt_einsum=False, trunc_obj_name='truncation'):
@@ -662,7 +662,7 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
     additionally the theory here is still in development and may not be pushed forward, it makes no sense to try and write this
     code if there isn't any theory to inform the rules defining the equations
     """
-    full_einsums = [("raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')", ), ]*3
+    full_einsums = [("raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')", ), ]*3
     # ----------------------------------------------------------------------------------------------- #
 
     # for distinguishing the different types of lists of optimized einsum paths
@@ -1097,7 +1097,7 @@ def _generate_optimized_paths_functions(omega_term, truncations, only_ground_sta
     additionally the theory here is still in development and may not be pushed forward, it makes no sense to try and write this
     code if there isn't any theory to inform the rules defining the equations
     """
-    full_paths = [("raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')", ), ]*3
+    full_paths = [("raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')", ), ]*3
     # ----------------------------------------------------------------------------------------------- #
 
     for i, term_type in enumerate(term_type_name_list):

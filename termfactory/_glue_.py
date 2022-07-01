@@ -42,7 +42,7 @@ def _generate_python(trunc, **kwargs):
 
     elif kwargs['ansatz'] == 'z_t ansatz':
         assert tkeys.key_list_type(trunc) == 'zhz', "Truncations must be zhz type"
-        raise Exception('There is no code generator for this ansatz. It was never implemented.')
+        raise NotImplementedError('There is no code generator for this ansatz. It was never implemented.')
 
     elif kwargs['ansatz'] == 'eT_z_t ansatz':
         assert tkeys.key_list_type(trunc) == 'eTz', "Truncations must be eTz type"

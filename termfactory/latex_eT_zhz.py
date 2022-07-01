@@ -658,10 +658,10 @@ def _generate_all_valid_eT_connection_permutations(LHS, t_list, h, z_pair, log_i
                 log.debug("Invalid upper perm" + dense_output)
 
     elif remaining_n == 0:  # pragma: no cover
-        raise Exception("have not coded this yet")
+        raise NotImplementedError("have not coded this yet")
 
     else:  # pragma: no cover
-        raise Exception("have not coded this yet")
+        raise NotImplementedError("have not coded this yet")
 
     return valid_upper_perm_combinations, valid_lower_perm_combinations
 
@@ -850,14 +850,14 @@ def _generate_all_o_eT_h_z_connection_permutations(LHS, h, valid_permutations, l
                         if t.m != sum(t_upper):  # pragma: no cover
                             log.debug(f"Bad t perms + z perms: {t.m = } {t_upper = }")
                             if lhs_rhs == 'RHS':
-                                raise Exception('''Code is not robust and I'm not sure what is wrong, To-Do!''')
+                                raise NotImplementedError('''Code is not robust and I'm not sure what is wrong, To-Do!''')
                             elif lhs_rhs == 'LHS':
                                 continue
 
                         if t.n != sum(t_lower):  # pragma: no cover
                             log.debug(f"Bad t perms + z perms: {t.n = } {t_lower = }")
                             if lhs_rhs == 'RHS':
-                                raise Exception('''Code is not robust and I'm not sure what is wrong, To-Do!''')
+                                raise NotImplementedError('''Code is not robust and I'm not sure what is wrong, To-Do!''')
                             elif lhs_rhs == 'LHS':
                                 continue
 
@@ -2073,7 +2073,7 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, lhs
 
     # the second (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist  # pragma: no cover
-        raise Exception(
+        raise NotImplementedError(
             "The excited state second eTZH terms are not implemented.\n"
             "To properly implement this Z term we need to write a new function `_build_second_eTz_term`"
             "Which loops over `eT_taylor_expansion` in the same way as `_build_third_eTz_term`"
@@ -2087,7 +2087,7 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, lhs
 
     # the fourth (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist  # pragma: no cover
-        raise Exception(
+        raise NotImplementedError(
             "The excited state second eTZHZ terms are not implemented.\n"
             "To properly implement this Z term we need to write a new function `_build_fourth_eTz_term`"
             "Which loops over `eT_taylor_expansion` in the same way as `_build_third_eTz_term`"

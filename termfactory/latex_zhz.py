@@ -1202,7 +1202,7 @@ def _prepare_second_z_latex(term_list, split_width=7, remove_f_terms=False, prin
 
         # add any prefactors if they exist
         if print_prefactors:  # pragma: no cover
-            raise Exception("prefactor code for z stuff is not done")
+            raise NotImplementedError("prefactor code for z stuff is not done")
             term_string += _build_z_latex_prefactor(h, z_left)
 
         # prepare the z terms
@@ -1485,7 +1485,7 @@ def _prepare_fourth_z_latex(term_list, split_width=7, remove_f_terms=False, prin
 
         # add any prefactors if they exist
         if print_prefactors:  # pragma: no cover
-            raise Exception("prefactor code for z stuff is not done")
+            raise NotImplementedError("prefactor code for z stuff is not done")
             term_string += _build_z_latex_prefactor(h, z_left)
 
         # prepare the z terms
@@ -1697,7 +1697,7 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
 
     # the second (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist pragma: no cover
-        raise Exception(not_implemented_yet_message)
+        raise NotImplementedError(not_implemented_yet_message)
         return_string += r'\\&-\Big(' + _build_second_z_term(LHS, H, Z, remove_f_terms) + r'\Big)'
 
     # the third (addition) term
@@ -1705,7 +1705,7 @@ def _generate_z_symmetric_latex_equations(LHS, H, Z, only_ground_state=True, rem
 
     # the fourth (subtraction) term
     if not only_ground_state:  # If we are acting on the vaccum state then these terms don't exist pragma: no cover
-        raise Exception(not_implemented_yet_message)
+        raise NotImplementedError(not_implemented_yet_message)
         return_string += r'\\&-\sum\Big(' + _build_fourth_z_term(LHS, H, Z, remove_f_terms) + r'\Big)(1-\delta_{db})'
 
     if only_ground_state:  # If we are acting on the vacuum state then we add these extra terms

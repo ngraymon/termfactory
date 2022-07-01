@@ -1791,7 +1791,7 @@ def _construct_eT_zhz_compute_function(Proj, operators, lhs_rhs, only_ground_sta
     if not only_ground_state:  # pragma: hot_bands_or_thermal
         ground_and_excited_state_einsums = _generate_eT_zhz_einsums(Proj, operators, lhs_rhs, only_ground_state=False,  opt_einsum=opt_einsum)
     else:
-        ground_and_excited_state_einsums = [("raise Exception('Hot Band amplitudes not implemented!')", ), ]*2
+        ground_and_excited_state_einsums = [("raise NotImplementedError('Hot Band amplitudes not implemented!')", ), ]*2
 
     # the ordering of the functions is linked to the output ordering from `_generate_eT_zhz_einsums`
     # they must be in the same order
