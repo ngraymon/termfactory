@@ -43,6 +43,7 @@ jobs:
           python -m coverage xml
           python -m coverage report
       - name: "Upload coverage to Codecov"
+        if: always()
         uses: codecov/codecov-action@v2
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
@@ -53,6 +54,7 @@ jobs:
           name: codecov-umbrella # optional
           verbose: true # optional (default = false)
       - name: "Store testing data and coverage report as artifacts"
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: htmlcov
