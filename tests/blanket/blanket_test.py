@@ -15,6 +15,7 @@ import code_full_cc as code_fcc
 import code_residual_equations as code_res
 import code_w_equations as code_weqn
 import code_dt_equations as code_dt_eqn
+import code_eT_zhz as code_eT
 
 import namedtuple_defines as nt
 from truncation_keys import TruncationsKeys as tkeys
@@ -374,3 +375,78 @@ class TestExcitedState():
         for i, omega_term in enumerate(excited_omega.operator_list):
             zhz._build_second_z_term(omega_term, excited_H, excited_Z, remove_f_terms=True)
             zhz._build_second_z_term(omega_term, excited_H, excited_Z, remove_f_terms=False)
+
+class Test_code_eT_zhz_gen():
+
+    @pytest.fixture(scope="class", params=[1, 2])
+    def A(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 2, 3, 4])
+    def B(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1])
+    def C(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 2, 3, 4])
+    def D(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=[1, 2, 3, 4])
+    def E(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class", params=['LHS', 'RHS'])
+    def left_right_switch(self, request):
+        return request.param
+
+    @pytest.fixture(scope="class")
+    def trunc(self, A, B, C, D, E):
+        eT_trunc = {
+            tkeys.H: A,
+            tkeys.CC: B,
+            tkeys.T: C,
+            tkeys.eT: D,
+            tkeys.P: E
+        }
+        return eT_trunc
+
+    def gen_path(self, truncations, tmpdir, kwargs):
+        """ defines the path to the file with the python equations"""
+
+        # f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
+        # gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
+        # path = f"./{gs_string}eT_zhz_equations{f_term_string}.py"
+        # temporary naming scheme until a better one can be designed
+
+        path = (
+            "eT_zhz_eqs"
+            f"_{kwargs['lhs_rhs']}"
+            f"_H({truncations[tkeys.H]})"
+            f"_P({truncations[tkeys.P]})"
+            f"_T({truncations[tkeys.T]})"
+            f"_exp({truncations[tkeys.eT]})"
+            f"_Z({truncations[tkeys.CC]})"
+            ".py"
+        )
+
+        return join(tmpdir, path)
+
+    def test_mass_gen(self, tmpdir, trunc, left_right_switch):
+        """ Test that the function works """
+
+        kwargs = {
+            'only_ground_state': True,
+            'remove_f_terms': False,
+            'lhs_rhs': left_right_switch,
+        }
+
+        output_path = self.gen_path(trunc, tmpdir, kwargs)
+
+        # add to the kwargs
+        kwargs['path'] = output_path
+
+        # do the hard work of generating all the code
+        code_eT.generate_eT_zhz_python(trunc, **kwargs)
