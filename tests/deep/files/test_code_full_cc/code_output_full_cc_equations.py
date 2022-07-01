@@ -27,7 +27,7 @@ def add_m0_n0_fully_connected_terms(R, ansatz, truncation, h_args, t_args):
             if truncation.singles:
                 R += np.einsum('aci, cbi -> ab', h_args[(0, 1)], t_args[(1, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -37,7 +37,7 @@ def add_m0_n0_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -47,7 +47,7 @@ def add_m0_n0_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 # --------------------------------------------------------------------------- #
@@ -62,7 +62,7 @@ def add_m0_n1_fully_connected_terms(R, ansatz, truncation, h_args, t_args):
     if ansatz.ground_state:
         R += h_args[(1, 0)]
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -72,7 +72,7 @@ def add_m0_n1_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -83,7 +83,7 @@ def add_m0_n1_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)
         if truncation.singles:
             R += np.einsum('ac, cbz -> abz', h_args[(0, 0)], t_args[(1, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -94,7 +94,7 @@ def add_m1_n0_fully_connected_terms(R, ansatz, truncation, h_args, t_args):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -104,7 +104,7 @@ def add_m1_n0_linked_disconnected_terms(R, ansatz, truncation, h_args, t_args):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -114,7 +114,7 @@ def add_m1_n0_unlinked_disconnected_terms(R, ansatz, truncation, h_args, t_args)
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -181,7 +181,7 @@ def add_m0_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_a
             if truncation.singles:
                 R += next(optimized_einsum)(h_args[(0, 1)], t_args[(1, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -194,7 +194,7 @@ def add_m0_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args,
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -207,7 +207,7 @@ def add_m0_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_arg
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 # --------------------------------------------------------------------------- #
@@ -225,7 +225,7 @@ def add_m0_n1_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_a
     if ansatz.ground_state:
         R += h_args[(1, 0)]
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -238,7 +238,7 @@ def add_m0_n1_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args,
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -252,7 +252,7 @@ def add_m0_n1_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_arg
         if truncation.singles:
             R += next(optimized_einsum)(h_args[(0, 0)], t_args[(1, 0)])
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -266,7 +266,7 @@ def add_m1_n0_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_a
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -279,7 +279,7 @@ def add_m1_n0_linked_disconnected_terms_optimized(R, ansatz, truncation, h_args,
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -292,7 +292,7 @@ def add_m1_n0_unlinked_disconnected_terms_optimized(R, ansatz, truncation, h_arg
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
     return
 
 
@@ -366,7 +366,7 @@ def compute_m0_n0_fully_connected_optimized_paths(A, N, ansatz, truncation):
             if truncation.singles:
                 fully_connected_opt_path_list.append(oe.contract_expression((A, A, N), (A, A, N)))
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
 
     return fully_connected_opt_path_list
 
@@ -379,7 +379,7 @@ def compute_m0_n0_linked_disconnected_optimized_paths(A, N, ansatz, truncation):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
 
     return linked_disconnected_opt_path_list
 
@@ -392,7 +392,7 @@ def compute_m0_n0_unlinked_disconnected_optimized_paths(A, N, ansatz, truncation
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
 
     return unlinked_disconnected_opt_path_list
 
@@ -410,7 +410,7 @@ def compute_m0_n1_fully_connected_optimized_paths(A, N, ansatz, truncation):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
 
     return fully_connected_opt_path_list
 
@@ -423,7 +423,7 @@ def compute_m0_n1_linked_disconnected_optimized_paths(A, N, ansatz, truncation):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
 
     return linked_disconnected_opt_path_list
 
@@ -437,7 +437,7 @@ def compute_m0_n1_unlinked_disconnected_optimized_paths(A, N, ansatz, truncation
         if truncation.singles:
             unlinked_disconnected_opt_path_list.append(oe.contract_expression((A, A), (A, A, N)))
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
 
     return unlinked_disconnected_opt_path_list
 
@@ -451,7 +451,7 @@ def compute_m1_n0_fully_connected_optimized_paths(A, N, ansatz, truncation):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
 
     return fully_connected_opt_path_list
 
@@ -464,7 +464,7 @@ def compute_m1_n0_linked_disconnected_optimized_paths(A, N, ansatz, truncation):
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
 
     return linked_disconnected_opt_path_list
 
@@ -477,7 +477,7 @@ def compute_m1_n0_unlinked_disconnected_optimized_paths(A, N, ansatz, truncation
     if ansatz.ground_state:
         pass  # no valid terms here
     else:
-        raise Exception('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
+        raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')
 
     return unlinked_disconnected_opt_path_list
 

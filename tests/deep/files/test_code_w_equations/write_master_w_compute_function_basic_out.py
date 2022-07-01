@@ -31,7 +31,7 @@ def compute_w_operators(A, N, t_args, ansatz, truncation):
     if not truncation.quintuples:
         return w_1, w_2, w_3, w_4, w_5, w_6
     else:
-        raise Exception(
+        raise NotImplementedError(
             "Attempting to calculate W^7 operator (quintuples)\n"
             "This is currently not implemented!!\n"
         )
