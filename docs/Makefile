@@ -9,6 +9,8 @@ SPHINXAUTHOR  = Neil Raymond
 SOURCEDIR     = .
 BUILDDIR      = _build
 GHPAGES_BUILDDIR = ../../termfactory-docs
+# PDFBUILDDIR   = /tmp
+# PDF           = ../manual.pdf
 
 RELATIVEPROJDIR  = ../termfactory/
 # we don't need the tests to be part of the documentation
@@ -24,7 +26,7 @@ gh-pages:
 	sphinx-apidoc -f -M -H "$(SPHINXPROJ)" -A "$(SPHINXAUTHOR)" \
 		-o $(SOURCEDIR)  $(RELATIVEPROJDIR) $(RELATIVEEXCLUDEPATTERN)
 	@$(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(GHPAGES_BUILDDIR)" $(SPHINXOPTS) $(O)
-	cd "$(GHPAGES_BUILDDIR)/html" && git add . && git commit -m "Updated gh-pages" && git push
+# 	cd "$(GHPAGES_BUILDDIR)/html" && git add . && git commit -m "Updated gh-pages" && git push
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
