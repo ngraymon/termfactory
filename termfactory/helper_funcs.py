@@ -1,9 +1,10 @@
 # system imports
 import itertools as it
+
 # third party imports
 
 # local imports
-from common_imports import tab, old_print_wrapper
+from .common_imports import tab, old_print_wrapper
 
 # ----------------------------------------------------------------------------------------------- #
 # ------------------------------------  HELPER FUNCTIONS  --------------------------------------- #
@@ -70,7 +71,7 @@ def _partitions(number):
     return sorted(list(answer), reverse=True)
 
 
-def generate_partitions_of_n(n): 
+def generate_partitions_of_n(n):
     """Return partitions of n. Such as (5,), (4, 1), (3, 1, 1), (2, 2, 1) ... etc."""
     return _partitions(n)
 
@@ -110,6 +111,7 @@ def generate_un_linked_disconnected_partitions_of_n(n): #pragma: no cover
 def named_line(name, width):
     """ Generate a header like
         (# ---- <name> ---- #)
+
     `width` argument determines how many `-` chars on BOTH sides.
     """
     return "# " + "-"*width + f" {name} " + "-"*width + " #"
@@ -117,9 +119,11 @@ def named_line(name, width):
 
 def spaced_named_line(name, width=28, spacing_line=f"# {'-'*75} #\n"):
     """ Generate a header like
+
         (# ---------------- #)
         (# ---- <name> ---- #)
         (# ---------------- #)
+
     `width` argument determines how many `-` chars on BOTH sides in the middle line
     """
     return spacing_line + named_line(name, width) + '\n' + spacing_line

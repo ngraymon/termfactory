@@ -8,7 +8,7 @@ SPHINXPROJ    = termfactory
 SPHINXAUTHOR  = Neil Raymond
 SOURCEDIR     = .
 BUILDDIR      = _build
-GHPAGES_BUILDDIR = ../../termfactory-docs
+GHPAGES_BUILDDIR = ../../termfactory-docs/
 # PDFBUILDDIR   = /tmp
 # PDF           = ../manual.pdf
 

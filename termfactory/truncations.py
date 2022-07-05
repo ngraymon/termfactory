@@ -17,7 +17,7 @@ from collections import namedtuple
 # third party imports
 
 # local imports
-from truncation_keys import TruncationsKeys as tkeys
+from .truncation_keys import TruncationsKeys as tkeys
 
 truncation_maximums = {
     'maximum_hamiltonian_rank': 6,  # maximum_h_rank
