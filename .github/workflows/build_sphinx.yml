@@ -1,0 +1,18 @@
+name: "Pull Request Docs Check"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: make folder
+      run: |
+        mkdir /tmp/sphinx-log
+    - uses: ammaraskar/sphinx-action@master
+      with:
+        docs-folder: "docs/"
