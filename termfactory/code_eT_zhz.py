@@ -39,6 +39,8 @@ subheader_log = log_conf.SubHeaderAdapter(log, {})
 s1, s2, s3 = 75, 28, 25
 l1, l2, l3 = 109, 45, 41
 
+term_type_name_list = ['HZ', 'eT_HZ']
+
 spaced_named_line = functools.partial(helper_funcs.spaced_named_line, spacing_line=f"# {'-'*s1} #\n")
 long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, large_spacing_line=f"# {'-'*l1} #\n")
 ##########################################################################################
