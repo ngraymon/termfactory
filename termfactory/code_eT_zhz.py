@@ -984,7 +984,7 @@ def _collect_z_contributions(
 # big boy function that does most of the work
 
 
-def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_obj_name='truncation', b_loop_flag=False, suppress_empty_if_checks=True):
+def _write_third_eTz_einsum_python(rank, operators, t_term_list, lhs_rhs, trunc_obj_name='truncation', opt_einsum=False, b_loop_flag=False, suppress_empty_if_checks=True):
     """ Still being written
 
     the flag `suppress_empty_if_checks` is to toggle the "suppression" of code such as
@@ -1842,7 +1842,7 @@ def _construct_eT_zhz_compute_function(Proj, operators, lhs_rhs, only_ground_sta
     full_paths = [("raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')", ), ]*3
 
     if not only_ground_state:  # pragma: hot_bands_or_thermal
-        full_paths = _generate_eT_zhz_einsums(Proj, operators, lhs_rhs, only_ground_state=False,  opt_einsum=opt_einsum)
+        full_paths = _generate_eT_zhz_einsums(Proj, operators, lhs_rhs, only_ground_state=False, opt_einsum=opt_einsum)
     # ----------------------------------------------------------------------------------------------- #
 
     # the ordering of the functions is linked to the output ordering from `_generate_eT_zhz_einsums`
@@ -1944,7 +1944,11 @@ def _wrap_eT_zhz_generation(master_omega, operators, lhs_rhs, only_ground_state=
         return_string += '\n' + named_line(f"{Proj} TERMS", s2//2)
 
         # functions
-        return_string += _construct_eT_zhz_compute_function(Proj, operators, lhs_rhs, only_ground_state, opt_einsum)
+        return_string += _construct_eT_zhz_compute_function(
+            Proj, operators, lhs_rhs,
+            only_ground_state=only_ground_state,
+            opt_einsum=opt_einsum
+        )
 
     return return_string
 
