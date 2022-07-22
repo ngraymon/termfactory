@@ -91,7 +91,7 @@ if (__name__ == '__main__'):
         trunc = _make_trunc(tuple(pargs.t))
         # probably need to set some kind of default path?
         # some better path management here would be good
-        save_trunc_to_JSON('../truncs.json', trunc)
+        save_trunc_to_JSON('truncs.json', trunc)
 
     # the user provides a path to a JSON file containing the truncation values
     elif not(pargs.path is None):
@@ -142,7 +142,12 @@ if (__name__ == '__main__'):
 
     import _glue_
 
+    ansatz_string = f"{default_kwargs['ansatz']} ansatz"
+    trunc_string = '\n'.join([f"{k:<35}{v}" for k,v in trunc.items()])
+
     if not(pargs.code):
+        print(f"Producing LaTeX for the {ansatz_string} where:\n{trunc_string}")
         _glue_._generate_latex(trunc, **default_kwargs)
     else:
+        print(f"Producing Code for the {ansatz_string} where:\n{trunc_string}")
         _glue_._generate_python(trunc, **default_kwargs)
