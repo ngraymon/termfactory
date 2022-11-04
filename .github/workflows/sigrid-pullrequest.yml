@@ -4,7 +4,7 @@ on:
     types:
       - open
     branches:
-      - dev_sigrid
+      - 'dev_sigrid'
 
 jobs:
   sigridci:
