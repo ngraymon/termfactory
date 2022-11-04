@@ -1,0 +1,38 @@
+exclude:
+  - "setup.py"
+  - ".*/test/deep/files/*" # don't need to analyze, they are static reference files
+
+languages:
+  - python
+
+# component_depth: 1
+
+components:
+- name: "Front end"
+  include:
+    - ".*/termfactory/driver.py"
+    - ".*/termfactory/_glue_.py"
+
+- name: "Shared modules"
+  include:
+    - ".*/termfactory/log_conf.py"
+    - ".*/termfactory/namedtuple_defines.py"
+    - ".*/termfactory/reference_latex_headers.py"
+    - ".*/termfactory/truncation_keys.py"
+    - ".*/termfactory/truncations.py"
+    - ".*/termfactory/code_import_statements_module.py"
+    - ".*/termfactory/common_imports.py"
+    - ".*/termfactory/helper_funcs.py"
+    - ".*/termfactory/latex_defines.py"
+
+- name: "LaTeX generators"
+  include:
+    - ".*/termfactory/latex_.*.py"
+
+- name: "Code generators"
+  include:
+    - ".*/termfactory/code_.*.py"
+
+- name: "Testing"
+  include:
+    - ".*/tests/.*"
