@@ -1,0 +1,21 @@
+name: Publish to Sigrid
+on:
+  push:
+    branches:
+      - dev_sigrid #tobe master
+
+jobs:
+  sigridci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Sigrid CI
+        uses: Software-Improvement-Group/sigridci@v1.2
+        with:
+          customer: examplecustomername
+          system: examplesystemname
+          targetquality: 3.5
+          publishonly: true
+        env:
+          SIGRID_CI_TOKEN: "${{ secrets.SIGRID_CI_TOKEN }}"
