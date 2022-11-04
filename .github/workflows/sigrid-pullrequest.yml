@@ -17,4 +17,4 @@ jobs:
       - name: "Run Sigrid CI"
         env:
           SIGRID_CI_TOKEN: "${{ secrets.SIGRID_CI_TOKEN }}"
-        run: "./sigridci/sigridci/sigridci.py --customer ctc --system initial --source . --targetquality 3.5"
+        run: "./sigridci/sigridci/sigridci.py --customer ctc --system termfactory --source . --targetquality 3.5"
