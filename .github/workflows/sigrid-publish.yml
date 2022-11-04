@@ -2,7 +2,7 @@ name: Publish to Sigrid
 on:
   push:
     branches:
-      - dev_sigrid #tobe master
+      - dev_sigrid
 
 jobs:
   sigridci:
@@ -10,12 +10,9 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
-      - name: Sigrid CI
-        uses: Software-Improvement-Group/sigridci@v1.2
-        with:
-          customer: ctc
-          system: initial
-          targetquality: 3.5
-          publishonly: false
+      - name: Download Sigrid CI
+        run: "git clone https://github.com/Software-Improvement-Group/sigridci.git sigridci"
+      - name: "Run Sigrid CI" 
         env:
           SIGRID_CI_TOKEN: "${{ secrets.SIGRID_CI_TOKEN }}"
+        run: "./sigridci/sigridci/sigridci.py --customer ctc --system initial --source . --targetquality 3.0 --publish" 
