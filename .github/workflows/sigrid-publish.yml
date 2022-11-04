@@ -13,8 +13,6 @@ jobs:
       - name: Sigrid CI
         uses: Software-Improvement-Group/sigridci@v1.2
         with:
-          customer: lhprice
-          system: ubuntu-test
           targetquality: 3.5
           publishonly: true
         env:
