@@ -27,7 +27,10 @@ components:
 
 - name: "LaTeX generators"
   include:
-    - ".*/termfactory/latex_.*.py"
+    - ".*/termfactory/latex_eT_zhz.py"
+    - ".*/termfactory/latex_full_cc.py"
+    - ".*/termfactory/latex_w_equations.py"
+    - ".*/termfactory/latex_zhz.py"
 
 - name: "Code generators"
   include:
