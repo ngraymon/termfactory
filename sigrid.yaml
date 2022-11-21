@@ -8,34 +8,45 @@ languages:
 # component_depth: 1
 
 components:
-- name: "Front end"
-  include:
-    - ".*/termfactory/driver.py"
-    - ".*/termfactory/_glue_.py"
+  - name: "Front end"
+    include:
+      - ".*/termfactory/driver.py"
+      - ".*/termfactory/_glue_.py"
 
-- name: "Shared modules"
-  include:
-    - ".*/termfactory/log_conf.py"
-    - ".*/termfactory/namedtuple_defines.py"
-    - ".*/termfactory/reference_latex_headers.py"
-    - ".*/termfactory/truncation_keys.py"
-    - ".*/termfactory/truncations.py"
-    - ".*/termfactory/code_import_statements_module.py"
-    - ".*/termfactory/common_imports.py"
-    - ".*/termfactory/helper_funcs.py"
-    - ".*/termfactory/latex_defines.py"
+  - name: "Shared modules"
+    include:
+      - ".*/termfactory/log_conf.py"
+      - ".*/termfactory/namedtuple_defines.py"
+      - ".*/termfactory/reference_latex_headers.py"
+      - ".*/termfactory/truncation_keys.py"
+      - ".*/termfactory/truncations.py"
+      - ".*/termfactory/code_import_statements_module.py"
+      - ".*/termfactory/common_imports.py"
+      - ".*/termfactory/helper_funcs.py"
+      - ".*/termfactory/latex_defines.py"
 
-- name: "LaTeX generators"
-  include:
-    - ".*/termfactory/latex_eT_zhz.py"
-    - ".*/termfactory/latex_full_cc.py"
-    - ".*/termfactory/latex_w_equations.py"
-    - ".*/termfactory/latex_zhz.py"
+  - name: "LaTeX generators"
+    include:
+      - ".*/termfactory/latex_eT_zhz.py"
+      - ".*/termfactory/latex_full_cc.py"
+      - ".*/termfactory/latex_w_equations.py"
+      - ".*/termfactory/latex_zhz.py"
 
-- name: "Code generators"
-  include:
-    - ".*/termfactory/code_.*.py"
+  - name: "Code generators"
+    include:
+      - ".*/termfactory/code_.*.py"
 
-- name: "Testing"
-  include:
-    - ".*/tests/.*"
+  - name: "Testing"
+    include:
+      - ".*/tests/.*"
+
+sigridci:
+  # configure targets for the overall maintainability rating
+  # as well as individual system properties
+  target:
+    maintainability: 3.5
+    duplication: 3.5
+    unit_size: 3.5
+    unit_complexity: 3.5
+    unit_interfacing: 2.5
+    module_coupling: 3.0

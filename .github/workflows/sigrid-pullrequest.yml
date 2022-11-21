@@ -17,6 +17,5 @@ jobs:
         with:
           customer: ctc
           system: termfactory
-          targetquality: 3.5
         env:
           SIGRID_CI_TOKEN: "${{ secrets.SIGRID_CI_TOKEN }}"
