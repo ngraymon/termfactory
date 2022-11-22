@@ -27,6 +27,7 @@ components:
 
   - name: "LaTeX generators"
     include:
+      # - ".*/termfactory/latex_.*.py"
       - ".*/termfactory/latex_eT_zhz.py"
       - ".*/termfactory/latex_full_cc.py"
       - ".*/termfactory/latex_w_equations.py"
@@ -34,7 +35,12 @@ components:
 
   - name: "Code generators"
     include:
-      - ".*/termfactory/code_.*.py"
+      # - ".*/termfactory/code_.*.py"
+      - ".*/termfactory/code_dt_equations.py"
+      - ".*/termfactory/code_eT_zhz.py"
+      - ".*/termfactory/code_full_cc.py"
+      - ".*/termfactory/code_residual_equations.py"
+      - ".*/termfactory/code_w_equations.py"
 
   - name: "Testing"
     include:
