@@ -1,5 +1,5 @@
 exclude:
-  - "setup.py"
+  - ".*/setup.py"
   - ".*/test/deep/files/.*" # don't need to analyze, they are static reference files
 
 languages:
