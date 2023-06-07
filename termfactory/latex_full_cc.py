@@ -378,27 +378,27 @@ def _generate_valid_s_n_operator_permutations(omega, h, s_series_term):
 
         # only terms which can pair off all operators are non zero
         if cannot_pair_off_b_d_operators:
-            log.debug('Bad Permutation (b and d are not balanced):', omega, h, perm)
+            log.debug('Bad Permutation (b and d are not balanced):  %s %s %s', omega, h, perm)
             continue
 
         # omega and H need to satisfy all b/d requirements of the t terms, t terms cannot join with each other!!
         if _t_joining_with_t_terms(omega, h, perm, nof_creation_ops):
-            log.debug('Bad Permutation (t joins with itself):', omega, h, perm)
+            log.debug('Bad Permutation (t joins with itself):  %s %s %s', omega, h, perm)
             continue
 
         # Omega must be able to connect with at least 1 b/d operator from h or a t_term otherwise it 'joins' with itself
         if _omega_joining_with_itself(omega, h, perm):
-            log.debug('Bad Permutation (omega joins with itself):', omega, h, perm)
+            log.debug('Bad Permutation (omega joins with itself):  %s %s %s', omega, h, perm)
             continue
 
         # h must connect with at least 1 b/d operator from omega or a t_term otherwise it 'joins' with itself
         if _h_joining_with_itself(omega, h, perm):
-            log.debug('Bad Permutation (h joins with itself):', omega, h, perm)
+            log.debug('Bad Permutation (h joins with itself):  %s %s %s', omega, h, perm)
             continue
 
         # record a valid permutation
         valid_permutations.append(perm)
-        log.debug('Good Permutation', omega, h, perm)
+        log.debug('Good Permutation  %s %s %s', omega, h, perm)
 
     return valid_permutations
 
@@ -825,7 +825,7 @@ def _build_t_term_latex_group(s_list, h=None, offset_dict=None):
 
     for s in s_list:
         t_labels = _build_t_term_latex_labels(s, offset_dict)
-        log.debug(s, t_labels, offset_dict)
+        log.debug("%s %s %s ", s, t_labels, offset_dict)
 
         if t_labels != "^{}_{}":
             t_list.append(bold_t_latex + t_labels)
