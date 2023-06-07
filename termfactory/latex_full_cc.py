@@ -1021,7 +1021,8 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
     In general the rules are:
         1 - 1/n! where n is the number of t terms (taylor series)
         1 - All t terms are balanced/neutral (they contribute m!n!/m!n! = 1)
-        1 - h contributes x!/m!n! where x is the number of UNIQUE t terms that h contracts with
+        1 - h contributes 1/m!n!
+        1 - multiply by (n choose y) where n is the number of t terms and y are the number of duplicate t terms
 
     A single h with no t list is a special case where the prefactor is always 1.
     """
@@ -1030,53 +1031,93 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
     if len(t_list) == 1 and t_list[0] == disconnected_namedtuple(0, 0, 0, 0):
         return ''
 
-    numerator_list = []
-    denominator_list = []
+    numerator_value, denominator_value = 1, 1
+    numerator_list, denominator_list = [], []
 
     # account for prefactor from Hamiltonian term `h`
     connected_ts = [t for t in t_list if t.m_h > 0 or t.n_h > 0]
-    x = len(set(connected_ts))
+    # x = len(set(connected_ts))
 
-    debug_flag = bool(
-        h.n == 2
-        and h.m == 0
-        and len(t_list) == 2
-        and t_list[0].m_h == 1
-        and t_list[0].m_o == 1
-        and t_list[1].m_h == 1
-        and t_list[1].m_o == 1
-    )
+    # These letters are defined according to eqs 149 & 150 on pg 22
+    # P operator labels
+    M = h.n_o + sum([t.n_o for t in t_list])
+    I = h.m_o + sum([t.m_o for t in t_list])
+    # H operators labels
+    L = h.m
+    K = h.n
+    # W operators labels
+    J = sum([t.m_h + t.m_o for t in t_list])
+    N = sum([t.n_h + t.n_o for t in t_list])
 
-    if debug_flag:
-        old_print_wrapper('\n\n\nzzzzzzzzz')
-        old_print_wrapper(connected_ts)
-        old_print_wrapper(set(connected_ts))
-        old_print_wrapper(len(set(connected_ts)))
-        old_print_wrapper('zzzzzzzzz\n\n\n')
+    # the number of lower H contracting with upper W
+    K_J = sum(h.n_t)
+    # the number of upper H contracting with lower W
+    L_N = sum(h.m_t)
 
-    if x > 1:
-        numerator_list.append(f'{x}!')
-    if h.m > 1:
-        denominator_list.append(f'{h.m}!')
-    if h.n > 1:
-        denominator_list.append(f'{h.n}!')
+    # print(f"{L=} {K=} {J=} {N=}")
+    # print(h)
+    # print(t_list)
+    # import pdb; pdb.set_trace()
 
-    # account for the number of permutations of all t-amplitudes
-    if len(t_list) > 1:
-        denominator_list.append(f'{len(t_list)}!')
+    # this is the L! contribution
+    if L > 1:
+        denominator_value *= math.factorial(L)
+        denominator_list.append(f'{L}!')
 
-    # simplify
-    if simplify_flag:
-        numerator_list, denominator_list = _simplify_full_cc_python_prefactor(numerator_list, denominator_list)
+    # this is the K! contribution
+    if K > 1:
+        denominator_value *= math.factorial(K)
+        denominator_list.append(f'{K}!')
+
+    # this is the (J - K_J)! contribution
+    if (J - K_J) > 1:
+        denominator_value *= math.factorial(J - K_J)
+        denominator_list.append(f'{J - K_J}!')
+
+    # this is the (N - L_N)! contribution
+    if (N - L_N) > 1:
+        denominator_value *= math.factorial(N - L_N)
+        denominator_list.append(f'{N - L_N}!')
+
+    # now we multiply by the symmetrization operators
+    if I > 1:
+        numerator_value *= math.factorial(I)
+        numerator_list.append(f'{I}!')
+
+    if M > 1:
+        numerator_value *= math.factorial(M)
+        numerator_list.append(f'{M}!')
+
+    # # Now we do (N choose L_N) * L_N!
+    # perms_one = math.comb(N, )
+    # if perms_one > 1:
+    #     numerator_value *= perms_one
+    #     numerator_list.append(f'({perms_one})')
+
+    # # Now we do (J choose K_J) * K_J!
+    # perms_two = math.comb(h.m, h.m_lhs)
+    # if perms_two > 1:
+    #     numerator_value *= perms_two
+    #     numerator_list.append(f'({perms_two})')
+
+    # # simplify
+    if False and simplify_flag:  # pragma: no cover
+        fraction = fractions.Fraction(numerator_value, denominator_value)
+        if fraction == 1:
+            return ''
+        else:
+            return f"\\frac{{{fraction.numerator}}}{{{fraction.denominator}}}"
+
+        # numerator_list, denominator_list = _simplify_full_cc_python_prefactor(numerator_list, denominator_list)
 
     # glue the numerator and denominator together
-    numerator = '1' if (numerator_list == []) else f"{''.join(numerator_list)}"
-    denominator = '1' if (denominator_list == []) else f"{''.join(denominator_list)}"
+    numerator_string = '1' if (numerator_list == []) else f"{''.join(numerator_list)}"
+    denominator_string = '1' if (denominator_list == []) else f"{''.join(denominator_list)}"
 
-    if numerator == '1' and denominator == '1':
+    if numerator_string == '1' and denominator_string == '1':
         return ''
     else:
-        return f"\\frac{{{numerator}}}{{{denominator}}}"
+        return f"\\frac{{{numerator_string}}}{{{denominator_string}}}"
 
 
 def _linked_condensed_adjust_t_terms(common_linked_factor_list, h, t_list):
