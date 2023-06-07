@@ -1282,10 +1282,16 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
         if len(return_list) < split_number*2:
             return f"({' + '.join(return_list)})"
 
-        # make a list of each line
         split_equation_list = []
+
+        # make a list of each line
         for i in range(0, len(return_list) // split_number):
             split_equation_list.append(' + '.join(return_list[i*split_number:(i+1)*split_number]))
+
+        # make sure we pickup the last few terms
+        last_few_terms = len(return_list) % split_number
+        if last_few_terms != 0:  # pragma: no cover, TODO test for this later
+            split_equation_list.append(' + '.join(return_list[-last_few_terms:]))
 
         # join the lists with the equation splitting string
         splitting_string = r'\\  &+  % split long equation'
