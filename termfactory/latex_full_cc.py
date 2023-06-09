@@ -1,6 +1,9 @@
 # system imports
 from collections import namedtuple
 import itertools as it
+import math
+import fractions
+
 # third party imports
 
 # local imports
@@ -1035,8 +1038,24 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
     numerator_list, denominator_list = [], []
 
     # account for prefactor from Hamiltonian term `h`
-    connected_ts = [t for t in t_list if t.m_h > 0 or t.n_h > 0]
+    # connected_ts = [t for t in t_list if t.m_h > 0 or t.n_h > 0]
     # x = len(set(connected_ts))
+
+    # unique t-terms according to Songhao's definition
+    duplicate_counts = {}
+    for t in t_list:
+        tup = (t.m_h + t.m_o, t.n_h + t.n_o)
+        if tup not in duplicate_counts:
+            duplicate_counts[tup] = 1
+        else:
+            duplicate_counts[tup] += 1
+
+    max_duplicates = max([v for v in duplicate_counts.values()])
+
+    # print(t_list)
+    # print(unique)
+
+    # import pdb; pdb.set_trace()
 
     # These letters are defined according to eqs 149 & 150 on pg 22
     # P operator labels
@@ -1059,6 +1078,9 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
     # print(t_list)
     # import pdb; pdb.set_trace()
 
+    """
+        calcululate_CI_contribution
+    """
     # this is the L! contribution
     if L > 1:
         denominator_value *= math.factorial(L)
@@ -1088,17 +1110,27 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
         numerator_value *= math.factorial(M)
         numerator_list.append(f'{M}!')
 
-    # # Now we do (N choose L_N) * L_N!
-    # perms_one = math.comb(N, )
-    # if perms_one > 1:
-    #     numerator_value *= perms_one
-    #     numerator_list.append(f'({perms_one})')
+    """
+        calcululate_CC_contribution
+    """
 
-    # # Now we do (J choose K_J) * K_J!
-    # perms_two = math.comb(h.m, h.m_lhs)
-    # if perms_two > 1:
-    #     numerator_value *= perms_two
-    #     numerator_list.append(f'({perms_two})')
+    # Taylor series expansion prefactor 1/n!
+    n_Taylor = len(t_list)
+    if n_Taylor > 1:
+        denominator_value *= math.factorial(n_Taylor)
+        denominator_list.append(f'{n_Taylor}!')
+
+    # account for the number of permutations of all t-amplitudes
+    bottom = max_duplicates
+    # bottom = n_Taylor - len(unique) + 1
+    t_permute = math.comb(n_Taylor, bottom)
+    # if t_permute > 1:
+    numerator_value *= t_permute
+    # numerator_list.append(f'({t_permute})')
+    # numerator_list.append(f'\\binom{{{n_Taylor}}}{{{bottom}}}')
+    binom_str = f'\\binom{{{n_Taylor}}}{{{bottom}}}'
+    # else:
+    #     binom_str = ""
 
     # # simplify
     if False and simplify_flag:  # pragma: no cover
