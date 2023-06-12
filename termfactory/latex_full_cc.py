@@ -1123,14 +1123,19 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
     # account for the number of permutations of all t-amplitudes
     bottom = max_duplicates
     # bottom = n_Taylor - len(unique) + 1
-    t_permute = math.comb(n_Taylor, bottom)
-    # if t_permute > 1:
-    numerator_value *= t_permute
-    # numerator_list.append(f'({t_permute})')
-    # numerator_list.append(f'\\binom{{{n_Taylor}}}{{{bottom}}}')
-    binom_str = f'\\binom{{{n_Taylor}}}{{{bottom}}}'
-    # else:
-    #     binom_str = ""
+    if bottom == 1:
+        numerator_value *= math.factorial(n_Taylor)
+        numerator_list.append(f'{n_Taylor}!')
+        binom_str = ""
+    else:
+        t_permute = math.comb(n_Taylor, bottom)
+        # if t_permute > 1:
+        numerator_value *= t_permute
+        # numerator_list.append(f'({t_permute})')
+        # numerator_list.append(f'\\binom{{{n_Taylor}}}{{{bottom}}}')
+        binom_str = f'\\binom{{{n_Taylor}}}{{{bottom}}}'
+        # else:
+        #     binom_str = ""
 
     # # simplify
     if False and simplify_flag:  # pragma: no cover
@@ -1149,7 +1154,7 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
     if numerator_string == '1' and denominator_string == '1':
         return ''
     else:
-        return f"\\frac{{{numerator_string}}}{{{denominator_string}}}"
+        return f"\\frac{{{numerator_string}}}{{{denominator_string}}}" + binom_str
 
 
 def _linked_condensed_adjust_t_terms(common_linked_factor_list, h, t_list):
