@@ -6,10 +6,13 @@
 [![codecov](https://img.shields.io/codecov/c/github/ngraymon/termfactory/ci_testing.svglabel=ci_testing)](https://codecov.io/gh/ngraymon/termfactory)
 
 ----
+Note that the `dev_eTHZ_opteinsum` branch is the current working version. If you run into any issues just reach out to me at neil.raymond@uwaterloo.ca.
+
 ## About
 
 A python package for generating LaTeX and python code for evaluating residual terms.
 The package is used to generate the `einsum` equations for the [vecc package (link tbd)]().
+
 
 
 At the moment the package provides three primary ansatz:
