@@ -91,7 +91,9 @@ def __verify_keys(truncations, key_list):
     """
     for key in key_list:
         assert key in truncations, f"Missing key, {key = :s} not in provided dictionary {truncations=:}"
-        assert truncations[key] >= 1, "Truncations need to be positive integers"
+        assert truncations[key] >= 0, "All Truncations need to be non-negative integers (T >= 0)"
+        if key == tkeys.max_cc_rank.value:
+            assert truncations[key] >= 1, "Coupled Cluster key needs to be >= 1"
         assert truncations[key] <= truncation_maximums[key], f"Key {key} is over the maximum of {truncation_maximums[key]}"
 
 
