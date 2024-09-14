@@ -146,6 +146,10 @@ def _gen_wrapper_full_cc_latex(truncations, **kwargs):
         lhs_rhs_string = "special_LHS_terms"
 
     path = f"./{gs_string}full_cc_{lhs_rhs_string}{f_term_string}.tex"
+    if True:
+        H, C, S, P = [truncations[k] for k in tkeys.fcc_key_list()]
+        path = f"./{gs_string}full_cc_{lhs_rhs_string}{f_term_string}_{H}{C}{S}{P}.tex"
+
     kwargs['path'] = path
 
     generate_full_cc_latex(truncations, **kwargs)
