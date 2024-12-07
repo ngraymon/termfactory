@@ -2104,6 +2104,7 @@ def _generate_eT_z_symmetric_latex_equations(LHS, eT_taylor_expansion, H, Z, lhs
         if only_ground_state:  # If we are acting on the vacuum state then we add these extra terms
             temporary_string = r"\text{all permutations of }\dv{\hat{t}_{\gamma}}{\tau}\hat{z}"
             return_string += r'\\&-i\sum\Big(' + _build_fifth_z_term(LHS, Z) + r'\Big)'
+
     elif lhs_rhs == 'LHS':
         pass  # do nothing
 

@@ -3,6 +3,7 @@ from collections import namedtuple
 import itertools as it
 import math
 import fractions
+import functools
 
 # third party imports
 
@@ -96,7 +97,7 @@ def generate_full_cc_hamiltonian_operator(maximum_rank=2):
     return hamiltonian_namedtuple(maximum_rank, return_list)
 
 
-def generate_s_operator(maximum_cc_rank=2, only_ground_state=False):
+def generate_s_operator(maximum_cc_rank=2, only_ground_state=False, zero_order_is_identity=True):
     """Return an `s_operator_namedtuple` whose attributes are determined by `maximum_cc_rank`.
 
     The `operator_list` contains all permutations of (`m`,`n`) for `m` & `n` in `range(maximum_cc_rank + 1)`.
@@ -104,6 +105,11 @@ def generate_s_operator(maximum_cc_rank=2, only_ground_state=False):
     `m` is associated with creation operators (d) and `n` is associated with annihilation operators (b).
     The Boolean flag `only_ground_state` restricts `n` to be 0 for all operators.
     Only creation operators can act on a system in the ground state, => `n` is required to be 0.
+
+
+    We assume that s^0_0 is identity when `zero_order_is_identity` is True.
+    In this case we simply ignore it and do not track the operator
+    However if it is not identity then we need to track how many multiples of this operator exist.
     """
     return_list = []
 
@@ -115,7 +121,7 @@ def generate_s_operator(maximum_cc_rank=2, only_ground_state=False):
                 continue
 
             # we account for the zero order S operator in `_generate_s_taylor_expansion`
-            if m == n == 0:
+            if (m == n == 0) and zero_order_is_identity:
                 continue
 
             name = "s"
@@ -154,7 +160,7 @@ def _2nd_or_higher_order_s_taylor_expansion(s_taylor_expansion, S, s_taylor_max_
         ]
 
 
-def generate_s_taylor_expansion(maximum_cc_rank=2, s_taylor_max_order=3, only_ground_state=False):
+def generate_s_taylor_expansion(maximum_cc_rank=2, s_taylor_max_order=3, only_ground_state=False, zero_order_is_identity=True):
     """Return a list of lists of `s_operator_namedtuple`s.
 
     Expanding e^{S} by Taylor series gives you 1 + S + S^2 + S^3 ... etc.
@@ -170,10 +176,14 @@ def generate_s_taylor_expansion(maximum_cc_rank=2, s_taylor_max_order=3, only_gr
 
     The Boolean flag `only_ground_state` is passed to `generate_s_operator` which restricts `n` to be 0 for all operators.
     Only creation operators can act on a system in the ground state, => `n` is required to be 0.
+
+    We assume that s^0_0 is identity when `zero_order_is_identity` is True.
+    In this case we simply ignore it and do not track the operator
+    However if it is not identity then we need to track how many multiples of this operator exist.
     """
 
     # The s_operator_namedtuple's
-    S = generate_s_operator(maximum_cc_rank, only_ground_state)
+    S = generate_s_operator(maximum_cc_rank, only_ground_state, zero_order_is_identity)
 
     # create the list
     s_taylor_expansion = [None, ]*(s_taylor_max_order+1)
@@ -583,11 +593,16 @@ def _remove_f_zero_terms(labeled_permutations):
     return return_list
 
 
-def _filter_out_valid_s_terms(omega, H, s_series_term, term_list, total_list, remove_f_terms=True):
+def _filter_out_valid_s_terms(omega, H, s_series_term, term_list, total_list, remove_f_terms=True, zero_order_is_identity=True):
     """ fill up the `term_list` and `total_list` for the S^n term
     first we find out what term (in the taylor expansion of e^S) `s_series_term` represents
     set a boolean flag, and wrap the lower order terms in lists so that they have the same
     structure as the s_n case (a list of lists of `general_operator_namedtuple`s)
+
+    We assume that s^0_0 is identity when `zero_order_is_identity` is True.
+    In this case we simply ignore it and do not track the operator
+    However if it is not identity then we need to track how many multiples of this operator exist.
+    Additionally, the logic for catching 'disconnected'/'connected' terms needs to change when it is not identity.
     """
 
     # S^0 operator is simply 1 in this case
@@ -654,13 +669,36 @@ def _filter_out_valid_s_terms(omega, H, s_series_term, term_list, total_list, re
     return
 
 
-def _seperate_s_terms_by_connection(total_list):
-    """ x """
+def _seperate_s_terms_by_connection(total_list, zero_order_is_identity=True):
+    """
+    The logic is that if all t/s operators are connected, then the entire term is connnected.
+    Otherwise it is a disconnected term, and then either linked-disconnected or unlinked-disconnected.
+    Unlinked means the H operator has no contractions with the projection operator.
+    Linked means the H operators has a non-zero number of contractions with the projection operator.
+    (But still less that the order of Pn; so if n=2 then there is 1 contraction between H & P, if n=3 then 1 or 2 etc.)
+
+    We assume that s^0_0 is identity when `zero_order_is_identity` is True.
+    In this case we simply ignore it and do not track the operator
+    However if it is not identity then we need to track how many multiples of this operator exist.
+    Additionally, the logic for catching 'disconnected'/'connected' terms needs to change when it is not identity.
+    """
+
     fully, linked, unlinked = [], [], []
 
     for term in total_list:
         omega, h, s_term_list = term
         linked_flag = False
+
+        # if not zero_order_is_identity:
+        #     print(omega, h, '\n', s_term_list)
+        #     breakpoint()
+
+        """ if the projection operator is identity (no creation or annihilation operators)
+            then by definition all terms are connected.
+            But we should double check this logic before putting to prod.
+        """
+        # if (omega.rank == 1):
+        #     fully.append(term)
 
         # simple check for h terms with no t terms
         if (len(s_term_list) == 1) and s_term_list[0] == disconnected_namedtuple(0, 0, 0, 0):
@@ -668,6 +706,12 @@ def _seperate_s_terms_by_connection(total_list):
             continue
 
         for i, s in enumerate(s_term_list):
+
+            if s == disconnected_namedtuple(0, 0, 0, 0):
+                if zero_order_is_identity:
+                    raise Exception('this should never happen when this flag is True')
+
+                continue  # ignore all identity operators
 
             if isinstance(s, connected_namedtuple):
                 continue  # continue to check if each s in term is connected
@@ -801,7 +845,7 @@ def _build_t_term_latex(s, h=None):
     return lst[0]
 
 
-def _build_t_term_latex_group(s_list, h=None, offset_dict=None):
+def _build_t_term_latex_group(s_list, h=None, offset_dict=None, zero_order_is_identity=True):
     """Return a list of strings for each term in `s_list`
 
     if the t term we are generating is paired with an h term
@@ -830,8 +874,12 @@ def _build_t_term_latex_group(s_list, h=None, offset_dict=None):
         t_labels = _build_t_term_latex_labels(s, offset_dict)
         log.debug("%s %s %s ", s, t_labels, offset_dict)
 
-        if t_labels != "^{}_{}":
-            t_list.append(bold_t_latex + t_labels)
+        if t_labels == "^{}_{}":
+            if zero_order_is_identity:
+                continue
+            t_labels = "^{}_{0}"  # same style as h_0
+
+        t_list.append(bold_t_latex + t_labels)
 
     return t_list
 
@@ -1219,7 +1267,7 @@ def _creates_fbar_prefactor(omega, h):
     return bool(omega.n_h >= 1 and h.m_o >= 1)
 
 
-def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False, print_prefactors=True, color=False):
+def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False, print_prefactors=True, color=False, zero_order_is_identity=True):
     """Return the latex commands to write the provided terms.
 
     the `color` argument in this case wraps all disconnected terms in a `\\colorbox{yellow}` if True
@@ -1273,7 +1321,7 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
             linked_list_index, new_t_list, t_offset_dict = _linked_condensed_adjust_t_terms(common_linked_factor_list, h, t_list)
 
             # prepare the t-amplitude terms
-            t_string_list = _build_t_term_latex_group(new_t_list, h, t_offset_dict)
+            t_string_list = _build_t_term_latex_group(new_t_list, h, t_offset_dict, zero_order_is_identity=zero_order_is_identity)
 
             # build the latex code representing this term in the sum
             h_offset = sum([t.m_o + t.n_o for t in common_linked_factor_list[linked_list_index]])
@@ -1284,7 +1332,7 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
 
         else:
             # prepare the t-amplitude terms
-            t_string_list = _build_t_term_latex_group(t_list, h=h)
+            t_string_list = _build_t_term_latex_group(t_list, h=h, zero_order_is_identity=zero_order_is_identity)
 
             # build the latex code representing this term in the sum
             term_string += _build_h_term_latex_labels(h) + ''.join(t_string_list)
@@ -1379,22 +1427,35 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
         return f"(\n{final_string}\n)"
 
 
-def _write_cc_latex_from_lists(rank, fully, linked, unlinked):
+def _write_cc_latex_from_lists(rank, fully, linked, unlinked, zero_order_is_identity=True):
     """Return the latex commands to write the provided terms.
     We use `join` to insert two backward's slashes \\ BETWEEN each line
     rather then adding them to end and having extra trailing slashes on the last line.
     The user is expected to manually copy the relevant lines from the text file into a latex file
     and generate the pdf themselves.
+
+
+    We assume that s^0_0 is identity when `zero_order_is_identity` is True.
+    In this case we simply ignore it and do not track the operator
+    However if it is not identity then we need to track how many multiples of this operator exist.
+    Thus the amount of operators in each term will be different.
+    Additionally, the logic for catching 'disconnected'/'connected' terms needs to change when it is not identity.
     """
+
+    """ for readability setup this kwarg passing """
+    pmake_latex = functools.partial(_make_latex, zero_order_is_identity=zero_order_is_identity)
+
+    # start
     return_string = ""
 
     # special case for zero order equation
     if rank == 0:
         return_string += ' + '.join([
-            _make_latex(rank, fully),
-            _make_latex(rank, linked),
-            _make_latex(rank, unlinked),
+            pmake_latex(rank, fully),
+            pmake_latex(rank, linked),
+            pmake_latex(rank, unlinked),
         ])
+        # if not zero_order_is_identity: breakpoint()
         return return_string.replace("^{}", "").replace("_{}", "")
 
     # no ____ terms
@@ -1402,7 +1463,7 @@ def _write_cc_latex_from_lists(rank, fully, linked, unlinked):
     no_linked = ' '*4 + r'\textit{no linked disconnected terms}'
     no_unlinked = ' '*4 + r'\textit{no unlinked disconnected terms}'
 
-    return_string += _make_latex(rank, fully) if fully != [] else no_fully
+    return_string += pmake_latex(rank, fully) if fully != [] else no_fully
     return_string += '\n%\n%\n\\\\  &+\n%\n%\n'
 
     """ special treatment for linear, quadratic, and cubic
@@ -1412,19 +1473,19 @@ def _write_cc_latex_from_lists(rank, fully, linked, unlinked):
     For any other `rank` we explicitly print all linked disconnected terms.
     """
     if rank > 1:
-        return_string += _make_latex(rank, linked, linked_condense=True) if linked != [] else no_linked
+        return_string += pmake_latex(rank, linked, linked_condense=True) if linked != [] else no_linked
     else:
-        return_string += _make_latex(rank, linked, linked_condense=False) if linked != [] else no_linked
+        return_string += pmake_latex(rank, linked, linked_condense=False) if linked != [] else no_linked
 
     return_string += '\n%\n%\n\\\\  &+\n%\n%\n'
-    return_string += _make_latex(rank, unlinked, unlinked_condense=True) if unlinked != [] else no_unlinked
+    return_string += pmake_latex(rank, unlinked, unlinked_condense=True) if unlinked != [] else no_unlinked
 
     # remove all empty ^{}/_{} terms that are no longer needed
     return return_string.replace("^{}", "").replace("_{}", "")
 
 
 # ------------------------------------------------------------------------ #
-def _generate_cc_latex_equations(omega, H, s_taylor_expansion, remove_f_terms=True):
+def _generate_cc_latex_equations(omega, H, s_taylor_expansion, remove_f_terms=True, zero_order_is_identity=True):
     """Return a string containing latex code to be placed into a .tex file.
     For a given set of input arguments: (`omega`, `H`, `s_taylor_expansion`) we generate
     all possible and valid CC terms. Note that:
@@ -1439,6 +1500,12 @@ def _generate_cc_latex_equations(omega, H, s_taylor_expansion, remove_f_terms=Tr
         - `omega` is the creation operator d
         - `H` is a Hamiltonian of rank two
         - `s_taylor_expansion` is the S^1 Taylor expansion term
+
+
+    We assume that s^0_0 is identity when `zero_order_is_identity` is True.
+    In this case we simply ignore it and do not track the operator
+    However if it is not identity then we need to track how many multiples of this operator exist.
+    Additionally, the logic for catching 'disconnected'/'connected' terms needs to change when it is not identity.
     """
 
     simple_repr_list = []  # old list, not so important anymore, might remove in future
@@ -1455,17 +1522,40 @@ def _generate_cc_latex_equations(omega, H, s_taylor_expansion, remove_f_terms=Tr
         if False:  # debugging
             old_print_wrapper(s_series_term, "-"*100, "\n\n")
 
+        """ so what we need to change here is that
+            s^0_0 is used to represent BOTH the (s^0_0 + s^1_0 + s^0_1) in the first order Taylor expansion AND the identity operator (i.e. 0th order Taylor expansion)
+            and i think that ends up causing an issue?
+
+        I don't think `_filter_out_valid_s_terms` needs to know about s^0_0 identity? not sure yet....
+
+        See the following `valid_term_list` from a `driver.py -t 4 2 2 2` run :
+            [connected_omega(rank=0, m=0, n=0, m_h=0, n_h=0, m_t=[0], n_t=[0]), connected_h(rank=0, m=0, n=0, m_o=0, n_o=0, m_t=[0], n_t=[0]), (disconnected(m_h=0, n_h=0, m_o=0, n_o=0),)]
+            [connected_omega(rank=0, m=0, n=0, m_h=0, n_h=0, m_t=[0], n_t=[0]), connected_h(rank=0, m=0, n=0, m_o=0, n_o=0, m_t=[0], n_t=[0]), (disconnected(m_h=0, n_h=0, m_o=0, n_o=0),)]
+            [connected_omega(rank=0, m=0, n=0, m_h=0, n_h=0, m_t=[0], n_t=[0]), connected_h(rank=1, m=0, n=1, m_o=0, n_o=0, m_t=[0], n_t=[1]), (connected(m_h=1, n_h=0, m_o=0, n_o=0),)]
+            [connected_omega(rank=0, m=0, n=0, m_h=0, n_h=0, m_t=[0], n_t=[0]), connected_h(rank=2, m=0, n=2, m_o=0, n_o=0, m_t=[0], n_t=[2]), (connected(m_h=2, n_h=0, m_o=0, n_o=0),)]
+        """
+        # add kwarg? `zero_order_is_identity=zero_order_is_identity` ???
         _filter_out_valid_s_terms(omega, H, s_series_term, simple_repr_list, valid_term_list, remove_f_terms=remove_f_terms)
 
     """ Next we take all terms and separate them into their respective groups """
-    fully, linked, unlinked = _seperate_s_terms_by_connection(valid_term_list)
+    fully, linked, unlinked = _seperate_s_terms_by_connection(valid_term_list, zero_order_is_identity)
+
+    if __debug__ and False:
+        for x in fully: print(x)
+        print('l')
+        for x in linked: print(x)
+        print('d')
+        for x in unlinked: print(x)
+
+    # if not zero_order_is_identity:
+    #     breakpoint()
 
     if False:  # extra heavy debugging
         _debug_print_valid_term_list(valid_term_list)
         _debug_print_different_types_of_terms(fully, linked, unlinked)
 
     # write and return the latex code
-    return _write_cc_latex_from_lists(omega.rank, fully, linked, unlinked)
+    return _write_cc_latex_from_lists(omega.rank, fully, linked, unlinked, zero_order_is_identity)
 
 
 # ------------------------------------------------------------------------ #
@@ -1610,6 +1700,7 @@ def generate_full_cc_latex(truncations, **kwargs):
 
     # unpack kwargs
     only_ground_state = kwargs['only_ground_state']
+    zero_order_is_identity = kwargs['s^0_0 is identity'] = False  # TEMP - constant for testing!!!
     remove_f_terms = kwargs['remove_f_terms']
     path = kwargs['path']
 
@@ -1622,7 +1713,7 @@ def generate_full_cc_latex(truncations, **kwargs):
 
     master_omega = generate_omega_operator(maximum_cc_rank, omega_max_order)
     H = generate_full_cc_hamiltonian_operator(maximum_h_rank)
-    s_taylor_expansion = generate_s_taylor_expansion(maximum_cc_rank, s_taylor_max_order, only_ground_state)
+    s_taylor_expansion = generate_s_taylor_expansion(maximum_cc_rank, s_taylor_max_order, only_ground_state, zero_order_is_identity)
 
     latex_code = ""  # store result in here
 
@@ -1641,7 +1732,7 @@ def generate_full_cc_latex(truncations, **kwargs):
         lhs_string = _generate_left_hand_side(omega_term)
 
         # where we do all the work of generating the latex
-        equations_string = _generate_cc_latex_equations(omega_term, H, s_taylor_expansion, remove_f_terms)
+        equations_string = _generate_cc_latex_equations(omega_term, H, s_taylor_expansion, remove_f_terms, zero_order_is_identity)
 
         # header for the sub section
         latex_code += '%\n%\n%\n%\n%\n\n'

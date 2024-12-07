@@ -77,8 +77,8 @@ def _gen_wrapper_full_cc_python(truncations, **kwargs):
 def _gen_wrapper_eT_zhz_python(truncations, **kwargs):
     # the 's_taylor_max_order' isn't releveant for this execution pathway
 
-    # f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
-    # gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
+    f_term_string = "_no_f_terms" if kwargs['remove_f_terms'] else ''
+    gs_string = "ground_state_" if kwargs['only_ground_state'] else ''
     # path = f"./{gs_string}eT_zhz_equations{f_term_string}.py"
 
     # temporary naming scheme until a better one can be designed
