@@ -94,6 +94,12 @@ def generate_full_cc_hamiltonian_operator(maximum_rank=2):
         for n in range(maximum_rank + 1 - m):      # n is the lower label
             return_list.append(h_operator_namedtuple(m+n, m, n))
 
+    # ignore the H.O. since that is just a constant shift
+    # H = alpha * (d + b)^maximum_rank + H.O.
+
+    # TEMP - special case for OZ
+    return_list = [op for op in return_list if op.rank % 2 == 0]
+
     return hamiltonian_namedtuple(maximum_rank, return_list)
 
 
@@ -740,7 +746,7 @@ def _seperate_s_terms_by_connection(total_list, zero_order_is_identity=True):
                     continue
 
             # this shouldn't happen, but we check just in case
-            else: # pragma: no cover
+            else:  # pragma: no cover
                 old_print_wrapper('??', s, term)
                 raise Exception("term contains something other than connected/disconnected namedtuple??\n")
 
@@ -1464,7 +1470,7 @@ def _write_cc_latex_from_lists(rank, fully, linked, unlinked, zero_order_is_iden
     no_unlinked = ' '*4 + r'\textit{no unlinked disconnected terms}'
 
     return_string += pmake_latex(rank, fully) if fully != [] else no_fully
-    return_string += '\n%\n%\n\\\\  &+\n%\n%\n'
+    return_string += '\n%\n%\n\\\\  &+ L\n%\n%\n'
 
     """ special treatment for linear, quadratic, and cubic
     What we are doing is grouping the linked disconnected terms into groups such as:
@@ -1477,7 +1483,7 @@ def _write_cc_latex_from_lists(rank, fully, linked, unlinked, zero_order_is_iden
     else:
         return_string += pmake_latex(rank, linked, linked_condense=False) if linked != [] else no_linked
 
-    return_string += '\n%\n%\n\\\\  &+\n%\n%\n'
+    return_string += '\n%\n%\n\\\\  &+ U\n%\n%\n'
     return_string += pmake_latex(rank, unlinked, unlinked_condense=True) if unlinked != [] else no_unlinked
 
     # remove all empty ^{}/_{} terms that are no longer needed
