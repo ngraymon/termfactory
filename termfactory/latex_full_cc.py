@@ -1099,10 +1099,17 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
     duplicate_counts = {}
     for t in t_list:
         tup = (t.m_h + t.m_o, t.n_h + t.n_o)
+
+        # if tup == (0, 0):
+        #     continue  # ignore t_0's as they are scalar
+
         if tup not in duplicate_counts:
             duplicate_counts[tup] = 1
         else:
             duplicate_counts[tup] += 1
+
+    # if duplicate_counts == {}:  # prevent empty diplicate if h * t_0 * t_0 only
+    #     duplicate_counts[(0, 0)] = 1
 
     max_duplicates = max([v for v in duplicate_counts.values()])
 
@@ -1150,7 +1157,7 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
         denominator_value *= math.factorial(J - K_J)
         denominator_list.append(f'{J - K_J}!')
 
-    # this is the (N - L_N)! contribution
+    # this is the (N - L_N)! contribution  (See eq 150 pg 23)
     if (N - L_N) > 1:
         denominator_value *= math.factorial(N - L_N)
         denominator_list.append(f'{N - L_N}!')
@@ -1175,21 +1182,33 @@ def _build_latex_prefactor(h, t_list, simplify_flag=True):
         denominator_list.append(f'{n_Taylor}!')
 
     # account for the number of permutations of all t-amplitudes
-    bottom = max_duplicates
-    # bottom = n_Taylor - len(unique) + 1
-    if bottom == 1:
-        numerator_value *= math.factorial(n_Taylor)
-        numerator_list.append(f'{n_Taylor}!')
+
+    # account for t_0's changing the permutations
+    top = n_Taylor - duplicate_counts.get((0, 0), 0)
+    if top == 0:  # all t0's case
+        bottom = 1
+        # numerator_value *= math.factorial(top)
+        # numerator_list.append(f'{top}!')
         binom_str = ""
+
     else:
-        t_permute = math.comb(n_Taylor, bottom)
-        # if t_permute > 1:
-        numerator_value *= t_permute
-        # numerator_list.append(f'({t_permute})')
-        # numerator_list.append(f'\\binom{{{n_Taylor}}}{{{bottom}}}')
-        binom_str = f'\\binom{{{n_Taylor}}}{{{bottom}}}'
-        # else:
-        #     binom_str = ""
+        max_duplicates = max([v for k, v in duplicate_counts.items() if k != (0, 0)])
+        bottom = max_duplicates  # ignored t0's
+        # bottom = n_Taylor - len(unique) + 1
+
+        if bottom == 1:
+            numerator_value *= math.factorial(top)
+            numerator_list.append(f'{top}!')
+            binom_str = ""
+        else:
+            t_permute = math.comb(top, bottom)
+            # if t_permute > 1:
+            numerator_value *= t_permute
+            # numerator_list.append(f'({t_permute})')
+            # numerator_list.append(f'\\binom{{{top}}}{{{bottom}}}')
+            binom_str = f'\\binom{{{top}}}{{{bottom}}}'
+            # else:
+            #     binom_str = ""
 
     # # simplify
     if False and simplify_flag:  # pragma: no cover
