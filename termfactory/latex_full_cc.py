@@ -1498,6 +1498,7 @@ def _write_cc_latex_from_lists(rank, fully, linked, unlinked, zero_order_is_iden
     For any other `rank` we explicitly print all linked disconnected terms.
     """
     if rank > 1:
+        # if you want to use projection operators higher than rank 3 you must set `linked_condense=False`
         return_string += pmake_latex(rank, linked, linked_condense=True) if linked != [] else no_linked
     else:
         return_string += pmake_latex(rank, linked, linked_condense=False) if linked != [] else no_linked
@@ -1585,7 +1586,7 @@ def _generate_cc_latex_equations(omega, H, s_taylor_expansion, remove_f_terms=Tr
 
 # ------------------------------------------------------------------------ #
 
-def _generate_left_hand_side(omega):
+def _generate_left_hand_side(omega, zero_order_is_identity=True):
     """ Generate the latex code for the LHS (left hand side) of the CC equation.
     The order of the `omega` operator determines all terms on the LHS.
     """
@@ -1596,14 +1597,23 @@ def _generate_left_hand_side(omega):
         return r'''i\left(\varepsilon\right)'''
 
     # generate all possible tuples (m, n) representing t terms t^m_n
-    single_t_list = [[m, n] for m in range(0, omega_order+1) for n in range(0, omega_order+1) if ((n == m != 0) or (n != m))]
+    if zero_order_is_identity:
+        single_t_list = [[m, n] for m in range(0, omega_order+1) for n in range(0, omega_order+1) if ((n == m != 0) or (n != m))]
+    else:
+        single_t_list = [[m, n] for m in range(0, omega_order+1) for n in range(0, omega_order+1)]
 
     all_combinations_list = []
 
-    # generate all possible combinations of t^m_n
-    # such as t_1, t^2, t^1 * t^1, t^1 * t^2_3, ... etc
-    for length in range(1, omega_order+1):
+    """ generate all possible combinations of t^m_n
+        such as t_1, t^2, t^1 * t^1, t^1 * t^2_3, ... etc
+    """
+    start_index = 1 if zero_order_is_identity else 0
+    for length in range(start_index, omega_order+1):
         all_combinations_list.append(list(it.product(single_t_list, repeat=length)))
+
+    if False and __debug__ and not zero_order_is_identity:
+        for x in all_combinations_list:
+            print(x)
 
     """ Next we filter out the combinations that don't match omega.
     Suppose omega is o^2_1:
@@ -1640,6 +1650,11 @@ def _generate_left_hand_side(omega):
     """
     sorted_list = sorted([[b for b in a] for a in matched_set], key=len)
 
+    if False and __debug__ and not zero_order_is_identity:
+        print(f"{matched_set=}")
+        print(f"{sorted_list=}")
+        breakpoint()
+
     """ Next we generate the latex code for each t term represented by the (m, n) tuples
     One possible `t_group` could be:
         - [[(0, 2)], [(0, 1), (0, 1)]]
@@ -1657,6 +1672,9 @@ def _generate_left_hand_side(omega):
 
             lower_label = summation_indices[count:count+t[1]]
             count += t[1]
+
+            if t == (0, 0) and not zero_order_is_identity:
+                lower_label = '0'  # special case for t_0
 
             group_list.append(f"{bold_t_latex}^{{{upper_label}}}_{{{lower_label}}}")
 
@@ -1754,7 +1772,7 @@ def generate_full_cc_latex(truncations, **kwargs):
             continue
 
         # generate the i(dt/dtau + t*epsilon) latex
-        lhs_string = _generate_left_hand_side(omega_term)
+        lhs_string = _generate_left_hand_side(omega_term, zero_order_is_identity)
 
         # where we do all the work of generating the latex
         equations_string = _generate_cc_latex_equations(omega_term, H, s_taylor_expansion, remove_f_terms, zero_order_is_identity)
