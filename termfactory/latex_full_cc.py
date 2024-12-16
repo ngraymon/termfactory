@@ -1608,7 +1608,7 @@ def _generate_left_hand_side(omega, zero_order_is_identity=True):
         such as t_1, t^2, t^1 * t^1, t^1 * t^2_3, ... etc
     """
     start_index = 1 if zero_order_is_identity else 0
-    for length in range(start_index, omega_order+1):
+    for length in range(start_index, taylor_expansion_order+1):
         all_combinations_list.append(list(it.product(single_t_list, repeat=length)))
 
     if False and __debug__ and not zero_order_is_identity:
@@ -1683,8 +1683,15 @@ def _generate_left_hand_side(omega, zero_order_is_identity=True):
     # create epsilon terms
     epsilon_list = [''.join(term) + r'\varepsilon' for term in latex_t_terms_list]
 
+    """ hacky temp fix - redesign later """
+    splitting_string = r'\right.\\  &+  % split long equation' + '\n' +r'\left.'
+    for i, e in enumerate(epsilon_list):
+        if i > 0 and i % 7 == 0:  # every 7th term put a new line
+            epsilon_list.insert(i, splitting_string)
+
     # create derivative terms
     derivative_list = []
+    split_count = 0
     for t_group in latex_t_terms_list:
         # loop over each t in the group and take the derivative of that specific t
         for i in range(len(t_group)):
@@ -1702,6 +1709,14 @@ def _generate_left_hand_side(omega, zero_order_is_identity=True):
                 string += f"{''.join(t_group[i+1:])}"
 
             derivative_list.append(string)
+
+            """ hacky temp fix - redesign later """
+            split_count += 1
+            if zero_order_is_identity:  # every 7th term put a new line
+                if split_count > 0 and split_count % 7 == 0:
+                    splitting_string = r'\right.\\  &+  % split long equation' + '\n' + r'\left.'
+                    derivative_list.append(splitting_string)
+                    # final_string = f"\n{tab}{splitting_string}\n".join(return_strings)
 
     # order the derivative terms before the epsilon terms
     return_string = ' + '.join([*derivative_list, *epsilon_list])
@@ -1772,7 +1787,7 @@ def generate_full_cc_latex(truncations, **kwargs):
             continue
 
         # generate the i(dt/dtau + t*epsilon) latex
-        lhs_string = _generate_left_hand_side(omega_term, zero_order_is_identity)
+        lhs_string = _generate_left_hand_side(omega_term, s_taylor_max_order, zero_order_is_identity)
 
         # where we do all the work of generating the latex
         equations_string = _generate_cc_latex_equations(omega_term, H, s_taylor_expansion, remove_f_terms, zero_order_is_identity)
