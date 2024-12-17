@@ -1586,7 +1586,7 @@ def _generate_cc_latex_equations(omega, H, s_taylor_expansion, remove_f_terms=Tr
 
 # ------------------------------------------------------------------------ #
 
-def _generate_left_hand_side(omega, zero_order_is_identity=True):
+def _generate_left_hand_side(omega, taylor_expansion_order, zero_order_is_identity=True):
     """ Generate the latex code for the LHS (left hand side) of the CC equation.
     The order of the `omega` operator determines all terms on the LHS.
     """
