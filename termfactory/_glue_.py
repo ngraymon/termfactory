@@ -69,6 +69,11 @@ def _gen_wrapper_full_cc_python(truncations, **kwargs):
         lhs_rhs_string = "special_LHS_equations"
 
     path = f"./{gs_string}full_cc_{lhs_rhs_string}{f_term_string}.py"
+
+    if not kwargs['nolabel']:  # label the filename with the associated truncations
+        H, C, S, P = [truncations[k] for k in tkeys.fcc_key_list()]
+        path = path.replace('.py', f"_{H}{C}{S}{P}.py")
+
     kwargs['path'] = path
 
     generate_full_cc_python(truncations, **kwargs)
@@ -107,8 +112,8 @@ def _generate_latex(trunc, **kwargs):
         'ansatz': 'full cc',
         'lhs_rhs': default_lhs_rhs,
     }
-    # if empty dict
-    if not bool(kwargs):
+
+    if not bool(kwargs):  # if empty dict
         kwargs = default_kwargs
     else:
         default_kwargs.update(kwargs)
@@ -146,9 +151,10 @@ def _gen_wrapper_full_cc_latex(truncations, **kwargs):
         lhs_rhs_string = "special_LHS_terms"
 
     path = f"./{gs_string}full_cc_{lhs_rhs_string}{f_term_string}.tex"
-    if True:
+
+    if not kwargs['nolabel']:  # label the filename with the associated truncations
         H, C, S, P = [truncations[k] for k in tkeys.fcc_key_list()]
-        path = f"./{gs_string}full_cc_{lhs_rhs_string}{f_term_string}_{H}{C}{S}{P}.tex"
+        path = path.replace('.tex', f"_{H}{C}{S}{P}.tex")
 
     kwargs['path'] = path
 
@@ -167,6 +173,11 @@ def _gen_wrapper_z_t_latex(truncations, **kwargs):
         lhs_rhs_string = "special_LHS_terms"
 
     path = f"./{gs_string}z_t_{lhs_rhs_string}{f_term_string}.tex"
+
+    if not kwargs['nolabel']:  # label the filename with the associated truncations
+        H, C, P = [truncations[k] for k in tkeys.zhz_key_list()]
+        path = path.replace('.tex', f"_{H}{C}{P}.tex")
+
     kwargs['path'] = path
 
     generate_z_t_symmetric_latex(truncations, **kwargs)
@@ -184,6 +195,11 @@ def _gen_wrapper_eT_z_t_latex(truncations, **kwargs):
         lhs_rhs_string = "special_LHS_terms"
 
     path = f"./{gs_string}eT_z_t_{lhs_rhs_string}{f_term_string}.tex"
+
+    if not kwargs['nolabel']:  # label the filename with the associated truncations
+        H, Z, T, eT, P = [truncations[k] for k in tkeys.eTz_key_list()]
+        path = path.replace('.tex', f"_{H}{P}{T}{eT}{Z}.tex")
+
     kwargs['path'] = path
 
     generate_eT_z_t_symmetric_latex(truncations, **kwargs)

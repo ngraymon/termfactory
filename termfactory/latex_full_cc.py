@@ -100,6 +100,8 @@ def generate_full_cc_hamiltonian_operator(maximum_rank=2):
     # TEMP - special case for OZ
     return_list = [op for op in return_list if op.rank % 2 == 0]
 
+    # add in change here
+
     return hamiltonian_namedtuple(maximum_rank, return_list)
 
 
@@ -1593,7 +1595,7 @@ def _generate_left_hand_side(omega, taylor_expansion_order, zero_order_is_identi
 
     omega_order = omega.m + omega.n
 
-    if omega_order == 0:
+    if omega_order == 0 and zero_order_is_identity:
         return r'''i\left(\varepsilon\right)'''
 
     # generate all possible tuples (m, n) representing t terms t^m_n

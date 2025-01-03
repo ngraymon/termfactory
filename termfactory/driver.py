@@ -39,6 +39,7 @@ def prepare_parsed_arguments():
 
     # ----- file save/load args -------
     parser.add_argument('-p', '--path', type=str, default=None, help="filename of load/save file")
+    parser.add_argument('--nolabel', type=bool, default=False, help="Remove truncation labels from the output filename")
 
     # ----- depricated args -------
     # parser.add_argument('-q', '--quiet', action='store_true', help='provide if you want to suppress all output/logging')
@@ -105,6 +106,7 @@ if (__name__ == '__main__'):
     default_kwargs = {
         'only_ground_state': True,
         'remove_f_terms': False,
+        'nolabel': False,
         'ansatz': 'eT_z_t ansatz',
         'lhs_rhs': 'RHS'
     }
@@ -114,6 +116,9 @@ if (__name__ == '__main__'):
 
     if pargs.remove_f_terms:
         default_kwargs['remove_f_terms'] = True
+
+    if pargs.nolabel:
+        default_kwargs['nolabel'] = True
 
     ansatz_list = ['eT_z_t ansatz', 'z_t ansatz', 'full cc']
 

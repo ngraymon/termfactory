@@ -179,7 +179,7 @@ def _generate_w_operator_prefactor(tupl):
 
 num_tag = ["zero", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th"]
 taylor_series_order_tag = ["", "singles", "doubles", "triples", "quadruples", "quintuples", "sextuples"]
-hamiltonian_order_tag = ["", "linear", "quadratic", "cubic", "quartic", "quintic"]
+hamiltonian_order_tag = ["", "linear", "quadratic", "cubic", "quartic", "quintic", "sextic"]
 einsum_surface_tags = "acdefghi"
 tag_str = "ijklmnop"
 
