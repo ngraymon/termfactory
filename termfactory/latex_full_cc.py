@@ -1491,6 +1491,10 @@ def _write_cc_latex_from_lists(rank, fully, linked, unlinked, zero_order_is_iden
     no_unlinked = ' '*4 + r'\textit{no unlinked disconnected terms}'
 
     return_string += pmake_latex(rank, fully) if fully != [] else no_fully
+
+    if (ignore_disconnected_terms := True):
+        return return_string.replace("^{}", "").replace("_{}", "")
+
     return_string += '\n%\n%\n\\\\  &+ L\n%\n%\n'
 
     """ special treatment for linear, quadratic, and cubic
@@ -1613,6 +1617,9 @@ def _generate_left_hand_side(omega, taylor_expansion_order, zero_order_is_identi
     for length in range(start_index, taylor_expansion_order+1):
         all_combinations_list.append(list(it.product(single_t_list, repeat=length)))
 
+    if (az_version := True):
+        all_combinations_list = [[tuple([x,]) for x in single_t_list],]
+
     if False and __debug__ and not zero_order_is_identity:
         for x in all_combinations_list:
             print(x)
@@ -1719,6 +1726,9 @@ def _generate_left_hand_side(omega, taylor_expansion_order, zero_order_is_identi
                     splitting_string = r'\right.\\  &+  % split long equation' + '\n' + r'\left.'
                     derivative_list.append(splitting_string)
                     # final_string = f"\n{tab}{splitting_string}\n".join(return_strings)
+
+    if az_version:  # no epsilons in az version
+        epsilon_list = []
 
     # order the derivative terms before the epsilon terms
     return_string = ' + '.join([*derivative_list, *epsilon_list])
