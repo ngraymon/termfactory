@@ -37,6 +37,8 @@ subheader_log = log_conf.SubHeaderAdapter(log, {})
 s1, s2, s3 = 75, 28, 25
 l1, l2, l3 = 109, 45, 41
 
+term_type_name_list = ['fully_connected', 'linked_disconnected', 'unlinked_disconnected']
+
 spaced_named_line = functools.partial(helper_funcs.spaced_named_line, spacing_line=f"# {'-'*s1} #\n")
 long_spaced_named_line = functools.partial(helper_funcs.long_spaced_named_line, large_spacing_line=f"# {'-'*l1} #\n")
 ##########################################################################################
@@ -51,7 +53,6 @@ def _rank_of_t_term_namedtuple(t):
     return sum([v for v in t._asdict().values()])
 
 
-# ------------------------------------------------------- #
 def _full_cc_einsum_electronic_components(t_list):
     """ x """
     electronic_surface_indices = 'cdefgh'
@@ -64,6 +65,10 @@ def _full_cc_einsum_electronic_components(t_list):
     electronic_components[-1] = electronic_components[-1][0] + 'b'
 
     return electronic_components
+
+# ----------------------------------------------------------------------------------------------- #
+# ----------------------------------------------------------------------------------------------- #
+# helper functions for handling the vibrational einsum string component
 
 
 def _build_h_term_python_labels(h, condense_offset=0):
@@ -137,24 +142,42 @@ def _build_t_term_python_group(t_list, h):
 
 
 def _full_cc_einsum_vibrational_components(h, t_list):
-    """ x """
+    """ Return two lists of strings to be used in a numpy.einsum() call.
+
+    The first list is all the vibrational components of each term (t, h),
+    to be traced over; which will be appended to the electronic components.
+    The second is the leftover indices, which indicated external labels; these
+    will be appended to the output string.
+
+    Each string is paired with a t or h term.
+    The default is to assume all terms have two electronic degrees of freedom.
+    We also assume that we want the final shape to have electronic dimensions `ab`.
+    Therefore we start with `ac` and simply iterate over `cdefgh` like so:
+        `ac, cd, de, ef, fg, gh, hb -> ab`
+    or
+        `ac, cd, db -> ab`
+    and so clearly the current implementation only supports up to 7 terms.
+    """
+
     vibrational_components = []  # store return values here
 
     old_print_wrapper(h, t_list)
 
+    # add h term vibrational components
     h_labels = _build_h_term_python_labels(h)
-
-    alist, blist = _build_t_term_python_group(t_list, h)
-
     vibrational_components.append(h_labels[0] + h_labels[1])
+
+    # add t term vibrational components
+    alist, blist = _build_t_term_python_group(t_list, h)
     for i in range(len(alist)):
         vibrational_components.append(alist[i] + blist[i])
 
-    remaining_list = [h_labels[1], ]
-    for i in range(len(alist)):
-        remaining_list.append(blist[i])
+    # remaining term lists
+    remaining_list = [h_labels[1], ] + [r for r in blist]
 
     return vibrational_components, ''.join(remaining_list)
+# ----------------------------------------------------------------------------------------------- #
+# old functions that are no longer used
 
 
 def _full_cc_einsum_subscript_generator(h, t_list):  # pragma: no cover
@@ -179,9 +202,11 @@ def _full_cc_einsum_prefactor(term):  # pragma: no cover
     string = ""
 
     return string
-
-
 # ----------------------------------------------------------------------------------------------- #
+# ----------------------------------------------------------------------------------------------- #
+# to handle the prefactor
+
+
 def _simplify_full_cc_python_prefactor(numerator_list, denominator_list):
     """ x """
 
@@ -312,29 +337,62 @@ def _build_full_cc_python_prefactor(h, t_list, simplify_flag=True):
 
 
 # ----------------------------------------------------------------------------------------------- #
-def _multiple_perms_logic(term):
-    """ x """
-    omega, h, t_list = term
+def _multiple_perms_logic(term, print_indist_perms: bool = False):
+    """ return a dictionary
 
+    The flag `print_indist_perms` is meant to indicate if we want to print out all possible permutations;
+    even permutations of indistinguishable terms.
+    Normally we don't want to do this for computational efficiency reasons.
+    """
+
+    Proj, h, t_list = term
+
+    # first create a dictionary counting the number of distinguishable t terms
+    # keys are the terms and the value is the count
     unique_dict = {}
     for t in t_list:
-        if t in unique_dict:
-            unique_dict[t] += 1
-        else:
-            unique_dict[t] = 1
+        unique_dict[t] = 1 + unique_dict.get(t, 0)
 
     # if there are no permutations to do
-    if len(unique_dict) == 1 and next(iter(unique_dict.values())) == 1:
+    if len(unique_dict.keys()) == 1 and next(iter(unique_dict.values())) == 1:
         return None, unique_dict
 
-    # only permutations on one items
-    if len(unique_dict) == 1:
-        length = list(unique_dict.values())[0]
-        return unique_permutations(range(length)), unique_dict
+    # 1 unique t term found
+    if len(unique_dict.keys()) == 1:
 
-    # if permutations on multiple t's
-    if len(unique_dict) > 1:
-        return unique_permutations(range(len(t_list))), unique_dict
+        # how many copies of that t term are present
+        count = list(unique_dict.values())[0]
+
+        # this produces a single permutation
+        if not print_indist_perms:
+            # if there is a single t term (`count` = 1) then the permutation is a tuple: (0, )
+            permutations = [range(count), ]
+
+        # this can produce 1 or more permutations
+        else:
+            # here permutations is simply all re-orderings of identical t terms
+            permutations = unique_permutations(range(count))
+
+        return permutations, unique_dict
+
+    # if multiple distinguishable t terms are present
+    if len(unique_dict.keys()) > 1:
+
+        # how many copies of that t term are present
+        count = len(t_list)
+
+        # this produces a single permutation
+        if not print_indist_perms:
+            # if there is a single t term (`count` = 1) then the permutation is a tuple: (0, )
+            permutations = [range(count), ]
+
+        # this can produce 1 or more permutations
+        else:
+            # here permutations is simply all re-orderings of identical t terms
+            permutations = unique_permutations(range(count))
+
+        return permutations, unique_dict
+
     #     # lst = []
     #     # for v in unique_dict.values():
     #     #     lst.append(*unique_permutations(range(v)))
@@ -346,7 +404,7 @@ def _multiple_perms_logic(term):
 
 def _write_cc_einsum_python_from_list(truncations, t_term_list, opt_einsum=False, trunc_obj_name='truncation'):
     """ Do all the work here.
-    Context: for a given omega(m,n) we generate (based on on `trunc_obj_name`'s value):
+    Context: for a given Proj(m,n) we generate (based on on `trunc_obj_name`'s value):
      - fully
      - linked-disconnected
      - disconnected
@@ -382,7 +440,7 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, opt_einsum=False
 
     for term in t_term_list:
 
-        omega, h, t_list = term
+        Proj, h, t_list = term
 
         h_operand = f"h_args[({h.m}, {h.n})]"
 
@@ -396,15 +454,15 @@ def _write_cc_einsum_python_from_list(truncations, t_term_list, opt_einsum=False
         prefactor = _build_full_cc_python_prefactor(h, t_list)
         max_t_rank = max(_rank_of_t_term_namedtuple(t) for t in t_list)
         log.debug(
-            f"omega =        {omega.__str__()}"
+            f"Projection =   {Proj.__str__()}"
             f"h =            {h.__str__()}"
             f"t_list =       {t_list.__str__()}"
             f"permutations = {permutations.__str__()}"
         )
-        # if omega.rank == 1 and permutations != None:
+        # if Proj.rank == 1 and permutations != None:
         #     sys.exit(0)
 
-        # we still need to account for output/omega permutations
+        # we still need to account for output/Proj permutations
 
         # -----------------------------------------------------------------------------------------
         # build with permutations
@@ -639,14 +697,21 @@ def _generate_full_cc_einsums(omega_term, truncations, only_ground_state=False, 
 
     return return_list
 
+# ----------------------------------------------------------------------------------------------- #
+# everything below here is pretty standard wrapping and string processing stuff (nothing too fancy)
 
-def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_state=False, opt_einsum=False):
+
+def _generate_full_cc_compute_functions(Proj, truncations, only_ground_state=False, opt_einsum=False):
     """ This builds the strings representing the `add_m0_n0_fully_connected_terms`
     functions
     """
-    return_string = ""
-    specifier_string = f"m{omega_term.m}_n{omega_term.n}"
-    five_tab = "\n" + tab*5
+    return_string = ""  # concatenate all results to this
+
+    # pre-defines
+    M, N = Proj.m, Proj.n
+    specifier_string = f"m{M}_n{N}"
+    four_tabbed_newline = "\n" + tab*4
+    five_tabbed_newline = "\n" + tab*5
 
     # ----------------------------------------------------------------------------------------------- #
     """ Preforms the bulk of the work!!!
@@ -654,7 +719,7 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
     this is the majority of the code that will be generated
     (most everything else is just glue + window dressing)
     """
-    ground_state_only_einsums = _generate_full_cc_einsums(omega_term, truncations, only_ground_state=True, opt_einsum=opt_einsum)
+    ground_state_only_einsums = _generate_full_cc_einsums(Proj, truncations, only_ground_state=True, opt_einsum=opt_einsum)
 
     """
     the current code `_generate_full_cc_einsums` DOES produce "something" when asked to try and produce hot band residual equations
@@ -662,14 +727,17 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
     additionally the theory here is still in development and may not be pushed forward, it makes no sense to try and write this
     code if there isn't any theory to inform the rules defining the equations
     """
-    full_einsums = [("raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')", ), ]*3
+    ground_and_excited_state_einsums = [("raise NotImplementedError('Hot Band amplitudes not implemented properly and have not been theoretically verified!')", ), ]*3
+
+    if not only_ground_state:  # pragma: hot_bands_or_thermal
+        ground_and_excited_state_einsums = _generate_full_cc_einsums(Proj, truncations, only_ground_state=False, opt_einsum=opt_einsum)
     # ----------------------------------------------------------------------------------------------- #
 
     # for distinguishing the different types of lists of optimized einsum paths
     optnames = ['connected', 'linked', 'unlinked']
 
     # now we glue everything together
-    for i, term_type in enumerate(['fully_connected', 'linked_disconnected', 'unlinked_disconnected']):
+    for i, term_type in enumerate(term_type_name_list):
 
         # the name of the function
         if not opt_einsum:
@@ -685,29 +753,31 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
 
         # the docstring of the function
         if not opt_einsum:
-            docstring = f"Calculate the {omega_term} {term_type} terms."
+            docstring = f"Calculate the {Proj} {term_type} terms.{four_tabbed_newline}"
         else:
-            docstring = f"Optimized calculation of the {omega_term} {term_type} terms."
+            docstring = f"Optimized calculation of the {Proj} {term_type} terms.{four_tabbed_newline}"
 
         # if we need to unpack the optimize einsum paths
         if not opt_einsum:
             unpack_optimized_einsum = ''
         else:
             unpack_optimized_einsum = (
-                f"\n{tab*4}# make an iterable out of the `opt_{optnames[i]}_path_list`"
-                f"\n{tab*4}optimized_einsum = iter(opt_{optnames[i]}_path_list)"
+                f"{four_tabbed_newline}# make an iterable out of the `opt_{optnames[i]}_path_list`"
+                f"{four_tabbed_newline}optimized_einsum = iter(opt_{optnames[i]}_path_list)"
                 "\n"
             )
 
         # glue all these strings together in a specific manner to form the function definition
         function_string = f'''
             def {func_name}({positional_arguments}):
-                """{docstring}"""
+                """{docstring}
+                """
                 {unpack_optimized_einsum}
                 if ansatz.ground_state:
-                    {five_tab.join(ground_state_only_einsums[i])}
+                    {five_tabbed_newline.join(ground_state_only_einsums[i])}
                 else:
-                    {five_tab.join(full_einsums[i])}
+                    {five_tabbed_newline.join(ground_and_excited_state_einsums[i])}
+
                 return
         '''
 
@@ -725,38 +795,42 @@ def _generate_full_cc_compute_functions(omega_term, truncations, only_ground_sta
     return return_string
 
 
-# ----------------------------------------------------------------------------------------------- #
-def _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state=False, opt_einsum=False):
+def _wrap_full_cc_generation(truncations, master_omega, named_line, spaced_named_line, only_ground_state=False, opt_einsum=False):
     """ x """
     return_string = ""
 
-    for i, omega_term in enumerate(master_omega.operator_list):
+    for i, Proj in enumerate(master_omega.operator_list):
 
         # only print the header when we change rank (from linear to quadratic for example)
-        if omega_term.rank > master_omega.operator_list[i-1].rank:
-            return_string += spaced_named_line(f"RANK {omega_term.rank:2d} FUNCTIONS", s2) + '\n'
+        if Proj.rank > master_omega.operator_list[i-1].rank:
+            return_string += spaced_named_line(f"RANK {Proj.rank:2d} FUNCTIONS", s2) + '\n'
 
         # header
-        return_string += '\n' + named_line(f"{omega_term} TERMS", s2//2)
+        return_string += '\n' + named_line(f"{Proj} TERMS", s2//2)
+
         # functions
-        return_string += _generate_full_cc_compute_functions(omega_term, truncations, only_ground_state, opt_einsum=opt_einsum)
+        return_string += _generate_full_cc_compute_functions(
+            Proj, truncations,
+            only_ground_state=only_ground_state,
+            opt_einsum=opt_einsum
+        )
 
     return return_string
 
 
-def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
+def _write_master_full_cc_compute_function(Proj, opt_einsum=False):
     """Write the wrapper function which `vibronic_hamiltonian.py` calls."""
 
-    specifier_string = f"m{omega_term.m}_n{omega_term.n}"
+    specifier_string = f"m{Proj.m}_n{Proj.n}"
 
     if not opt_einsum:
         func_string = f'''
             def compute_{specifier_string}_amplitude(A, N, ansatz, truncation, h_args, t_args):
-                """Compute the {omega_term} amplitude."""
+                """Compute the {Proj} amplitude."""
                 truncation.confirm_at_least_singles()
 
                 # the residual tensor
-                R = np.zeros(shape=({', '.join(['A','A',] + ['N',]*omega_term.rank)}), dtype=complex)
+                R = np.zeros(shape=({', '.join(['A','A',] + ['N',]*Proj.rank)}), dtype=complex)
 
                 # add each of the terms
                 add_{specifier_string}_fully_connected_terms(R, ansatz, truncation, h_args, t_args)
@@ -768,14 +842,14 @@ def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
     else:
         func_string = f'''
             def compute_{specifier_string}_amplitude_optimized(A, N, ansatz, truncation, h_args, t_args, opt_path_lists):
-                """Compute the {omega_term} amplitude."""
+                """Compute the {Proj} amplitude."""
                 truncation.confirm_at_least_singles()
 
                 # the residual tensor
-                R = np.zeros(shape=({', '.join(['A','A',] + ['N',]*omega_term.rank)}), dtype=complex)
+                R = np.zeros(shape=({', '.join(['A','A',] + ['N',]*Proj.rank)}), dtype=complex)
 
                 # unpack the optimized paths
-                opt_connected_path_list, opt_linked_path_list, opt_unlinked_path_list = opt_path_lists[({omega_term.m}, {omega_term.n})]
+                opt_connected_path_list, opt_linked_path_list, opt_unlinked_path_list = opt_path_lists[({Proj.m}, {Proj.n})]
 
                 # add each of the terms
                 add_{specifier_string}_fully_connected_terms_optimized(R, ansatz, truncation, h_args, t_args, opt_connected_path_list)
@@ -791,20 +865,41 @@ def _write_master_full_cc_compute_function(omega_term, opt_einsum=False):
     trimmed_string = "\n".join([line[tab_length*3:] for line in lines])
 
     return trimmed_string
-
-
 # ----------------------------------------------------------------------------------------------- #
-term_type_name_list = ['fully_connected', 'linked_disconnected', 'unlinked_disconnected']
+
+
+def _term_shape_string(order):
+    """Return the string `(N, ...)` with `order` number of `N`'s."""
+    assert order >= 1, f"Should only use this function if {order = } >= 1"
+    if order == 1:
+        return "(N,)"
+
+    string = f"({', '.join(['N',]*order)})"
+    return string
+
+
+def _A_term_shape_string(order):
+    """Return the string `(A, N, ...)` with `order` number of `N`'s."""
+    if order == 0:
+        return "(A,)"
+
+    string = f"({', '.join(['A',] + ['N',]*order)})"
+    return string
 
 
 def _A_A_term_shape_string(order):
     """Return the string `(A, A, N, ...)` with `order` number of `N`'s."""
     return f"({', '.join(['A','A',] + ['N',]*order)})"
+# ----------------------------------------------------------------------------------------------- #
+# big boy function that does most of the work
 
 
-def _write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_name, trunc_obj_name='truncation'):
+def _write_cc_optimized_paths_from_list(
+    truncations, t_term_list, local_list_name,
+    trunc_obj_name='truncation',
+):
     """ Do all the work here.
-    Context: for a given omega(m,n) we generate (based on on `trunc_obj_name`'s value):
+    Context: for a given Proj(m,n) we generate (based on on `trunc_obj_name`'s value):
      - fully
      - linked-disconnected
      - disconnected
@@ -826,8 +921,13 @@ def _write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_nam
         ``
     """
 
+    # the choice of trade-off between accuracy and speed of path finding
+    # see https://dgasmith.github.io/opt_einsum/api_reference/#opt_einsumcontract_path
+    opt_alg = 'auto-hq'
+
     maximum_h_rank = truncations[tkeys.H]
     maximum_cc_rank = truncations[tkeys.CC]
+    log.info("Starting this function")
 
     if t_term_list == []:
         return ["pass  # no valid terms here", ]
@@ -838,9 +938,11 @@ def _write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_nam
     for i in range(maximum_h_rank+1):
         hamiltonian_rank_list.append(dict([(i, {}) for i in range(maximum_cc_rank+1)]))
 
+    # ----------------------------------------------------------------------------------------------- #
+    # the big loop
     for term in t_term_list:
 
-        omega, h, t_list = term
+        Proj, h, t_list = term
 
         # we only care about the size of the tensor
         h_operand = _A_A_term_shape_string(h.m + h.n)
@@ -858,13 +960,13 @@ def _write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_nam
         prefactor = _build_full_cc_python_prefactor(h, t_list)
         max_t_rank = max(_rank_of_t_term_namedtuple(t) for t in t_list)
         log.debug(
-            f"omega =        {omega.__str__()}"
+            f"Projection =   {Proj.__str__()}"
             f"h =            {h.__str__()}"
             f"t_list =       {t_list.__str__()}"
             f"permutations = {permutations.__str__()}"
         )
 
-        # we still need to account for output/omega permutations
+        # we still need to account for output/Proj permutations
         # -----------------------------------------------------------------------------------------
         # build with permutations
         hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor] = []
@@ -873,57 +975,101 @@ def _write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_nam
         for t in t_list:
             assert sum(t) == (t.m_h + t.n_h + t.m_o + t.n_o)
 
+        e_a = _full_cc_einsum_electronic_components(t_list)
+        v_a, remaining_indices = _full_cc_einsum_vibrational_components(h, t_list)
+
+        ab_char = 'ab'
+
         # no permutations
         if permutations is None:
             t_operands = ', '.join([_A_A_term_shape_string(sum(t)) for t in t_list])
 
-            # we still need to call this function to get the `remaining_indices
-            _, remaining_indices = _full_cc_einsum_vibrational_components(h, t_list)
-
-            # if we trace over everything
+            # no remaining (external) indices/labels means we simply proceed as normal and glue everything together
             if remaining_indices == '':
 
-                # compute contraction
-                string = f"oe.contract_expression({h_operand}, {t_operands})"
+                # create the initial indices
+                combined_electronic_vibrational = [f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))]
+
+                # prune all empty contributions
+                combined_electronic_vibrational = [s for s in combined_electronic_vibrational if s != '']
+
+                # glue them together
+                left_op = ", ".join(combined_electronic_vibrational)
+
+                # stick the indices into the full einsum function call
+                string = f"oe.contract_expression('{left_op} -> {ab_char}{remaining_indices}', {h_operand}, {t_operands}, optimize='{opt_alg}')"
 
                 # save it
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
-            # if there are some external labels
+            # this means we need to permute over the remaining (external) indices/labels
             elif len(remaining_indices) >= 1:
+
                 for perm in unique_permutations(remaining_indices):
 
-                    # compute contraction
-                    string = f"oe.contract_expression({h_operand}, {t_operands})"
+                    # create the initial indices
+                    combined_electronic_vibrational = [f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))]
+
+                    # prune all empty contributions
+                    combined_electronic_vibrational = [s for s in combined_electronic_vibrational if s != '']
+
+                    # glue them together
+                    left_op = ", ".join(combined_electronic_vibrational)
+
+                    # stick the indices into the full einsum function call
+                    string = f"oe.contract_expression('{left_op} -> {ab_char}{remaining_indices}', {h_operand}, {t_operands}, optimize='{opt_alg}')"
 
                     # save it
                     hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
-        # only 1 permutation
+        # if there is only a single distinguishable t term
+        # eg: t1 * t1 * t1 ---> 3 indistinguishable t terms
+        # as opposed to t1 * t2 being two distinguishable t terms
         elif len(unique_dict.keys()) == 1:
             t_operands = ', '.join([_A_A_term_shape_string(sum(t)) for t in t_list])
 
             # there are some external labels
             for perm in permutations:
 
-                # compute contraction
-                string = f"oe.contract_expression({h_operand}, {t_operands})"
+                # create the initial indices
+                combined_electronic_vibrational = [f"{e_a[i]}{v_a[i]}" for i in range(len(e_a))]
+
+                # prune all empty contributions
+                combined_electronic_vibrational = [s for s in combined_electronic_vibrational if s != '']
+
+                # glue them together
+                left_op = ", ".join(combined_electronic_vibrational)
+
+                # stick the indices into the full einsum function call
+                string = f"oe.contract_expression('{left_op} -> {ab_char}{remaining_indices}', {h_operand}, {t_operands}, optimize='{opt_alg}')"
 
                 # save it
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
 
-        # multiple permutations
+        # if there is multiple distinguishable t terms
+        # eg: t1 * t2 * t1 ---> 2 distinguishable t terms (t1, t2)
         elif len(unique_dict) > 1:
 
             for perm in permutations:
 
-                t_operands = ', '.join([
-                    _A_A_term_shape_string(sum(t_list[i]))
-                    for i in perm
-                ])
+                # create the string of (t terms/t_operands) that we are tracing over
+                # since they are NOT identical, we do have to pay attention to the ordering
 
-                # compute contraction
-                string = f"oe.contract_expression({h_operand}, {t_operands})"
+                # for simplicity we create a new re-ordered list
+                re_ordered_t_list = [t_list[i] for i in perm]
+                t_operands = ', '.join([_A_A_term_shape_string(sum(t)) for t in re_ordered_t_list])
+
+                # add the h term indices
+                combined_electronic_vibrational = [f"{e_a[0]}{v_a[0]}"]
+
+                # create the t term indices
+                combined_electronic_vibrational.extend([f"{e_a[i+1]}{v_a[p+1]}" for i, p in enumerate(perm)])
+
+                # glue them together
+                left_op = ", ".join(combined_electronic_vibrational)
+
+                # stick the indices into the full einsum function call
+                string = f"oe.contract_expression('{left_op} -> {ab_char}{remaining_indices}', {h_operand}, {t_operands}, optimize='{opt_alg}')"
 
                 # save it
                 hamiltonian_rank_list[max(h.m, h.n)][max_t_rank][prefactor].append(string)
@@ -1037,9 +1183,10 @@ def _write_cc_optimized_paths_from_list(truncations, t_term_list, local_list_nam
         return_list.append("pass  # no valid terms here")
 
     return return_list
+# ----------------------------------------------------------------------------------------------- #
 
 
-def _generate_full_cc_optimized_paths(omega_term, truncations, only_ground_state=False):
+def _generate_full_cc_optimized_paths(Proj, truncations, only_ground_state=False):
     """Return a string containing python code to be placed into a .py file.
     This does all the work of generating the optimized einsum paths.
     """
@@ -1063,7 +1210,7 @@ def _generate_full_cc_optimized_paths(omega_term, truncations, only_ground_state
     """
     for count, s_series_term in enumerate(s_taylor_expansion):
         log.debug(s_series_term, "-"*100, "\n\n")
-        _filter_out_valid_s_terms(omega_term, H, s_series_term, simple_repr_list, valid_term_list, remove_f_terms=True)
+        _filter_out_valid_s_terms(Proj, H, s_series_term, simple_repr_list, valid_term_list, remove_f_terms=True)
 
     # take all terms and separate them into their respective groups
     fully, linked, unlinked = _seperate_s_terms_by_connection(valid_term_list)
@@ -1075,13 +1222,20 @@ def _generate_full_cc_optimized_paths(omega_term, truncations, only_ground_state
     ]
 
     return return_list
+# ----------------------------------------------------------------------------------------------- #
+# everything below here is pretty standard wrapping and string processing stuff (nothing too fancy)
 
 
-def _generate_optimized_paths_functions(omega_term, truncations, only_ground_state):
+def _construct_optimized_paths_functions(Proj, truncations, only_ground_state):
     """Return strings to write all the constant `oe.contract_expression` calls."""
-    return_string = ""
-    specifier_string = f"m{omega_term.m}_n{omega_term.n}"
-    five_tab = "\n" + tab*5
+
+    return_string = ""  # concatenate all results to this
+
+    # pre-defines
+    M, N = Proj.m, Proj.n
+    specifier_string = f"m{M}_n{N}"
+    four_tabbed_newline = "\n" + tab*4
+    five_tabbed_newline = "\n" + tab*5
 
     # ----------------------------------------------------------------------------------------------- #
     """ Preforms the bulk of the work!!!
@@ -1089,7 +1243,7 @@ def _generate_optimized_paths_functions(omega_term, truncations, only_ground_sta
     this is the majority of the code that will be generated
     (most everything else is just glue + window dressing)
     """
-    ground_state_only_paths = _generate_full_cc_optimized_paths(omega_term, truncations, only_ground_state=True)
+    ground_state_only_paths = _generate_full_cc_optimized_paths(Proj, truncations, only_ground_state=True)
 
     """
     the current code `_generate_full_cc_optimized_paths` DOES produce "something" when asked to try and produce hot band residual equations
@@ -1110,9 +1264,9 @@ def _generate_optimized_paths_functions(omega_term, truncations, only_ground_sta
                 {term_type}_opt_path_list = []
 
                 if ansatz.ground_state:
-                    {five_tab.join(ground_state_only_paths[i])}
+                    {five_tabbed_newline.join(ground_state_only_paths[i])}
                 else:
-                    {five_tab.join(full_paths[i])}
+                    {five_tabbed_newline.join(full_paths[i])}
 
                 return {term_type}_opt_path_list
         '''
@@ -1131,35 +1285,35 @@ def _generate_optimized_paths_functions(omega_term, truncations, only_ground_sta
     return return_string
 
 
-def _wrap_optimized_paths_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state=False):
+def _wrap_optimized_paths_generation(truncations, master_omega, named_line, spaced_named_line, only_ground_state=False):
     """ x """
     return_string = ""
 
-    for i, omega_term in enumerate(master_omega.operator_list):
+    for i, Proj in enumerate(master_omega.operator_list):
 
         # only print the header when we change rank (from linear to quadratic for example)
-        if omega_term.rank > master_omega.operator_list[i-1].rank:
-            return_string += spaced_named_line(f"RANK {omega_term.rank:2d} OPTIMIZED PATHS", s2) + '\n'
+        if Proj.rank > master_omega.operator_list[i-1].rank:
+            return_string += spaced_named_line(f"RANK {Proj.rank:2d} OPTIMIZED PATHS", s2) + '\n'
 
         # header
-        return_string += '\n' + named_line(f"{omega_term} OPTIMIZED PATHS", s2//2)
+        return_string += '\n' + named_line(f"{Proj} OPTIMIZED PATHS", s2//2)
         # functions
-        return_string += _generate_optimized_paths_functions(omega_term, truncations, only_ground_state)
+        return_string += _construct_optimized_paths_functions(Proj, truncations, only_ground_state)
 
     return return_string
 
 
-def _write_grouped_optimized_paths_function(omega_term):
+def _write_grouped_optimized_paths_function(Proj):
     """Write the projection-specific wrapper function for the optimized paths.
     This provides the optimized paths for a specific (m, n) projection
     """
-    M, N = omega_term.m, omega_term.n
+    M, N = Proj.m, Proj.n
 
     specifier_string = f"m{M}_n{N}"
 
     func_string = f'''
         def compute_{specifier_string}_optimized_paths(A, N, ansatz, truncation):
-            """Compute the optimized paths for this {omega_term}."""
+            """Compute the optimized paths for this {Proj}."""
             truncation.confirm_at_least_singles()
 
             connected_opt_path_list = compute_{specifier_string}_fully_connected_optimized_paths(A, N, ansatz, truncation)
@@ -1187,8 +1341,8 @@ def _write_optimized_master_paths_function(master_omega):
 
     main_strings = []
 
-    for i, omega_term in enumerate(master_omega.operator_list):
-        M, N = omega_term.m, omega_term.n
+    for i, Proj in enumerate(master_omega.operator_list):
+        M, N = Proj.m, Proj.n
         main_strings.append(f"all_opt_path_lists[({M}, {N})] = compute_m{M}_n{N}_optimized_paths(A, N, ansatz, truncation)[({M}, {N})]\n")
 
     main_strings = f"{tab*3}".join(main_strings)
@@ -1199,7 +1353,7 @@ def _write_optimized_master_paths_function(master_omega):
             Calculates all optimized paths for the `opt_einsum` calls up to
                 a maximum order of m+n={master_omega.maximum_rank} for a projection operator P^m_n
             """
-            all_opt_path_lists = []
+            all_opt_path_lists = {}
 
             {main_strings}
             return all_opt_path_lists
@@ -1234,14 +1388,14 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # header
     string += '\n' + named_line("INDIVIDUAL TERMS", l2) + '\n\n'
     # generate
-    string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state)
+    string += _wrap_full_cc_generation(truncations, master_omega, named_line, spaced_named_line, only_ground_state)
     # ----------------------------------------------------------------------- #
     # header
     string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
     # generate
     string += "".join([
-        _write_master_full_cc_compute_function(omega_term)
-        for omega_term in master_omega.operator_list
+        _write_master_full_cc_compute_function(Proj)
+        for Proj in master_omega.operator_list
     ])
     # ------------------------------------------------------------------------------------------- #
     # header for optimized functions
@@ -1250,14 +1404,14 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # header
     string += '\n' + named_line("INDIVIDUAL TERMS", l2) + '\n\n'
     # generate
-    string += _wrap_full_cc_generation(truncations, master_omega, s2, named_line, spaced_named_line, only_ground_state, opt_einsum=True)
+    string += _wrap_full_cc_generation(truncations, master_omega, named_line, spaced_named_line, only_ground_state, opt_einsum=True)
     # ----------------------------------------------------------------------- #
     # header
     string += '\n' + named_line("RESIDUAL FUNCTIONS", l2)
     # generate
     string += "".join([
-        _write_master_full_cc_compute_function(omega_term, opt_einsum=True)
-        for omega_term in master_omega.operator_list
+        _write_master_full_cc_compute_function(Proj, opt_einsum=True)
+        for Proj in master_omega.operator_list
     ])
     # # ------------------------------------------------------------------------------------------- #
     # header for optimized paths function
@@ -1266,14 +1420,14 @@ def _generate_full_cc_python_file_contents(truncations, only_ground_state=False)
     # header
     string += '\n' + named_line("INDIVIDUAL OPTIMIZED PATHS", l3) + '\n\n'
     # generate
-    string += _wrap_optimized_paths_generation(truncations, master_omega, s3, named_line, spaced_named_line, only_ground_state)
+    string += _wrap_optimized_paths_generation(truncations, master_omega, named_line, spaced_named_line, only_ground_state)
     # ----------------------------------------------------------------------- #
     # header
     string += '\n' + named_line("GROUPED BY PROJECTION OPERATOR", l3)
     # generate
     string += "".join([
-        _write_grouped_optimized_paths_function(omega_term)
-        for omega_term in master_omega.operator_list
+        _write_grouped_optimized_paths_function(Proj)
+        for Proj in master_omega.operator_list
     ])
     # ----------------------------------------------------------------------- #
     # header
