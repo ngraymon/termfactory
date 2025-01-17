@@ -1353,7 +1353,7 @@ def _write_optimized_master_paths_function(master_omega):
             Calculates all optimized paths for the `opt_einsum` calls up to
                 a maximum order of m+n={master_omega.maximum_rank} for a projection operator P^m_n
             """
-            all_opt_path_lists = {}
+            all_opt_path_lists = {{}}
 
             {main_strings}
             return all_opt_path_lists
