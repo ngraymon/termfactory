@@ -1383,8 +1383,7 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
             return_list = [r'\disconnected{' + term.replace(common_latex, '') + r'}' for term in return_list]
 
         # old_print_wrapper(return_list)
-
-        return f"({' + '.join(return_list)}){common_latex}"
+        return rf"{common_latex}\Bigg[\Bigg.{' + '.join(return_list)}\Bigg.\Bigg]"
 
     # special treatment to condense the linked disconnected terms
     if linked_condense:
@@ -1410,7 +1409,34 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
 
             # linked_return_list[i] = [term.replace(common_latex, '') for term in linked_return_list[i]]
             # old_print_wrapper('z', i, linked_return_list[i])
-            return_strings.append(f"({' + '.join(linked_return_list[i])}){common_latex}")
+
+            # the current terms we are processing (they all share `common_latex` as a factor)
+            term_list = linked_return_list[i]
+
+            # the maximum number of terms on 1 horizontal line (in latex)
+            # change this as needed to fit equations on page
+            split_number = 8
+
+            # if the line is so short we don't need to split
+            if len(term_list) < split_number:
+                return_strings.append(rf"{common_latex}\Bigg[\Bigg.{' + '.join(term_list)}\Bigg.\Bigg]")
+            else:
+                split_equation_list = []
+
+                # make a list of each line
+                for i in range(0, len(term_list) // split_number):
+                    split_equation_list.append(' + '.join(term_list[i*split_number:(i+1)*split_number]))
+
+                # make sure we pickup the last few terms
+                last_few_terms = len(term_list) % split_number
+                if last_few_terms != 0:  # pragma: no cover, TODO test for this later
+                    split_equation_list.append(' + '.join(term_list[-last_few_terms:]))
+
+                # join the lists with the equation splitting string
+                splitting_string = r'\\  &+  % split long equation'
+                split_string = f"\n{tab}{splitting_string}\n".join(split_equation_list)
+
+                return_strings.append(rf"{common_latex}\Bigg[\Bigg.{split_string}\Bigg.\Bigg]")
 
         # join the lists with the equation splitting string
         splitting_string = r'\\  &+  % split long equation'
@@ -1431,8 +1457,12 @@ def _make_latex(rank, term_list, linked_condense=False, unlinked_condense=False,
         # change this as needed to fit equations on page
         split_number = 7
 
-        # if the line is so short we don't need to split
-        if len(return_list) < split_number*2:
+        """if the line is so short we don't need to split
+        although truth be told this also depends on how many prefactors and such are present
+        simplest to just manually adjust it to suit your needs
+        """
+        early_split = split_number+1 if print_prefactors else split_number*2
+        if len(return_list) < early_split:
             return f"({' + '.join(return_list)})"
 
         split_equation_list = []
@@ -1492,10 +1522,10 @@ def _write_cc_latex_from_lists(rank, fully, linked, unlinked, zero_order_is_iden
 
     return_string += pmake_latex(rank, fully) if fully != [] else no_fully
 
-    if (ignore_disconnected_terms := True):
+    if (ignore_disconnected_terms := False):
         return return_string.replace("^{}", "").replace("_{}", "")
 
-    return_string += '\n%\n%\n\\\\  &+ L\n%\n%\n'
+    return_string += '\n%\n%\n\\\\  L&+ \n%\n%\n'
 
     """ special treatment for linear, quadratic, and cubic
     What we are doing is grouping the linked disconnected terms into groups such as:
@@ -1503,13 +1533,17 @@ def _write_cc_latex_from_lists(rank, fully, linked, unlinked, zero_order_is_iden
     This is purely for readability / visual appeal.
     For any other `rank` we explicitly print all linked disconnected terms.
     """
-    if rank > 1:
-        # if you want to use projection operators higher than rank 3 you must set `linked_condense=False`
-        return_string += pmake_latex(rank, linked, linked_condense=True) if linked != [] else no_linked
-    else:
-        return_string += pmake_latex(rank, linked, linked_condense=False) if linked != [] else no_linked
 
-    return_string += '\n%\n%\n\\\\  &+ U\n%\n%\n'
+    # the code only supports condensing linked-disconnected terms for ranks={1,2,3}
+    # rank=0 is trivial and requires not condensing
+    linked_condense_flag = True if 4 > rank > 1 else False
+    if rank > 3:
+        msg = "Note that we currently cannot condense linked-disconnected terms for rank > 3!"
+        msg += "Instead they will be presented in aggregate"
+        print(msg)
+    return_string += pmake_latex(rank, linked, linked_condense=linked_condense_flag) if linked != [] else no_linked
+
+    return_string += '\n%\n%\n\\\\  U&+ \n%\n%\n'
     return_string += pmake_latex(rank, unlinked, unlinked_condense=True) if unlinked != [] else no_unlinked
 
     # remove all empty ^{}/_{} terms that are no longer needed
@@ -1770,7 +1804,7 @@ def generate_full_cc_latex(truncations, **kwargs):
 
     # unpack kwargs
     only_ground_state = kwargs['only_ground_state']
-    zero_order_is_identity = kwargs['s^0_0 is identity'] = False  # TEMP - constant for testing!!!
+    zero_order_is_identity = kwargs['s^0_0 is identity'] = True  # TEMP - constant for testing!!!
     remove_f_terms = kwargs['remove_f_terms']
     path = kwargs['path']
 
